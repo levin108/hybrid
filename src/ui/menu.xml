@@ -1,0 +1,13 @@
+<ui>
+	<menubar name="MenuBar">
+		<menu action="Accounts">
+			<menuitem action="Open"/>
+			<menuitem action="Save"/>
+			<separator/>
+			<menuitem action="Quit"/>
+		</menu>
+		<menu action="Help">
+			<menuitem action="About"/>
+		</menu>
+	</menubar>
+</ui>

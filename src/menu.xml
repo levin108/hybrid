@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ui>
+  <menubar name="MenuBar">
+    <menu action="File">
+      <menuitem action="Open"/>
+      <menuitem action="Save"/>
+      <separator/>
+      <menuitem action="Close"/>
+    </menu>
+    <menu action="Edit">
+      <menuitem action="Cut"/>
+      <menuitem action="Copy"/>
+      <menuitem action="Paste"/>
+    </menu>
+    <menu action="Help">
+      <menuitem action="About"/>
+    </menu>
+  </menubar>
+</ui>
