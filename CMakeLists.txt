@@ -99,6 +99,7 @@ set(hybird_SRC
 	lib/module.c
 	lib/account.c
 	lib/xmlnode.c
+	lib/config.c
 	src/gtkutils.c
 	src/blist.c
 	src/conv.c
