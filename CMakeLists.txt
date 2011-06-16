@@ -1,13 +1,13 @@
-project(im)
+project(hybird)
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
-set(TARNAME im)
+set(TARNAME hybird)
 
 
 # program name, version etc
 
-set(PACKAGE_VERSION "2.2.0")
-set(PACKAGE_NAME "IM")
+set(PACKAGE_VERSION "0.0.1")
+set(PACKAGE_NAME "Hybird")
 set(PACKAGE_TARNAME "${TARNAME}")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_BUGREPORT "http://code.google.com/p/ofetion/issues/list")
@@ -91,7 +91,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
 )
 
-set(im_SRC
+set(hybird_SRC
 	lib/connect.c
 	lib/network.c
 	lib/debug.c
@@ -107,15 +107,15 @@ set(im_SRC
 )
 
 # install include files
-file(GLOB IM_INCLUDES "src/*.h" "lib/*.h")
-install(FILES ${IM_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
+file(GLOB HYBIRD_INCLUDES "src/*.h" "lib/*.h")
+install(FILES ${HYBIRD_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
 
 # install pixmaps
-file(GLOB IM_PIXMAPS "share/*.png" "share/*.jpg")
-install(FILES ${IM_PIXMAPS} DESTINATION ${DATA_INSTALL_DIR})
+file(GLOB HYBIRD_PIXMAPS "share/*.png" "share/*.jpg")
+install(FILES ${HYBIRD_PIXMAPS} DESTINATION ${DATA_INSTALL_DIR})
 
-add_executable(im ${im_SRC})
-target_link_libraries(im ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})
+add_executable(hybird ${hybird_SRC})
+target_link_libraries(hybird ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 # source list of fetion module
 set(fetion_SRC
