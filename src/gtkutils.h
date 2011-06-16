@@ -1,5 +1,5 @@
-#ifndef Hybird_GTKUTILS_H
-#define Hybird_GTKUTILS_H
+#ifndef HYBIRD_GTKUTILS_H
+#define HYBIRD_GTKUTILS_H
 
 #include <gdk/gdk.h>
 
@@ -25,4 +25,4 @@ GdkPixbuf *create_presence_pixbuf(gint presence, gint scale_size);
 }
 #endif
 
-#endif /* Hybird_GTKUTILS_H */
+#endif /* HYBIRD_GTKUTILS_H */

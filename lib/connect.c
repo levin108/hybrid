@@ -21,23 +21,23 @@ nonblock(gint sk)
 {
 	gint flag;
 
-	g_return_val_if_fail(sk != 0, Hybird_ERROR);
+	g_return_val_if_fail(sk != 0, HYBIRD_ERROR);
 
 	hybird_debug_info("option", "set socket to be nonblock");
 
 	if ((flag = fcntl(sk, F_GETFL, 0)) == -1) {
 		hybird_debug_error("socket", "set socket to be nonblock:%s",
 				strerror(errno));
-		return Hybird_ERROR;
+		return HYBIRD_ERROR;
 	}
 
 	if ((flag = fcntl(sk, F_SETFL, flag | O_NONBLOCK)) == -1) {
 		hybird_debug_error("socket", "set socket to be nonblock:%s",
 				strerror(errno));
-		return Hybird_ERROR;
+		return HYBIRD_ERROR;
 	}
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 }
 
 /**
@@ -50,9 +50,9 @@ addr_init(const gchar *hostname, gint port, struct sockaddr *addr)
 	struct sockaddr_in *addr_in = (struct sockaddr_in*)addr;
 
 	memset(host_ip, 0, sizeof(host_ip));
-	if (resolve_host(hostname, host_ip) == Hybird_ERROR) {
+	if (resolve_host(hostname, host_ip) == HYBIRD_ERROR) {
 		hybird_debug_error("connect", "connect terminate due to bad hostname");
-		return Hybird_ERROR;
+		return HYBIRD_ERROR;
 	}
 
 	memset(&addr, 0, sizeof(struct sockaddr_in));
@@ -60,7 +60,7 @@ addr_init(const gchar *hostname, gint port, struct sockaddr *addr)
 	addr_in->sin_addr.s_addr = inet_addr(host_ip);
 	addr_in->sin_port = htons(port);
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 }
 
 HybirdConnection*
@@ -86,13 +86,13 @@ hybird_proxy_connect(const gchar *hostname, gint port, connect_callback func,
 		return NULL;
 	}
 
-	if (nonblock(sk) != Hybird_OK) {
+	if (nonblock(sk) != HYBIRD_OK) {
 
 		hybird_connection_destroy(conn);
 		return NULL;
 	}
 
-	if (addr_init(hostname, port, &addr) != Hybird_OK) {
+	if (addr_init(hostname, port, &addr) != HYBIRD_OK) {
 
 		hybird_connection_destroy(conn);
 		return NULL;
@@ -111,7 +111,7 @@ hybird_proxy_connect(const gchar *hostname, gint port, connect_callback func,
 
 		hybird_debug_info("connect", "connect in progress");
 
-		hybird_event_add(sk, Hybird_EVENT_WRITE, func, user_data);
+		hybird_event_add(sk, HYBIRD_EVENT_WRITE, func, user_data);
 
 	} else {
 		/* connection establish imediately */
@@ -132,6 +132,7 @@ static gboolean
 ssl_connect_cb(gint sk, gpointer user_data)
 {
 	gint l;
+	gboolean res;
 	HybirdSslConnection *ssl_conn = (HybirdSslConnection*)user_data;
 
 	if (!SSL_set_fd(ssl_conn->ssl, sk)) {
@@ -175,7 +176,9 @@ ssl_connect_cb(gint sk, gpointer user_data)
 
 	}
 ssl_ok:
-	return ssl_conn->conn_cb(ssl_conn, ssl_conn->conn_data);
+	res = ssl_conn->conn_cb(ssl_conn, ssl_conn->conn_data);
+
+	return res;
 ssl_err:
 	return FALSE;
 }

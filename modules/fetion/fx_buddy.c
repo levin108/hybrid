@@ -43,12 +43,12 @@ fetion_buddy_scribe(gint sk, fetion_account *ac)
 	if (send(sk, res, strlen(res), 0) == -1) { 
 		g_free(res);
 
-		return Hybird_ERROR;
+		return HYBIRD_ERROR;
 	}
 
 	g_free(res);
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 }
 
 fetion_buddy*
@@ -250,7 +250,7 @@ portrait_conn_cb(gint sk, gpointer user_data)
 
 	g_free(http_string);
 
-	hybird_event_add(sk, Hybird_EVENT_READ, portrait_recv_cb, trans);
+	hybird_event_add(sk, HYBIRD_EVENT_READ, portrait_recv_cb, trans);
 
 	return FALSE;
 }

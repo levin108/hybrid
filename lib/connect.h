@@ -1,5 +1,5 @@
-#ifndef Hybird_CONNECT_H
-#define Hybird_CONNECT_H
+#ifndef HYBIRD_CONNECT_H
+#define HYBIRD_CONNECT_H
 
 #include <glib.h>
 #include <openssl/ssl.h>
@@ -129,4 +129,4 @@ gint hybird_get_http_length(const gchar *http_response);
 }
 #endif
 
-#endif /* Hybird_CONNECT_H */
+#endif /* HYBIRD_CONNECT_H */

@@ -1,10 +1,11 @@
-#ifndef Hybird_ACCOUNT_H
-#define Hybird_ACCOUNT_H
+#ifndef HYBIRD_ACCOUNT_H
+#define HYBIRD_ACCOUNT_H
 
 #include <glib.h>
 
 typedef struct _HybirdAccount HybirdAccount;
 
+#include "config.h"
 #include "module.h"
 
 struct _HybirdAccount {
@@ -12,15 +13,16 @@ struct _HybirdAccount {
 	gchar *password;
 	gint   state;    /**< online status */
 
+	HybirdConfig *config;
 	HybirdModule *proto;
 };
 
 enum {
-	Hybird_STATE_INVISIBLE = 0,
-	Hybird_STATE_OFFLINE,
-	Hybird_STATE_BUSY,
-	Hybird_STATE_AWAY,
-	Hybird_STATE_ONLINE
+	HYBIRD_STATE_INVISIBLE = 0,
+	HYBIRD_STATE_OFFLINE,
+	HYBIRD_STATE_BUSY,
+	HYBIRD_STATE_AWAY,
+	HYBIRD_STATE_ONLINE
 };
 
 #ifdef __cplusplus

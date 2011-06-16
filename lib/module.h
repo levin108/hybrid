@@ -1,5 +1,5 @@
-#ifndef Hybird_MODULE_H
-#define Hybird_MODULE_H
+#ifndef HYBIRD_MODULE_H
+#define HYBIRD_MODULE_H
 
 #include <glib.h>
 #include <gmodule.h>
@@ -33,7 +33,7 @@ struct _HybirdModule {
 extern "C" {
 #endif
 
-#define Hybird_MODULE_INIT(func, moduleinfo) \
+#define HYBIRD_MODULE_INIT(func, moduleinfo) \
 	G_MODULE_EXPORT gboolean proto_module_init(HybirdModule *module); \
 	G_MODULE_EXPORT gboolean proto_module_init(HybirdModule *module) { \
 		module->info = (moduleinfo); \
@@ -47,7 +47,7 @@ extern "C" {
  * Initialize the module function, load all the 
  * protocol modules in MODULE_DIR directory.
  *
- * @return Hybird_OK if success, orelse Hybird_ERROR.
+ * @return HYBIRD_OK if success, orelse HYBIRD_ERROR.
  */
 gint hybird_module_init();
 
@@ -73,7 +73,7 @@ void hybird_module_destroy(HybirdModule *module);
  *
  * @param module Module to load.
  *
- * @return Hybird_OK if success, orelse Hybird_ERROR.
+ * @return HYBIRD_OK if success, orelse HYBIRD_ERROR.
  */
 gint hybird_module_load(HybirdModule *module);
 
@@ -97,4 +97,4 @@ HybirdModule *hybird_module_find(const gchar *name);
 }
 #endif
 
-#endif /* Hybird_MODULE_H */
+#endif /* HYBIRD_MODULE_H */

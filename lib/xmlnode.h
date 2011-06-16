@@ -1,5 +1,5 @@
-#ifndef Hybird_XMLPARSER_H
-#define Hybird_XMLPARSER_H
+#ifndef HYBIRD_XMLPARSER_H
+#define HYBIRD_XMLPARSER_H
 #include <glib.h>
 #include <libxml/parser.h>
 
@@ -29,6 +29,15 @@ extern "C" {
  * @return The root xmlnode struct.
  */
 xmlnode *xmlnode_root(const gchar *xml_buf, gint size);
+
+/**
+ * Get the root element of the xml file.
+ *
+ * @param filepath The absoulte path of the xml file.
+ *
+ * @return The root xmlnode struct.
+ */
+xmlnode *xmlnode_root_from_file(const gchar *filepath);
 
 /**
  * Get the children nodes of a xmlnode.
@@ -106,6 +115,17 @@ gchar *xmlnode_to_string(xmlnode *root);
  * @param value The attribte value.
  */
 void xmlnode_new_prop(xmlnode *node, const gchar *name, const gchar *value);
+
+/**
+ * Save the xml context to a xml file, it doesn't free the memory in the xml context.
+ * So remember to call xmlnode_free() to destroy the xml context.
+ *
+ * @param root The root node of the xml context.
+ * @param filepath The absoulte path of the xml file to save.
+ *
+ * @return HYBIRD_OK if success, HYBIRD_ERROR if there was an error.
+ */
+gint xmlnode_save_file(xmlnode *root, const gchar *filepath);
 
 /**
  * Destroy the ROOT node, and destroy the xml context.

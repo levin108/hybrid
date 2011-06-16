@@ -1,5 +1,5 @@
-#ifndef Hybird_FETION_H
-#define Hybird_FETION_H
+#ifndef HYBIRD_FETION_H
+#define HYBIRD_FETION_H
 #include <glib.h>
 
 #define PROTO_VERSION "4.0.2510"
@@ -39,4 +39,4 @@ void process_pushed(fetion_account *ac, const gchar *sipmsg);
 }
 #endif
 
-#endif /* Hybird_FETION_H */
+#endif /* HYBIRD_FETION_H */

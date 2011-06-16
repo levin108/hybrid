@@ -4,12 +4,14 @@
 HybirdAccount*
 hybird_account_create(HybirdModule *proto)
 {
+	extern HybirdConfig *global_config;
 	g_return_val_if_fail(proto != NULL, NULL);
 
 	HybirdAccount *ac = g_new0(HybirdAccount, 1);
 	hybird_account_set_username(ac, "547264589");
 	hybird_account_set_password(ac, "lwp1279");
 	
+	ac->config = global_config;
 	ac->proto = proto;
 
 	return ac;

@@ -1,5 +1,5 @@
-#ifndef Hybird_FX_ACCOUNT_H
-#define Hybird_FX_ACCOUNT_H
+#ifndef HYBIRD_FX_ACCOUNT_H
+#define HYBIRD_FX_ACCOUNT_H
 #include <glib.h>
 #include "account.h"
 
@@ -130,4 +130,4 @@ void fetion_account_destroy(fetion_account *ac);
 }
 #endif
 
-#endif /* Hybird_FX_ACCOUNT_H */
+#endif /* HYBIRD_FX_ACCOUNT_H */

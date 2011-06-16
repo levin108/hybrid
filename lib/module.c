@@ -33,13 +33,13 @@ hybird_module_load(HybirdModule *module)
 	GModule *gm;
 	ModuleInitFunc hybird_module_init;
 
-	g_return_val_if_fail(module != NULL, Hybird_ERROR);
+	g_return_val_if_fail(module != NULL, HYBIRD_ERROR);
 
 	if (!(gm = g_module_open(module->path, G_MODULE_BIND_LOCAL))) {
 
 		hybird_debug_error("module", g_module_error());
 
-		return Hybird_ERROR;
+		return HYBIRD_ERROR;
 	}
 
 	if (!g_module_symbol(gm, "proto_module_init", 
@@ -47,13 +47,13 @@ hybird_module_load(HybirdModule *module)
 
 		hybird_debug_error("module", g_module_error());
 
-		return Hybird_ERROR;
+		return HYBIRD_ERROR;
 
 	}
 
 	hybird_module_init(module);
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 }
 
 void 
@@ -102,7 +102,7 @@ hybird_module_init()
 
 		hybird_debug_error("module", "open modules directory: %s", MODULE_DIR);
 
-		return Hybird_ERROR;
+		return HYBIRD_ERROR;
 	}
 
 	while ((name = g_dir_read_name(dir))) {
@@ -118,7 +118,7 @@ hybird_module_init()
 			
 			module = hybird_module_create(abs_path);
 
-			if (hybird_module_load(module) != Hybird_OK) {
+			if (hybird_module_load(module) != HYBIRD_OK) {
 				hybird_module_destroy(module);
 			}
 
@@ -129,5 +129,5 @@ hybird_module_init()
 
 	g_dir_close(dir);
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 }

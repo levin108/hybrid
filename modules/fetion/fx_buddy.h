@@ -1,5 +1,5 @@
-#ifndef Hybird_FX_BUDDY_H
-#define Hybird_FX_BUDDY_H
+#ifndef HYBIRD_FX_BUDDY_H
+#define HYBIRD_FX_BUDDY_H
 #include <glib.h>
 #include "fx_account.h"
 
@@ -65,7 +65,7 @@ fetion_buddy *fetion_buddy_create(void);
  * @param sk The socket file descriptor to write sip msg to.
  * @param ac The fetion account context.
  *
- * @return Hybird_OK if success, Hybird_ERROR if there was an error.
+ * @return HYBIRD_OK if success, HYBIRD_ERROR if there was an error.
  */
 gint fetion_buddy_scribe(gint sk, fetion_account *ac);
 
@@ -108,4 +108,4 @@ void fetion_buddies_init(fetion_account *ac);
 }
 #endif
 
-#endif /* Hybird_FX_BUDDY_H */
+#endif /* HYBIRD_FX_BUDDY_H */

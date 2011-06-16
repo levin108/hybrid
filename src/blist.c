@@ -43,22 +43,22 @@ render_column(HybirdBlist *blist)
 	g_object_set(renderer, "expander-visible", TRUE, NULL);
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-					    "visible", Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
+					    "visible", HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* contact expander */
 	renderer = pidgin_cell_renderer_expander_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-					    "visible", Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
+					    "visible", HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* portrait */
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", Hybird_BLIST_BUDDY_ICON,
-						"visible", Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
+						"pixbuf", HYBIRD_BLIST_BUDDY_ICON,
+						"visible", HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
 						NULL);
 	g_object_set(renderer, "xalign", 1.0, "xpad", 3, "ypad", 0, NULL);
 
@@ -66,7 +66,7 @@ render_column(HybirdBlist *blist)
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, TRUE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"markup", Hybird_BLIST_BUDDY_NAME,
+						"markup", HYBIRD_BLIST_BUDDY_NAME,
 						NULL);
 	g_object_set(renderer, "xalign", 0.0, "xpad", 3, "ypad", 0, NULL);
 	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -75,8 +75,8 @@ render_column(HybirdBlist *blist)
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", Hybird_BLIST_PROTO_ICON,
-						"visible", Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE,
+						"pixbuf", HYBIRD_BLIST_PROTO_ICON,
+						"visible", HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE,
 						NULL);
 	g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 
@@ -85,8 +85,8 @@ render_column(HybirdBlist *blist)
 	g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", Hybird_BLIST_STATUS_ICON,
-						"visible", Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE,
+						"pixbuf", HYBIRD_BLIST_STATUS_ICON,
+						"visible", HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE,
 						NULL);
 
 }
@@ -111,7 +111,7 @@ row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 	gtk_tree_model_get_iter(model, &iter, path);
 
 	gtk_tree_model_get(model, &iter,
-			Hybird_BLIST_BUDDY_ID, &id, -1);
+			HYBIRD_BLIST_BUDDY_ID, &id, -1);
 
 	if (!(buddy = hybird_blist_find_buddy(id))) {
 		hybird_debug_error("blist", "FATAL ERROR, find buddy \'%s\'", id);
@@ -129,7 +129,7 @@ hybird_blist_init()
 {
 	blist = hybird_blist_create();
 
-	blist->treemodel = gtk_tree_store_new(Hybird_BLIST_COLUMNS,
+	blist->treemodel = gtk_tree_store_new(HYBIRD_BLIST_COLUMNS,
 			G_TYPE_STRING,
 			GDK_TYPE_PIXBUF,
 			G_TYPE_STRING,
@@ -150,7 +150,7 @@ hybird_blist_init()
 
 	gtk_tree_sortable_set_sort_column_id(
 			GTK_TREE_SORTABLE(blist->treemodel),
-			Hybird_BLIST_BUDDY_STATE, GTK_SORT_DESCENDING);
+			HYBIRD_BLIST_BUDDY_STATE, GTK_SORT_DESCENDING);
 
 	g_signal_connect(blist->treeview, "button-press-event",
 			G_CALLBACK(button_press_cb), NULL);
@@ -175,13 +175,13 @@ hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
 	temp = g_strdup_printf("<b>%s</b>", name);
 
 	gtk_tree_store_set(blist->treemodel, &group->iter,
-			Hybird_BLIST_BUDDY_NAME, temp,
-			Hybird_BLIST_PROTO_ICON, proto_icon,
-			Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, TRUE,
-			Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-			Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE, FALSE,
-			Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-			Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE, FALSE,
+			HYBIRD_BLIST_BUDDY_NAME, temp,
+			HYBIRD_BLIST_PROTO_ICON, proto_icon,
+			HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, TRUE,
+			HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+			HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE, FALSE,
+			HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+			HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE, FALSE,
 			-1);
 
 	g_free(temp);
@@ -195,6 +195,17 @@ hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
 	g_object_unref(proto_icon);
 
 	return group;
+}
+
+void
+hybird_blist_group_destroy(HybirdGroup *group)
+{
+	if (group) {
+		g_free(group->id);
+		g_free(group->name);
+
+		g_free(group);
+	}
 }
 
 HybirdBuddy*
@@ -218,21 +229,22 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 	gtk_tree_store_append(blist->treemodel, &buddy->iter, &parent->iter);
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			Hybird_BLIST_BUDDY_ID, id,
-			Hybird_BLIST_STATUS_ICON, status_icon,
-			Hybird_BLIST_PROTO_ICON, proto_icon,
-			Hybird_BLIST_BUDDY_NAME, name,
-			Hybird_BLIST_BUDDY_STATE, Hybird_STATE_OFFLINE,
-			Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
-			Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-			Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
-			Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-			Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
+			HYBIRD_BLIST_BUDDY_ID, id,
+			HYBIRD_BLIST_STATUS_ICON, status_icon,
+			HYBIRD_BLIST_PROTO_ICON, proto_icon,
+			HYBIRD_BLIST_BUDDY_NAME, name,
+			HYBIRD_BLIST_BUDDY_STATE, HYBIRD_STATE_OFFLINE,
+			HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
+			HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+			HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
+			HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+			HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
 			-1);
 
 	buddy->id = g_strdup(id);
 	buddy->name = g_strdup(name);
 	buddy->account = ac;
+	buddy->parent = parent;
 
 	buddy_list = g_slist_append(buddy_list, buddy);
 
@@ -245,7 +257,22 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 	g_object_unref(status_icon);
 	g_object_unref(proto_icon);
 
+	hybird_blist_buddy_to_cache(buddy);
+
 	return buddy;
+}
+
+void
+hybird_blist_buddy_destroy(HybirdBuddy *buddy)
+{
+	if (buddy) {
+		g_free(buddy->id);
+		g_free(buddy->name);
+		g_free(buddy->mood);
+		g_free(buddy->icon_data);
+		g_free(buddy->icon_crc);
+		g_free(buddy);
+	}
 }
 
 /**
@@ -286,7 +313,7 @@ hybird_blist_set_name_field(HybirdBuddy *buddy)
 	text = g_strdup_printf("%s%s", tmp, mood);
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			Hybird_BLIST_BUDDY_NAME, text, -1);
+			HYBIRD_BLIST_BUDDY_NAME, text, -1);
 
 	g_free(mood);
 	g_free(text);
@@ -299,7 +326,6 @@ static void
 hybird_blist_set_state_field(HybirdBuddy *buddy)
 {
 	GdkPixbuf *pixbuf;
-	GdkPixbufLoader *loader;
 	GError *err = NULL;
 
 	g_return_if_fail(buddy != NULL);
@@ -307,16 +333,14 @@ hybird_blist_set_state_field(HybirdBuddy *buddy)
 	pixbuf = create_presence_pixbuf(buddy->state, 16);
 	
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			Hybird_BLIST_BUDDY_STATE, buddy->state,
-			Hybird_BLIST_STATUS_ICON, pixbuf, -1);
+			HYBIRD_BLIST_BUDDY_STATE, buddy->state,
+			HYBIRD_BLIST_STATUS_ICON, pixbuf, -1);
 
 	g_object_unref(pixbuf);
 	pixbuf = NULL;
 
 	/* set the portrait */
 	gint scale_size = 32;
-
-	loader = gdk_pixbuf_loader_new();
 
 	if (buddy->icon_data == NULL || buddy->icon_data_length == 0) {
 		/* load the default icon. */
@@ -339,7 +363,7 @@ hybird_blist_set_state_field(HybirdBuddy *buddy)
 	}
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			Hybird_BLIST_BUDDY_ICON, pixbuf, -1);
+			HYBIRD_BLIST_BUDDY_ICON, pixbuf, -1);
 
 	g_object_unref(pixbuf);
 
@@ -448,4 +472,146 @@ hybird_blist_find_buddy(const gchar *id)
 	}
 
 	return NULL;
+}
+
+void
+hybird_blist_buddy_to_cache(HybirdBuddy *buddy)
+{
+	HybirdAccount *ac;
+	HybirdConfig *config;
+	HybirdBlistCache *cache;
+	xmlnode *root;
+	xmlnode *node;
+	xmlnode *temp;
+	gchar *username;
+	gchar *protoname;
+	gchar *id;
+	gchar *name;
+
+	g_return_if_fail(buddy != NULL);
+
+	ac = buddy->account;
+	config = ac->config;
+	cache = config->blist_cache;
+	root = cache->root;
+
+	if (!(node = xmlnode_find(root, "accounts"))) {
+		hybird_debug_error("blist", "can't find accounts node in blist cache");
+		return;
+	}
+
+	/* find node named 'account' */
+	if ((temp = xmlnode_child(node))) {
+
+		while (temp) {
+			if (!xmlnode_has_prop(temp, "username") ||
+				!xmlnode_has_prop(temp, "proto")) {
+				hybird_debug_error("blist", "invalid blist cache node found");
+				temp = xmlnode_next(temp);
+				continue;
+			}
+
+			username = xmlnode_prop(temp, "username");
+			protoname = xmlnode_prop(temp, "proto");
+
+			if (g_strcmp0(ac->username, username) == 0 &&
+				g_strcmp0(ac->proto->info->name, protoname) == 0) {
+				g_free(username);
+				g_free(protoname);
+				node = temp;
+				goto account_exist;
+			}
+
+			temp = xmlnode_next(temp);
+
+			g_free(username);
+			g_free(protoname);
+		}
+	}
+
+	node = xmlnode_new_child(node, "account");
+	xmlnode_new_prop(node, "username", ac->username);
+	xmlnode_new_prop(node, "proto", ac->proto->info->name);
+
+account_exist:
+	if (!(temp = xmlnode_find(node, "buddies"))) {
+		node = xmlnode_new_child(node, "buddies");
+
+	} else {
+		node = temp;	
+	}
+
+	/* Now node point to node named 'buddies'', make it
+	 * point to group node.
+	 *
+	 * check whether there was a group node that we need.
+	 */
+	if ((temp = xmlnode_child(node))) {
+
+		while (temp) {
+
+			if (!xmlnode_has_prop(temp, "id") ||
+				!xmlnode_has_prop(temp, "name")) {
+				hybird_debug_error("blist", "invalid blist cache node found");
+				temp = xmlnode_next(temp);
+				continue;
+			}
+			
+			id = xmlnode_prop(temp, "id");
+			name = xmlnode_prop(temp, "name");
+
+			if (g_strcmp0(id, buddy->parent->id) == 0 &&
+				g_strcmp0(name, buddy->parent->name) == 0) {
+				g_free(id);
+				g_free(name);
+				node = temp;
+				goto group_exist;
+			}
+
+			temp = xmlnode_next(temp);
+
+			g_free(id);
+			g_free(name);
+		}
+	}
+
+	node = xmlnode_new_child(node, "group");
+	xmlnode_new_prop(node, "id", buddy->parent->id);
+	xmlnode_new_prop(node, "name", buddy->parent->name);
+
+group_exist:
+	/* whether there's a buddy node */
+	if ((temp = xmlnode_child(node))) {
+		
+		while (temp) {
+
+			if (!xmlnode_has_prop(temp, "id")) {
+				hybird_debug_error("blist", "invalid blist cache node found");
+				temp = xmlnode_next(temp);
+				continue;
+			}
+			
+			id = xmlnode_prop(temp, "id");
+
+			if (g_strcmp0(id, buddy->id) == 0) {
+				g_free(id);
+				node = temp;
+				goto buddy_exist;
+			}
+
+			temp = xmlnode_next(temp);
+
+			g_free(id);
+		}
+	}
+
+	node = xmlnode_new_child(node, "buddy");
+
+buddy_exist:
+
+	xmlnode_new_prop(node, "id", buddy->id);
+	xmlnode_new_prop(node, "name", buddy->name);
+	xmlnode_new_prop(node, "mood", buddy->mood);
+
+	xmlnode_save_file(root, cache->cache_file_name);
 }

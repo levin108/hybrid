@@ -1,12 +1,12 @@
-#ifndef Hybird_EVENTLOOP_H
-#define Hybird_EVENTLOOP_H
+#ifndef HYBIRD_EVENTLOOP_H
+#define HYBIRD_EVENTLOOP_H
 
 #include <glib.h>
 
 #include "connect.h"
 
-#define Hybird_EVENT_READ  (G_IO_IN | G_IO_HUP | G_IO_ERR)
-#define Hybird_EVENT_WRITE (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
+#define HYBIRD_EVENT_READ  (G_IO_IN | G_IO_HUP | G_IO_ERR)
+#define HYBIRD_EVENT_WRITE (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
 
 typedef gboolean (*input_func)(gint sk, gpointer user_data);
 
@@ -42,4 +42,4 @@ guint hybird_ssl_event_add(HybirdSslConnection *isc, ssl_callback func,
 }
 #endif
 
-#endif /* Hybird_EVENTLOOP_H */
+#endif /* HYBIRD_EVENTLOOP_H */

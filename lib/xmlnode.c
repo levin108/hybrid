@@ -29,6 +29,32 @@ xmlnode_root(const gchar *xml_buf, gint size)
 }
 
 xmlnode*
+xmlnode_root_from_file(const gchar *filepath)
+{
+	xmlDoc *doc;
+	xmlnode *node;
+
+	g_return_val_if_fail(filepath != NULL, NULL);
+
+	doc = xmlParseFile(filepath);
+	
+	if (!doc) {
+		hybird_debug_error("xml", "parse xml file");
+		return NULL;
+	}
+
+	node = g_new0(xmlnode, 1);
+	node->node = xmlDocGetRootElement(doc);
+	node->doc = doc;
+	node->is_root = 1;
+	node->next = NULL;
+	node->child = NULL;
+	node->name = g_strdup((gchar*)node->node->name);
+
+	return node;
+}
+
+xmlnode*
 xmlnode_find(xmlnode *node, const gchar *name)
 {
 	xmlnode *temp, *iter;
@@ -163,11 +189,12 @@ xmlnode_new_child(xmlnode *node, const gchar *childname)
 
 	child = xmlnode_child(node);
 
-	if (!child) {
+	if (child) {
 		pos = child;
 		while (pos) {
 			if (pos->next == NULL) {
 				pos->next = new;
+				break;
 			}
 
 			pos = pos->next;
@@ -223,6 +250,20 @@ xmlnode_new_prop(xmlnode *node, const gchar *name, const gchar *value)
 	xmlNewProp(node->node, BAD_CAST name, BAD_CAST value);
 }
 
+gint
+xmlnode_save_file(xmlnode *root, const gchar *filepath)
+{
+	g_return_val_if_fail(root != NULL, HYBIRD_ERROR);
+	g_return_val_if_fail(root->is_root == 1, HYBIRD_ERROR);
+	g_return_val_if_fail(filepath != NULL, HYBIRD_ERROR);
+
+	if (xmlSaveFormatFileEnc(filepath, root->doc, "UTF-8", 1) == -1) {
+		return HYBIRD_ERROR;
+	}
+
+	return HYBIRD_OK;
+}
+
 void
 xmlnode_free(xmlnode *node)
 {
@@ -238,7 +279,7 @@ xmlnode_free(xmlnode *node)
 		xmlFreeDoc(node->doc);
 		node->doc = NULL;
 	}
-	
+
 	if (node->child) {
 		xmlnode_free(node->child);
 	}
@@ -247,7 +288,7 @@ xmlnode_free(xmlnode *node)
 		temp = &node;
 		node = node->next;
 		xmlnode_free(*temp);
+		g_free(*temp);
 		*temp = NULL;
 	}
-
 }

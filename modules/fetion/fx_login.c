@@ -78,11 +78,11 @@ parse_ssi_response(fetion_account *ac, const gchar *response)
 	g_free(prop);
 #endif
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 ssi_term:
 	hybird_account_error_reason(ac->account, _("ssi authencation"));
 	xmlnode_free(root);
-	return Hybird_ERROR;
+	return HYBIRD_ERROR;
 }
 
 /**
@@ -130,7 +130,7 @@ cfg_read_cb(gint sk, gpointer user_data)
 			goto error;
 		}
 
-		if (parse_configuration(ac, pos) != Hybird_OK) {
+		if (parse_configuration(ac, pos) != HYBIRD_OK) {
 			g_free(ac->buffer);
 			ac->buffer = NULL;
 			goto error;
@@ -182,7 +182,7 @@ cfg_connect_cb(gint sk, gpointer user_data)
 
 	g_free(http);
 
-	hybird_event_add(sk, Hybird_EVENT_READ, cfg_read_cb, ac);
+	hybird_event_add(sk, HYBIRD_EVENT_READ, cfg_read_cb, ac);
 
 	return FALSE;
 }
@@ -234,7 +234,7 @@ ssi_auth_cb(HybirdSslConnection *ssl, gpointer user_data)
 		goto ssi_auth_err;
 	}
 
-	if (parse_ssi_response(ac, pos) != Hybird_OK) {
+	if (parse_ssi_response(ac, pos) != HYBIRD_OK) {
 		goto ssi_auth_err;
 	}
 
@@ -329,7 +329,7 @@ sipc_reg_cb(gint sk, gpointer user_data)
 	/* parse response, we need the key and nouce */
 	digest = sip_header_get_attr(buf, "W");
 
-	if (parse_sipc_reg_response(digest, &nonce, &key) != Hybird_OK) {
+	if (parse_sipc_reg_response(digest, &nonce, &key) != HYBIRD_OK) {
 		g_free(digest);
 		return FALSE;
 	}
@@ -387,7 +387,7 @@ sipc_reg_action(gint sk, gpointer user_data)
 		return FALSE;
 	}
 
-	hybird_event_add(sk, Hybird_EVENT_READ, sipc_reg_cb, ac);
+	hybird_event_add(sk, HYBIRD_EVENT_READ, sipc_reg_cb, ac);
 
 	g_free(sipmsg);
 
@@ -421,7 +421,7 @@ push_cb(gint sk, gpointer user_data)
 	memcpy(ac->buffer + data_len, sipmsg, n + 1);
 
 recheck:
-	data_len = strlen(ac->buffer);
+	data_len = ac->buffer ? strlen(ac->buffer) : 0;
 
 	if ((pos = strstr(ac->buffer, "\r\n\r\n"))) {
 		pos += 4;
@@ -532,7 +532,7 @@ aut_fin:
 		fetion_buddy_scribe(sk, ac);
 
 		/* now we start to handle the pushed messages */
-		hybird_event_add(sk, Hybird_EVENT_READ, push_cb, ac);
+		hybird_event_add(sk, HYBIRD_EVENT_READ, push_cb, ac);
 
 	} else {
 		hybird_debug_error("fetion", "sipc authentication error.");
@@ -599,11 +599,11 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 				strerror(errno));
 		g_free(sipmsg);
 
-		return Hybird_ERROR; 
+		return HYBIRD_ERROR; 
 	}
 	g_free(sipmsg);
 
-	hybird_event_add(sk, Hybird_EVENT_READ, sipc_auth_cb, ac);
+	hybird_event_add(sk, HYBIRD_EVENT_READ, sipc_auth_cb, ac);
 
 	return 0;
 }
@@ -904,12 +904,12 @@ parse_configuration(fetion_account *ac, const gchar *cfg)
 
 	xmlnode_free(root);
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 
 cfg_parse_err:
 	xmlnode_free(root);
 	hybird_debug_error("fetion", "parse cfg body");
-	return Hybird_ERROR;
+	return HYBIRD_ERROR;
 }
 
 /**
@@ -922,7 +922,7 @@ parse_sipc_reg_response(const gchar *reg_response, gchar **nonce, gchar **key)
 	gchar key_flag[] = "key=\"";
 	gchar *pos, *cur;
 
-	g_return_val_if_fail(reg_response != NULL, Hybird_ERROR);
+	g_return_val_if_fail(reg_response != NULL, HYBIRD_ERROR);
 
 	if (!(pos = g_strrstr(reg_response, nonce_flag))) {
 		goto parse_sipc_error;
@@ -952,11 +952,11 @@ parse_sipc_reg_response(const gchar *reg_response, gchar **nonce, gchar **key)
 
 	*key = g_strndup(pos, cur - pos);
 
-	return Hybird_OK;
+	return HYBIRD_OK;
 
 parse_sipc_error:
 	hybird_debug_error("fetion", "parse sipc register response");
-	return Hybird_ERROR;
+	return HYBIRD_ERROR;
 	
 }
 

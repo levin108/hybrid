@@ -13,11 +13,11 @@
 
 #include "debug.h"
 
-#define Hybird_OK    0
-#define Hybird_ERROR 1
+#define HYBIRD_OK    0
+#define HYBIRD_ERROR 1
 
-#ifndef Hybird_UTIL_H
-#define Hybird_UTIL_H
+#ifndef HYBIRD_UTIL_H
+#define HYBIRD_UTIL_H
 
 #define PATH_LENGTH 1024
 #define URL_LENGTH 1024

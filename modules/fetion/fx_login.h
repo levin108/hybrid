@@ -1,5 +1,5 @@
-#ifndef Hybird_FX_LOGIN_H
-#define Hybird_FX_LOGIN_H
+#ifndef HYBIRD_FX_LOGIN_H
+#define HYBIRD_FX_LOGIN_H
 
 #include "connect.h"
 
@@ -13,4 +13,4 @@ gboolean ssi_auth_action(HybirdSslConnection *isc, gpointer user_data);
 }
 #endif
 
-#endif /* Hybird_FX_LOGIN_H */
+#endif /* HYBIRD_FX_LOGIN_H */

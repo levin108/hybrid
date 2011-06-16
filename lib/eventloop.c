@@ -63,5 +63,5 @@ hybird_ssl_event_add(HybirdSslConnection *isc, ssl_callback func,
 	isc->recv_cb = func;
 	isc->recv_data = user_data;
 
-	return hybird_event_add(isc->sk, Hybird_EVENT_READ, ssl_recv_cb, isc);
+	return hybird_event_add(isc->sk, HYBIRD_EVENT_READ, ssl_recv_cb, isc);
 }

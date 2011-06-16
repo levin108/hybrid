@@ -1,9 +1,10 @@
-#ifndef Hybird_BLIST_H
-#define Hybird_BLIST_H
+#ifndef HYBIRD_BLIST_H
+#define HYBIRD_BLIST_H
 #include <gtk/gtk.h>
 
 #define GROUPNAME_LENGTH   320
 #define CONTACTNAME_LENGTH 320
+#include "xmlnode.h"
 #include "account.h"
 
 typedef struct _HybirdBlist    HybirdBlist;
@@ -27,37 +28,41 @@ struct _HybirdBuddy {
 	GtkTreeIter iter;
 	HybirdAccount *account;
 	HybirdGroup *parent;
+
+	xmlnode *cache_node; /**< The corresponding xml node in cache context.*/
+
 	gchar *id;	/**< User Identity. */
 	gchar *name; /**< The name string. */
 	gchar *mood; /**< The mood phrase. */
-	gint   state; /**< The online status. */
+	gint   state; /**< The presence status. */
 	guchar *icon_data; /**< The portrait raw data. */
-	gsize icon_data_length;
+	gsize icon_data_length; /**< The size of the portrait raw data */
+	gchar *icon_crc; /**< The portrait crc. */
 };
 
 enum {
-	Hybird_BLIST_BUDDY_ID,
-	Hybird_BLIST_STATUS_ICON,
-	Hybird_BLIST_BUDDY_NAME,
-	Hybird_BLIST_PROTO_ICON,
-	Hybird_BLIST_BUDDY_ICON,
-	Hybird_BLIST_BUDDY_STATE,
-	Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
-	Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
-	Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE,
-	Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE,
-	Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
-	Hybird_BLIST_COLUMNS
+	HYBIRD_BLIST_BUDDY_ID,
+	HYBIRD_BLIST_STATUS_ICON,
+	HYBIRD_BLIST_BUDDY_NAME,
+	HYBIRD_BLIST_PROTO_ICON,
+	HYBIRD_BLIST_BUDDY_ICON,
+	HYBIRD_BLIST_BUDDY_STATE,
+	HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
+	HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
+	HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE,
+	HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE,
+	HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
+	HYBIRD_BLIST_COLUMNS
 };
 
 /**
  * Test the buddy's online state.
  */
-#define BUDDY_IS_ONLINE(b)    ((b)->state == Hybird_STATE_ONLINE)
-#define BUDDY_IS_OFFLINE(b)   ((b)->state == Hybird_STATE_OFFLINE)
-#define BUDDY_IS_AWAY(b)      ((b)->state == Hybird_STATE_AWAY)
-#define BUDDY_IS_BUSY(b)      ((b)->state == Hybird_STATE_BUSY)
-#define BUDDY_IS_INVISIBLE(b) ((b)->state == Hybird_STATE_INVISIBLE)
+#define BUDDY_IS_ONLINE(b)    ((b)->state == HYBIRD_STATE_ONLINE)
+#define BUDDY_IS_OFFLINE(b)   ((b)->state == HYBIRD_STATE_OFFLINE)
+#define BUDDY_IS_AWAY(b)      ((b)->state == HYBIRD_STATE_AWAY)
+#define BUDDY_IS_BUSY(b)      ((b)->state == HYBIRD_STATE_BUSY)
+#define BUDDY_IS_INVISIBLE(b) ((b)->state == HYBIRD_STATE_INVISIBLE)
 
 #ifdef __cplusplus
 extern "C" {
@@ -89,6 +94,13 @@ void hybird_blist_init();
 HybirdGroup *hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name);
 
 /**
+ * Destroy a group context and free the memory allocated.
+ *
+ * @param group The group context to destroy.
+ */
+void hybird_blist_group_destroy(HybirdGroup *group);
+
+/**
  * Add a new buddy to the buddy list
  *
  * @param ac The account context.
@@ -101,6 +113,12 @@ HybirdGroup *hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gc
 HybirdBuddy *hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, 
 		const gchar *id, const gchar *name);
 
+/**
+ * Destroy a buddy context and free the memory allocated.
+ *
+ * @param buddy The buddy context to destroy.
+ */
+void hybird_blist_buddy_destroy(HybirdBuddy *buddy);
 /**
  * Set the buddy's display name.
  *
@@ -162,8 +180,16 @@ HybirdGroup *hybird_blist_find_group_by_name(const gchar *name);
  */
 HybirdBuddy *hybird_blist_find_buddy(const gchar *id);
 
+/**
+ * Write the buddy information to the cache which in fact is 
+ * a XML tree in the memory, if you want to synchronize the cache
+ * with the cache file, use hybird_blist_cache_flush().
+ *
+ * @param buddy The buddy to write to cache.
+ */
+void hybird_blist_buddy_to_cache(HybirdBuddy *buddy);
 #ifdef _cplusplus
 }
 #endif
 
-#endif /* Hybird_BLIST_H */
+#endif /* HYBIRD_BLIST_H */

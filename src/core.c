@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
+#include "config.h"
 #include "module.h"
 #include "blist.h"
 #include "util.h"
@@ -21,6 +22,34 @@ hybird_start_login()
 static void
 window_destroy(GtkWidget *widget, gpointer user_data)
 {
+	/*
+	 * Now free the memory.
+	 */
+	GSList *pos;
+	HybirdGroup *group;
+	HybirdBuddy *buddy;
+	
+	extern GSList *group_list;
+	extern GSList *buddy_list;
+
+	extern HybirdBlist *blist;
+
+	g_free(blist);
+
+	while (group_list) {
+		pos = group_list;
+		group = (HybirdGroup*)pos->data;
+		group_list = g_slist_remove(group_list, group);
+		hybird_blist_group_destroy(group);
+	}
+
+	while (buddy_list) {
+		pos = buddy_list;
+		buddy = (HybirdBuddy*)pos->data;
+		buddy_list = g_slist_remove(buddy_list, buddy);
+		hybird_blist_buddy_destroy(buddy);
+	}
+
 	gtk_main_quit();
 }
 
@@ -28,8 +57,6 @@ static void
 create_basic_menus(GtkBox *box)
 {
 	GtkUIManager *ui;
-	GtkWidget *menubar;
-	GtkWidget *account_menu;
 
 	GtkActionEntry entries[] = {
 		{ "Accounts", NULL, "_Accounts" },
@@ -54,6 +81,8 @@ create_basic_menus(GtkBox *box)
 	ui = gtk_ui_manager_new();
 	gtk_ui_manager_insert_action_group(ui, actionGroup, 0);
 	gtk_ui_manager_add_ui_from_file(ui, UI_DIR"menu.xml", NULL);
+
+	g_object_unref(actionGroup);
 
 	gtk_box_pack_start(box, gtk_ui_manager_get_widget(ui, "/MenuBar"),
 			FALSE, FALSE, 0);
@@ -98,6 +127,8 @@ main(gint argc, gchar **argv)
 	gtk_init(&argc, &argv);
 	
 	ui_init();
+
+	hybird_config_init();
 
 	hybird_module_init();
 

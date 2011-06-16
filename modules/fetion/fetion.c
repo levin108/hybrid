@@ -34,26 +34,26 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 
 		switch (buddy->state) {
 			case P_ONLINE:
-				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_ONLINE);
+				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_ONLINE);
 				break;
 			case P_OFFLINE:
-				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_OFFLINE);
+				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_OFFLINE);
 				break;
 			case P_INVISIBLE:
-				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_OFFLINE);
+				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_OFFLINE);
 				break;
 			case P_AWAY:
-				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_AWAY);
+				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_AWAY);
 				break;
 			case P_BUSY:
-				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_BUSY);
+				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_BUSY);
 				break;
 			default:
-				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_AWAY);
+				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_AWAY);
 				break;
 		}
 
-		fetion_update_portrait(ac, buddy);
+		//fetion_update_portrait(ac, buddy);
 	}
 }
 
@@ -155,11 +155,13 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 gboolean
 fetion_login(HybirdAccount *imac)
 {
+	HybirdSslConnection *conn;
+
 	hybird_debug_info("fetion", "fetion is now logining...");
 
 	ac = fetion_account_create(imac, imac->username, imac->password);
 
-	hybird_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
+	conn = hybird_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
 
 	return TRUE;
 }
@@ -180,4 +182,4 @@ fetion_module_init(HybirdModule *module)
 	printf("hello world\n");
 }
 
-Hybird_MODULE_INIT(fetion_module_init, &module_info);
+HYBIRD_MODULE_INIT(fetion_module_init, &module_info);

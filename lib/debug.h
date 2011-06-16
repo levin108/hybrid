@@ -1,7 +1,7 @@
 #include <glib.h>
 
-#ifndef Hybird_DEBUG_H
-#define Hybird_DEBUG_H
+#ifndef HYBIRD_DEBUG_H
+#define HYBIRD_DEBUG_H
 
 void hybird_debug_info(const gchar *relm, const gchar *format, ...);
 

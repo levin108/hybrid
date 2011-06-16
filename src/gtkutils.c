@@ -97,6 +97,10 @@ create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 	gdk_pixbuf_loader_close(loader, NULL);
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
+	if (pixbuf) {
+		g_object_ref(loader);
+	}
+	g_object_unref(loader);
 
 	return pixbuf;
 }
@@ -136,6 +140,11 @@ create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 	gdk_pixbuf_loader_close(loader, NULL);
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
+	if (pixbuf) {
+		g_object_ref(loader);
+	}
+	g_object_unref(loader);
+
 	if (!pixbuf) {
 		hybird_debug_error("blist", "get pixbuf from loader");
 		return NULL;
@@ -170,23 +179,23 @@ create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 GdkPixbuf*
 create_presence_pixbuf(gint presence, gint scale_size)
 {
-	gchar *name;
+	const gchar *name;
 
 	switch (presence) {
 
-		case Hybird_STATE_OFFLINE:
+		case HYBIRD_STATE_OFFLINE:
 			name = DATA_DIR"/offline.png";
 			break;
-		case Hybird_STATE_INVISIBLE:
+		case HYBIRD_STATE_INVISIBLE:
 			name = DATA_DIR"/invisible.png";
 			break;
-		case Hybird_STATE_BUSY:
+		case HYBIRD_STATE_BUSY:
 			name = DATA_DIR"/busy.png";
 			break;
-		case Hybird_STATE_AWAY:
+		case HYBIRD_STATE_AWAY:
 			name = DATA_DIR"/away.png";
 			break;
-		case Hybird_STATE_ONLINE:
+		case HYBIRD_STATE_ONLINE:
 			name = DATA_DIR"/available.png";
 			break;
 		default:

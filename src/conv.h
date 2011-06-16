@@ -1,5 +1,5 @@
-#ifndef Hybird_CHAT_H
-#define Hybird_CHAT_H
+#ifndef HYBIRD_CHAT_H
+#define HYBIRD_CHAT_H
 
 #include <gtk/gtk.h>
 #include "blist.h"
