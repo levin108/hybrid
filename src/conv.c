@@ -150,12 +150,21 @@ static void
 close_tab(IMChatPanel *chat)
 {
 	IMConversation *conv;
+	IMChatPanel *temp_chat;
+	GSList *pos;
 
 	g_return_if_fail(chat != NULL);
 
 	conv = chat->parent;
 
 	gtk_notebook_remove_page(GTK_NOTEBOOK(conv->notebook), chat->page_index);
+
+	/* Realocate page index */
+	for (pos = conv->chat_buddies; pos; pos = pos->next) {
+		temp_chat = (IMChatPanel*)pos->data;
+		temp_chat->page_index = gtk_notebook_page_num(
+				GTK_NOTEBOOK(conv->notebook), temp_chat->vbox);
+	}
 
 	conv->chat_buddies = g_slist_remove(conv->chat_buddies, chat);
 
@@ -511,14 +520,13 @@ init_chat_panel(IMChatPanel *chat)
 
 	if (g_slist_length(conv->chat_buddies) == 1) {
 		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), FALSE);
-		gtk_notebook_set_show_border(GTK_NOTEBOOK(conv->notebook), TRUE);
 
 	} else {
 		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), TRUE);
-		gtk_notebook_set_show_border(GTK_NOTEBOOK(conv->notebook), TRUE);
 	}
 
-	vbox = gtk_vbox_new(FALSE, 0);	
+	vbox = gtk_vbox_new(FALSE, 0);
+	chat->vbox = vbox;
 
 	chat->pagelabel = gtk_label_new(buddy->name);
 	chat->page_index = gtk_notebook_append_page(GTK_NOTEBOOK(conv->notebook), vbox,
@@ -624,8 +632,12 @@ im_chat_panel_create(IMBuddy *buddy)
 	chat->buddy = buddy;
 	conv->chat_buddies = g_slist_append(conv->chat_buddies, chat);
 
-found:
 	init_chat_panel(chat);	
+	return chat;
+
+found:
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook),
+			chat->page_index);
 
 	return chat;
 }

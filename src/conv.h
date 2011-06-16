@@ -20,6 +20,7 @@ struct _IMChatPanel {
 	GtkWidget *textview;
 	GtkWidget *toolbar;
 	GtkWidget *sendtext;
+	GtkWidget *vbox; /**< The Notebook child widget */
 	guint page_index; /**< The page index in the notebook tabs */
 
 	/* tab label */
