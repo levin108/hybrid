@@ -146,7 +146,7 @@ menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
 static void
 menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMChatPanel *chat = (IMChatPanel*)user_data;
+	//IMChatPanel *chat = (IMChatPanel*)user_data;
 
 }
 
@@ -157,7 +157,6 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 		IMChatPanel *chat = (IMChatPanel*)user_data;
 		IMChatPanel *temp_chat;
 		IMBuddy *temp_buddy;
-		IMBuddy *buddy = chat->buddy;
 		GdkPixbuf *pixbuf;
 		GtkWidget *img;
 		GtkWidget *menu;
@@ -171,16 +170,20 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 
 			temp_chat = (IMChatPanel*)pos->data;	
 			temp_buddy = temp_chat->buddy;
+
 			pixbuf = create_pixbuf_at_size(temp_buddy->icon_data,
 					temp_buddy->icon_data_length, 16, 16);
 			img = gtk_image_new_from_pixbuf(pixbuf);
 			g_object_unref(pixbuf);
 
-			submenu = gtk_image_menu_item_new_with_label(temp_buddy->name);
+			submenu = gtk_image_menu_item_new_with_label(
+					temp_buddy->name && *(temp_buddy->name) != '\0' ?
+					temp_buddy->name : temp_buddy->id);
+
 			g_signal_connect(submenu, "activate",
 					G_CALLBACK(menu_switch_page_cb), temp_chat);
-			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(submenu), img);
 
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(submenu), img);
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 		}
 		/* create move menu */
@@ -265,8 +268,9 @@ create_note_label(IMChatPanel *chat)
 	icon_pixbuf = create_presence_pixbuf(buddy->state, 16);
 
 	gtk_list_store_set(store, &chat->tabiter, 
-			TAB_STATUS_ICON_COLUMN, icon_pixbuf,
-			TAB_NAME_COLUMN, buddy->name, -1);
+			TAB_STATUS_ICON_COLUMN, icon_pixbuf, TAB_NAME_COLUMN,
+			buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
+			-1);
 
 	g_object_unref(icon_pixbuf);
 
@@ -309,6 +313,7 @@ create_buddy_tips_panel(GtkWidget *vbox, IMChatPanel *chat)
 	GtkTreePath *path;
 	IMBuddy *buddy;
 	gchar *name_text;
+	gchar *mood_text;
 	GdkPixbuf *icon_pixbuf;
 
 	g_return_if_fail(vbox != NULL);
@@ -362,9 +367,12 @@ create_buddy_tips_panel(GtkWidget *vbox, IMChatPanel *chat)
 	icon_pixbuf = create_round_pixbuf(buddy->icon_data,
 			buddy->icon_data_length, 32);
 
+	mood_text = g_markup_escape_text(buddy->mood ? buddy->mood : "", -1);
+
 	name_text = g_strdup_printf(
 			"<b>%s</b>\n<small><span font=\"#8f8f8f\">%s</span></small>",
-			buddy->name, buddy->mood);
+			buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
+			mood_text);
 
 	gtk_list_store_set(store, &chat->tipiter, 
 			BUDDY_ICON_COLUMN, icon_pixbuf,
@@ -372,6 +380,7 @@ create_buddy_tips_panel(GtkWidget *vbox, IMChatPanel *chat)
 
 	g_object_unref(icon_pixbuf);
 	g_free(name_text);
+	g_free(mood_text);
 
 	gtk_box_pack_start(GTK_BOX(vbox), cellview, FALSE, FALSE, 5);
 }
