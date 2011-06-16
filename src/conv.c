@@ -5,6 +5,8 @@
 /* The list of the currently opened conversation dialogs. */
 GSList *conv_list = NULL; 
 
+static GtkWidget *create_note_label(IMChatPanel *chat);
+
 /**
  * Callback function to handle the close button click event.
  */
@@ -203,8 +205,43 @@ static void
 menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 {
 	IMChatPanel *chat = (IMChatPanel*)user_data;
+	IMChatPanel *newchat;
+	GtkWidget *vbox;
+	IMBuddy *buddy;
+	gint page_index;
 
+	IMConversation *newconv;
+	IMConversation *parent;
 
+	vbox = chat->vbox;
+	/* 
+	 * First we increase the reference value of vbox,
+	 * prevent it from being destroyed by gtk_notebook_remove_page().
+	 */
+	g_object_ref(vbox);
+
+	close_tab(chat);
+
+	parent = chat->parent;
+	buddy = chat->buddy;
+
+	newconv = im_conv_create();
+	conv_list = g_slist_append(conv_list, newconv);
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(newconv->notebook), FALSE);
+
+	newchat = g_new0(IMChatPanel, 1);
+	newchat->parent = newconv;
+	newchat->buddy = buddy;
+	newchat->vbox = vbox;
+	newconv->chat_buddies = g_slist_append(newconv->chat_buddies, newchat);
+
+	newchat->pagelabel = create_note_label(newchat);
+	page_index = gtk_notebook_append_page(GTK_NOTEBOOK(newconv->notebook), vbox,
+						newchat->pagelabel);
+	gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(newconv->notebook), vbox, TRUE);
+	gtk_notebook_set_tab_detachable(GTK_NOTEBOOK(newconv->notebook), vbox, TRUE);
+	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(newconv->notebook),
+			vbox, TRUE, TRUE, GTK_PACK_START);
 }
 
 static void
@@ -512,45 +549,15 @@ create_buddy_tips_panel(GtkWidget *vbox, IMChatPanel *chat)
 	gtk_box_pack_start(GTK_BOX(vbox), cellview, FALSE, FALSE, 5);
 }
 
-/**
- * Initialize the chat panel.
- */
 static void
-init_chat_panel(IMChatPanel *chat)
+init_chat_panel_body(GtkWidget *vbox, IMChatPanel *chat)
 {
-	GtkWidget *vbox;
 	GtkWidget *scroll;
 	GtkWidget *button;
 	GtkWidget *image_icon;
-	GtkWidget *tablabel;
-	IMConversation *conv;
-	IMBuddy *buddy;
-	gint page_index;
 
+	g_return_if_fail(vbox != NULL);
 	g_return_if_fail(chat != NULL);
-
-	conv = chat->parent;
-	buddy = chat->buddy;
-
-	if (g_slist_length(conv->chat_buddies) == 1) {
-		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), FALSE);
-
-	} else {
-		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), TRUE);
-	}
-
-	vbox = gtk_vbox_new(FALSE, 0);
-	chat->vbox = vbox;
-
-	chat->pagelabel = gtk_label_new(buddy->name);
-	page_index = gtk_notebook_append_page(GTK_NOTEBOOK(conv->notebook), vbox,
-			chat->pagelabel);
-	tablabel = create_note_label(chat);
-	gtk_notebook_set_tab_label(GTK_NOTEBOOK(conv->notebook), vbox, tablabel);
-	gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(conv->notebook), vbox, TRUE);
-	gtk_notebook_set_tab_detachable(GTK_NOTEBOOK(conv->notebook), vbox, TRUE);
-	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(conv->notebook),
-			vbox, TRUE, TRUE, GTK_PACK_START);
 
 	/* create buddy tips panel */
 	create_buddy_tips_panel(vbox, chat);
@@ -602,6 +609,43 @@ init_chat_panel(IMChatPanel *chat)
 	gtk_widget_show_all(scroll);
 
 	gtk_widget_show_all(vbox);
+}
+
+/**
+ * Initialize the chat panel.
+ */
+static void
+init_chat_panel(IMChatPanel *chat)
+{
+	GtkWidget *vbox;
+	IMConversation *conv;
+	IMBuddy *buddy;
+	gint page_index;
+
+	g_return_if_fail(chat != NULL);
+
+	conv = chat->parent;
+	buddy = chat->buddy;
+
+	if (g_slist_length(conv->chat_buddies) == 1) {
+		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), FALSE);
+
+	} else {
+		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), TRUE);
+	}
+
+	vbox = gtk_vbox_new(FALSE, 0);
+	chat->vbox = vbox;
+
+	chat->pagelabel = create_note_label(chat);
+	page_index = gtk_notebook_append_page(GTK_NOTEBOOK(conv->notebook), vbox,
+			chat->pagelabel);
+	gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(conv->notebook), vbox, TRUE);
+	gtk_notebook_set_tab_detachable(GTK_NOTEBOOK(conv->notebook), vbox, TRUE);
+	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(conv->notebook),
+			vbox, TRUE, TRUE, GTK_PACK_START);
+
+	init_chat_panel_body(vbox, chat);
 
 	/*
 	 * The function should stay here. Because of the following reason:
