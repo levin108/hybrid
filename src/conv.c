@@ -49,11 +49,15 @@ switch_page_cb(GtkNotebook *notebook, gpointer newpage, guint newpage_nth,
 	IMBuddy *buddy;
 	GdkPixbuf *pixbuf;
 	IMConversation *conv = (IMConversation*)user_data;	
+	gint page_index;
 
 	for (pos = conv->chat_buddies; pos; pos = pos->next) {
 		chat = (IMChatPanel*)pos->data;
 
-		if (chat->page_index == newpage_nth) {
+		page_index = gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook),
+				chat->vbox);
+
+		if (page_index == newpage_nth) {
 			goto page_found;
 		}
 	}
@@ -138,9 +142,11 @@ static void
 menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
 {
 	IMChatPanel *chat = (IMChatPanel*)user_data;
+	IMConversation *conv = chat->parent;
+	GtkNotebook *notebook = GTK_NOTEBOOK(conv->notebook);
+	gint page_index = gtk_notebook_page_num(notebook, chat->vbox);
 
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(chat->parent->notebook),
-			chat->page_index);
+	gtk_notebook_set_current_page(notebook, page_index);
 }
 
 /**
@@ -150,21 +156,15 @@ static void
 close_tab(IMChatPanel *chat)
 {
 	IMConversation *conv;
-	IMChatPanel *temp_chat;
-	GSList *pos;
+	gint page_index;
 
 	g_return_if_fail(chat != NULL);
 
 	conv = chat->parent;
 
-	gtk_notebook_remove_page(GTK_NOTEBOOK(conv->notebook), chat->page_index);
-
-	/* Realocate page index */
-	for (pos = conv->chat_buddies; pos; pos = pos->next) {
-		temp_chat = (IMChatPanel*)pos->data;
-		temp_chat->page_index = gtk_notebook_page_num(
-				GTK_NOTEBOOK(conv->notebook), temp_chat->vbox);
-	}
+	page_index = gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook),
+			chat->vbox);
+	gtk_notebook_remove_page(GTK_NOTEBOOK(conv->notebook), page_index);
 
 	conv->chat_buddies = g_slist_remove(conv->chat_buddies, chat);
 
@@ -197,6 +197,14 @@ menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 	IMChatPanel *chat = (IMChatPanel*)user_data;
 
 	close_tab(chat);
+}
+
+static void
+menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
+{
+	IMChatPanel *chat = (IMChatPanel*)user_data;
+
+
 }
 
 static void
@@ -279,6 +287,11 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 		g_signal_connect(submenu, "activate",
 				G_CALLBACK(menu_close_current_page_cb), temp_chat);
+
+		submenu = gtk_menu_item_new_with_label(_("Popup Current Page"));
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+		g_signal_connect(submenu, "activate",
+				G_CALLBACK(menu_popup_current_page_cb), temp_chat);
 
 		submenu = gtk_menu_item_new_with_label(_("Close Other Pages"));
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
@@ -512,6 +525,7 @@ init_chat_panel(IMChatPanel *chat)
 	GtkWidget *tablabel;
 	IMConversation *conv;
 	IMBuddy *buddy;
+	gint page_index;
 
 	g_return_if_fail(chat != NULL);
 
@@ -529,7 +543,7 @@ init_chat_panel(IMChatPanel *chat)
 	chat->vbox = vbox;
 
 	chat->pagelabel = gtk_label_new(buddy->name);
-	chat->page_index = gtk_notebook_append_page(GTK_NOTEBOOK(conv->notebook), vbox,
+	page_index = gtk_notebook_append_page(GTK_NOTEBOOK(conv->notebook), vbox,
 			chat->pagelabel);
 	tablabel = create_note_label(chat);
 	gtk_notebook_set_tab_label(GTK_NOTEBOOK(conv->notebook), vbox, tablabel);
@@ -589,13 +603,14 @@ init_chat_panel(IMChatPanel *chat)
 
 	gtk_widget_show_all(vbox);
 
-	/* The function should stay here. Because of the following reason:
+	/*
+	 * The function should stay here. Because of the following reason:
 	 *
 	 * Note that due to historical reasons, GtkNotebook refuses to
 	 * switch to a page unless the child widget is visible.
 	 *                                ---- GtkNotebook
-	 * */
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook), chat->page_index);
+	 */
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook), page_index);
 }
 
 IMChatPanel*
@@ -637,7 +652,7 @@ im_chat_panel_create(IMBuddy *buddy)
 
 found:
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook),
-			chat->page_index);
+		gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook), chat->vbox));
 
 	return chat;
 }
