@@ -143,11 +143,51 @@ menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
 			chat->page_index);
 }
 
+/**
+ * Close a single tab.
+ */
+static void 
+close_tab(IMChatPanel *chat)
+{
+	IMConversation *conv;
+
+	g_return_if_fail(chat != NULL);
+
+	conv = chat->parent;
+
+	gtk_notebook_remove_page(GTK_NOTEBOOK(conv->notebook), chat->page_index);
+
+	conv->chat_buddies = g_slist_remove(conv->chat_buddies, chat);
+
+	if (g_slist_length(conv->chat_buddies) == 1) {
+		 /*
+		 * We don't want to show the tabs any more 
+		 * when we have only one tab left.  	
+		 */
+		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), FALSE);
+	}
+
+	g_free(chat);
+
+	if (conv->chat_buddies == NULL) { 
+
+		/*
+		* Now we need to destroy the conversation window.
+		* NOTE: We don't have to free the resource here,
+		*       it will be done in the callback function
+		*       of the window-destroy event.
+		*/
+		gtk_widget_destroy(conv->window);
+	}
+
+}
+
 static void
 menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	//IMChatPanel *chat = (IMChatPanel*)user_data;
+	IMChatPanel *chat = (IMChatPanel*)user_data;
 
+	close_tab(chat);
 }
 
 static gboolean
@@ -161,6 +201,7 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 		GtkWidget *img;
 		GtkWidget *menu;
 		GtkWidget *submenu;
+		GtkWidget *seperator;
 		GSList *pos;
 
 		menu = gtk_menu_new();
@@ -186,8 +227,14 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(submenu), img);
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 		}
+
+		/* create seperator */
+		seperator = gtk_separator_menu_item_new();
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu) , seperator);
+
 		/* create move menu */
 		submenu = gtk_menu_item_new_with_label(_("Close Current Page"));
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 		g_signal_connect(submenu, "activate",
 				G_CALLBACK(menu_close_current_page_cb), temp_chat);
 
@@ -203,6 +250,17 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 	return FALSE;
 }
 
+static gboolean
+tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
+{
+	IMChatPanel *chat = (IMChatPanel*)user_data;
+
+	if (e->button == 1) {
+		close_tab(chat);
+	}
+
+	return TRUE;
+}
 
 /**
  * Create the tab label widget for the GtkNotebook.
@@ -285,6 +343,8 @@ create_note_label(IMChatPanel *chat)
 	/* close button */
 	eventbox = gtk_event_box_new();
 	close_image = gtk_image_new_from_file(DATA_DIR"/close.png");
+	g_signal_connect(G_OBJECT(eventbox), "button-press-event",
+			G_CALLBACK(tab_close_press_cb), chat);
 	gtk_container_add(GTK_CONTAINER(eventbox), close_image);
 
 	gtk_box_pack_start(GTK_BOX(hbox), eventbox, FALSE, FALSE, 0);
