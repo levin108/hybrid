@@ -1,12 +1,12 @@
-#ifndef IM_EVENTLOOP_H
-#define IM_EVENTLOOP_H
+#ifndef Hybird_EVENTLOOP_H
+#define Hybird_EVENTLOOP_H
 
 #include <glib.h>
 
 #include "connect.h"
 
-#define IM_EVENT_READ  (G_IO_IN | G_IO_HUP | G_IO_ERR)
-#define IM_EVENT_WRITE (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
+#define Hybird_EVENT_READ  (G_IO_IN | G_IO_HUP | G_IO_ERR)
+#define Hybird_EVENT_WRITE (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
 
 typedef gboolean (*input_func)(gint sk, gpointer user_data);
 
@@ -23,7 +23,7 @@ extern "C" {
  *
  * @return The event source id.
  */
-guint im_event_add(gint sk, gint event_type, input_func func,
+guint hybird_event_add(gint sk, gint event_type, input_func func,
 		gpointer user_data);
 
 /**
@@ -35,11 +35,11 @@ guint im_event_add(gint sk, gint event_type, input_func func,
  *
  * @return The event source id.
  */
-guint im_ssl_event_add(IMSslConnection *isc, ssl_callback func,
+guint hybird_ssl_event_add(HybirdSslConnection *isc, ssl_callback func,
 		gpointer user_data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IM_EVENTLOOP_H */
+#endif /* Hybird_EVENTLOOP_H */

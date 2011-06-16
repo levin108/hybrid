@@ -1,5 +1,5 @@
-#ifndef IM_FX_GROUP_H
-#define IM_FX_GROUP_H
+#ifndef Hybird_FX_GROUP_H
+#define Hybird_FX_GROUP_H
 #include <glib.h>
 #include "fx_account.h"
 

@@ -12,19 +12,19 @@ main(gint argc, gchar **argv)
 	gtk_widget_set_usize(window, 250, 500);
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
-	im_module_init();
+	hybird_module_init();
 
-	IMBlist *blist = im_blist_create();
-	IMGroup *group;
-	IMContact *contact;
+	HybirdBlist *blist = hybird_blist_create();
+	HybirdGroup *group;
+	HybirdContact *contact;
 
-	im_blist_init(blist);
+	hybird_blist_init(blist);
 	
-	group = im_blist_add_group(blist, "ocean university");
-	contact = im_blist_add_contact(blist, group, "125559923", "levin108");
-	contact = im_blist_add_contact(blist, group, "125559923", "soulpower");
-	contact = im_blist_add_contact(blist, group, "125559923", "ricky");
-	group = im_blist_add_group(blist, "beijing university");
+	group = hybird_blist_add_group(blist, "ocean university");
+	contact = hybird_blist_add_contact(blist, group, "125559923", "levin108");
+	contact = hybird_blist_add_contact(blist, group, "125559923", "soulpower");
+	contact = hybird_blist_add_contact(blist, group, "125559923", "ricky");
+	group = hybird_blist_add_group(blist, "beijing university");
 
 	gtk_container_add(GTK_CONTAINER(window), blist->treeview);
 

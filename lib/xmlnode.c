@@ -13,7 +13,7 @@ xmlnode_root(const gchar *xml_buf, gint size)
 	doc = xmlParseMemory(xml_buf, size);
 	
 	if (!doc) {
-		im_debug_error("xml", "parse xml");
+		hybird_debug_error("xml", "parse xml");
 		return NULL;
 	}
 

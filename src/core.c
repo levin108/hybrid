@@ -4,15 +4,15 @@
 #include "blist.h"
 #include "util.h"
 
-extern IMBlist *blist;
+extern HybirdBlist *blist;
 
 void
-im_start_login()
+hybird_start_login()
 {
-	IMModule *module;
+	HybirdModule *module;
 
-	module = im_module_find("fetion");
-	IMAccount *ac = im_account_create(module);
+	module = hybird_module_find("fetion");
+	HybirdAccount *ac = hybird_account_create(module);
 
 	module->info->login(ac);
 
@@ -85,7 +85,7 @@ ui_init(void)
 								 GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
 
-	im_blist_init();
+	hybird_blist_init();
 
 	gtk_container_add(GTK_CONTAINER(scroll), blist->treeview);
 
@@ -99,9 +99,9 @@ main(gint argc, gchar **argv)
 	
 	ui_init();
 
-	im_module_init();
+	hybird_module_init();
 
-	im_start_login();
+	hybird_start_login();
 
 	gtk_main();
 

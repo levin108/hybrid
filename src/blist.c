@@ -10,18 +10,18 @@
 GSList *group_list = NULL;
 GSList *buddy_list = NULL;
 
-IMBlist *blist = NULL;
+HybirdBlist *blist = NULL;
 
 
-IMBlist*
-im_blist_create()
+HybirdBlist*
+hybird_blist_create()
 {
-	IMBlist *imb = g_new0(IMBlist, 1);
+	HybirdBlist *imb = g_new0(HybirdBlist, 1);
 	return imb;
 }
 
 static void
-render_column(IMBlist *blist)
+render_column(HybirdBlist *blist)
 {
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
@@ -43,22 +43,22 @@ render_column(IMBlist *blist)
 	g_object_set(renderer, "expander-visible", TRUE, NULL);
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-					    "visible", IM_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
+					    "visible", Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* contact expander */
 	renderer = pidgin_cell_renderer_expander_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-					    "visible", IM_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
+					    "visible", Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* portrait */
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", IM_BLIST_BUDDY_ICON,
-						"visible", IM_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
+						"pixbuf", Hybird_BLIST_BUDDY_ICON,
+						"visible", Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
 						NULL);
 	g_object_set(renderer, "xalign", 1.0, "xpad", 3, "ypad", 0, NULL);
 
@@ -66,7 +66,7 @@ render_column(IMBlist *blist)
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, TRUE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"markup", IM_BLIST_BUDDY_NAME,
+						"markup", Hybird_BLIST_BUDDY_NAME,
 						NULL);
 	g_object_set(renderer, "xalign", 0.0, "xpad", 3, "ypad", 0, NULL);
 	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -75,8 +75,8 @@ render_column(IMBlist *blist)
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", IM_BLIST_PROTO_ICON,
-						"visible", IM_BLIST_PROTO_ICON_COLUMN_VISIBLE,
+						"pixbuf", Hybird_BLIST_PROTO_ICON,
+						"visible", Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE,
 						NULL);
 	g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 
@@ -85,8 +85,8 @@ render_column(IMBlist *blist)
 	g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", IM_BLIST_STATUS_ICON,
-						"visible", IM_BLIST_STATUS_ICON_COLUMN_VISIBLE,
+						"pixbuf", Hybird_BLIST_STATUS_ICON,
+						"visible", Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE,
 						NULL);
 
 }
@@ -105,31 +105,31 @@ row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gchar *id;
-	IMBuddy *buddy;
+	HybirdBuddy *buddy;
 
 	model = gtk_tree_view_get_model(treeview);
 	gtk_tree_model_get_iter(model, &iter, path);
 
 	gtk_tree_model_get(model, &iter,
-			IM_BLIST_BUDDY_ID, &id, -1);
+			Hybird_BLIST_BUDDY_ID, &id, -1);
 
-	if (!(buddy = im_blist_find_buddy(id))) {
-		im_debug_error("blist", "FATAL ERROR, find buddy \'%s\'", id);
+	if (!(buddy = hybird_blist_find_buddy(id))) {
+		hybird_debug_error("blist", "FATAL ERROR, find buddy \'%s\'", id);
 		g_free(id);
 		return;
 	}
 
-	IMChatPanel *chat = im_chat_panel_create(buddy);
+	HybirdChatPanel *chat = hybird_chat_panel_create(buddy);
 
 	g_free(id);
 }
 
 void 
-im_blist_init()
+hybird_blist_init()
 {
-	blist = im_blist_create();
+	blist = hybird_blist_create();
 
-	blist->treemodel = gtk_tree_store_new(IM_BLIST_COLUMNS,
+	blist->treemodel = gtk_tree_store_new(Hybird_BLIST_COLUMNS,
 			G_TYPE_STRING,
 			GDK_TYPE_PIXBUF,
 			G_TYPE_STRING,
@@ -150,7 +150,7 @@ im_blist_init()
 
 	gtk_tree_sortable_set_sort_column_id(
 			GTK_TREE_SORTABLE(blist->treemodel),
-			IM_BLIST_BUDDY_STATE, GTK_SORT_DESCENDING);
+			Hybird_BLIST_BUDDY_STATE, GTK_SORT_DESCENDING);
 
 	g_signal_connect(blist->treeview, "button-press-event",
 			G_CALLBACK(button_press_cb), NULL);
@@ -160,13 +160,13 @@ im_blist_init()
 
 }
 
-IMGroup*
-im_blist_add_group(IMAccount *ac, const gchar *id, const gchar *name)
+HybirdGroup*
+hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
 {
 	g_return_val_if_fail(name != NULL && blist != NULL, NULL);
 
 	gchar *temp;
-	IMGroup *group = g_new0(IMGroup, 1);
+	HybirdGroup *group = g_new0(HybirdGroup, 1);
 	GdkPixbuf *proto_icon = gdk_pixbuf_new_from_file_at_size(
 			DATA_DIR"/msn.png", 16, 16, NULL);
 
@@ -175,13 +175,13 @@ im_blist_add_group(IMAccount *ac, const gchar *id, const gchar *name)
 	temp = g_strdup_printf("<b>%s</b>", name);
 
 	gtk_tree_store_set(blist->treemodel, &group->iter,
-			IM_BLIST_BUDDY_NAME, temp,
-			IM_BLIST_PROTO_ICON, proto_icon,
-			IM_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, TRUE,
-			IM_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-			IM_BLIST_STATUS_ICON_COLUMN_VISIBLE, FALSE,
-			IM_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-			IM_BLIST_BUDDY_ICON_COLUMN_VISIBLE, FALSE,
+			Hybird_BLIST_BUDDY_NAME, temp,
+			Hybird_BLIST_PROTO_ICON, proto_icon,
+			Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, TRUE,
+			Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+			Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE, FALSE,
+			Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+			Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE, FALSE,
 			-1);
 
 	g_free(temp);
@@ -197,8 +197,8 @@ im_blist_add_group(IMAccount *ac, const gchar *id, const gchar *name)
 	return group;
 }
 
-IMBuddy*
-im_blist_add_buddy(IMAccount *ac, IMGroup *parent, const gchar *id,
+HybirdBuddy*
+hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 		const gchar *name)
 {
 	GdkPixbuf *status_icon;
@@ -213,21 +213,21 @@ im_blist_add_buddy(IMAccount *ac, IMGroup *parent, const gchar *id,
 	status_icon = gdk_pixbuf_new_from_file(DATA_DIR"/available.png", NULL);
 	proto_icon = gdk_pixbuf_new_from_file(DATA_DIR"/msn.png", NULL);
 
-	IMBuddy *buddy = g_new0(IMBuddy, 1);
+	HybirdBuddy *buddy = g_new0(HybirdBuddy, 1);
 	
 	gtk_tree_store_append(blist->treemodel, &buddy->iter, &parent->iter);
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			IM_BLIST_BUDDY_ID, id,
-			IM_BLIST_STATUS_ICON, status_icon,
-			IM_BLIST_PROTO_ICON, proto_icon,
-			IM_BLIST_BUDDY_NAME, name,
-			IM_BLIST_BUDDY_STATE, IM_STATE_OFFLINE,
-			IM_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
-			IM_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-			IM_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
-			IM_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-			IM_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
+			Hybird_BLIST_BUDDY_ID, id,
+			Hybird_BLIST_STATUS_ICON, status_icon,
+			Hybird_BLIST_PROTO_ICON, proto_icon,
+			Hybird_BLIST_BUDDY_NAME, name,
+			Hybird_BLIST_BUDDY_STATE, Hybird_STATE_OFFLINE,
+			Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
+			Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+			Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
+			Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+			Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
 			-1);
 
 	buddy->id = g_strdup(id);
@@ -238,7 +238,7 @@ im_blist_add_buddy(IMAccount *ac, IMGroup *parent, const gchar *id,
 
 	g_file_get_contents(DATA_DIR"/icon.png", (gchar**)&status_icon_data,
 			&status_icon_data_length, NULL);
-	im_blist_set_buddy_icon(buddy, status_icon_data, status_icon_data_length);
+	hybird_blist_set_buddy_icon(buddy, status_icon_data, status_icon_data_length);
 
 	g_free(status_icon_data);
 
@@ -252,7 +252,7 @@ im_blist_add_buddy(IMAccount *ac, IMGroup *parent, const gchar *id,
  * Set the name field.
  */
 static void
-im_blist_set_name_field(IMBuddy *buddy)
+hybird_blist_set_name_field(HybirdBuddy *buddy)
 {
 	gchar *text;
 	gchar *mood;
@@ -286,7 +286,7 @@ im_blist_set_name_field(IMBuddy *buddy)
 	text = g_strdup_printf("%s%s", tmp, mood);
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			IM_BLIST_BUDDY_NAME, text, -1);
+			Hybird_BLIST_BUDDY_NAME, text, -1);
 
 	g_free(mood);
 	g_free(text);
@@ -296,7 +296,7 @@ im_blist_set_name_field(IMBuddy *buddy)
  * Set the buddy state.
  */
 static void
-im_blist_set_state_field(IMBuddy *buddy)
+hybird_blist_set_state_field(HybirdBuddy *buddy)
 {
 	GdkPixbuf *pixbuf;
 	GdkPixbufLoader *loader;
@@ -307,8 +307,8 @@ im_blist_set_state_field(IMBuddy *buddy)
 	pixbuf = create_presence_pixbuf(buddy->state, 16);
 	
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			IM_BLIST_BUDDY_STATE, buddy->state,
-			IM_BLIST_STATUS_ICON, pixbuf, -1);
+			Hybird_BLIST_BUDDY_STATE, buddy->state,
+			Hybird_BLIST_STATUS_ICON, pixbuf, -1);
 
 	g_object_unref(pixbuf);
 	pixbuf = NULL;
@@ -324,7 +324,7 @@ im_blist_set_state_field(IMBuddy *buddy)
 					(gchar**)&buddy->icon_data,
 					&buddy->icon_data_length, &err)) {
 
-			im_debug_error("blist", "load the default icon:%s", err->message);
+			hybird_debug_error("blist", "load the default icon:%s", err->message);
 			g_error_free(err);
 			return;
 		}
@@ -339,36 +339,36 @@ im_blist_set_state_field(IMBuddy *buddy)
 	}
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			IM_BLIST_BUDDY_ICON, pixbuf, -1);
+			Hybird_BLIST_BUDDY_ICON, pixbuf, -1);
 
 	g_object_unref(pixbuf);
 
 }
 
 void
-im_blist_set_buddy_name(IMBuddy *buddy, const gchar *name)
+hybird_blist_set_buddy_name(HybirdBuddy *buddy, const gchar *name)
 {
 	g_return_if_fail(buddy != NULL);
 
 	g_free(buddy->name);
 	buddy->name = g_strdup(name);
 
-	im_blist_set_name_field(buddy);
+	hybird_blist_set_name_field(buddy);
 }
 
 void
-im_blist_set_buddy_mood(IMBuddy *buddy, const gchar *mood)
+hybird_blist_set_buddy_mood(HybirdBuddy *buddy, const gchar *mood)
 {
 	g_return_if_fail(buddy != NULL);
 
 	g_free(buddy->mood);
 	buddy->mood = g_strdup(mood);
 
-	im_blist_set_name_field(buddy);
+	hybird_blist_set_name_field(buddy);
 }
 
 void
-im_blist_set_buddy_icon(IMBuddy *buddy, const guchar *icon_data, gsize len)
+hybird_blist_set_buddy_icon(HybirdBuddy *buddy, const guchar *icon_data, gsize len)
 {
 	g_return_if_fail(buddy != NULL);
 
@@ -380,29 +380,29 @@ im_blist_set_buddy_icon(IMBuddy *buddy, const guchar *icon_data, gsize len)
 		buddy->icon_data_length = len;
 	}
 
-	im_blist_set_state_field(buddy);
+	hybird_blist_set_state_field(buddy);
 }
 
 void
-im_blist_set_buddy_state(IMBuddy *buddy, gint state)
+hybird_blist_set_buddy_state(HybirdBuddy *buddy, gint state)
 {
 	g_return_if_fail(buddy != NULL);
 
 	buddy->state = state;
 
-	im_blist_set_state_field(buddy);
+	hybird_blist_set_state_field(buddy);
 }
 
-IMGroup*
-im_blist_find_group_by_id(const gchar *id)
+HybirdGroup*
+hybird_blist_find_group_by_id(const gchar *id)
 {
 	GSList *pos;
-	IMGroup *group;
+	HybirdGroup *group;
 
 	g_return_val_if_fail(id != NULL, NULL);
 
 	for (pos = group_list; pos; pos = pos->next) {
-		group = (IMGroup*)pos->data;
+		group = (HybirdGroup*)pos->data;
 
 		if (g_strcmp0(group->id, id) == 0) {
 			return group;
@@ -412,16 +412,16 @@ im_blist_find_group_by_id(const gchar *id)
 	return NULL;
 }
 
-IMGroup*
-im_blist_find_group_by_name(const gchar *name)
+HybirdGroup*
+hybird_blist_find_group_by_name(const gchar *name)
 {
 	GSList *pos;
-	IMGroup *group;
+	HybirdGroup *group;
 
 	g_return_val_if_fail(name != NULL, NULL);
 
 	for (pos = group_list; pos; pos = pos->next) {
-		group = (IMGroup*)pos->data;
+		group = (HybirdGroup*)pos->data;
 
 		if (g_strcmp0(group->name, name) == 0) {
 			return group;
@@ -431,16 +431,16 @@ im_blist_find_group_by_name(const gchar *name)
 	return NULL;
 }
 
-IMBuddy*
-im_blist_find_buddy(const gchar *id)
+HybirdBuddy*
+hybird_blist_find_buddy(const gchar *id)
 {
 	GSList *pos;
-	IMBuddy *buddy;
+	HybirdBuddy *buddy;
 
 	g_return_val_if_fail(id != NULL, NULL);
 
 	for (pos = buddy_list; pos; pos = pos->next) {
-		buddy = (IMBuddy*)pos->data;
+		buddy = (HybirdBuddy*)pos->data;
 
 		if (g_strcmp0(buddy->id, id) == 0) {
 			return buddy;

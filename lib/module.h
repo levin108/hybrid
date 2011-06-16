@@ -1,15 +1,15 @@
-#ifndef IM_MODULE_H
-#define IM_MODULE_H
+#ifndef Hybird_MODULE_H
+#define Hybird_MODULE_H
 
 #include <glib.h>
 #include <gmodule.h>
 
-typedef struct _IMModule IMModule;
-typedef struct _IMModuleInfo IMModuleInfo;
+typedef struct _HybirdModule HybirdModule;
+typedef struct _HybirdModuleInfo HybirdModuleInfo;
 
 #include "account.h"
 
-struct _IMModuleInfo {
+struct _HybirdModuleInfo {
 	gchar *name;
 	gchar *author;
 	gchar *summary;
@@ -18,27 +18,27 @@ struct _IMModuleInfo {
 	gchar *major_version;
 	gchar *minor_version;
 
-	gboolean (*login)(IMAccount *ac);
+	gboolean (*login)(HybirdAccount *ac);
 };
 
-struct _IMModule {
+struct _HybirdModule {
 	/* full path of the library file */
 	gchar *path;
 	gboolean loaded;
 	/* plugin info */
-	IMModuleInfo *info;
+	HybirdModuleInfo *info;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define IM_MODULE_INIT(func, moduleinfo) \
-	G_MODULE_EXPORT gboolean proto_module_init(IMModule *module); \
-	G_MODULE_EXPORT gboolean proto_module_init(IMModule *module) { \
+#define Hybird_MODULE_INIT(func, moduleinfo) \
+	G_MODULE_EXPORT gboolean proto_module_init(HybirdModule *module); \
+	G_MODULE_EXPORT gboolean proto_module_init(HybirdModule *module) { \
 		module->info = (moduleinfo); \
 		func(module); \
-		im_module_register(module); \
+		hybird_module_register(module); \
 		return TRUE; \
 	}
 
@@ -47,54 +47,54 @@ extern "C" {
  * Initialize the module function, load all the 
  * protocol modules in MODULE_DIR directory.
  *
- * @return IM_OK if success, orelse IM_ERROR.
+ * @return Hybird_OK if success, orelse Hybird_ERROR.
  */
-gint im_module_init();
+gint hybird_module_init();
 
 /**
  * Create a new protocol plugin.
  *
  * @param path Full path to the module library file *.so,*.dll.
  *
- * @return IM Module created, need to be destroyed after use.
+ * @return Hybird Module created, need to be destroyed after use.
  */
-IMModule *im_module_create(const gchar *path);
+HybirdModule *hybird_module_create(const gchar *path);
 
 /**
  * Destroy a module, free the memory allocated.
  * 
  * @param module Module to destroy.
  */
-void im_module_destroy(IMModule *module);
+void hybird_module_destroy(HybirdModule *module);
 
 /**
  * Load the module from the module file, run the exported sympol 
- * function im_plugin_init() inside the module.
+ * function hybird_plugin_init() inside the module.
  *
  * @param module Module to load.
  *
- * @return IM_OK if success, orelse IM_ERROR.
+ * @return Hybird_OK if success, orelse Hybird_ERROR.
  */
-gint im_module_load(IMModule *module);
+gint hybird_module_load(HybirdModule *module);
 
 /**
  * Register the plugin to the plugin chain.
  *
  * @param module Module to register.
  */
-void im_module_register(IMModule *module);
+void hybird_module_register(HybirdModule *module);
 
 /**
  * Find a protocol module by name.
  *
  * @param name Name of the module.
  *
- * @return IM Module if found, orelse NULL.
+ * @return Hybird Module if found, orelse NULL.
  */
-IMModule *im_module_find(const gchar *name);
+HybirdModule *hybird_module_find(const gchar *name);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IM_MODULE_H */
+#endif /* Hybird_MODULE_H */

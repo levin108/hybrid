@@ -3,7 +3,7 @@
 #include "fx_account.h"
 
 fetion_account*
-fetion_account_create(IMAccount *account, const gchar *no, const gchar *password)
+fetion_account_create(HybirdAccount *account, const gchar *no, const gchar *password)
 {
 	fetion_account *ac;
 

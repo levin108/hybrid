@@ -1,5 +1,5 @@
-#ifndef IM_FX_LOGIN_H
-#define IM_FX_LOGIN_H
+#ifndef Hybird_FX_LOGIN_H
+#define Hybird_FX_LOGIN_H
 
 #include "connect.h"
 
@@ -7,10 +7,10 @@
 extern "C" {
 #endif
 
-gboolean ssi_auth_action(IMSslConnection *isc, gpointer user_data);
+gboolean ssi_auth_action(HybirdSslConnection *isc, gpointer user_data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IM_FX_LOGIN_H */
+#endif /* Hybird_FX_LOGIN_H */

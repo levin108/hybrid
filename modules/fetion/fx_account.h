@@ -1,5 +1,5 @@
-#ifndef IM_FX_ACCOUNT_H
-#define IM_FX_ACCOUNT_H
+#ifndef Hybird_FX_ACCOUNT_H
+#define Hybird_FX_ACCOUNT_H
 #include <glib.h>
 #include "account.h"
 
@@ -19,7 +19,7 @@ struct _Verification {
 
 
 struct _fetion_account {
-	IMAccount *account;
+	HybirdAccount *account;
 
 	/* buffer for received data */
 	gchar *buffer;
@@ -100,13 +100,13 @@ extern "C" {
 /**
  * Create a fetion account structure, using the specified number and password.
  *
- * @param account The IMAccount struct.
+ * @param account The HybirdAccount struct.
  * @param no Mobile number or fetion number.
  * @param password The password of this account.
  *
  * @return NULL if there was an error. fetion_account if success.
  */
-fetion_account *fetion_account_create(IMAccount *account, const gchar *no,
+fetion_account *fetion_account_create(HybirdAccount *account, const gchar *no,
 		const gchar *password);
 
 /**
@@ -130,4 +130,4 @@ void fetion_account_destroy(fetion_account *ac);
 }
 #endif
 
-#endif /* IM_FX_ACCOUNT_H */
+#endif /* Hybird_FX_ACCOUNT_H */

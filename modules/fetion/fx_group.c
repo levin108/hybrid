@@ -36,6 +36,6 @@ fetion_groups_init(fetion_account *ac)
 	for (pos = ac->groups; pos; pos = pos->next) {
 		group = (fetion_group*)pos->data;
 		g_snprintf(buf, sizeof(buf) - 1, "%d", group->group_id);
-		im_blist_add_group(ac->account, buf, group->group_name);
+		hybird_blist_add_group(ac->account, buf, group->group_name);
 	}
 }

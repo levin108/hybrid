@@ -1,27 +1,27 @@
-#ifndef IM_CONNECT_H
-#define IM_CONNECT_H
+#ifndef Hybird_CONNECT_H
+#define Hybird_CONNECT_H
 
 #include <glib.h>
 #include <openssl/ssl.h>
 
-typedef struct _IMConnection IMConnection;
-typedef struct _IMSslConnection IMSslConnection;
+typedef struct _HybirdConnection HybirdConnection;
+typedef struct _HybirdSslConnection HybirdSslConnection;
 
 
 typedef gboolean (*connect_callback)(gint sk, gpointer user_data);
-typedef gboolean (*ssl_callback)(IMSslConnection *ssl_conn, gpointer user_data);
+typedef gboolean (*ssl_callback)(HybirdSslConnection *ssl_conn, gpointer user_data);
 
 #include "eventloop.h"
 
-struct _IMConnection {
+struct _HybirdConnection {
 	gint sk;
 	gchar *host;
 	gint port;
 };
 
-struct _IMSslConnection {
+struct _HybirdSslConnection {
 	gint sk;
-	IMConnection *conn;
+	HybirdConnection *conn;
 
 	ssl_callback conn_cb;
 	gpointer conn_data;
@@ -46,11 +46,11 @@ extern "C" {
  *        is established.
  * @param user_data User-specified data.
  *
- * @return IMConncetion if success, which can be used to cancel
+ * @return HybirdConncetion if success, which can be used to cancel
  *         the pending connection, destroy it if don't use or after use.
  *         NULL if there was an error.
  */
-IMConnection* im_proxy_connect(const gchar *hostname, gint port,
+HybirdConnection* hybird_proxy_connect(const gchar *hostname, gint port,
 		connect_callback func, gpointer user_data);
 
 /**
@@ -62,11 +62,11 @@ IMConnection* im_proxy_connect(const gchar *hostname, gint port,
  *        is established.
  * @param user_data User-specified data.
  *
- * @return IMSslConncetion if success, which can be used to cancel
+ * @return HybirdSslConncetion if success, which can be used to cancel
  *         the pending connection, destroy it if don't use or after use.
  *         NULL if there was an error.
  */
-IMSslConnection* im_ssl_connect(const gchar *hostname, gint port,
+HybirdSslConnection* hybird_ssl_connect(const gchar *hostname, gint port,
 		ssl_callback func, gpointer user_data);
 
 /**
@@ -78,7 +78,7 @@ IMSslConnection* im_ssl_connect(const gchar *hostname, gint port,
  *
  * @return The number of bytes written to the connection.
  */
-gint im_ssl_write(IMSslConnection *ssl, const gchar *buf, gint len);
+gint hybird_ssl_write(HybirdSslConnection *ssl, const gchar *buf, gint len);
 
 /**
  * Read data from a SSL connection.
@@ -89,21 +89,21 @@ gint im_ssl_write(IMSslConnection *ssl, const gchar *buf, gint len);
  *
  * @retutn The number of bytes read from the connection.
  */
-gint im_ssl_read(IMSslConnection *ssl, gchar *buf, gint len);
+gint hybird_ssl_read(HybirdSslConnection *ssl, gchar *buf, gint len);
 
 /**
  * Destroy a connection, free the memory and close the socket.
  *
  * @param conn Connection to destroy.
  */
-void im_connection_destroy(IMConnection *conn);
+void hybird_connection_destroy(HybirdConnection *conn);
 
 /**
  * Destroy a SSL connection, free the memory and close the socket.
  *
  * @param conn Connection to destroy.
  */
-void im_ssl_connection_destory(IMSslConnection *conn);
+void hybird_ssl_connection_destory(HybirdSslConnection *conn);
 
 
 /**
@@ -113,7 +113,7 @@ void im_ssl_connection_destory(IMSslConnection *conn);
  * 
  * @return The code.
  */
-gint im_get_http_code(const gchar *http_response);
+gint hybird_get_http_code(const gchar *http_response);
 
 /**
  * Parse the body length of the http response string.
@@ -122,11 +122,11 @@ gint im_get_http_code(const gchar *http_response);
  * 
  * @return The length.
  */
-gint im_get_http_length(const gchar *http_response);
+gint hybird_get_http_length(const gchar *http_response);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IM_CONNECT_H */
+#endif /* Hybird_CONNECT_H */

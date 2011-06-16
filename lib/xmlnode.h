@@ -1,5 +1,5 @@
-#ifndef IM_XMLPARSER_H
-#define IM_XMLPARSER_H
+#ifndef Hybird_XMLPARSER_H
+#define Hybird_XMLPARSER_H
 #include <glib.h>
 #include <libxml/parser.h>
 

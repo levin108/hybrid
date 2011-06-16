@@ -5,12 +5,12 @@
 /* module chain stores the modules registered */
 GSList *modules = NULL;
 
-typedef gboolean (*ModuleInitFunc)(IMModule *module);
+typedef gboolean (*ModuleInitFunc)(HybirdModule *module);
 
-IMModule*
-im_module_create(const gchar *path)
+HybirdModule*
+hybird_module_create(const gchar *path)
 {
-	IMModule *module = g_new0(IMModule, 1);
+	HybirdModule *module = g_new0(HybirdModule, 1);
 
 	module->path = g_strdup(path);
 
@@ -18,7 +18,7 @@ im_module_create(const gchar *path)
 }
 
 void 
-im_module_destroy(IMModule *module)
+hybird_module_destroy(HybirdModule *module)
 {
 	if (module) {
 		g_free(module->path);
@@ -28,36 +28,36 @@ im_module_destroy(IMModule *module)
 }
 
 gint 
-im_module_load(IMModule *module)
+hybird_module_load(HybirdModule *module)
 {
 	GModule *gm;
-	ModuleInitFunc im_module_init;
+	ModuleInitFunc hybird_module_init;
 
-	g_return_val_if_fail(module != NULL, IM_ERROR);
+	g_return_val_if_fail(module != NULL, Hybird_ERROR);
 
 	if (!(gm = g_module_open(module->path, G_MODULE_BIND_LOCAL))) {
 
-		im_debug_error("module", g_module_error());
+		hybird_debug_error("module", g_module_error());
 
-		return IM_ERROR;
+		return Hybird_ERROR;
 	}
 
 	if (!g_module_symbol(gm, "proto_module_init", 
-				(gpointer*)&im_module_init))	{
+				(gpointer*)&hybird_module_init))	{
 
-		im_debug_error("module", g_module_error());
+		hybird_debug_error("module", g_module_error());
 
-		return IM_ERROR;
+		return Hybird_ERROR;
 
 	}
 
-	im_module_init(module);
+	hybird_module_init(module);
 
-	return IM_OK;
+	return Hybird_OK;
 }
 
 void 
-im_module_register(IMModule *module)
+hybird_module_register(HybirdModule *module)
 {
 	GSList *iter;
 
@@ -71,14 +71,14 @@ im_module_register(IMModule *module)
 	modules = g_slist_append(modules, module);
 }
 
-IMModule*
-im_module_find(const gchar *name)
+HybirdModule*
+hybird_module_find(const gchar *name)
 {
 	GSList *iter;
-	IMModule *temp;
+	HybirdModule *temp;
 
 	for (iter = modules; iter; iter = iter->next) {
-		temp = (IMModule*)iter->data;
+		temp = (HybirdModule*)iter->data;
 
 		if (g_strcmp0(temp->info->name, name) == 0) {
 			return temp;
@@ -89,20 +89,20 @@ im_module_find(const gchar *name)
 }
 
 gint 
-im_module_init()
+hybird_module_init()
 {
 	GDir *dir;
 	const gchar *name;
 	gchar *abs_path;
-	IMModule *module;
+	HybirdModule *module;
 
-	im_debug_info("module", "initialize module");
+	hybird_debug_info("module", "initialize module");
 
 	if ((dir = g_dir_open(MODULE_DIR, 0, NULL)) == NULL) {
 
-		im_debug_error("module", "open modules directory: %s", MODULE_DIR);
+		hybird_debug_error("module", "open modules directory: %s", MODULE_DIR);
 
-		return IM_ERROR;
+		return Hybird_ERROR;
 	}
 
 	while ((name = g_dir_read_name(dir))) {
@@ -116,10 +116,10 @@ im_module_init()
 
 		if (g_str_has_suffix(abs_path, G_MODULE_SUFFIX)) {
 			
-			module = im_module_create(abs_path);
+			module = hybird_module_create(abs_path);
 
-			if (im_module_load(module) != IM_OK) {
-				im_module_destroy(module);
+			if (hybird_module_load(module) != Hybird_OK) {
+				hybird_module_destroy(module);
 			}
 
 		}
@@ -129,5 +129,5 @@ im_module_init()
 
 	g_dir_close(dir);
 
-	return IM_OK;
+	return Hybird_OK;
 }

@@ -38,17 +38,17 @@ fetion_buddy_scribe(gint sk, fetion_account *ac)
 
 	g_free(body);
 
-	im_debug_info("fetion", "send:\n%s", res);
+	hybird_debug_info("fetion", "send:\n%s", res);
 
 	if (send(sk, res, strlen(res), 0) == -1) { 
 		g_free(res);
 
-		return IM_ERROR;
+		return Hybird_ERROR;
 	}
 
 	g_free(res);
 
-	return IM_OK;
+	return Hybird_OK;
 }
 
 fetion_buddy*
@@ -103,8 +103,8 @@ fetion_buddies_init(fetion_account *ac)
 	GSList *pos;
 	gchar *start, *stop, *id;
 	fetion_buddy *buddy;
-	IMGroup *imgroup;
-	IMBuddy *imbuddy;
+	HybirdGroup *imgroup;
+	HybirdBuddy *imbuddy;
 
 	for (pos = ac->buddies; pos; pos = pos->next) {
 		buddy = (fetion_buddy*)pos->data;
@@ -116,13 +116,13 @@ fetion_buddies_init(fetion_account *ac)
 			for (; *stop && *stop != ';'; stop ++);
 			id = g_strndup(start, stop - start);
 
-			imgroup = im_blist_find_group_by_id(id);
+			imgroup = hybird_blist_find_group_by_id(id);
 
-			imbuddy = im_blist_add_buddy(ac->account, imgroup,
+			imbuddy = hybird_blist_add_buddy(ac->account, imgroup,
 					buddy->userid, buddy->localname);
 
 			if (*(buddy->localname) == '\0') {
-				im_blist_set_buddy_name(imbuddy, buddy->sid);
+				hybird_blist_set_buddy_name(imbuddy, buddy->sid);
 			}
 
 			g_free(id);
@@ -147,11 +147,11 @@ portrait_recv_cb(gint sk, gpointer user_data)
 	gchar buf[BUF_LENGTH];
 	gint n;
 	gchar *pos;
-	IMBuddy *imbuddy;
+	HybirdBuddy *imbuddy;
 	portrait_trans *trans = (portrait_trans*)user_data;
 
 	if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
-		im_debug_error("fetion", "get portrait for \'%s\':%s",
+		hybird_debug_error("fetion", "get portrait for \'%s\':%s",
 				trans->buddy->sid, strerror(errno));
 		return FALSE;
 	}
@@ -159,11 +159,11 @@ portrait_recv_cb(gint sk, gpointer user_data)
 	buf[n] = '\0';
 
 	if (n == 0) {
-		if (im_get_http_code(trans->data) != 200) {
+		if (hybird_get_http_code(trans->data) != 200) {
 			goto pt_fin;
 		}
 
-		trans->data_len = im_get_http_length(trans->data);
+		trans->data_len = hybird_get_http_length(trans->data);
 
 		if (!(pos = strstr(trans->data, "\r\n\r\n"))) {
 			goto pt_fin;
@@ -171,9 +171,9 @@ portrait_recv_cb(gint sk, gpointer user_data)
 
 		pos += 4;
 
-		imbuddy = im_blist_find_buddy(trans->buddy->userid);
+		imbuddy = hybird_blist_find_buddy(trans->buddy->userid);
 
-		im_blist_set_buddy_icon(imbuddy, (guchar*)pos, trans->data_len);
+		hybird_blist_set_buddy_icon(imbuddy, (guchar*)pos, trans->data_len);
 
 		goto pt_fin;
 
@@ -239,10 +239,10 @@ portrait_conn_cb(gint sk, gpointer user_data)
 	g_free(encoded_ssic);
 	g_free(uri);
 
-	//im_debug_info("fetion", "send:\n%s", http_string);
+	//hybird_debug_info("fetion", "send:\n%s", http_string);
 
 	if (send(sk, http_string, strlen(http_string), 0) == -1) {
-		im_debug_error("fetion", "download portrait for \'%s\':%s",
+		hybird_debug_error("fetion", "download portrait for \'%s\':%s",
 				trans->buddy->sid, strerror(errno));
 		g_free(http_string);
 		return FALSE;
@@ -250,7 +250,7 @@ portrait_conn_cb(gint sk, gpointer user_data)
 
 	g_free(http_string);
 
-	im_event_add(sk, IM_EVENT_READ, portrait_recv_cb, trans);
+	hybird_event_add(sk, Hybird_EVENT_READ, portrait_recv_cb, trans);
 
 	return FALSE;
 }
@@ -267,5 +267,5 @@ fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 	data->buddy = buddy;
 	data->ac = ac;
 
-	im_proxy_connect(ac->portrait_host_name, 80, portrait_conn_cb, data);
+	hybird_proxy_connect(ac->portrait_host_name, 80, portrait_conn_cb, data);
 }

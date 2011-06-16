@@ -1,14 +1,14 @@
 #include <glib.h>
 #include "account.h"
 
-IMAccount*
-im_account_create(IMModule *proto)
+HybirdAccount*
+hybird_account_create(HybirdModule *proto)
 {
 	g_return_val_if_fail(proto != NULL, NULL);
 
-	IMAccount *ac = g_new0(IMAccount, 1);
-	im_account_set_username(ac, "547264589");
-	im_account_set_password(ac, "lwp1279");
+	HybirdAccount *ac = g_new0(HybirdAccount, 1);
+	hybird_account_set_username(ac, "547264589");
+	hybird_account_set_password(ac, "lwp1279");
 	
 	ac->proto = proto;
 
@@ -16,7 +16,7 @@ im_account_create(IMModule *proto)
 }
 
 void
-im_account_destroy(IMAccount *account)
+hybird_account_destroy(HybirdAccount *account)
 {
 	if (account) {
 		g_free(account->username);
@@ -26,7 +26,7 @@ im_account_destroy(IMAccount *account)
 }
 
 void 
-im_account_set_username(IMAccount *account, const gchar *username)
+hybird_account_set_username(HybirdAccount *account, const gchar *username)
 {
 	g_return_if_fail(account != NULL);
 
@@ -36,7 +36,7 @@ im_account_set_username(IMAccount *account, const gchar *username)
 }
 
 void 
-im_account_set_password(IMAccount *account, const gchar *password)
+hybird_account_set_password(HybirdAccount *account, const gchar *password)
 {
 	g_return_if_fail(account != NULL);
 
@@ -46,10 +46,10 @@ im_account_set_password(IMAccount *account, const gchar *password)
 }
 
 void
-im_account_error_reason(IMAccount *account, const gchar *reason)
+hybird_account_error_reason(HybirdAccount *account, const gchar *reason)
 {
 	/* TODO */
 	g_return_if_fail(account != NULL);
 
-	im_account_destroy(account);
+	hybird_account_destroy(account);
 }

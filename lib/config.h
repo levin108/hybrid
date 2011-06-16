@@ -1,15 +1,15 @@
-#ifndef IM_CONFIG_H
-#define IM_CONFIG_H
+#ifndef Hybird_CONFIG_H
+#define Hybird_CONFIG_H
 #include "xmlnode.h"
 
-typedef struct _IMBlistCache IMBlistCache;
-typedef struct _IMConfig IMConfig;
+typedef struct _HybirdBlistCache HybirdBlistCache;
+typedef struct _HybirdConfig HybirdConfig;
 
-struct _IMBlistCache {
+struct _HybirdBlistCache {
 	xmlnode *root;
 };
 
-struct IMConfig {
+struct HybirdConfig {
 	gchar *config_path;
 };
 
@@ -23,10 +23,10 @@ extern "C" {
  *
  * @return The path name, needs to be freed when no longer used.
  */
-gchar *im_config_get_path(void);
+gchar *hybird_config_get_path(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* IM_CONFIG_H */
+#endif /* Hybird_CONFIG_H */

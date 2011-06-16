@@ -5,7 +5,7 @@
 #include "config.h"
 
 gchar*
-im_config_get_path(void)
+hybird_config_get_path(void)
 {
 	gchar *home;
 	gchar *config_path;
@@ -13,7 +13,7 @@ im_config_get_path(void)
 	gint e;
 
 	if (!(home = getenv("HOME"))) {
-		im_debug_error("config", "No environment variable named HOME\n");
+		hybird_debug_error("config", "No environment variable named HOME\n");
 		return NULL;
 	}
 
@@ -22,7 +22,7 @@ im_config_get_path(void)
 	e = mkdir(config_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
 	if (e && access(config_path, R_OK|W_OK)) {
-		im_debug_error("config", "%s,cannot create, read or write",
+		hybird_debug_error("config", "%s,cannot create, read or write",
 				config_path);
 		g_free(config_path);
 
@@ -34,7 +34,7 @@ im_config_get_path(void)
 	e = mkdir(hybird_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
 	if (e && access(hybird_path, R_OK|W_OK)) {
-		im_debug_error("config", "%s,cannot create, read or write",
+		hybird_debug_error("config", "%s,cannot create, read or write",
 				hybird_path);
 		g_free(config_path);
 		g_free(hybird_path);

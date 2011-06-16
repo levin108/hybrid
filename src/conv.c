@@ -5,7 +5,7 @@
 /* The list of the currently opened conversation dialogs. */
 GSList *conv_list = NULL; 
 
-static GtkWidget *create_note_label(IMChatPanel *chat);
+static GtkWidget *create_note_label(HybirdChatPanel *chat);
 
 /**
  * Callback function to handle the close button click event.
@@ -13,9 +13,9 @@ static GtkWidget *create_note_label(IMChatPanel *chat);
 static void
 conv_close_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMConversation *conv;
+	HybirdConversation *conv;
 
-	conv = (IMConversation*)user_data;
+	conv = (HybirdConversation*)user_data;
 
 	gtk_widget_destroy(conv->window);
 }
@@ -26,14 +26,14 @@ conv_close_cb(GtkWidget *widget, gpointer user_data)
 static void
 conv_destroy_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMConversation *conv = (IMConversation*)user_data;
+	HybirdConversation *conv = (HybirdConversation*)user_data;
 	GSList *pos;
-	IMChatPanel *temp_chat;
+	HybirdChatPanel *temp_chat;
 
-	/* First we should free the memory in the list of IMChatPanel. */
+	/* First we should free the memory in the list of HybirdChatPanel. */
 	while (conv->chat_buddies) {
 		pos = conv->chat_buddies;
-		temp_chat = (IMChatPanel*)pos->data;
+		temp_chat = (HybirdChatPanel*)pos->data;
 		conv->chat_buddies = g_slist_remove(conv->chat_buddies, pos->data);
 		g_free(temp_chat);
 	}
@@ -47,14 +47,14 @@ switch_page_cb(GtkNotebook *notebook, gpointer newpage, guint newpage_nth,
 		gpointer user_data)
 {
 	GSList *pos;
-	IMChatPanel *chat;
-	IMBuddy *buddy;
+	HybirdChatPanel *chat;
+	HybirdBuddy *buddy;
 	GdkPixbuf *pixbuf;
-	IMConversation *conv = (IMConversation*)user_data;	
+	HybirdConversation *conv = (HybirdConversation*)user_data;	
 	gint page_index;
 
 	for (pos = conv->chat_buddies; pos; pos = pos->next) {
-		chat = (IMChatPanel*)pos->data;
+		chat = (HybirdChatPanel*)pos->data;
 
 		page_index = gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook),
 				chat->vbox);
@@ -64,7 +64,7 @@ switch_page_cb(GtkNotebook *notebook, gpointer newpage, guint newpage_nth,
 		}
 	}
 
-	im_debug_error("conv", "FATAL, can not find an exist buddy\n");
+	hybird_debug_error("conv", "FATAL, can not find an exist buddy\n");
 
 	return;
 
@@ -82,19 +82,19 @@ page_found:
 }
 
 /**
- * Create a new IM Conversation Dialog.
+ * Create a new Hybird Conversation Dialog.
  */
-static IMConversation*
-im_conv_create()
+static HybirdConversation*
+hybird_conv_create()
 {
 	GtkWidget *vbox;
 	GtkWidget *action_area;
 	GtkWidget *halign;
 	GtkWidget *button;
 
-	IMConversation *imconv;
+	HybirdConversation *imconv;
 
-	imconv = g_new0(IMConversation, 1);
+	imconv = g_new0(HybirdConversation, 1);
 
 	/* create window */
 	imconv->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -143,8 +143,8 @@ im_conv_create()
 static void
 menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMChatPanel *chat = (IMChatPanel*)user_data;
-	IMConversation *conv = chat->parent;
+	HybirdChatPanel *chat = (HybirdChatPanel*)user_data;
+	HybirdConversation *conv = chat->parent;
 	GtkNotebook *notebook = GTK_NOTEBOOK(conv->notebook);
 	gint page_index = gtk_notebook_page_num(notebook, chat->vbox);
 
@@ -155,9 +155,9 @@ menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
  * Close a single tab.
  */
 static void 
-close_tab(IMChatPanel *chat)
+close_tab(HybirdChatPanel *chat)
 {
-	IMConversation *conv;
+	HybirdConversation *conv;
 	gint page_index;
 
 	g_return_if_fail(chat != NULL);
@@ -196,7 +196,7 @@ close_tab(IMChatPanel *chat)
 static void
 menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMChatPanel *chat = (IMChatPanel*)user_data;
+	HybirdChatPanel *chat = (HybirdChatPanel*)user_data;
 
 	close_tab(chat);
 }
@@ -204,14 +204,14 @@ menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 static void
 menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMChatPanel *chat = (IMChatPanel*)user_data;
-	IMChatPanel *newchat;
+	HybirdChatPanel *chat = (HybirdChatPanel*)user_data;
+	HybirdChatPanel *newchat;
 	GtkWidget *vbox;
-	IMBuddy *buddy;
+	HybirdBuddy *buddy;
 	gint page_index;
 
-	IMConversation *newconv;
-	IMConversation *parent;
+	HybirdConversation *newconv;
+	HybirdConversation *parent;
 
 	vbox = chat->vbox;
 	/* 
@@ -225,11 +225,11 @@ menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 	parent = chat->parent;
 	buddy = chat->buddy;
 
-	newconv = im_conv_create();
+	newconv = hybird_conv_create();
 	conv_list = g_slist_append(conv_list, newconv);
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(newconv->notebook), FALSE);
 
-	newchat = g_new0(IMChatPanel, 1);
+	newchat = g_new0(HybirdChatPanel, 1);
 	newchat->parent = newconv;
 	newchat->buddy = buddy;
 	newchat->vbox = vbox;
@@ -247,8 +247,8 @@ menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 static void
 menu_close_other_pages_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMChatPanel *chat = (IMChatPanel*)user_data;
-	IMConversation *conv;
+	HybirdChatPanel *chat = (HybirdChatPanel*)user_data;
+	HybirdConversation *conv;
 	GSList *pos;
 
 	conv = chat->parent;
@@ -272,7 +272,7 @@ menu_close_other_pages_cb(GtkWidget *widget, gpointer user_data)
 static void
 menu_close_all_pages_cb(GtkWidget *widget, gpointer user_data)
 {
-	IMChatPanel *chat = (IMChatPanel*)user_data;
+	HybirdChatPanel *chat = (HybirdChatPanel*)user_data;
 
 	gtk_widget_destroy(chat->parent->window);
 }
@@ -281,9 +281,9 @@ static gboolean
 tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 {
 	if (e->button == 3) { /**< right button clicked */
-		IMChatPanel *chat = (IMChatPanel*)user_data;
-		IMChatPanel *temp_chat;
-		IMBuddy *temp_buddy;
+		HybirdChatPanel *chat = (HybirdChatPanel*)user_data;
+		HybirdChatPanel *temp_chat;
+		HybirdBuddy *temp_buddy;
 		GdkPixbuf *pixbuf;
 		GtkWidget *img;
 		GtkWidget *menu;
@@ -296,7 +296,7 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 		/* create labels menu */
 		for (pos = chat->parent->chat_buddies; pos; pos = pos->next) {
 
-			temp_chat = (IMChatPanel*)pos->data;	
+			temp_chat = (HybirdChatPanel*)pos->data;	
 			temp_buddy = temp_chat->buddy;
 
 			pixbuf = create_pixbuf_at_size(temp_buddy->icon_data,
@@ -356,7 +356,7 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 static gboolean
 tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 {
-	IMChatPanel *chat = (IMChatPanel*)user_data;
+	HybirdChatPanel *chat = (HybirdChatPanel*)user_data;
 
 	if (e->button == 1) {
 		close_tab(chat);
@@ -377,7 +377,7 @@ tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
  * |- GtkEventBox -> GtkCellView  -|--- GtkEventBox ---|
  */
 static GtkWidget*
-create_note_label(IMChatPanel *chat)
+create_note_label(HybirdChatPanel *chat)
 {
 	GtkWidget *hbox;
 	GtkWidget *eventbox;
@@ -386,7 +386,7 @@ create_note_label(IMChatPanel *chat)
 	GtkListStore *store;
 	GtkCellRenderer *renderer;
 	GtkTreePath *path;
-	IMBuddy *buddy;
+	HybirdBuddy *buddy;
 	GdkPixbuf *icon_pixbuf;
 
 	g_return_val_if_fail(chat != NULL, NULL);
@@ -469,13 +469,13 @@ create_note_label(IMChatPanel *chat)
  * -----------------------------------------------------
  */
 static void
-create_buddy_tips_panel(GtkWidget *vbox, IMChatPanel *chat)
+create_buddy_tips_panel(GtkWidget *vbox, HybirdChatPanel *chat)
 {
 	GtkWidget *cellview;
 	GtkListStore *store;
 	GtkCellRenderer *renderer; 
 	GtkTreePath *path;
-	IMBuddy *buddy;
+	HybirdBuddy *buddy;
 	gchar *name_text;
 	gchar *mood_text;
 	GdkPixbuf *icon_pixbuf;
@@ -550,7 +550,7 @@ create_buddy_tips_panel(GtkWidget *vbox, IMChatPanel *chat)
 }
 
 static void
-init_chat_panel_body(GtkWidget *vbox, IMChatPanel *chat)
+init_chat_panel_body(GtkWidget *vbox, HybirdChatPanel *chat)
 {
 	GtkWidget *scroll;
 	GtkWidget *button;
@@ -615,11 +615,11 @@ init_chat_panel_body(GtkWidget *vbox, IMChatPanel *chat)
  * Initialize the chat panel.
  */
 static void
-init_chat_panel(IMChatPanel *chat)
+init_chat_panel(HybirdChatPanel *chat)
 {
 	GtkWidget *vbox;
-	IMConversation *conv;
-	IMBuddy *buddy;
+	HybirdConversation *conv;
+	HybirdBuddy *buddy;
 	gint page_index;
 
 	g_return_if_fail(chat != NULL);
@@ -657,23 +657,23 @@ init_chat_panel(IMChatPanel *chat)
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook), page_index);
 }
 
-IMChatPanel*
-im_chat_panel_create(IMBuddy *buddy)
+HybirdChatPanel*
+hybird_chat_panel_create(HybirdBuddy *buddy)
 {
-	IMChatPanel *chat = NULL;
-	IMConversation *conv = NULL;
+	HybirdChatPanel *chat = NULL;
+	HybirdConversation *conv = NULL;
 	GSList *conv_pos;
 	GSList *chat_pos;
 
 	g_return_val_if_fail(buddy != NULL, NULL);
 
 	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
-		conv = (IMConversation*)conv_pos->data;
+		conv = (HybirdConversation*)conv_pos->data;
 
 		for (chat_pos = conv->chat_buddies; chat_pos;
 				chat_pos = chat_pos->next) {
 
-			chat = (IMChatPanel*)chat_pos->data;
+			chat = (HybirdChatPanel*)chat_pos->data;
 
 			if (chat->buddy == buddy) {
 				goto found;
@@ -682,11 +682,11 @@ im_chat_panel_create(IMBuddy *buddy)
 	}
 
 	if (!conv) {
-		conv = im_conv_create();
+		conv = hybird_conv_create();
 		conv_list = g_slist_append(conv_list, conv);
 	}
 
-	chat = g_new0(IMChatPanel, 1);
+	chat = g_new0(HybirdChatPanel, 1);
 	chat->parent = conv;
 	chat->buddy = buddy;
 	conv->chat_buddies = g_slist_append(conv->chat_buddies, chat);

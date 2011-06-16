@@ -1,21 +1,21 @@
-#ifndef IM_CHAT_H
-#define IM_CHAT_H
+#ifndef Hybird_CHAT_H
+#define Hybird_CHAT_H
 
 #include <gtk/gtk.h>
 #include "blist.h"
 
-typedef struct _IMConversation IMConversation;
-typedef struct _IMChatPanel IMChatPanel;
+typedef struct _HybirdConversation HybirdConversation;
+typedef struct _HybirdChatPanel HybirdChatPanel;
 
-struct _IMConversation {
+struct _HybirdConversation {
 	GtkWidget *window;
 	GtkWidget *notebook;
 	GSList *chat_buddies;
 };
 
-struct _IMChatPanel {
-	IMConversation *parent;
-	IMBuddy *buddy;
+struct _HybirdChatPanel {
+	HybirdConversation *parent;
+	HybirdBuddy *buddy;
 	GtkWidget *pagelabel;
 	GtkWidget *textview;
 	GtkWidget *toolbar;
@@ -59,9 +59,9 @@ extern "C" {
  *
  * @param buddy The buddy to chat with.
  *
- * @return The IMChatPanel created.
+ * @return The HybirdChatPanel created.
  */
-IMChatPanel *im_chat_panel_create(IMBuddy *buddy);
+HybirdChatPanel *hybird_chat_panel_create(HybirdBuddy *buddy);
 
 #ifdef __cplusplus
 }

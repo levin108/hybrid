@@ -20,36 +20,36 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 	GSList *list;
 	GSList *pos;
 	fetion_buddy *buddy;
-	IMBuddy *imbuddy;
+	HybirdBuddy *imbuddy;
 
 	list = sip_parse_presence(ac, sipmsg);
 
 	for (pos = list; pos; pos = pos->next) {
 
 		buddy = (fetion_buddy*)pos->data;
-		imbuddy = im_blist_find_buddy(buddy->userid);
+		imbuddy = hybird_blist_find_buddy(buddy->userid);
 
-		im_blist_set_buddy_name(imbuddy, buddy->nickname);
-		im_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);
+		hybird_blist_set_buddy_name(imbuddy, buddy->nickname);
+		hybird_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);
 
 		switch (buddy->state) {
 			case P_ONLINE:
-				im_blist_set_buddy_state(imbuddy, IM_STATE_ONLINE);
+				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_ONLINE);
 				break;
 			case P_OFFLINE:
-				im_blist_set_buddy_state(imbuddy, IM_STATE_OFFLINE);
+				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_OFFLINE);
 				break;
 			case P_INVISIBLE:
-				im_blist_set_buddy_state(imbuddy, IM_STATE_OFFLINE);
+				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_OFFLINE);
 				break;
 			case P_AWAY:
-				im_blist_set_buddy_state(imbuddy, IM_STATE_AWAY);
+				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_AWAY);
 				break;
 			case P_BUSY:
-				im_blist_set_buddy_state(imbuddy, IM_STATE_BUSY);
+				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_BUSY);
 				break;
 			default:
-				im_blist_set_buddy_state(imbuddy, IM_STATE_AWAY);
+				hybird_blist_set_buddy_state(imbuddy, Hybird_STATE_AWAY);
 				break;
 		}
 
@@ -71,7 +71,7 @@ process_notify_cb(fetion_account *ac, const gchar *sipmsg)
 	if (notify_type == NOTIFICATION_TYPE_UNKNOWN ||
 			event_type == NOTIFICATION_EVENT_UNKNOWN) {
 
-		im_debug_info("fetion", "recv unknown notification:\n%s", sipmsg);
+		hybird_debug_info("fetion", "recv unknown notification:\n%s", sipmsg);
 		return;
 	}
 
@@ -147,24 +147,24 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 			//process_sipc_cb(ac, sipmsg);	
 			break;
 		default:
-			im_debug_info("fetion", "recevie unknown msg:\n%s", sipmsg);
+			hybird_debug_info("fetion", "recevie unknown msg:\n%s", sipmsg);
 			break;
 	}
 }
 
 gboolean
-fetion_login(IMAccount *imac)
+fetion_login(HybirdAccount *imac)
 {
-	im_debug_info("fetion", "fetion is now logining...");
+	hybird_debug_info("fetion", "fetion is now logining...");
 
 	ac = fetion_account_create(imac, imac->username, imac->password);
 
-	im_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
+	hybird_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
 
 	return TRUE;
 }
 
-IMModuleInfo module_info = {
+HybirdModuleInfo module_info = {
 	"fetion",
 	"levin108",
 	N_("fetion client"),
@@ -175,9 +175,9 @@ IMModuleInfo module_info = {
 };
 
 void 
-fetion_module_init(IMModule *module)
+fetion_module_init(HybirdModule *module)
 {
 	printf("hello world\n");
 }
 
-IM_MODULE_INIT(fetion_module_init, &module_info);
+Hybird_MODULE_INIT(fetion_module_init, &module_info);

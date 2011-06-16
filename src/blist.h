@@ -1,32 +1,32 @@
-#ifndef IM_BLIST_H
-#define IM_BLIST_H
+#ifndef Hybird_BLIST_H
+#define Hybird_BLIST_H
 #include <gtk/gtk.h>
 
 #define GROUPNAME_LENGTH   320
 #define CONTACTNAME_LENGTH 320
 #include "account.h"
 
-typedef struct _IMBlist    IMBlist;
-typedef struct _IMGroup   IMGroup;
-typedef struct _IMBuddy IMBuddy;
+typedef struct _HybirdBlist    HybirdBlist;
+typedef struct _HybirdGroup   HybirdGroup;
+typedef struct _HybirdBuddy HybirdBuddy;
 
-struct _IMBlist {
+struct _HybirdBlist {
 	GtkWidget *treeview;
 	GtkTreeStore *treemodel;
 	GtkTreeViewColumn *column;
 };
 
-struct _IMGroup {
+struct _HybirdGroup {
 	GtkTreeIter iter;
-	IMAccount *account;
+	HybirdAccount *account;
 	gchar *id;
 	gchar *name;
 };
 
-struct _IMBuddy {
+struct _HybirdBuddy {
 	GtkTreeIter iter;
-	IMAccount *account;
-	IMGroup *parent;
+	HybirdAccount *account;
+	HybirdGroup *parent;
 	gchar *id;	/**< User Identity. */
 	gchar *name; /**< The name string. */
 	gchar *mood; /**< The mood phrase. */
@@ -36,46 +36,46 @@ struct _IMBuddy {
 };
 
 enum {
-	IM_BLIST_BUDDY_ID,
-	IM_BLIST_STATUS_ICON,
-	IM_BLIST_BUDDY_NAME,
-	IM_BLIST_PROTO_ICON,
-	IM_BLIST_BUDDY_ICON,
-	IM_BLIST_BUDDY_STATE,
-	IM_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
-	IM_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
-	IM_BLIST_STATUS_ICON_COLUMN_VISIBLE,
-	IM_BLIST_PROTO_ICON_COLUMN_VISIBLE,
-	IM_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
-	IM_BLIST_COLUMNS
+	Hybird_BLIST_BUDDY_ID,
+	Hybird_BLIST_STATUS_ICON,
+	Hybird_BLIST_BUDDY_NAME,
+	Hybird_BLIST_PROTO_ICON,
+	Hybird_BLIST_BUDDY_ICON,
+	Hybird_BLIST_BUDDY_STATE,
+	Hybird_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
+	Hybird_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
+	Hybird_BLIST_STATUS_ICON_COLUMN_VISIBLE,
+	Hybird_BLIST_PROTO_ICON_COLUMN_VISIBLE,
+	Hybird_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
+	Hybird_BLIST_COLUMNS
 };
 
 /**
  * Test the buddy's online state.
  */
-#define BUDDY_IS_ONLINE(b)    ((b)->state == IM_STATE_ONLINE)
-#define BUDDY_IS_OFFLINE(b)   ((b)->state == IM_STATE_OFFLINE)
-#define BUDDY_IS_AWAY(b)      ((b)->state == IM_STATE_AWAY)
-#define BUDDY_IS_BUSY(b)      ((b)->state == IM_STATE_BUSY)
-#define BUDDY_IS_INVISIBLE(b) ((b)->state == IM_STATE_INVISIBLE)
+#define BUDDY_IS_ONLINE(b)    ((b)->state == Hybird_STATE_ONLINE)
+#define BUDDY_IS_OFFLINE(b)   ((b)->state == Hybird_STATE_OFFLINE)
+#define BUDDY_IS_AWAY(b)      ((b)->state == Hybird_STATE_AWAY)
+#define BUDDY_IS_BUSY(b)      ((b)->state == Hybird_STATE_BUSY)
+#define BUDDY_IS_INVISIBLE(b) ((b)->state == Hybird_STATE_INVISIBLE)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * Create an IMBlist struct, the memory allocated should be freed.
+ * Create an HybirdBlist struct, the memory allocated should be freed.
  *
- * @return The IMBList struct created
+ * @return The HybirdBList struct created
  */
-IMBlist *im_blist_create();
+HybirdBlist *hybird_blist_create();
 
 /**
- * Initialize the specified IMBlist struct.
+ * Initialize the specified HybirdBlist struct.
  *
- * @param blist IMBlist struct to be initialized.
+ * @param blist HybirdBlist struct to be initialized.
  */
-void im_blist_init();
+void hybird_blist_init();
 
 /**
  * Add a new group to the buddy list
@@ -86,7 +86,7 @@ void im_blist_init();
  *
  * @return The new added group
  */
-IMGroup *im_blist_add_group(IMAccount *ac, const gchar *id, const gchar *name);
+HybirdGroup *hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name);
 
 /**
  * Add a new buddy to the buddy list
@@ -98,7 +98,7 @@ IMGroup *im_blist_add_group(IMAccount *ac, const gchar *id, const gchar *name);
  *
  * @return The new added contact
  */
-IMBuddy *im_blist_add_buddy(IMAccount *ac, IMGroup *parent, 
+HybirdBuddy *hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, 
 		const gchar *id, const gchar *name);
 
 /**
@@ -107,7 +107,7 @@ IMBuddy *im_blist_add_buddy(IMAccount *ac, IMGroup *parent,
  * @param buddy The buddy to be set
  * @param name The buddy name to set
  */
-void im_blist_set_buddy_name(IMBuddy *buddy, const gchar *name);
+void hybird_blist_set_buddy_name(HybirdBuddy *buddy, const gchar *name);
 
 /**
  * Set the buddy's mood phrase.
@@ -115,7 +115,7 @@ void im_blist_set_buddy_name(IMBuddy *buddy, const gchar *name);
  * @param buddy The buddy to be set.
  * @param name The buddy name to set.
  */
-void im_blist_set_buddy_mood(IMBuddy *buddy, const gchar *name);
+void hybird_blist_set_buddy_mood(HybirdBuddy *buddy, const gchar *name);
 
 /**
  * Set the buddy's state.
@@ -123,7 +123,7 @@ void im_blist_set_buddy_mood(IMBuddy *buddy, const gchar *name);
  * @param buddy The buddy to be set.
  * @param The state number to set.
  */
-void im_blist_set_buddy_state(IMBuddy *buddy, gint state);
+void hybird_blist_set_buddy_state(HybirdBuddy *buddy, gint state);
 
 /**
  * Set the buddy's portrait icon.
@@ -132,7 +132,7 @@ void im_blist_set_buddy_state(IMBuddy *buddy, gint state);
  * @param icon_data The icon raw data.
  * @param len The length of the icon raw data.
  */
-void im_blist_set_buddy_icon(IMBuddy *buddy,
+void hybird_blist_set_buddy_icon(HybirdBuddy *buddy,
 		const guchar *icon_data, gsize len);
 
 /**
@@ -140,30 +140,30 @@ void im_blist_set_buddy_icon(IMBuddy *buddy,
  *
  * @param id ID of the group to find.
  *
- * @return IMGroup if fount, NULL if no group was found.
+ * @return HybirdGroup if fount, NULL if no group was found.
  */
-IMGroup *im_blist_find_group_by_id(const gchar *id);
+HybirdGroup *hybird_blist_find_group_by_id(const gchar *id);
 
 /**
  * Find a group with the specified name.
  *
  * @param id Name of the group to find.
  *
- * @return IMGroup if found, NULL if no group was found.
+ * @return HybirdGroup if found, NULL if no group was found.
  */
-IMGroup *im_blist_find_group_by_name(const gchar *name);
+HybirdGroup *hybird_blist_find_group_by_name(const gchar *name);
 
 /**
  * Find a buddy with the specified ID.
  *
  * @param id The buddy ID.
  *
- * @return IMBuddy if found, NULL if no buddy was found.
+ * @return HybirdBuddy if found, NULL if no buddy was found.
  */
-IMBuddy *im_blist_find_buddy(const gchar *id);
+HybirdBuddy *hybird_blist_find_buddy(const gchar *id);
 
 #ifdef _cplusplus
 }
 #endif
 
-#endif /* IM_BLIST_H */
+#endif /* Hybird_BLIST_H */
