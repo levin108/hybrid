@@ -51,6 +51,14 @@ void hybird_config_destroy(HybirdConfig *config);
  */
 gint hybird_config_init(void);
 
+/**
+ * Flush the blist cache, synchronize the cache in memory
+ * with the local xml file.
+ * 
+ * @param blist_cache The cache to flush.
+ */
+void hybird_blist_cache_flush();
+
 #ifdef __cplusplus
 }
 #endif

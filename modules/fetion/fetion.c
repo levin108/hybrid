@@ -53,7 +53,7 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 				break;
 		}
 
-		//fetion_update_portrait(ac, buddy);
+		fetion_update_portrait(ac, buddy);
 	}
 }
 

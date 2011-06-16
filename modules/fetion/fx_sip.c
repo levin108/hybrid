@@ -621,6 +621,12 @@ sip_parse_presence(fetion_account *ac, const gchar *sipmsg)
 				g_free(temp);
 			}
 
+			if (xmlnode_has_prop(pnode, "p")) {
+				temp = xmlnode_prop(pnode, "p");
+				g_free(buddy->portrait_crc);
+				buddy->portrait_crc = temp;
+			}
+
 			if (xmlnode_has_prop(pnode, "cs")) {
 				temp = xmlnode_prop(pnode, "cs");
 				buddy->carrier_status = atoi(temp);

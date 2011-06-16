@@ -55,6 +55,18 @@ xmlnode_root_from_file(const gchar *filepath)
 }
 
 xmlnode*
+xmlnode_next(xmlnode *node)
+{
+	xmlnode *new;
+
+	g_return_val_if_fail(node != NULL, NULL);
+	
+	new = node->next;
+
+	return new;
+}
+
+xmlnode*
 xmlnode_find(xmlnode *node, const gchar *name)
 {
 	xmlnode *temp, *iter;
@@ -250,6 +262,12 @@ xmlnode_new_prop(xmlnode *node, const gchar *name, const gchar *value)
 	xmlNewProp(node->node, BAD_CAST name, BAD_CAST value);
 }
 
+void
+xmlnode_set_prop(xmlnode *node, const gchar *name, const gchar *value)
+{
+	xmlSetProp(node->node, BAD_CAST name, BAD_CAST value);
+}
+
 gint
 xmlnode_save_file(xmlnode *root, const gchar *filepath)
 {
@@ -257,7 +275,7 @@ xmlnode_save_file(xmlnode *root, const gchar *filepath)
 	g_return_val_if_fail(root->is_root == 1, HYBIRD_ERROR);
 	g_return_val_if_fail(filepath != NULL, HYBIRD_ERROR);
 
-	if (xmlSaveFormatFileEnc(filepath, root->doc, "UTF-8", 1) == -1) {
+	if (xmlSaveFormatFileEnc(filepath, root->doc, "UTF-8", 0) == -1) {
 		return HYBIRD_ERROR;
 	}
 

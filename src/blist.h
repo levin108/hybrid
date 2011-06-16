@@ -149,9 +149,10 @@ void hybird_blist_set_buddy_state(HybirdBuddy *buddy, gint state);
  * @param buddy The buddy to set.
  * @param icon_data The icon raw data.
  * @param len The length of the icon raw data.
+ * @param crc The checksum of the icon.
  */
 void hybird_blist_set_buddy_icon(HybirdBuddy *buddy,
-		const guchar *icon_data, gsize len);
+		const guchar *icon_data, gsize len, const gchar *crc);
 
 /**
  * Find a group with the specified id.

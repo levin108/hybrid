@@ -131,3 +131,13 @@ blist_cache_init_null:
 blist_cache_init_fin:
 	return HYBIRD_OK;
 }
+
+void
+hybird_blist_cache_flush()
+{
+	HybirdBlistCache *cache;
+
+	cache = global_config->blist_cache;
+
+	xmlnode_save_file(cache->root, cache->cache_file_name);
+}

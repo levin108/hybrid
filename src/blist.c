@@ -250,7 +250,9 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 
 	g_file_get_contents(DATA_DIR"/icon.png", (gchar**)&status_icon_data,
 			&status_icon_data_length, NULL);
-	hybird_blist_set_buddy_icon(buddy, status_icon_data, status_icon_data_length);
+
+	/*TODO we will load icon from local cache first. */
+	hybird_blist_set_buddy_icon(buddy, status_icon_data, status_icon_data_length, "");
 
 	g_free(status_icon_data);
 
@@ -378,6 +380,7 @@ hybird_blist_set_buddy_name(HybirdBuddy *buddy, const gchar *name)
 	buddy->name = g_strdup(name);
 
 	hybird_blist_set_name_field(buddy);
+	hybird_blist_buddy_to_cache(buddy);
 }
 
 void
@@ -389,10 +392,12 @@ hybird_blist_set_buddy_mood(HybirdBuddy *buddy, const gchar *mood)
 	buddy->mood = g_strdup(mood);
 
 	hybird_blist_set_name_field(buddy);
+	hybird_blist_buddy_to_cache(buddy);
 }
 
 void
-hybird_blist_set_buddy_icon(HybirdBuddy *buddy, const guchar *icon_data, gsize len)
+hybird_blist_set_buddy_icon(HybirdBuddy *buddy, const guchar *icon_data,
+		gsize len, const gchar *crc)
 {
 	g_return_if_fail(buddy != NULL);
 
@@ -400,11 +405,13 @@ hybird_blist_set_buddy_icon(HybirdBuddy *buddy, const guchar *icon_data, gsize l
 	buddy->icon_data = NULL;
 
 	if (icon_data != NULL) {
+		buddy->icon_crc = g_strdup(crc);
 		buddy->icon_data = g_memdup(icon_data, len);
 		buddy->icon_data_length = len;
 	}
 
 	hybird_blist_set_state_field(buddy);
+	hybird_blist_buddy_to_cache(buddy);
 }
 
 void
@@ -490,6 +497,11 @@ hybird_blist_buddy_to_cache(HybirdBuddy *buddy)
 
 	g_return_if_fail(buddy != NULL);
 
+	if (buddy->cache_node) {
+		node = buddy->cache_node;
+		goto buddy_exist;
+	}
+
 	ac = buddy->account;
 	config = ac->config;
 	cache = config->blist_cache;
@@ -552,7 +564,7 @@ account_exist:
 
 			if (!xmlnode_has_prop(temp, "id") ||
 				!xmlnode_has_prop(temp, "name")) {
-				hybird_debug_error("blist", "invalid blist cache node found");
+				hybird_debug_error("blist", "invalid blist cache group node found");
 				temp = xmlnode_next(temp);
 				continue;
 			}
@@ -586,7 +598,7 @@ group_exist:
 		while (temp) {
 
 			if (!xmlnode_has_prop(temp, "id")) {
-				hybird_debug_error("blist", "invalid blist cache node found");
+				hybird_debug_error("blist", "invalid blist cache buddy node found");
 				temp = xmlnode_next(temp);
 				continue;
 			}
@@ -609,9 +621,36 @@ group_exist:
 
 buddy_exist:
 
-	xmlnode_new_prop(node, "id", buddy->id);
-	xmlnode_new_prop(node, "name", buddy->name);
-	xmlnode_new_prop(node, "mood", buddy->mood);
+	if (xmlnode_has_prop(node, "id")) {
+		xmlnode_set_prop(node, "id", buddy->id);
 
-	xmlnode_save_file(root, cache->cache_file_name);
+	} else {
+		xmlnode_new_prop(node, "id", buddy->id);
+	}
+
+	if (xmlnode_has_prop(node, "name")) {
+		xmlnode_set_prop(node, "name", buddy->name);
+
+	} else {
+		xmlnode_new_prop(node, "name", buddy->name);
+	}
+
+	if (xmlnode_has_prop(node, "mood")) {
+		xmlnode_set_prop(node, "mood", buddy->mood);
+
+	} else {
+		xmlnode_new_prop(node, "mood", buddy->mood);
+	}
+
+	if (xmlnode_has_prop(node, "crc")) {
+		xmlnode_set_prop(node, "crc", buddy->icon_crc);
+
+	} else {
+		xmlnode_new_prop(node, "crc", buddy->icon_crc);
+	}
+
+	/* Set the buddy's xml cache node property. */
+	buddy->cache_node = node;
+
+	hybird_blist_cache_flush();
 }

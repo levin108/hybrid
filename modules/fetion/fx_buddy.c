@@ -91,8 +91,13 @@ fetion_buddy_destroy(fetion_buddy *buddy)
 	if (buddy) {
 		g_free(buddy->userid);
 		g_free(buddy->sipuri);
+		g_free(buddy->sid);
+		g_free(buddy->mobileno);
+		g_free(buddy->mood_phrase);
+		g_free(buddy->carrier);
 		g_free(buddy->localname);
 		g_free(buddy->groups);
+		g_free(buddy->portrait_crc);
 		g_free(buddy);
 	}
 }
@@ -173,7 +178,8 @@ portrait_recv_cb(gint sk, gpointer user_data)
 
 		imbuddy = hybird_blist_find_buddy(trans->buddy->userid);
 
-		hybird_blist_set_buddy_icon(imbuddy, (guchar*)pos, trans->data_len);
+		hybird_blist_set_buddy_icon(imbuddy, (guchar*)pos,
+				trans->data_len, trans->buddy->portrait_crc);
 
 		goto pt_fin;
 

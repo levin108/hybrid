@@ -14,8 +14,6 @@ struct _xmlnode {
 	xmlnode *next;
 };
 
-#define xmlnode_next(n) ((n)->next)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,6 +37,13 @@ xmlnode *xmlnode_root(const gchar *xml_buf, gint size);
  */
 xmlnode *xmlnode_root_from_file(const gchar *filepath);
 
+/**
+ * Goto the next node of the specified node.
+ *
+ * @param node The node.
+ * @return The next node.
+ */
+xmlnode *xmlnode_next(xmlnode *node);
 /**
  * Get the children nodes of a xmlnode.
  *
@@ -115,6 +120,15 @@ gchar *xmlnode_to_string(xmlnode *root);
  * @param value The attribte value.
  */
 void xmlnode_new_prop(xmlnode *node, const gchar *name, const gchar *value);
+
+/**
+ * Set a value to a specified node attribute.
+ *
+ * @param node The node.
+ * @param name The attribute name
+ * @param value The attribute value.
+ */
+void xmlnode_set_prop(xmlnode *node, const gchar *name, const gchar *value);
 
 /**
  * Save the xml context to a xml file, it doesn't free the memory in the xml context.

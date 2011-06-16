@@ -15,6 +15,7 @@ struct _fetion_buddy {
 	gchar *carrier;
 	gchar carrier_status;
 	gchar *localname;
+	gchar *portrait_crc;
 	gchar *groups; /**< it's the group IDs,in form of 3,5,7 */
 	gint state;
 };
