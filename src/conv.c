@@ -190,6 +190,39 @@ menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 	close_tab(chat);
 }
 
+static void
+menu_close_other_pages_cb(GtkWidget *widget, gpointer user_data)
+{
+	IMChatPanel *chat = (IMChatPanel*)user_data;
+	IMConversation *conv;
+	GSList *pos;
+
+	conv = chat->parent;
+
+	while (g_slist_length(conv->chat_buddies) > 1) {
+		pos = conv->chat_buddies;
+
+		if (pos->data != chat) {
+			close_tab(pos->data);
+
+		} else {
+			pos = pos->next;
+
+			if (pos) {
+				close_tab(pos->data);
+			}
+		}
+	}
+}
+
+static void
+menu_close_all_pages_cb(GtkWidget *widget, gpointer user_data)
+{
+	IMChatPanel *chat = (IMChatPanel*)user_data;
+
+	gtk_widget_destroy(chat->parent->window);
+}
+
 static gboolean
 tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 {
@@ -237,6 +270,17 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 		g_signal_connect(submenu, "activate",
 				G_CALLBACK(menu_close_current_page_cb), temp_chat);
+
+		submenu = gtk_menu_item_new_with_label(_("Close Other Pages"));
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+		g_signal_connect(submenu, "activate",
+				G_CALLBACK(menu_close_other_pages_cb), temp_chat);
+
+		submenu = gtk_menu_item_new_with_label(_("Close All Pages"));
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+		g_signal_connect(submenu, "activate",
+				G_CALLBACK(menu_close_all_pages_cb), temp_chat);
+
 
 		gtk_widget_show_all(menu);
 
@@ -314,6 +358,7 @@ create_note_label(IMChatPanel *chat)
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(label), renderer, TRUE);
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(label), renderer,
 			"markup", TAB_NAME_COLUMN, NULL);
+
 	g_object_set(renderer, "xalign", 0.5, "xpad", 6, "ypad", 0, NULL);
 	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 
