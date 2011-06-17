@@ -21,6 +21,8 @@ GdkPixbuf *create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 
 GdkPixbuf *create_presence_pixbuf(gint presence, gint scale_size);
 
+gchar *hybird_sha1(const gchar *in, gint size);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <openssl/sha.h>
 #include "gtkutils.h"
 #include "account.h"
 #include "util.h"
@@ -205,4 +206,26 @@ create_presence_pixbuf(gint presence, gint scale_size)
 
 	return gdk_pixbuf_new_from_file_at_size(name,
 			scale_size, scale_size, NULL);
+}
+
+
+gchar*
+hybird_sha1(const gchar *in, gint size)
+{
+	SHA_CTX s;
+	guchar hash[20];
+	gchar *res;
+	gint i;
+  
+	SHA1_Init(&s);
+	SHA1_Update(&s, in, size);
+	SHA1_Final(hash, &s);
+
+	res = g_malloc0(41);
+  
+	for (i=0; i < 20; i++) {
+		g_snprintf(res + i * 2, 41, "%.2x", (gint)hash[i]);
+	}
+
+	return res;
 }

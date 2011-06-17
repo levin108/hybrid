@@ -27,7 +27,7 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 	for (pos = list; pos; pos = pos->next) {
 
 		buddy = (fetion_buddy*)pos->data;
-		imbuddy = hybird_blist_find_buddy(buddy->userid);
+		imbuddy = hybird_blist_find_buddy(ac->account, buddy->userid);
 
 		hybird_blist_set_buddy_name(imbuddy, buddy->nickname);
 		hybird_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);

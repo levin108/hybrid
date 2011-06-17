@@ -7,9 +7,10 @@
 #include "xmlnode.h"
 #include "account.h"
 
-typedef struct _HybirdBlist    HybirdBlist;
-typedef struct _HybirdGroup   HybirdGroup;
+typedef struct _HybirdBlist HybirdBlist;
+typedef struct _HybirdGroup HybirdGroup;
 typedef struct _HybirdBuddy HybirdBuddy;
+typedef enum _HybirdBlistCacheType HybirdBlistCacheType;
 
 struct _HybirdBlist {
 	GtkWidget *treeview;
@@ -35,6 +36,7 @@ struct _HybirdBuddy {
 	gchar *name; /**< The name string. */
 	gchar *mood; /**< The mood phrase. */
 	gint   state; /**< The presence status. */
+	gchar *icon_name; /**< The portrait file name.  */
 	guchar *icon_data; /**< The portrait raw data. */
 	gsize icon_data_length; /**< The size of the portrait raw data */
 	gchar *icon_crc; /**< The portrait crc. */
@@ -47,12 +49,20 @@ enum {
 	HYBIRD_BLIST_PROTO_ICON,
 	HYBIRD_BLIST_BUDDY_ICON,
 	HYBIRD_BLIST_BUDDY_STATE,
+	HYBIRD_BLIST_OBJECT_COLUMN,
 	HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
 	HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
 	HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE,
 	HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE,
 	HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
 	HYBIRD_BLIST_COLUMNS
+};
+
+enum _HybirdBlistCacheType {
+	HYBIRD_BLIST_CACHE_ADD, /**< Add a new item to the blist cache. */
+	HYBIRD_BLIST_CACHE_UPDATE_NAME, /**< Update the name of an existing item. */
+	HYBIRD_BLIST_CACHE_UPDATE_MOOD, /**< Update the mood of an existing item. */
+	HYBIRD_BLIST_CACHE_UPDATE_ICON  /**< Update the icon of an existing item. */
 };
 
 /**
@@ -144,24 +154,36 @@ void hybird_blist_set_buddy_mood(HybirdBuddy *buddy, const gchar *name);
 void hybird_blist_set_buddy_state(HybirdBuddy *buddy, gint state);
 
 /**
- * Set the buddy's portrait icon.
+ * Set the buddy's portrait icon. If you want to set portrait icon
+ * to the default icon, just set the icon_data to NULL, at the same time,
+ * the len must be 0.
  *
- * @param buddy The buddy to set.
+ * @param buddy     The buddy to set.
  * @param icon_data The icon raw data.
- * @param len The length of the icon raw data.
- * @param crc The checksum of the icon.
+ * @param len       The length of the icon raw data.
+ * @param crc       The checksum of the icon.
  */
 void hybird_blist_set_buddy_icon(HybirdBuddy *buddy,
 		const guchar *icon_data, gsize len, const gchar *crc);
 
 /**
+ * Get the portrait checksum of the specified buddy.
+ *
+ * @param buddy The buddy.
+ *
+ * @return The checksum of the buddy's portrait.
+ */
+const gchar *hybird_blist_get_buddy_checksum(HybirdBuddy *buddy);
+
+/**
  * Find a group with the specified id.
  *
- * @param id ID of the group to find.
+ * @param account The account to which the group belongs.
+ * @param id      ID of the group to find.
  *
  * @return HybirdGroup if fount, NULL if no group was found.
  */
-HybirdGroup *hybird_blist_find_group_by_id(const gchar *id);
+HybirdGroup *hybird_blist_find_group(HybirdAccount *account, const gchar *id);
 
 /**
  * Find a group with the specified name.
@@ -170,16 +192,17 @@ HybirdGroup *hybird_blist_find_group_by_id(const gchar *id);
  *
  * @return HybirdGroup if found, NULL if no group was found.
  */
-HybirdGroup *hybird_blist_find_group_by_name(const gchar *name);
+HybirdGroup *hybird_blist_find_group_by_name(HybirdAccount *account, const gchar *name);
 
 /**
  * Find a buddy with the specified ID.
  *
- * @param id The buddy ID.
+ * @param account The account to which the buddy belongs.
+ * @param id      The buddy ID.
  *
  * @return HybirdBuddy if found, NULL if no buddy was found.
  */
-HybirdBuddy *hybird_blist_find_buddy(const gchar *id);
+HybirdBuddy *hybird_blist_find_buddy(HybirdAccount *account, const gchar *id);
 
 /**
  * Write the buddy information to the cache which in fact is 
@@ -187,8 +210,10 @@ HybirdBuddy *hybird_blist_find_buddy(const gchar *id);
  * with the cache file, use hybird_blist_cache_flush().
  *
  * @param buddy The buddy to write to cache.
+ * @param type  The action of writing to cache.
  */
-void hybird_blist_buddy_to_cache(HybirdBuddy *buddy);
+void hybird_blist_buddy_to_cache(HybirdBuddy *buddy, HybirdBlistCacheType type);
+
 #ifdef _cplusplus
 }
 #endif

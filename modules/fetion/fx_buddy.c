@@ -121,12 +121,12 @@ fetion_buddies_init(fetion_account *ac)
 			for (; *stop && *stop != ';'; stop ++);
 			id = g_strndup(start, stop - start);
 
-			imgroup = hybird_blist_find_group_by_id(id);
+			imgroup = hybird_blist_find_group(ac->account, id);
 
 			imbuddy = hybird_blist_add_buddy(ac->account, imgroup,
 					buddy->userid, buddy->localname);
 
-			if (*(buddy->localname) == '\0') {
+			if (*(imbuddy->name) == '\0') {
 				hybird_blist_set_buddy_name(imbuddy, buddy->sid);
 			}
 
@@ -176,7 +176,8 @@ portrait_recv_cb(gint sk, gpointer user_data)
 
 		pos += 4;
 
-		imbuddy = hybird_blist_find_buddy(trans->buddy->userid);
+		imbuddy = hybird_blist_find_buddy(trans->ac->account,
+				trans->buddy->userid);
 
 		hybird_blist_set_buddy_icon(imbuddy, (guchar*)pos,
 				trans->data_len, trans->buddy->portrait_crc);
@@ -265,6 +266,8 @@ void
 fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 {
 	portrait_data *data;
+	HybirdBuddy *hybird_buddy;
+	const gchar *checksum;
 
 	g_return_if_fail(ac != NULL);
 	g_return_if_fail(buddy != NULL);
@@ -272,6 +275,23 @@ fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 	data = g_new0(portrait_data, 1);
 	data->buddy = buddy;
 	data->ac = ac;
+
+	if (!(hybird_buddy = hybird_blist_find_buddy(ac->account, buddy->userid))) {
+		hybird_debug_error("fetion", "FATAL, update portrait,"
+				" unable to find a buddy.");
+		return;
+	}
+
+	checksum = hybird_blist_get_buddy_checksum(hybird_buddy);
+
+	g_print("checksum : %d\n", checksum == NULL);
+
+	if (checksum)
+	printf("%s, %s\n", checksum, buddy->portrait_crc);
+	if (checksum != NULL && g_strcmp0(checksum, buddy->portrait_crc) == 0) {
+		hybird_debug_info("fetion", "portrait for %s(%s) up to date");
+		return;
+	}
 
 	hybird_proxy_connect(ac->portrait_host_name, 80, portrait_conn_cb, data);
 }

@@ -90,11 +90,11 @@ hybird_blist_cache_init(HybirdConfig *config)
 	gchar *cache_file_name;
 	HybirdBlistCache *cache;
 	xmlnode *root;
+	gint err;
 
 	g_return_val_if_fail(config != NULL, HYBIRD_ERROR);
 
 	cache_file_name = g_strdup_printf("%s/blist.xml", config->config_path);
-
 
 	hybird_debug_info("config", "init the blist cache from %s",
 			cache_file_name);
@@ -129,6 +129,19 @@ blist_cache_init_null:
 	xmlnode_save_file(root, cache->cache_file_name);
 
 blist_cache_init_fin:
+	/* initialize the icon path. */
+	config->icon_path = g_strdup_printf("%s/icons", config->config_path);
+
+	err = mkdir(config->icon_path, S_IRWXU|S_IRWXO|S_IRWXG);
+
+	if (err && access(config->icon_path, R_OK|W_OK)) {
+		hybird_debug_error("config", "%s,cannot create, read or write",
+				config->icon_path);
+		g_free(config->icon_path);
+
+		return HYBIRD_ERROR;
+	}
+
 	return HYBIRD_OK;
 }
 

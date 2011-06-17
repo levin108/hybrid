@@ -13,6 +13,7 @@ struct _HybirdBlistCache {
 
 struct _HybirdConfig {
 	gchar *config_path;
+	gchar *icon_path;
 	HybirdBlistCache *blist_cache;
 };
 
@@ -36,13 +37,6 @@ gchar *hybird_config_get_path(void);
 HybirdConfig *hybird_config_create();
 
 /**
- * Destroy the config context.
- *
- * @param config The config context to destroy.
- */
-void hybird_config_destroy(HybirdConfig *config);
-
-/**
  * Initialize the config context. Things to do:
  * 1. Initialize the buddy list cache.
  * 2. ...
@@ -50,6 +44,13 @@ void hybird_config_destroy(HybirdConfig *config);
  * @return HYBIRD_OK if success, HYBIRD_ERROR if there was an error.
  */
 gint hybird_config_init(void);
+
+/**
+ * Destroy the config context.
+ *
+ * @param config The config context to destroy.
+ */
+void hybird_config_destroy(HybirdConfig *config);
 
 /**
  * Flush the blist cache, synchronize the cache in memory

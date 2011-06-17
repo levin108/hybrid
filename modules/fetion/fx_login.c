@@ -522,6 +522,9 @@ aut_fin:
 		pos = strstr(ac->buffer, "\r\n\r\n") + 4;
 		parse_sipc_resp(ac, pos, length);
 
+		/* set the connection status. */
+		hybird_account_set_connection_status(ac->account, HYBIRD_CONNECTION_CONNECTED);
+
 		/* init group list */
 		fetion_groups_init(ac);
 

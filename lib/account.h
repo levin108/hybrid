@@ -4,6 +4,7 @@
 #include <glib.h>
 
 typedef struct _HybirdAccount HybirdAccount;
+typedef enum _HybirdConnectionStatusType HybirdConnectionStatusType;
 
 #include "config.h"
 #include "module.h"
@@ -11,7 +12,8 @@ typedef struct _HybirdAccount HybirdAccount;
 struct _HybirdAccount {
 	gchar *username;
 	gchar *password;
-	gint   state;    /**< online status */
+	gint   state;    /**< online status. */
+	gint   connect_state; /**< connection status. */
 
 	HybirdConfig *config;
 	HybirdModule *proto;
@@ -24,6 +26,17 @@ enum {
 	HYBIRD_STATE_AWAY,
 	HYBIRD_STATE_ONLINE
 };
+
+enum _HybirdConnectionStatusType {
+	HYBIRD_CONNECTION_CONNECTING,
+	HYBIRD_CONNECTION_CONNECTED,
+	HYBIRD_CONNECTION_CLOSED
+};
+
+#define HYBIRD_IS_CONNECTING(h) ((h)->connect_state == HYBIRD_CONNECTION_CONNECTING)
+#define HYBIRD_IS_CONNECTED(h)  ((h)->connect_state == HYBIRD_CONNECTION_CONNECTED)
+#define HYBIRD_IS_CLOSED(h)     ((h)->connect_state == HYBIRD_CONNECTION_CLOSED)
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,6 +89,18 @@ void hybird_account_set_state(HybirdAccount *account, gint state);
  * @param reason The error reason message.
  */
 void hybird_account_error_reason(HybirdAccount *account, const gchar *reason);
+
+/**
+ * Set the connection status. If the status was changed to CONNECTED,
+ * then the local buddy list stored on the disk would be loaded. Make sure
+ * to set the status to CONNECTED after logining successfully, orelse you can
+ * not add buddies using hybird_blist_add_buddy().
+ *
+ * @param The account.
+ * @param status The new connection status.
+ */
+void hybird_account_set_connection_status(HybirdAccount *account,
+		HybirdConnectionStatusType status);
 
 #ifdef __cplusplus
 }

@@ -4,6 +4,7 @@
 #include "module.h"
 #include "blist.h"
 #include "util.h"
+#include "gtkutils.h"
 
 extern HybirdBlist *blist;
 
@@ -56,6 +57,7 @@ window_destroy(GtkWidget *widget, gpointer user_data)
 static void
 create_basic_menus(GtkBox *box)
 {
+#if 0
 	GtkUIManager *ui;
 
 	GtkActionEntry entries[] = {
@@ -86,6 +88,7 @@ create_basic_menus(GtkBox *box)
 
 	gtk_box_pack_start(box, gtk_ui_manager_get_widget(ui, "/MenuBar"),
 			FALSE, FALSE, 0);
+#endif
 }
 
 static void
