@@ -103,6 +103,7 @@ set(hybird_SRC
 	src/gtkutils.c
 	src/blist.c
 	src/conv.c
+	src/info.c
 	src/gtkcellrendererexpander.c
 	src/core.c
 )

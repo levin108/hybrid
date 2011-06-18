@@ -8,6 +8,7 @@ typedef struct _HybirdModule HybirdModule;
 typedef struct _HybirdModuleInfo HybirdModuleInfo;
 
 #include "account.h"
+#include "blist.h"
 
 struct _HybirdModuleInfo {
 	gchar *name;
@@ -19,6 +20,7 @@ struct _HybirdModuleInfo {
 	gchar *minor_version;
 
 	gboolean (*login)(HybirdAccount *ac);
+	void (*get_info)(HybirdAccount *ac, HybirdBuddy *buddy);
 };
 
 struct _HybirdModule {

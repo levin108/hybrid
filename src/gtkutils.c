@@ -7,7 +7,7 @@
  * We copied the following two functions from pidgin,
  * hoping pidgin wouldn't angry,for we follow GPL...
  */
-gboolean 
+static gboolean 
 pixbuf_is_opaque(GdkPixbuf *pixbuf) {
 	int height, rowstride, i;
 	unsigned char *pixels;
@@ -42,7 +42,7 @@ pixbuf_is_opaque(GdkPixbuf *pixbuf) {
 	return TRUE;
 }
 
-void
+static void
 pixbuf_make_round(GdkPixbuf *pixbuf) {
 	int width, height, rowstride;
 	guchar *pixels;
@@ -85,7 +85,7 @@ pixbuf_make_round(GdkPixbuf *pixbuf) {
 }
 
 GdkPixbuf*
-create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
+hybird_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 {
 	GdkPixbufLoader *loader;
 	GdkPixbuf *pixbuf;
@@ -116,13 +116,29 @@ create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 }
 
 GdkPixbuf*
-create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
+hybird_create_default_icon(gint scale_size)
+{
+	GdkPixbuf *pixbuf;
+
+	if (scale_size) {
+		pixbuf = gdk_pixbuf_new_from_file_at_size(DATA_DIR"/icon.png",
+				scale_size, scale_size, NULL);
+
+	} else {
+		pixbuf = gdk_pixbuf_new_from_file(DATA_DIR"/icon.png", NULL);
+	}
+
+	return pixbuf;
+}
+
+GdkPixbuf*
+hybird_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_width, gint scale_height)
 {
 	GdkPixbuf *pixbuf;
 	GdkPixbuf *res;
 
-	pixbuf = create_pixbuf(pixbuf_data, pixbuf_len);
+	pixbuf = hybird_create_pixbuf(pixbuf_data, pixbuf_len);
 
 	res = gdk_pixbuf_scale_simple(pixbuf,
 			scale_width, scale_height, GDK_INTERP_BILINEAR);
@@ -133,7 +149,7 @@ create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
 }
 
 GdkPixbuf*
-create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
+hybird_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_size)
 {
 	GdkPixbufLoader *loader;
@@ -195,7 +211,7 @@ create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 }
 
 GdkPixbuf*
-create_presence_pixbuf(gint presence, gint scale_size)
+hybird_create_presence_pixbuf(gint presence, gint scale_size)
 {
 	const gchar *name;
 

@@ -4,6 +4,7 @@
 #include "util.h"
 #include "blist.h"
 #include "conv.h"
+#include "info.h"
 #include "gtkutils.h"
 #include "gtkcellrendererexpander.h"
 
@@ -157,9 +158,26 @@ create_menu_seperator(GtkWidget *parent)
 }
 
 static void
-instant_message_menu_activate(GtkWidget *widget, gpointer user_data)
+instant_message_menu_cb(GtkWidget *widget, gpointer user_data)
 {
 	hybird_chat_panel_create(user_data);
+}
+
+static void
+buddy_information_menu_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybirdBuddy *buddy = (HybirdBuddy*)user_data;
+	HybirdAccount *account = buddy->account;
+	HybirdModule *proto = account->proto;
+	HybirdInfo *info;
+
+	/* Call the get information callback in module space. */
+	if (proto->info->get_info) {
+		
+		info = hybird_info_create(buddy);
+
+		proto->info->get_info(account, buddy);
+	}
 }
 
 static GtkWidget*
@@ -189,8 +207,9 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	account = buddy->account;
 	
 	create_menu(menu, _("Instant Message"), "instants", TRUE,
-			instant_message_menu_activate, buddy);
-	create_menu(menu, _("Buddy Information"), "profile", TRUE, NULL, NULL);
+			instant_message_menu_cb, buddy);
+	create_menu(menu, _("Buddy Information"), "profile", TRUE,
+			buddy_information_menu_cb, buddy);
 	create_menu_seperator(menu);
 	child_menu = create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
 
@@ -412,7 +431,7 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 		return buddy;
 	}
 
-	status_icon = create_presence_pixbuf(HYBIRD_STATE_OFFLINE, 32);
+	status_icon = hybird_create_presence_pixbuf(HYBIRD_STATE_OFFLINE, 32);
 	proto_icon = gdk_pixbuf_new_from_file(DATA_DIR"/msn.png", NULL);
 
 	/*
@@ -540,7 +559,7 @@ hybird_blist_set_state_field(HybirdBuddy *buddy)
 
 	g_return_if_fail(buddy != NULL);
 
-	pixbuf = create_presence_pixbuf(buddy->state, 16);
+	pixbuf = hybird_create_presence_pixbuf(buddy->state, 16);
 	
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
 			HYBIRD_BLIST_BUDDY_STATE, buddy->state,
@@ -569,11 +588,12 @@ hybird_blist_set_state_field(HybirdBuddy *buddy)
 			return;
 		}
 
-		pixbuf = create_round_pixbuf(icon_data, icon_data_length, scale_size);
+		pixbuf = hybird_create_round_pixbuf(icon_data, icon_data_length,
+				scale_size);
 
 	} else {
-		pixbuf = create_round_pixbuf(buddy->icon_data, buddy->icon_data_length,
-				scale_size);
+		pixbuf = hybird_create_round_pixbuf(buddy->icon_data, 
+				buddy->icon_data_length, scale_size);
 	}
 
 	/* If buddy is not online, show a grey icon. */

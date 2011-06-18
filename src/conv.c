@@ -72,7 +72,7 @@ page_found:
 	buddy = chat->buddy;
 
 	/* Set the conversation window's icon. */
-	pixbuf = create_pixbuf(buddy->icon_data, buddy->icon_data_length);
+	pixbuf = hybird_create_pixbuf(buddy->icon_data, buddy->icon_data_length);
 	gtk_window_set_icon(GTK_WINDOW(conv->window), pixbuf);
 	g_object_unref(pixbuf);
 
@@ -299,8 +299,8 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 			temp_chat = (HybirdChatPanel*)pos->data;	
 			temp_buddy = temp_chat->buddy;
 
-			pixbuf = create_pixbuf_at_size(temp_buddy->icon_data,
-					temp_buddy->icon_data_length, 16, 16);
+			pixbuf = hybird_create_pixbuf_at_size(temp_buddy->icon_data,
+						temp_buddy->icon_data_length, 16, 16);
 			img = gtk_image_new_from_pixbuf(pixbuf);
 			g_object_unref(pixbuf);
 
@@ -427,7 +427,7 @@ create_note_label(HybirdChatPanel *chat)
 	gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(label), path);
 	gtk_tree_path_free(path);
 
-	icon_pixbuf = create_presence_pixbuf(buddy->state, 16);
+	icon_pixbuf = hybird_create_presence_pixbuf(buddy->state, 16);
 
 	gtk_list_store_set(store, &chat->tabiter, 
 			TAB_STATUS_ICON_COLUMN, icon_pixbuf, TAB_NAME_COLUMN,
@@ -528,8 +528,8 @@ create_buddy_tips_panel(GtkWidget *vbox, HybirdChatPanel *chat)
 	gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(cellview), path);
 	gtk_tree_path_free(path);
 
-	icon_pixbuf = create_round_pixbuf(buddy->icon_data,
-			buddy->icon_data_length, 32);
+	icon_pixbuf = hybird_create_round_pixbuf(buddy->icon_data,
+					buddy->icon_data_length, 32);
 
 	mood_text = g_markup_escape_text(buddy->mood ? buddy->mood : "", -1);
 

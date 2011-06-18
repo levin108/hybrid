@@ -4,13 +4,14 @@
 
 #define GROUPNAME_LENGTH   320
 #define CONTACTNAME_LENGTH 320
-#include "xmlnode.h"
-#include "account.h"
 
 typedef struct _HybirdBlist HybirdBlist;
 typedef struct _HybirdGroup HybirdGroup;
 typedef struct _HybirdBuddy HybirdBuddy;
 typedef enum _HybirdBlistCacheType HybirdBlistCacheType;
+
+#include "xmlnode.h"
+#include "account.h"
 
 struct _HybirdBlist {
 	GtkWidget *treeview;

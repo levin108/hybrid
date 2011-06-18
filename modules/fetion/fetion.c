@@ -152,7 +152,7 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 	}
 }
 
-gboolean
+static gboolean
 fetion_login(HybirdAccount *imac)
 {
 	HybirdSslConnection *conn;
@@ -166,6 +166,12 @@ fetion_login(HybirdAccount *imac)
 	return TRUE;
 }
 
+static void
+fetion_get_info(HybirdAccount *account, HybirdBuddy *buddy)
+{
+	printf("%s\n", buddy->id);
+}
+
 HybirdModuleInfo module_info = {
 	"fetion",
 	"levin108",
@@ -174,6 +180,7 @@ HybirdModuleInfo module_info = {
 	"http://basiccoder.com",
 	"0","1",
 	fetion_login,
+	fetion_get_info,
 };
 
 void 
