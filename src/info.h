@@ -10,7 +10,7 @@ typedef struct _HybirdInfo HybirdInfo;
 struct _HybirdInfo {
 	GtkWidget *window;
 	GtkWidget *treeview;
-	GtkTreeStore *store;
+	GtkListStore *store;
 	HybirdBuddy *buddy;
 };
 
