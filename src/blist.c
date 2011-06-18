@@ -92,9 +92,160 @@ render_column(HybirdBlist *blist)
 
 }
 
+/**
+ * Create a child menu for the @parent menu. Create an image menu if 
+ * icon_path is not NULL, orelse create a text menu.
+ *
+ * @param parent    The parent menu of the menu to create.
+ * @param icon_name The name of icon without suffix and '/', The icon
+ *                  must be in share/menus, and has suffix of '.png'.
+ */
+static GtkWidget*
+create_menu(GtkWidget *parent, const gchar *title, const gchar *icon_name, 
+		gboolean sensitive,
+		void (*callback)(GtkWidget *widget, gpointer user_data),
+		gpointer user_data)
+{
+	GtkWidget *item;
+	GdkPixbuf *pixbuf;
+	GtkWidget *image;
+	gchar *icon_path;
+
+	g_return_val_if_fail(parent != NULL, NULL);
+	g_return_val_if_fail(title != NULL, NULL);
+
+	if (icon_name) {
+		icon_path = g_strdup_printf(DATA_DIR"/menus/%s.png", icon_name);
+		item = gtk_image_menu_item_new_with_label(title);
+		pixbuf = gdk_pixbuf_new_from_file_at_size(icon_path, 16, 16, NULL);
+
+		if (pixbuf) {
+			image = gtk_image_new_from_pixbuf(pixbuf);
+			g_object_unref(pixbuf);
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
+		}
+
+		g_free(icon_path);
+
+	} else {
+		item = gtk_menu_item_new_with_label(title);
+	}
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(parent), item);
+
+	if (!sensitive) {
+		gtk_widget_set_sensitive(item, FALSE);
+		return item;
+	}
+
+	if (callback) {
+		g_signal_connect(item, "activate", G_CALLBACK(callback), user_data);
+	}
+
+	return item;
+}
+
+static void
+create_menu_seperator(GtkWidget *parent)
+{
+	GtkWidget *seperator;
+
+	g_return_if_fail(parent != NULL);
+
+	seperator = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(parent), seperator);
+}
+
+static void
+instant_message_menu_activate(GtkWidget *widget, gpointer user_data)
+{
+	hybird_chat_panel_create(user_data);
+}
+
+static GtkWidget*
+create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
+{
+	GtkWidget *menu;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GtkWidget *group_menu;
+	GtkWidget *child_menu;
+	HybirdAccount *account;
+	HybirdBuddy *buddy;
+	HybirdGroup *group;
+	GSList *pos;
+
+	g_return_val_if_fail(treeview != NULL, NULL);
+	g_return_val_if_fail(path != NULL, NULL);
+
+	menu = gtk_menu_new();
+
+	/* Select a tree row when right click on it. */
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
+
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
+	gtk_tree_model_get(model, &iter, HYBIRD_BLIST_OBJECT_COLUMN, &buddy, -1);
+
+	account = buddy->account;
+	
+	create_menu(menu, _("Instant Message"), "instants", TRUE,
+			instant_message_menu_activate, buddy);
+	create_menu(menu, _("Buddy Information"), "profile", TRUE, NULL, NULL);
+	create_menu_seperator(menu);
+	child_menu = create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
+
+	group_menu = gtk_menu_new();
+	
+	for (pos = group_list; pos; pos = pos->next) {
+		group = (HybirdGroup*)pos->data;
+
+		if (account == group->account) {
+			create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
+		}
+	}
+
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(child_menu), group_menu);
+
+	create_menu(menu, _("Remove Buddy"), "remove", TRUE, NULL, NULL);
+	create_menu(menu, _("Rename Buddy"), "rename", TRUE, NULL, NULL);
+	create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
+
+	return menu;
+}
+
 static gboolean
 button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
+	GtkWidget *menu;
+	GtkTreeModel *model;
+	GtkTreePath *path;
+	GtkTreeSelection *selection;
+	gint depth;
+
+	if (event->button == 3) {
+
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+		gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
+				(gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
+
+		/* Select a tree row when right click on it. */
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+		gtk_tree_selection_select_path(selection, path);
+
+		depth = gtk_tree_path_get_depth(path);
+
+		if (depth > 1) {
+			menu = create_buddy_menu(widget, path);
+
+			gtk_widget_show_all(menu);
+
+			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
+					(event != NULL) ? event->button : 0,
+					gdk_event_get_time((GdkEvent*)event));
+		}
+
+		return TRUE;
+	}
 
 	return FALSE;
 }
@@ -300,10 +451,9 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 
 	buddy_list = g_slist_append(buddy_list, buddy);
 
-	//hybird_blist_set_buddy_icon(buddy, NULL, 0, NULL);
-
 	g_object_unref(status_icon);
 	g_object_unref(proto_icon);
+	g_object_unref(buddy_icon);
 
 	hybird_blist_buddy_to_cache(buddy, HYBIRD_BLIST_CACHE_ADD);
 
@@ -374,6 +524,7 @@ hybird_blist_set_name_field(HybirdBuddy *buddy)
 
 	g_free(mood);
 	g_free(text);
+	g_free(tmp);
 }
 
 /**

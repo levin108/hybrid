@@ -112,8 +112,14 @@ file(GLOB HYBIRD_INCLUDES "src/*.h" "lib/*.h")
 install(FILES ${HYBIRD_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
 
 # install pixmaps
-file(GLOB HYBIRD_PIXMAPS "share/*.png" "share/*.jpg")
+file(GLOB HYBIRD_PIXMAPS 
+	"share/*.png"
+	"share/*.jpg")
 install(FILES ${HYBIRD_PIXMAPS} DESTINATION ${DATA_INSTALL_DIR})
+
+# install menus pixmaps
+file(GLOB HYBIRD_MENUS_PIXMAPS "share/menus/*.png")
+install(FILES ${HYBIRD_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/menus/")
 
 add_executable(hybird ${hybird_SRC})
 target_link_libraries(hybird ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})

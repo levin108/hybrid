@@ -236,8 +236,8 @@ menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 	newconv->chat_buddies = g_slist_append(newconv->chat_buddies, newchat);
 
 	newchat->pagelabel = create_note_label(newchat);
-	page_index = gtk_notebook_append_page(GTK_NOTEBOOK(newconv->notebook), vbox,
-						newchat->pagelabel);
+	page_index = gtk_notebook_append_page(GTK_NOTEBOOK(newconv->notebook),
+					vbox, newchat->pagelabel);
 	gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(newconv->notebook), vbox, TRUE);
 	gtk_notebook_set_tab_detachable(GTK_NOTEBOOK(newconv->notebook), vbox, TRUE);
 	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(newconv->notebook),

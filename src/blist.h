@@ -175,8 +175,6 @@ void hybird_blist_set_buddy_icon(HybirdBuddy *buddy,
  */
 const gchar *hybird_blist_get_buddy_checksum(HybirdBuddy *buddy);
 
-void hybird_blist_set_buddy_checksum(HybirdBuddy *buddy);
-
 /**
  * Find a group with the specified id.
  *

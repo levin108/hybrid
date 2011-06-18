@@ -89,12 +89,21 @@ create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 {
 	GdkPixbufLoader *loader;
 	GdkPixbuf *pixbuf;
-
-	g_return_val_if_fail(pixbuf_data != NULL, NULL);
-	g_return_val_if_fail(pixbuf_len != 0, NULL);
+	guchar *default_pixbuf_data;
+	gsize default_pixbuf_size;
 
 	loader = gdk_pixbuf_loader_new();
-	gdk_pixbuf_loader_write(loader, pixbuf_data, pixbuf_len, NULL);
+
+	if (!pixbuf_data || pixbuf_len == 0) { /**< Load the default. */
+		g_file_get_contents(DATA_DIR"/icon.png",
+				(gchar**)&default_pixbuf_data, &default_pixbuf_size, NULL);
+		gdk_pixbuf_loader_write(loader, default_pixbuf_data,
+				default_pixbuf_size, NULL);
+		g_free(default_pixbuf_data);
+
+	} else {
+		gdk_pixbuf_loader_write(loader, pixbuf_data, pixbuf_len, NULL);
+	}
 	gdk_pixbuf_loader_close(loader, NULL);
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
@@ -112,9 +121,6 @@ create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
 {
 	GdkPixbuf *pixbuf;
 	GdkPixbuf *res;
-
-	g_return_val_if_fail(pixbuf_data != NULL, NULL);
-	g_return_val_if_fail(pixbuf_len != 0, NULL);
 
 	pixbuf = create_pixbuf(pixbuf_data, pixbuf_len);
 
@@ -135,9 +141,20 @@ create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 	GdkPixbuf *newpixbuf;
 	gint orig_width;
 	gint orig_height;
+	guchar *default_pixbuf_data;
+	gsize default_pixbuf_size;
 
 	loader = gdk_pixbuf_loader_new();
-	gdk_pixbuf_loader_write(loader, pixbuf_data, pixbuf_len, NULL);
+	if (!pixbuf_data || pixbuf_len == 0) { /**< Load the default. */
+		g_file_get_contents(DATA_DIR"/icon.png",
+				(gchar**)&default_pixbuf_data, &default_pixbuf_size, NULL);
+		gdk_pixbuf_loader_write(loader, default_pixbuf_data,
+				default_pixbuf_size, NULL);
+		g_free(default_pixbuf_data);
+
+	} else {
+		gdk_pixbuf_loader_write(loader, pixbuf_data, pixbuf_len, NULL);
+	}
 	gdk_pixbuf_loader_close(loader, NULL);
 
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
