@@ -164,7 +164,20 @@ portrait_recv_cb(gint sk, gpointer user_data)
 	buf[n] = '\0';
 
 	if (n == 0) {
+		imbuddy = hybird_blist_find_buddy(trans->ac->account,
+				trans->buddy->userid);
+
 		if (hybird_get_http_code(trans->data) != 200) {
+			/* 
+			 * Note that we got no portrait, but we still need
+			 * to set buddy icon, just for the portrait checksum, we 
+			 * set it default to "0" instead of leaving it NULL,
+			 * so that in the next login, we just check the changes
+			 * of the buddy's checksum to determine whether to fetch a 
+			 * portrait from the server. 
+			 */
+			hybird_blist_set_buddy_icon(imbuddy, NULL, 0,
+					trans->buddy->portrait_crc);
 			goto pt_fin;
 		}
 
@@ -175,9 +188,6 @@ portrait_recv_cb(gint sk, gpointer user_data)
 		}
 
 		pos += 4;
-
-		imbuddy = hybird_blist_find_buddy(trans->ac->account,
-				trans->buddy->userid);
 
 		hybird_blist_set_buddy_icon(imbuddy, (guchar*)pos,
 				trans->data_len, trans->buddy->portrait_crc);
@@ -284,12 +294,9 @@ fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 
 	checksum = hybird_blist_get_buddy_checksum(hybird_buddy);
 
-	g_print("checksum : %d\n", checksum == NULL);
-
-	if (checksum)
-	printf("%s, %s\n", checksum, buddy->portrait_crc);
 	if (checksum != NULL && g_strcmp0(checksum, buddy->portrait_crc) == 0) {
-		hybird_debug_info("fetion", "portrait for %s(%s) up to date");
+		hybird_debug_info("fetion", "portrait for %s(%s) up to date",
+				checksum, buddy->portrait_crc);
 		return;
 	}
 

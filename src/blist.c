@@ -238,6 +238,7 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 {
 	GdkPixbuf *status_icon;
 	GdkPixbuf *proto_icon;
+	GdkPixbuf *buddy_icon;
 	HybirdBuddy *buddy;
 
 	g_return_val_if_fail(blist != NULL, NULL);
@@ -263,12 +264,23 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 	status_icon = create_presence_pixbuf(HYBIRD_STATE_OFFLINE, 32);
 	proto_icon = gdk_pixbuf_new_from_file(DATA_DIR"/msn.png", NULL);
 
+	/*
+	 * Here we need to set a default icon for the buddy, never use 
+	 * hybird_blist_add_buddy_icon(), for it will modify the cache
+	 * of "crc" attribute, but we only allow this function to modify
+	 * the "id" and "name" attribute, so we use the original method
+	 * to set a default icon.
+	 */
+	buddy_icon = gdk_pixbuf_new_from_file_at_size(DATA_DIR"/icon.png",
+			16, 16, NULL);
+
 	buddy = g_new0(HybirdBuddy, 1);
 	
 	gtk_tree_store_append(blist->treemodel, &buddy->iter, &parent->iter);
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
 			HYBIRD_BLIST_BUDDY_ID, id,
+			HYBIRD_BLIST_STATUS_ICON, buddy_icon,
 			HYBIRD_BLIST_STATUS_ICON, status_icon,
 			HYBIRD_BLIST_PROTO_ICON, proto_icon,
 			HYBIRD_BLIST_BUDDY_NAME, name,
@@ -776,5 +788,4 @@ hybird_blist_buddy_icon_save(HybirdBuddy *buddy)
 			buddy->icon_data_length, NULL);
 
 	g_free(name);
-
 }

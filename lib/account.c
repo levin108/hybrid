@@ -208,7 +208,6 @@ load_blist_from_disk(HybirdAccount *account)
 					g_free(value);
 					value = NULL;
 				}
-				printf("ccc : %s\n", value);
 			}
 
 			hybird_blist_set_buddy_icon(buddy, icon_data,

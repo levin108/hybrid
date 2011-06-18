@@ -624,7 +624,15 @@ sip_parse_presence(fetion_account *ac, const gchar *sipmsg)
 			if (xmlnode_has_prop(pnode, "p")) {
 				temp = xmlnode_prop(pnode, "p");
 				g_free(buddy->portrait_crc);
+
+				if (*temp == '\0') {
+					g_free(temp);
+					temp = g_strdup("0");
+				}
 				buddy->portrait_crc = temp;
+			} else {
+				g_free(buddy->portrait_crc);
+				buddy->portrait_crc = g_strdup("0");
 			}
 
 			if (xmlnode_has_prop(pnode, "cs")) {
