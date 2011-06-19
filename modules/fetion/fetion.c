@@ -2,6 +2,7 @@
 #include "util.h"
 #include "account.h"
 #include "module.h"
+#include "info.h"
 #include "blist.h"
 
 #include "fetion.h"
@@ -169,7 +170,11 @@ fetion_login(HybirdAccount *imac)
 static void
 fetion_get_info(HybirdAccount *account, HybirdBuddy *buddy)
 {
-	printf("%s\n", buddy->id);
+	HybirdInfo *info;
+
+	info = hybird_info_create(buddy);
+	hybird_info_add_pair(info, "Name", buddy->name);
+	hybird_info_add_pair(info, "Mood", buddy->mood);
 }
 
 HybirdModuleInfo module_info = {

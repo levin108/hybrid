@@ -1,9 +1,54 @@
 #include <glib.h>
 #include "util.h"
+#include "config.h"
 #include "account.h"
 #include "blist.h"
 
+GSList *account_list = NULL;
+
 static void load_blist_from_disk(HybirdAccount *account);
+
+void
+hybird_account_init(void)
+{
+	extern HybirdConfig *global_config;
+	gchar *account_file;
+	gchar *config_path;
+	xmlnode *root;
+	xmlnode *node;
+	gboolean flush = FALSE;
+
+	config_path = hybird_config_get_path();
+	account_file = g_strdup_printf("%s/accounts.xml", config_path);
+	g_free(config_path);
+
+	if (!(root = xmlnode_root_from_file(account_file))) {
+		const gchar *root_name = "<accounts></accounts>";
+		hybird_debug_info("account", "accounts.xml doesn't exist or"
+				"in bad format, create a new one.");
+		root = xmlnode_root(root_name, strlen(root_name));
+		flush ^= 1;
+	}
+
+	if ((node = xmlnode_child(root))) {
+		if (g_strcmp0(node->name, "account")) {
+			hybird_debug_error("account", "accounts.xml is in bad format,"
+					"please try to remove ~/.config/hybird/accounts.xml,"
+					"and then restart hybird :)");
+			xmlnode_free(root);
+			return;
+		}
+
+		while (node) {
+				
+			node = node->next;
+		}
+	}
+
+	if (flush) {
+		xmlnode_save_file(root, account_file);
+	}
+}
 
 HybirdAccount*
 hybird_account_create(HybirdModule *proto)
@@ -12,8 +57,10 @@ hybird_account_create(HybirdModule *proto)
 	g_return_val_if_fail(proto != NULL, NULL);
 
 	HybirdAccount *ac = g_new0(HybirdAccount, 1);
-	hybird_account_set_username(ac, "547264589");
-	hybird_account_set_password(ac, "lwp1279");
+	//hybird_account_set_username(ac, "547264589");
+	//hybird_account_set_password(ac, "lwp1279");
+	hybird_account_set_username(ac, "15210634361");
+	hybird_account_set_password(ac, "leveil926.n7");
 	
 	ac->config = global_config;
 	ac->proto = proto;

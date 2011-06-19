@@ -2,6 +2,7 @@
 #define HYBIRD_GTKUTILS_H
 
 #include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,6 +64,40 @@ GdkPixbuf *hybird_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len
  * @return The pixbuf created.
  */
 GdkPixbuf *hybird_create_presence_pixbuf(gint presence, gint scale_size);
+
+/**
+ * Create a child menu for the @parent menu. Create an image menu if 
+ * icon_path is not NULL, orelse create a text menu.
+ *
+ * @param parent    The parent menu of the menu to create.
+ * @param icon_name The name of icon without suffix and '/', The icon
+ *                  must be in share/menus, and has suffix of '.png'.
+ */
+GtkWidget *hybird_create_menu(GtkWidget *parent, const gchar *title,
+		const gchar *icon_name, gboolean sensitive,
+		void (*callback)(GtkWidget *widget, gpointer user_data),
+		gpointer user_data);
+
+/**
+ * Create a GtkWindow.
+ *
+ * @param title The window title.
+ * @param icon  The window icon. If NULL, load the default icon.
+ *              It'll decrease the reference value of the icon,
+ *              so there's no need to unref the icon manaully.
+ * @param pos   The window position.
+ * @param resizable True if the user can resize the window.
+ *
+ * @return The GtkWindow created.
+ */
+GtkWidget *hybird_create_window(const gchar *title,	GdkPixbuf *icon,
+		GtkWindowPosition pos, gboolean resizable);
+/**
+ * Create a seperator for a menu.
+ *
+ * @param parent The menu widget.
+ */
+void hybird_create_menu_seperator(GtkWidget *parent);
 
 gchar *hybird_sha1(const gchar *in, gint size);
 

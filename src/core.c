@@ -4,6 +4,7 @@
 #include "module.h"
 #include "blist.h"
 #include "util.h"
+#include "gtkaccount.h"
 #include "gtkutils.h"
 
 extern HybirdBlist *blist;
@@ -55,30 +56,39 @@ window_destroy(GtkWidget *widget, gpointer user_data)
 }
 
 static void
+manage_account_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybirdAccountPanel *panel;
+
+	panel = hybird_account_panel_create();
+	printf("abc\n");
+}
+
+static void
+quit_cb(GtkWidget *widget, gpointer user_data)
+{
+	printf("quit\n");
+	//gtk_main_quit();
+}
+
+static void
 create_basic_menus(GtkBox *box)
 {
-#if 0
 	GtkUIManager *ui;
+	GtkActionGroup *actionGroup;
 
 	GtkActionEntry entries[] = {
-		{ "Accounts", NULL, "_Accounts" },
-
-		{ "Open", GTK_STOCK_OPEN, "Open",
-		 "<control>O", "Open File", NULL},
-
-		{ "Save", GTK_STOCK_SAVE, "Save",
-		 "<control>S", "Save File", NULL},
-
+		{ "Account", NULL, "_Account" },
+		{ "Manage Accounts", NULL, "Manage Accounts",
+		 "<control>A", "Manage Account", G_CALLBACK(manage_account_cb)},
 		{ "Quit", GTK_STOCK_QUIT, "Quit",
-		 "<control>Q", "Quit", NULL},
-
+		 "<control>Q", "Quit", G_CALLBACK(quit_cb)},
 		{ "Help", NULL, "_Help" },
-
 		{ "About", GTK_STOCK_ABOUT, "About" }
 	};
-	GtkActionGroup *actionGroup;
+
 	actionGroup = gtk_action_group_new("Actions");
-    gtk_action_group_add_actions(actionGroup, entries, 6, NULL);
+    gtk_action_group_add_actions(actionGroup, entries, 5, NULL);
 
 	ui = gtk_ui_manager_new();
 	gtk_ui_manager_insert_action_group(ui, actionGroup, 0);
@@ -88,7 +98,6 @@ create_basic_menus(GtkBox *box)
 
 	gtk_box_pack_start(box, gtk_ui_manager_get_widget(ui, "/MenuBar"),
 			FALSE, FALSE, 0);
-#endif
 }
 
 static void
@@ -135,7 +144,9 @@ main(gint argc, gchar **argv)
 
 	hybird_module_init();
 
-	hybird_start_login();
+	hybird_account_init();
+
+//	hybird_start_login();
 
 	gtk_main();
 

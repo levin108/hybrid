@@ -1,8 +1,7 @@
 <ui>
 	<menubar name="MenuBar">
-		<menu action="Accounts">
-			<menuitem action="Open"/>
-			<menuitem action="Save"/>
+		<menu action="Account">
+			<menuitem action="Manage Accounts"/>
 			<separator/>
 			<menuitem action="Quit"/>
 		</menu>

@@ -103,6 +103,12 @@ fetion_buddy_destroy(fetion_buddy *buddy)
 }
 
 void
+fetion_buddy_get_info(fetion_account *ac, fetion_buddy *buddy)
+{
+
+}
+
+void
 fetion_buddies_init(fetion_account *ac)
 {
 	GSList *pos;

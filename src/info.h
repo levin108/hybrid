@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 
 typedef struct _HybirdInfo HybirdInfo;
+typedef struct _HybirdInfoItem HybirdInfoItem;
 
 #include "blist.h"
 
@@ -12,6 +13,12 @@ struct _HybirdInfo {
 	GtkWidget *treeview;
 	GtkListStore *store;
 	HybirdBuddy *buddy;
+	GSList *item_list;
+};
+
+struct _HybirdInfoItem {
+	gchar *name;
+	gchar *value;
 };
 
 enum {
@@ -34,6 +41,16 @@ extern "C" {
  * @return The profile info panel created.
  */
 HybirdInfo *hybird_info_create(HybirdBuddy *buddy);
+
+/**
+ * Add a name-value pair to the info panel.
+ *
+ * @param info The info panel context.
+ * @param name The name of the pair.
+ * @param value The value of the pair.
+ */
+void hybird_info_add_pair(HybirdInfo *info, const gchar *name,
+		const gchar *value);
 
 #ifdef __cplusplus
 }

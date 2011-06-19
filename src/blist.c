@@ -93,70 +93,6 @@ render_column(HybirdBlist *blist)
 
 }
 
-/**
- * Create a child menu for the @parent menu. Create an image menu if 
- * icon_path is not NULL, orelse create a text menu.
- *
- * @param parent    The parent menu of the menu to create.
- * @param icon_name The name of icon without suffix and '/', The icon
- *                  must be in share/menus, and has suffix of '.png'.
- */
-static GtkWidget*
-create_menu(GtkWidget *parent, const gchar *title, const gchar *icon_name, 
-		gboolean sensitive,
-		void (*callback)(GtkWidget *widget, gpointer user_data),
-		gpointer user_data)
-{
-	GtkWidget *item;
-	GdkPixbuf *pixbuf;
-	GtkWidget *image;
-	gchar *icon_path;
-
-	g_return_val_if_fail(parent != NULL, NULL);
-	g_return_val_if_fail(title != NULL, NULL);
-
-	if (icon_name) {
-		icon_path = g_strdup_printf(DATA_DIR"/menus/%s.png", icon_name);
-		item = gtk_image_menu_item_new_with_label(title);
-		pixbuf = gdk_pixbuf_new_from_file_at_size(icon_path, 16, 16, NULL);
-
-		if (pixbuf) {
-			image = gtk_image_new_from_pixbuf(pixbuf);
-			g_object_unref(pixbuf);
-			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
-		}
-
-		g_free(icon_path);
-
-	} else {
-		item = gtk_menu_item_new_with_label(title);
-	}
-
-	gtk_menu_shell_append(GTK_MENU_SHELL(parent), item);
-
-	if (!sensitive) {
-		gtk_widget_set_sensitive(item, FALSE);
-		return item;
-	}
-
-	if (callback) {
-		g_signal_connect(item, "activate", G_CALLBACK(callback), user_data);
-	}
-
-	return item;
-}
-
-static void
-create_menu_seperator(GtkWidget *parent)
-{
-	GtkWidget *seperator;
-
-	g_return_if_fail(parent != NULL);
-
-	seperator = gtk_separator_menu_item_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(parent), seperator);
-}
-
 static void
 instant_message_menu_cb(GtkWidget *widget, gpointer user_data)
 {
@@ -206,12 +142,12 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 
 	account = buddy->account;
 	
-	create_menu(menu, _("Instant Message"), "instants", TRUE,
+	hybird_create_menu(menu, _("Instant Message"), "instants", TRUE,
 			instant_message_menu_cb, buddy);
-	create_menu(menu, _("Buddy Information"), "profile", TRUE,
+	hybird_create_menu(menu, _("Buddy Information"), "profile", TRUE,
 			buddy_information_menu_cb, buddy);
-	create_menu_seperator(menu);
-	child_menu = create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
+	hybird_create_menu_seperator(menu);
+	child_menu = hybird_create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
 
 	group_menu = gtk_menu_new();
 	
@@ -219,15 +155,15 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 		group = (HybirdGroup*)pos->data;
 
 		if (account == group->account) {
-			create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
+			hybird_create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
 		}
 	}
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(child_menu), group_menu);
 
-	create_menu(menu, _("Remove Buddy"), "remove", TRUE, NULL, NULL);
-	create_menu(menu, _("Rename Buddy"), "rename", TRUE, NULL, NULL);
-	create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
+	hybird_create_menu(menu, _("Remove Buddy"), "remove", TRUE, NULL, NULL);
+	hybird_create_menu(menu, _("Rename Buddy"), "rename", TRUE, NULL, NULL);
+	hybird_create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
 
 	return menu;
 }

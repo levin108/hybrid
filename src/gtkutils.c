@@ -1,8 +1,7 @@
-#include <gtk/gtk.h>
 #include <openssl/sha.h>
 #include "gtkutils.h"
 #include "account.h"
-#include "util.h"
+#include "debug.h"
 /**
  * We copied the following two functions from pidgin,
  * hoping pidgin wouldn't angry,for we follow GPL...
@@ -239,6 +238,86 @@ hybird_create_presence_pixbuf(gint presence, gint scale_size)
 
 	return gdk_pixbuf_new_from_file_at_size(name,
 			scale_size, scale_size, NULL);
+}
+
+GtkWidget*
+hybird_create_menu(GtkWidget *parent, const gchar *title,
+		const gchar *icon_name, gboolean sensitive,
+		void (*callback)(GtkWidget *widget, gpointer user_data),
+		gpointer user_data)
+{
+	GtkWidget *item;
+	GdkPixbuf *pixbuf;
+	GtkWidget *image;
+	gchar *icon_path;
+
+	g_return_val_if_fail(title != NULL, NULL);
+
+	if (icon_name) {
+		icon_path = g_strdup_printf(DATA_DIR"/menus/%s.png", icon_name);
+		item = gtk_image_menu_item_new_with_label(title);
+		pixbuf = gdk_pixbuf_new_from_file_at_size(icon_path, 16, 16, NULL);
+
+		if (pixbuf) {
+			image = gtk_image_new_from_pixbuf(pixbuf);
+			g_object_unref(pixbuf);
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
+		}
+
+		g_free(icon_path);
+
+	} else {
+		item = gtk_menu_item_new_with_label(title);
+	}
+
+	if (parent) {
+		gtk_menu_shell_append(GTK_MENU_SHELL(parent), item);
+	}
+
+	if (!sensitive) {
+		gtk_widget_set_sensitive(item, FALSE);
+		return item;
+	}
+
+	if (callback) {
+		g_signal_connect(item, "activate", G_CALLBACK(callback), user_data);
+	}
+
+	return item;
+}
+
+
+void
+hybird_create_menu_seperator(GtkWidget *parent)
+{
+	GtkWidget *seperator;
+
+	g_return_if_fail(parent != NULL);
+
+	seperator = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(parent), seperator);
+}
+
+GtkWidget*
+hybird_create_window(const gchar *title, GdkPixbuf *icon,
+		GtkWindowPosition pos, gboolean resizable)
+{
+	GtkWidget *window;
+
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+	if (!icon) {
+		icon = hybird_create_default_icon(0);
+	}
+
+	gtk_window_set_icon(GTK_WINDOW(window), icon);
+
+	gtk_window_set_resizable(GTK_WINDOW(window), resizable);
+	gtk_window_set_title(GTK_WINDOW(window), title);
+	gtk_window_set_position(GTK_WINDOW(window), pos);
+	g_object_unref(icon);
+
+	return window;
 }
 
 

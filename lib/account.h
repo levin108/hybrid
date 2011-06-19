@@ -43,6 +43,11 @@ extern "C" {
 #endif
 
 /**
+ * Initialize the account context. Load the existing account.
+ */
+void hybird_account_init(void);
+
+/**
  * Create a new Hybird account with the specified protocol module.
  *
  * @param proto Protocol Module that the account belongs to.

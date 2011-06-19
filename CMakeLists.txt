@@ -101,6 +101,7 @@ set(hybird_SRC
 	lib/xmlnode.c
 	lib/config.c
 	src/gtkutils.c
+	src/gtkaccount.c
 	src/blist.c
 	src/conv.c
 	src/info.c

@@ -1,3 +1,6 @@
+#ifndef HYBIRD_UTIL_H
+#define HYBIRD_UTIL_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,9 +18,6 @@
 
 #define HYBIRD_OK    0
 #define HYBIRD_ERROR 1
-
-#ifndef HYBIRD_UTIL_H
-#define HYBIRD_UTIL_H
 
 #define PATH_LENGTH 1024
 #define URL_LENGTH 1024

@@ -95,6 +95,13 @@ fetion_buddy *fetion_buddy_find_by_userid(fetion_account *ac,
  */
 void fetion_buddy_destroy(fetion_buddy *buddy);
 
+/**
+ * Fetch the detail information from the server.
+ *
+ * @param ac    The fetion account context.
+ * @param buddy The buddy whose detail information to fetch.
+ */
+void fetion_buddy_get_info(fetion_account *ac, fetion_buddy *buddy);
 
 /* UI ops */
 
