@@ -21,23 +21,23 @@ nonblock(gint sk)
 {
 	gint flag;
 
-	g_return_val_if_fail(sk != 0, HYBIRD_ERROR);
+	g_return_val_if_fail(sk != 0, HYBRID_ERROR);
 
-	hybird_debug_info("option", "set socket to be nonblock");
+	hybrid_debug_info("option", "set socket to be nonblock");
 
 	if ((flag = fcntl(sk, F_GETFL, 0)) == -1) {
-		hybird_debug_error("socket", "set socket to be nonblock:%s",
+		hybrid_debug_error("socket", "set socket to be nonblock:%s",
 				strerror(errno));
-		return HYBIRD_ERROR;
+		return HYBRID_ERROR;
 	}
 
 	if ((flag = fcntl(sk, F_SETFL, flag | O_NONBLOCK)) == -1) {
-		hybird_debug_error("socket", "set socket to be nonblock:%s",
+		hybrid_debug_error("socket", "set socket to be nonblock:%s",
 				strerror(errno));
-		return HYBIRD_ERROR;
+		return HYBRID_ERROR;
 	}
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 }
 
 /**
@@ -50,9 +50,9 @@ addr_init(const gchar *hostname, gint port, struct sockaddr *addr)
 	struct sockaddr_in *addr_in = (struct sockaddr_in*)addr;
 
 	memset(host_ip, 0, sizeof(host_ip));
-	if (resolve_host(hostname, host_ip) == HYBIRD_ERROR) {
-		hybird_debug_error("connect", "connect terminate due to bad hostname");
-		return HYBIRD_ERROR;
+	if (resolve_host(hostname, host_ip) == HYBRID_ERROR) {
+		hybrid_debug_error("connect", "connect terminate due to bad hostname");
+		return HYBRID_ERROR;
 	}
 
 	memset(&addr, 0, sizeof(struct sockaddr_in));
@@ -60,41 +60,41 @@ addr_init(const gchar *hostname, gint port, struct sockaddr *addr)
 	addr_in->sin_addr.s_addr = inet_addr(host_ip);
 	addr_in->sin_port = htons(port);
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 }
 
-HybirdConnection*
-hybird_proxy_connect(const gchar *hostname, gint port, connect_callback func,
+HybridConnection*
+hybrid_proxy_connect(const gchar *hostname, gint port, connect_callback func,
 		gpointer user_data)
 {
 	gint sk;
 	struct sockaddr addr;
-	HybirdConnection *conn;
+	HybridConnection *conn;
 
 	g_return_val_if_fail(port != 0, NULL);
 	g_return_val_if_fail(hostname != NULL, NULL);
 
-	hybird_debug_info("connect", "connecting to %s:%d", hostname, port);
+	hybrid_debug_info("connect", "connecting to %s:%d", hostname, port);
 
-	conn = g_new0(HybirdConnection, 1);
+	conn = g_new0(HybridConnection, 1);
 
 	if ((sk = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 
-		hybird_debug_error("connect", "create socket: %s", strerror(errno));
-		hybird_connection_destroy(conn);
+		hybrid_debug_error("connect", "create socket: %s", strerror(errno));
+		hybrid_connection_destroy(conn);
 
 		return NULL;
 	}
 
-	if (nonblock(sk) != HYBIRD_OK) {
+	if (nonblock(sk) != HYBRID_OK) {
 
-		hybird_connection_destroy(conn);
+		hybrid_connection_destroy(conn);
 		return NULL;
 	}
 
-	if (addr_init(hostname, port, &addr) != HYBIRD_OK) {
+	if (addr_init(hostname, port, &addr) != HYBRID_OK) {
 
-		hybird_connection_destroy(conn);
+		hybrid_connection_destroy(conn);
 		return NULL;
 	}
 
@@ -102,16 +102,16 @@ hybird_proxy_connect(const gchar *hostname, gint port, connect_callback func,
 
 		if (errno != EINPROGRESS) {
 
-			hybird_debug_error("connect", "connect to \'%s:%d\':%s", hostname,
+			hybrid_debug_error("connect", "connect to \'%s:%d\':%s", hostname,
 					port, strerror(errno));
-			hybird_connection_destroy(conn);
+			hybrid_connection_destroy(conn);
 
 			return NULL;
 		}
 
-		hybird_debug_info("connect", "connect in progress");
+		hybrid_debug_info("connect", "connect in progress");
 
-		hybird_event_add(sk, HYBIRD_EVENT_WRITE, func, user_data);
+		hybrid_event_add(sk, HYBRID_EVENT_WRITE, func, user_data);
 
 	} else {
 		/* connection establish imediately */
@@ -133,11 +133,11 @@ ssl_connect_cb(gint sk, gpointer user_data)
 {
 	gint l;
 	gboolean res;
-	HybirdSslConnection *ssl_conn = (HybirdSslConnection*)user_data;
+	HybridSslConnection *ssl_conn = (HybridSslConnection*)user_data;
 
 	if (!SSL_set_fd(ssl_conn->ssl, sk)) {
 
-		hybird_debug_error("ssl", "add ssl to tcp socket:%s", 
+		hybrid_debug_error("ssl", "add ssl to tcp socket:%s", 
 				ERR_reason_error_string(ERR_get_error()));
 		return FALSE;
 	}
@@ -183,11 +183,11 @@ ssl_err:
 	return FALSE;
 }
 
-HybirdSslConnection* 
-hybird_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
+HybridSslConnection* 
+hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 		gpointer user_data)
 {
-	HybirdSslConnection *conn;
+	HybridSslConnection *conn;
 
 	g_return_val_if_fail(hostname != NULL, NULL);
 	g_return_val_if_fail(port != 0, NULL);
@@ -197,22 +197,22 @@ hybird_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 	SSL_load_error_strings();
 	SSL_library_init();
 
-	conn = g_new0(HybirdSslConnection, 1);
+	conn = g_new0(HybridSslConnection, 1);
 
 	if (!(conn->ssl_ctx = SSL_CTX_new(SSLv23_client_method()))) {
 
-		hybird_debug_error("ssl", "initialize SSL CTX: %s",
+		hybrid_debug_error("ssl", "initialize SSL CTX: %s",
 				ERR_reason_error_string(ERR_get_error()));
-		hybird_ssl_connection_destory(conn);
+		hybrid_ssl_connection_destory(conn);
 
 		return NULL;
 	}
 
 	if (!(conn->ssl = SSL_new(conn->ssl_ctx))) {
 
-		hybird_debug_error("ssl", "create SSl:%s",
+		hybrid_debug_error("ssl", "create SSl:%s",
 				ERR_reason_error_string(ERR_get_error()));
-		hybird_ssl_connection_destory(conn);
+		hybrid_ssl_connection_destory(conn);
 
 		return NULL;
 	}
@@ -220,25 +220,25 @@ hybird_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 	conn->conn_cb = func;
 	conn->conn_data = user_data;
 
-	conn->conn = hybird_proxy_connect(hostname, port, ssl_connect_cb, conn);
+	conn->conn = hybrid_proxy_connect(hostname, port, ssl_connect_cb, conn);
 
 	return conn;
 }
 
 gint
-hybird_ssl_write(HybirdSslConnection *ssl, const gchar *buf, gint len)
+hybrid_ssl_write(HybridSslConnection *ssl, const gchar *buf, gint len)
 {
 	return SSL_write(ssl->ssl, buf, len);
 }
 
 gint
-hybird_ssl_read(HybirdSslConnection *ssl, gchar *buf, gint len)
+hybrid_ssl_read(HybridSslConnection *ssl, gchar *buf, gint len)
 {
 	return SSL_read(ssl->ssl, buf, len);
 }
 
 void 
-hybird_connection_destroy(HybirdConnection *conn)
+hybrid_connection_destroy(HybridConnection *conn)
 {
 	if (conn) {
 		g_free(conn->host);
@@ -248,18 +248,18 @@ hybird_connection_destroy(HybirdConnection *conn)
 }
 
 void 
-hybird_ssl_connection_destory(HybirdSslConnection *conn)
+hybrid_ssl_connection_destory(HybridSslConnection *conn)
 {
 	if (conn) {
 		SSL_free(conn->ssl);
 		SSL_CTX_free(conn->ssl_ctx);
-		hybird_connection_destroy(conn->conn);
+		hybrid_connection_destroy(conn->conn);
 		g_free(conn);
 	}
 }
 
 gint 
-hybird_get_http_code(const gchar *http_response)
+hybrid_get_http_code(const gchar *http_response)
 {
 	gchar *pos;
 	gchar *code_start = NULL, *code_stop = NULL;
@@ -285,7 +285,7 @@ hybird_get_http_code(const gchar *http_response)
 	}
 
 	if (!code_start || !code_stop) {
-		hybird_debug_error("http", "unknown http response");
+		hybrid_debug_error("http", "unknown http response");
 		return 0;
 	}
 
@@ -298,7 +298,7 @@ hybird_get_http_code(const gchar *http_response)
 
 
 gint 
-hybird_get_http_length(const gchar *http_response)
+hybrid_get_http_length(const gchar *http_response)
 {
 	gchar *pos, *stop;
 	gchar *temp;
@@ -308,7 +308,7 @@ hybird_get_http_length(const gchar *http_response)
 	g_return_val_if_fail(http_response != NULL, 0);
 
 	if (!(pos = g_strrstr(http_response, cur))) {
-		hybird_debug_error("http", "no Content-length in response header.");
+		hybrid_debug_error("http", "no Content-length in response header.");
 		return 0;
 	}
 

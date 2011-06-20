@@ -5,7 +5,7 @@
 static GSList *info_list = NULL;
 
 static void
-render_column(HybirdInfo *info)
+render_column(HybridInfo *info)
 {
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
@@ -25,7 +25,7 @@ render_column(HybirdInfo *info)
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(column, renderer,
-					    "markup", HYBIRD_INFO_NAME_COLUMN,
+					    "markup", HYBRID_INFO_NAME_COLUMN,
 					    NULL);
 	g_object_set(renderer, "wrap-mode", PANGO_WRAP_CHAR, NULL);
 	g_object_set(renderer, "wrap-width",120, NULL);
@@ -33,7 +33,7 @@ render_column(HybirdInfo *info)
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(column, renderer,
-					    "markup", HYBIRD_INFO_VALUE_COLUMN,
+					    "markup", HYBRID_INFO_VALUE_COLUMN,
 					    NULL);
 	g_object_set(renderer, "wrap-mode", PANGO_WRAP_CHAR, NULL);
 	g_object_set(renderer, "wrap-width",250, NULL);
@@ -42,14 +42,14 @@ render_column(HybirdInfo *info)
 /**
  * Create a new information item with the name-value pair;
  */
-static HybirdInfoItem*
-hybird_info_item_create(const gchar *name, const gchar *value)
+static HybridInfoItem*
+hybrid_info_item_create(const gchar *name, const gchar *value)
 {
-	HybirdInfoItem *item;
+	HybridInfoItem *item;
 
 	g_return_val_if_fail(name != NULL, NULL);
 
-	item = g_new0(HybirdInfoItem, 1);
+	item = g_new0(HybridInfoItem, 1);
 	item->name = g_strdup(name);
 	item->value = g_strdup(value);
 
@@ -60,7 +60,7 @@ hybird_info_item_create(const gchar *name, const gchar *value)
  * Destroy the information item.
  */
 static void
-hybird_info_item_destroy(HybirdInfoItem *item)
+hybrid_info_item_destroy(HybridInfoItem *item)
 {
 	if (item) {
 		g_free(item->name);
@@ -72,7 +72,7 @@ hybird_info_item_destroy(HybirdInfoItem *item)
 static void
 close_click_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybirdInfo *info = (HybirdInfo*)user_data;
+	HybridInfo *info = (HybridInfo*)user_data;
 
 	gtk_widget_destroy(info->window);
 }
@@ -80,26 +80,26 @@ close_click_cb(GtkWidget *widget, gpointer user_data)
 static void
 window_destroy_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybirdInfo *info = (HybirdInfo*)user_data;
-	HybirdInfoItem *item;
+	HybridInfo *info = (HybridInfo*)user_data;
+	HybridInfoItem *item;
 	GSList *pos;
 
 	while (info->item_list) {
 		pos = info->item_list;
-		item = (HybirdInfoItem*)pos->data;
+		item = (HybridInfoItem*)pos->data;
 
 		info->item_list = g_slist_remove(info->item_list, item);
-		hybird_info_item_destroy(item);
+		hybrid_info_item_destroy(item);
 	}
 
 	info_list = g_slist_remove(info_list, info);
 	g_free(info);
 }
 
-HybirdInfo*
-hybird_info_create(HybirdBuddy *buddy)
+HybridInfo*
+hybrid_info_create(HybridBuddy *buddy)
 {
-	HybirdInfo *info;
+	HybridInfo *info;
 	GdkPixbuf *pixbuf;
 	GtkWidget *vbox;
 	GtkWidget *scroll;
@@ -114,21 +114,21 @@ hybird_info_create(HybirdBuddy *buddy)
 	g_return_val_if_fail(buddy != NULL, NULL);
 
 	for (pos = info_list; pos; pos = pos->next) {
-		info = (HybirdInfo*)pos->data;
+		info = (HybridInfo*)pos->data;
 
 		if (info->buddy == buddy) {
-			return (HybirdInfo*)pos->data;
+			return (HybridInfo*)pos->data;
 		}
 	}
 
-	info = g_new0(HybirdInfo, 1);
+	info = g_new0(HybridInfo, 1);
 	info->buddy = buddy;
 
 	info_list = g_slist_append(info_list, info);
 
 	info->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	g_object_set(info->window, "border-width", 10, NULL);
-	pixbuf = hybird_create_default_icon(0);
+	pixbuf = hybrid_create_default_icon(0);
 	title = g_strdup_printf(_("%s's information"),
 			buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id);
 
@@ -165,7 +165,7 @@ hybird_info_create(HybirdBuddy *buddy)
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 			GTK_SHADOW_ETCHED_IN);
 
-	info->store = gtk_list_store_new(HYBIRD_INFO_COLUMNS,
+	info->store = gtk_list_store_new(HYBRID_INFO_COLUMNS,
 					G_TYPE_STRING,
 					G_TYPE_STRING);
 
@@ -192,9 +192,9 @@ hybird_info_create(HybirdBuddy *buddy)
 }
 
 void
-hybird_info_add_pair(HybirdInfo *info, const gchar *name, const gchar *value)
+hybrid_info_add_pair(HybridInfo *info, const gchar *name, const gchar *value)
 {
-	HybirdInfoItem *item;
+	HybridInfoItem *item;
 	GtkTreeIter iter;
 	gchar *name_markup;
 	gchar *name_escaped;
@@ -203,7 +203,7 @@ hybird_info_add_pair(HybirdInfo *info, const gchar *name, const gchar *value)
 	g_return_if_fail(info != NULL);
 	g_return_if_fail(name != NULL);
 
-	item = hybird_info_item_create(name, value);
+	item = hybrid_info_item_create(name, value);
 	info->item_list = g_slist_append(info->item_list, item);
 
 	name_escaped = g_markup_escape_text(name, -1);
@@ -212,8 +212,8 @@ hybird_info_add_pair(HybirdInfo *info, const gchar *name, const gchar *value)
 
 	gtk_list_store_append(info->store, &iter);
 	gtk_list_store_set(info->store, &iter,
-			HYBIRD_INFO_NAME_COLUMN, name_markup,
-			HYBIRD_INFO_VALUE_COLUMN, value_escaped, -1);
+			HYBRID_INFO_NAME_COLUMN, name_markup,
+			HYBRID_INFO_VALUE_COLUMN, value_escaped, -1);
 
 	g_free(name_markup);
 	g_free(name_escaped);

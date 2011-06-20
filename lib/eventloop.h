@@ -1,12 +1,12 @@
-#ifndef HYBIRD_EVENTLOOP_H
-#define HYBIRD_EVENTLOOP_H
+#ifndef HYBRID_EVENTLOOP_H
+#define HYBRID_EVENTLOOP_H
 
 #include <glib.h>
 
 #include "connect.h"
 
-#define HYBIRD_EVENT_READ  (G_IO_IN | G_IO_HUP | G_IO_ERR)
-#define HYBIRD_EVENT_WRITE (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
+#define HYBRID_EVENT_READ  (G_IO_IN | G_IO_HUP | G_IO_ERR)
+#define HYBRID_EVENT_WRITE (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
 
 typedef gboolean (*input_func)(gint sk, gpointer user_data);
 
@@ -23,7 +23,7 @@ extern "C" {
  *
  * @return The event source id.
  */
-guint hybird_event_add(gint sk, gint event_type, input_func func,
+guint hybrid_event_add(gint sk, gint event_type, input_func func,
 		gpointer user_data);
 
 /**
@@ -35,11 +35,11 @@ guint hybird_event_add(gint sk, gint event_type, input_func func,
  *
  * @return The event source id.
  */
-guint hybird_ssl_event_add(HybirdSslConnection *isc, ssl_callback func,
+guint hybrid_ssl_event_add(HybridSslConnection *isc, ssl_callback func,
 		gpointer user_data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HYBIRD_EVENTLOOP_H */
+#endif /* HYBRID_EVENTLOOP_H */

@@ -21,36 +21,36 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 	GSList *list;
 	GSList *pos;
 	fetion_buddy *buddy;
-	HybirdBuddy *imbuddy;
+	HybridBuddy *imbuddy;
 
 	list = sip_parse_presence(ac, sipmsg);
 
 	for (pos = list; pos; pos = pos->next) {
 
 		buddy = (fetion_buddy*)pos->data;
-		imbuddy = hybird_blist_find_buddy(ac->account, buddy->userid);
+		imbuddy = hybrid_blist_find_buddy(ac->account, buddy->userid);
 
-		hybird_blist_set_buddy_name(imbuddy, buddy->nickname);
-		hybird_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);
+		hybrid_blist_set_buddy_name(imbuddy, buddy->nickname);
+		hybrid_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);
 
 		switch (buddy->state) {
 			case P_ONLINE:
-				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_ONLINE);
+				hybrid_blist_set_buddy_state(imbuddy, HYBRID_STATE_ONLINE);
 				break;
 			case P_OFFLINE:
-				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_OFFLINE);
+				hybrid_blist_set_buddy_state(imbuddy, HYBRID_STATE_OFFLINE);
 				break;
 			case P_INVISIBLE:
-				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_OFFLINE);
+				hybrid_blist_set_buddy_state(imbuddy, HYBRID_STATE_OFFLINE);
 				break;
 			case P_AWAY:
-				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_AWAY);
+				hybrid_blist_set_buddy_state(imbuddy, HYBRID_STATE_AWAY);
 				break;
 			case P_BUSY:
-				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_BUSY);
+				hybrid_blist_set_buddy_state(imbuddy, HYBRID_STATE_BUSY);
 				break;
 			default:
-				hybird_blist_set_buddy_state(imbuddy, HYBIRD_STATE_AWAY);
+				hybrid_blist_set_buddy_state(imbuddy, HYBRID_STATE_AWAY);
 				break;
 		}
 
@@ -72,7 +72,7 @@ process_notify_cb(fetion_account *ac, const gchar *sipmsg)
 	if (notify_type == NOTIFICATION_TYPE_UNKNOWN ||
 			event_type == NOTIFICATION_EVENT_UNKNOWN) {
 
-		hybird_debug_info("fetion", "recv unknown notification:\n%s", sipmsg);
+		hybrid_debug_info("fetion", "recv unknown notification:\n%s", sipmsg);
 		return;
 	}
 
@@ -148,36 +148,36 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 			//process_sipc_cb(ac, sipmsg);	
 			break;
 		default:
-			hybird_debug_info("fetion", "recevie unknown msg:\n%s", sipmsg);
+			hybrid_debug_info("fetion", "recevie unknown msg:\n%s", sipmsg);
 			break;
 	}
 }
 
 static gboolean
-fetion_login(HybirdAccount *imac)
+fetion_login(HybridAccount *imac)
 {
-	HybirdSslConnection *conn;
+	HybridSslConnection *conn;
 
-	hybird_debug_info("fetion", "fetion is now logining...");
+	hybrid_debug_info("fetion", "fetion is now logining...");
 
 	ac = fetion_account_create(imac, imac->username, imac->password);
 
-	conn = hybird_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
+	conn = hybrid_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
 
 	return TRUE;
 }
 
 static void
-fetion_get_info(HybirdAccount *account, HybirdBuddy *buddy)
+fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
 {
-	HybirdInfo *info;
+	HybridInfo *info;
 
-	info = hybird_info_create(buddy);
-	hybird_info_add_pair(info, "Name", buddy->name);
-	hybird_info_add_pair(info, "Mood", buddy->mood);
+	info = hybrid_info_create(buddy);
+	hybrid_info_add_pair(info, "Name", buddy->name);
+	hybrid_info_add_pair(info, "Mood", buddy->mood);
 }
 
-HybirdModuleInfo module_info = {
+HybridModuleInfo module_info = {
 	"fetion",
 	"levin108",
 	N_("fetion client"),
@@ -189,9 +189,9 @@ HybirdModuleInfo module_info = {
 };
 
 void 
-fetion_module_init(HybirdModule *module)
+fetion_module_init(HybridModule *module)
 {
 	printf("hello world\n");
 }
 
-HYBIRD_MODULE_INIT(fetion_module_init, &module_info);
+HYBRID_MODULE_INIT(fetion_module_init, &module_info);

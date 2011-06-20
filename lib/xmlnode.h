@@ -1,5 +1,5 @@
-#ifndef HYBIRD_XMLPARSER_H
-#define HYBIRD_XMLPARSER_H
+#ifndef HYBRID_XMLPARSER_H
+#define HYBRID_XMLPARSER_H
 #include <glib.h>
 #include <libxml/parser.h>
 
@@ -137,7 +137,7 @@ void xmlnode_set_prop(xmlnode *node, const gchar *name, const gchar *value);
  * @param root The root node of the xml context.
  * @param filepath The absoulte path of the xml file to save.
  *
- * @return HYBIRD_OK if success, HYBIRD_ERROR if there was an error.
+ * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
  */
 gint xmlnode_save_file(xmlnode *root, const gchar *filepath);
 

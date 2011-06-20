@@ -1,21 +1,21 @@
-#ifndef HYBIRD_CHAT_H
-#define HYBIRD_CHAT_H
+#ifndef HYBRID_CHAT_H
+#define HYBRID_CHAT_H
 
 #include <gtk/gtk.h>
 #include "blist.h"
 
-typedef struct _HybirdConversation HybirdConversation;
-typedef struct _HybirdChatPanel HybirdChatPanel;
+typedef struct _HybridConversation HybridConversation;
+typedef struct _HybridChatPanel HybridChatPanel;
 
-struct _HybirdConversation {
+struct _HybridConversation {
 	GtkWidget *window;
 	GtkWidget *notebook;
 	GSList *chat_buddies;
 };
 
-struct _HybirdChatPanel {
-	HybirdConversation *parent;
-	HybirdBuddy *buddy;
+struct _HybridChatPanel {
+	HybridConversation *parent;
+	HybridBuddy *buddy;
 	GtkWidget *pagelabel;
 	GtkWidget *textview;
 	GtkWidget *toolbar;
@@ -59,9 +59,9 @@ extern "C" {
  *
  * @param buddy The buddy to chat with.
  *
- * @return The HybirdChatPanel created.
+ * @return The HybridChatPanel created.
  */
-HybirdChatPanel *hybird_chat_panel_create(HybirdBuddy *buddy);
+HybridChatPanel *hybrid_chat_panel_create(HybridBuddy *buddy);
 
 #ifdef __cplusplus
 }

@@ -1,20 +1,20 @@
-#ifndef HYBIRD_CONFIG_H
-#define HYBIRD_CONFIG_H
+#ifndef HYBRID_CONFIG_H
+#define HYBRID_CONFIG_H
 #include <gtk/gtk.h>
 #include "xmlnode.h"
 
-typedef struct _HybirdBlistCache HybirdBlistCache;
-typedef struct _HybirdConfig HybirdConfig;
+typedef struct _HybridBlistCache HybridBlistCache;
+typedef struct _HybridConfig HybridConfig;
 
-struct _HybirdBlistCache {
+struct _HybridBlistCache {
 	xmlnode *root;
 	gchar *cache_file_name;
 };
 
-struct _HybirdConfig {
+struct _HybridConfig {
 	gchar *config_path;
 	gchar *icon_path;
-	HybirdBlistCache *blist_cache;
+	HybridBlistCache *blist_cache;
 };
 
 #ifdef __cplusplus
@@ -27,30 +27,30 @@ extern "C" {
  *
  * @return The path name, needs to be freed when no longer used.
  */
-gchar *hybird_config_get_path(void);
+gchar *hybrid_config_get_path(void);
 
 /**
  * Create a config context.
  *
  * @return The config structure created.
  */
-HybirdConfig *hybird_config_create();
+HybridConfig *hybrid_config_create();
 
 /**
  * Initialize the config context. Things to do:
  * 1. Initialize the buddy list cache.
  * 2. ...
  *
- * @return HYBIRD_OK if success, HYBIRD_ERROR if there was an error.
+ * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
  */
-gint hybird_config_init(void);
+gint hybrid_config_init(void);
 
 /**
  * Destroy the config context.
  *
  * @param config The config context to destroy.
  */
-void hybird_config_destroy(HybirdConfig *config);
+void hybrid_config_destroy(HybridConfig *config);
 
 /**
  * Flush the blist cache, synchronize the cache in memory
@@ -58,10 +58,10 @@ void hybird_config_destroy(HybirdConfig *config);
  * 
  * @param blist_cache The cache to flush.
  */
-void hybird_blist_cache_flush();
+void hybrid_blist_cache_flush();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HYBIRD_CONFIG_H */
+#endif /* HYBRID_CONFIG_H */

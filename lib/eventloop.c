@@ -26,7 +26,7 @@ read_event_cb(GIOChannel *source, GIOCondition condition, gpointer user_data)
 }
 
 guint
-hybird_event_add(gint sk, gint event_type, input_func func, gpointer user_data)
+hybrid_event_add(gint sk, gint event_type, input_func func, gpointer user_data)
 {
 	g_return_val_if_fail(sk != 0, -1);
 
@@ -49,12 +49,12 @@ hybird_event_add(gint sk, gint event_type, input_func func, gpointer user_data)
 static gboolean
 ssl_recv_cb(gint sk, gpointer user_data)
 {
-	HybirdSslConnection *isc = (HybirdSslConnection*)user_data;
+	HybridSslConnection *isc = (HybridSslConnection*)user_data;
 	return isc->recv_cb(isc, isc->recv_data);
 }
 
 guint 
-hybird_ssl_event_add(HybirdSslConnection *isc, ssl_callback func,
+hybrid_ssl_event_add(HybridSslConnection *isc, ssl_callback func,
 		gpointer user_data) 
 {
 	g_return_val_if_fail(isc != NULL, 0);
@@ -63,5 +63,5 @@ hybird_ssl_event_add(HybirdSslConnection *isc, ssl_callback func,
 	isc->recv_cb = func;
 	isc->recv_data = user_data;
 
-	return hybird_event_add(isc->sk, HYBIRD_EVENT_READ, ssl_recv_cb, isc);
+	return hybrid_event_add(isc->sk, HYBRID_EVENT_READ, ssl_recv_cb, isc);
 }

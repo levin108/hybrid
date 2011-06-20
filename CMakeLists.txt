@@ -1,7 +1,7 @@
-project(hybird)
+project(hybrid)
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
-set(TARNAME hybird)
+set(TARNAME hybrid)
 
 
 # program name, version etc
@@ -91,7 +91,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
 )
 
-set(hybird_SRC
+set(hybrid_SRC
 	lib/connect.c
 	lib/network.c
 	lib/debug.c
@@ -110,21 +110,21 @@ set(hybird_SRC
 )
 
 # install include files
-file(GLOB HYBIRD_INCLUDES "src/*.h" "lib/*.h")
-install(FILES ${HYBIRD_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
+file(GLOB HYBRID_INCLUDES "src/*.h" "lib/*.h")
+install(FILES ${HYBRID_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
 
 # install pixmaps
-file(GLOB HYBIRD_PIXMAPS 
+file(GLOB HYBRID_PIXMAPS 
 	"share/*.png"
 	"share/*.jpg")
-install(FILES ${HYBIRD_PIXMAPS} DESTINATION ${DATA_INSTALL_DIR})
+install(FILES ${HYBRID_PIXMAPS} DESTINATION ${DATA_INSTALL_DIR})
 
 # install menus pixmaps
-file(GLOB HYBIRD_MENUS_PIXMAPS "share/menus/*.png")
-install(FILES ${HYBIRD_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/menus/")
+file(GLOB HYBRID_MENUS_PIXMAPS "share/menus/*.png")
+install(FILES ${HYBRID_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/menus/")
 
-add_executable(hybird ${hybird_SRC})
-target_link_libraries(hybird ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})
+add_executable(hybrid ${hybrid_SRC})
+target_link_libraries(hybrid ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 # source list of fetion module
 set(fetion_SRC

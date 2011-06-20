@@ -1,5 +1,5 @@
-#ifndef HYBIRD_FX_GROUP_H
-#define HYBIRD_FX_GROUP_H
+#ifndef HYBRID_FX_GROUP_H
+#define HYBRID_FX_GROUP_H
 #include <glib.h>
 #include "fx_account.h"
 

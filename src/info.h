@@ -3,28 +3,28 @@
 
 #include <gtk/gtk.h>
 
-typedef struct _HybirdInfo HybirdInfo;
-typedef struct _HybirdInfoItem HybirdInfoItem;
+typedef struct _HybridInfo HybridInfo;
+typedef struct _HybridInfoItem HybridInfoItem;
 
 #include "blist.h"
 
-struct _HybirdInfo {
+struct _HybridInfo {
 	GtkWidget *window;
 	GtkWidget *treeview;
 	GtkListStore *store;
-	HybirdBuddy *buddy;
+	HybridBuddy *buddy;
 	GSList *item_list;
 };
 
-struct _HybirdInfoItem {
+struct _HybridInfoItem {
 	gchar *name;
 	gchar *value;
 };
 
 enum {
-	HYBIRD_INFO_NAME_COLUMN,
-	HYBIRD_INFO_VALUE_COLUMN,
-	HYBIRD_INFO_COLUMNS
+	HYBRID_INFO_NAME_COLUMN,
+	HYBRID_INFO_VALUE_COLUMN,
+	HYBRID_INFO_COLUMNS
 };
 
 #ifdef __cplusplus
@@ -40,7 +40,7 @@ extern "C" {
  *
  * @return The profile info panel created.
  */
-HybirdInfo *hybird_info_create(HybirdBuddy *buddy);
+HybridInfo *hybrid_info_create(HybridBuddy *buddy);
 
 /**
  * Add a name-value pair to the info panel.
@@ -49,7 +49,7 @@ HybirdInfo *hybird_info_create(HybirdBuddy *buddy);
  * @param name The name of the pair.
  * @param value The value of the pair.
  */
-void hybird_info_add_pair(HybirdInfo *info, const gchar *name,
+void hybrid_info_add_pair(HybridInfo *info, const gchar *name,
 		const gchar *value);
 
 #ifdef __cplusplus

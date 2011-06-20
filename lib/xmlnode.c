@@ -13,7 +13,7 @@ xmlnode_root(const gchar *xml_buf, gint size)
 	doc = xmlParseMemory(xml_buf, size);
 	
 	if (!doc) {
-		hybird_debug_error("xml", "parse xml");
+		hybrid_debug_error("xml", "parse xml");
 		return NULL;
 	}
 
@@ -39,7 +39,7 @@ xmlnode_root_from_file(const gchar *filepath)
 	doc = xmlParseFile(filepath);
 	
 	if (!doc) {
-		hybird_debug_error("xml", "parse xml file");
+		hybrid_debug_error("xml", "parse xml file");
 		return NULL;
 	}
 
@@ -271,15 +271,15 @@ xmlnode_set_prop(xmlnode *node, const gchar *name, const gchar *value)
 gint
 xmlnode_save_file(xmlnode *root, const gchar *filepath)
 {
-	g_return_val_if_fail(root != NULL, HYBIRD_ERROR);
-	g_return_val_if_fail(root->is_root == 1, HYBIRD_ERROR);
-	g_return_val_if_fail(filepath != NULL, HYBIRD_ERROR);
+	g_return_val_if_fail(root != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(root->is_root == 1, HYBRID_ERROR);
+	g_return_val_if_fail(filepath != NULL, HYBRID_ERROR);
 
 	if (xmlSaveFormatFileEnc(filepath, root->doc, "UTF-8", 0) == -1) {
-		return HYBIRD_ERROR;
+		return HYBRID_ERROR;
 	}
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 }
 
 void

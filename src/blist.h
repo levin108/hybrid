@@ -1,35 +1,35 @@
-#ifndef HYBIRD_BLIST_H
-#define HYBIRD_BLIST_H
+#ifndef HYBRID_BLIST_H
+#define HYBRID_BLIST_H
 #include <gtk/gtk.h>
 
 #define GROUPNAME_LENGTH   320
 #define CONTACTNAME_LENGTH 320
 
-typedef struct _HybirdBlist HybirdBlist;
-typedef struct _HybirdGroup HybirdGroup;
-typedef struct _HybirdBuddy HybirdBuddy;
-typedef enum _HybirdBlistCacheType HybirdBlistCacheType;
+typedef struct _HybridBlist HybridBlist;
+typedef struct _HybridGroup HybridGroup;
+typedef struct _HybridBuddy HybridBuddy;
+typedef enum _HybridBlistCacheType HybridBlistCacheType;
 
 #include "xmlnode.h"
 #include "account.h"
 
-struct _HybirdBlist {
+struct _HybridBlist {
 	GtkWidget *treeview;
 	GtkTreeStore *treemodel;
 	GtkTreeViewColumn *column;
 };
 
-struct _HybirdGroup {
+struct _HybridGroup {
 	GtkTreeIter iter;
-	HybirdAccount *account;
+	HybridAccount *account;
 	gchar *id;
 	gchar *name;
 };
 
-struct _HybirdBuddy {
+struct _HybridBuddy {
 	GtkTreeIter iter;
-	HybirdAccount *account;
-	HybirdGroup *parent;
+	HybridAccount *account;
+	HybridGroup *parent;
 
 	xmlnode *cache_node; /**< The corresponding xml node in cache context.*/
 
@@ -44,54 +44,54 @@ struct _HybirdBuddy {
 };
 
 enum {
-	HYBIRD_BLIST_BUDDY_ID,
-	HYBIRD_BLIST_STATUS_ICON,
-	HYBIRD_BLIST_BUDDY_NAME,
-	HYBIRD_BLIST_PROTO_ICON,
-	HYBIRD_BLIST_BUDDY_ICON,
-	HYBIRD_BLIST_BUDDY_STATE,
-	HYBIRD_BLIST_OBJECT_COLUMN,
-	HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
-	HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
-	HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE,
-	HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE,
-	HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
-	HYBIRD_BLIST_COLUMNS
+	HYBRID_BLIST_BUDDY_ID,
+	HYBRID_BLIST_STATUS_ICON,
+	HYBRID_BLIST_BUDDY_NAME,
+	HYBRID_BLIST_PROTO_ICON,
+	HYBRID_BLIST_BUDDY_ICON,
+	HYBRID_BLIST_BUDDY_STATE,
+	HYBRID_BLIST_OBJECT_COLUMN,
+	HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
+	HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
+	HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE,
+	HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE,
+	HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
+	HYBRID_BLIST_COLUMNS
 };
 
-enum _HybirdBlistCacheType {
-	HYBIRD_BLIST_CACHE_ADD, /**< Add a new item to the blist cache. */
-	HYBIRD_BLIST_CACHE_UPDATE_NAME, /**< Update the name of an existing item. */
-	HYBIRD_BLIST_CACHE_UPDATE_MOOD, /**< Update the mood of an existing item. */
-	HYBIRD_BLIST_CACHE_UPDATE_ICON  /**< Update the icon of an existing item. */
+enum _HybridBlistCacheType {
+	HYBRID_BLIST_CACHE_ADD, /**< Add a new item to the blist cache. */
+	HYBRID_BLIST_CACHE_UPDATE_NAME, /**< Update the name of an existing item. */
+	HYBRID_BLIST_CACHE_UPDATE_MOOD, /**< Update the mood of an existing item. */
+	HYBRID_BLIST_CACHE_UPDATE_ICON  /**< Update the icon of an existing item. */
 };
 
 /**
  * Test the buddy's online state.
  */
-#define BUDDY_IS_ONLINE(b)    ((b)->state == HYBIRD_STATE_ONLINE)
-#define BUDDY_IS_OFFLINE(b)   ((b)->state == HYBIRD_STATE_OFFLINE)
-#define BUDDY_IS_AWAY(b)      ((b)->state == HYBIRD_STATE_AWAY)
-#define BUDDY_IS_BUSY(b)      ((b)->state == HYBIRD_STATE_BUSY)
-#define BUDDY_IS_INVISIBLE(b) ((b)->state == HYBIRD_STATE_INVISIBLE)
+#define BUDDY_IS_ONLINE(b)    ((b)->state == HYBRID_STATE_ONLINE)
+#define BUDDY_IS_OFFLINE(b)   ((b)->state == HYBRID_STATE_OFFLINE)
+#define BUDDY_IS_AWAY(b)      ((b)->state == HYBRID_STATE_AWAY)
+#define BUDDY_IS_BUSY(b)      ((b)->state == HYBRID_STATE_BUSY)
+#define BUDDY_IS_INVISIBLE(b) ((b)->state == HYBRID_STATE_INVISIBLE)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * Create an HybirdBlist struct, the memory allocated should be freed.
+ * Create an HybridBlist struct, the memory allocated should be freed.
  *
- * @return The HybirdBList struct created
+ * @return The HybridBList struct created
  */
-HybirdBlist *hybird_blist_create();
+HybridBlist *hybrid_blist_create();
 
 /**
- * Initialize the specified HybirdBlist struct.
+ * Initialize the specified HybridBlist struct.
  *
- * @param blist HybirdBlist struct to be initialized.
+ * @param blist HybridBlist struct to be initialized.
  */
-void hybird_blist_init();
+void hybrid_blist_init();
 
 /**
  * Add a new group to the buddy list
@@ -102,14 +102,14 @@ void hybird_blist_init();
  *
  * @return The new added group
  */
-HybirdGroup *hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name);
+HybridGroup *hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name);
 
 /**
  * Destroy a group context and free the memory allocated.
  *
  * @param group The group context to destroy.
  */
-void hybird_blist_group_destroy(HybirdGroup *group);
+void hybrid_blist_group_destroy(HybridGroup *group);
 
 /**
  * Add a new buddy to the buddy list
@@ -121,7 +121,7 @@ void hybird_blist_group_destroy(HybirdGroup *group);
  *
  * @return The new added contact
  */
-HybirdBuddy *hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, 
+HybridBuddy *hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, 
 		const gchar *id, const gchar *name);
 
 /**
@@ -129,14 +129,14 @@ HybirdBuddy *hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent,
  *
  * @param buddy The buddy context to destroy.
  */
-void hybird_blist_buddy_destroy(HybirdBuddy *buddy);
+void hybrid_blist_buddy_destroy(HybridBuddy *buddy);
 /**
  * Set the buddy's display name.
  *
  * @param buddy The buddy to be set
  * @param name The buddy name to set
  */
-void hybird_blist_set_buddy_name(HybirdBuddy *buddy, const gchar *name);
+void hybrid_blist_set_buddy_name(HybridBuddy *buddy, const gchar *name);
 
 /**
  * Set the buddy's mood phrase.
@@ -144,7 +144,7 @@ void hybird_blist_set_buddy_name(HybirdBuddy *buddy, const gchar *name);
  * @param buddy The buddy to be set.
  * @param name The buddy name to set.
  */
-void hybird_blist_set_buddy_mood(HybirdBuddy *buddy, const gchar *name);
+void hybrid_blist_set_buddy_mood(HybridBuddy *buddy, const gchar *name);
 
 /**
  * Set the buddy's state.
@@ -152,7 +152,7 @@ void hybird_blist_set_buddy_mood(HybirdBuddy *buddy, const gchar *name);
  * @param buddy The buddy to be set.
  * @param The state number to set.
  */
-void hybird_blist_set_buddy_state(HybirdBuddy *buddy, gint state);
+void hybrid_blist_set_buddy_state(HybridBuddy *buddy, gint state);
 
 /**
  * Set the buddy's portrait icon. If you want to set portrait icon
@@ -164,7 +164,7 @@ void hybird_blist_set_buddy_state(HybirdBuddy *buddy, gint state);
  * @param len       The length of the icon raw data.
  * @param crc       The checksum of the icon.
  */
-void hybird_blist_set_buddy_icon(HybirdBuddy *buddy,
+void hybrid_blist_set_buddy_icon(HybridBuddy *buddy,
 		const guchar *icon_data, gsize len, const gchar *crc);
 
 /**
@@ -174,7 +174,7 @@ void hybird_blist_set_buddy_icon(HybirdBuddy *buddy,
  *
  * @return The checksum of the buddy's portrait.
  */
-const gchar *hybird_blist_get_buddy_checksum(HybirdBuddy *buddy);
+const gchar *hybrid_blist_get_buddy_checksum(HybridBuddy *buddy);
 
 /**
  * Find a group with the specified id.
@@ -182,18 +182,18 @@ const gchar *hybird_blist_get_buddy_checksum(HybirdBuddy *buddy);
  * @param account The account to which the group belongs.
  * @param id      ID of the group to find.
  *
- * @return HybirdGroup if fount, NULL if no group was found.
+ * @return HybridGroup if fount, NULL if no group was found.
  */
-HybirdGroup *hybird_blist_find_group(HybirdAccount *account, const gchar *id);
+HybridGroup *hybrid_blist_find_group(HybridAccount *account, const gchar *id);
 
 /**
  * Find a group with the specified name.
  *
  * @param id Name of the group to find.
  *
- * @return HybirdGroup if found, NULL if no group was found.
+ * @return HybridGroup if found, NULL if no group was found.
  */
-HybirdGroup *hybird_blist_find_group_by_name(HybirdAccount *account, const gchar *name);
+HybridGroup *hybrid_blist_find_group_by_name(HybridAccount *account, const gchar *name);
 
 /**
  * Find a buddy with the specified ID.
@@ -201,22 +201,22 @@ HybirdGroup *hybird_blist_find_group_by_name(HybirdAccount *account, const gchar
  * @param account The account to which the buddy belongs.
  * @param id      The buddy ID.
  *
- * @return HybirdBuddy if found, NULL if no buddy was found.
+ * @return HybridBuddy if found, NULL if no buddy was found.
  */
-HybirdBuddy *hybird_blist_find_buddy(HybirdAccount *account, const gchar *id);
+HybridBuddy *hybrid_blist_find_buddy(HybridAccount *account, const gchar *id);
 
 /**
  * Write the buddy information to the cache which in fact is 
  * a XML tree in the memory, if you want to synchronize the cache
- * with the cache file, use hybird_blist_cache_flush().
+ * with the cache file, use hybrid_blist_cache_flush().
  *
  * @param buddy The buddy to write to cache.
  * @param type  The action of writing to cache.
  */
-void hybird_blist_buddy_to_cache(HybirdBuddy *buddy, HybirdBlistCacheType type);
+void hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type);
 
 #ifdef _cplusplus
 }
 #endif
 
-#endif /* HYBIRD_BLIST_H */
+#endif /* HYBRID_BLIST_H */

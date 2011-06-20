@@ -1,27 +1,27 @@
-#ifndef HYBIRD_CONNECT_H
-#define HYBIRD_CONNECT_H
+#ifndef HYBRID_CONNECT_H
+#define HYBRID_CONNECT_H
 
 #include <glib.h>
 #include <openssl/ssl.h>
 
-typedef struct _HybirdConnection HybirdConnection;
-typedef struct _HybirdSslConnection HybirdSslConnection;
+typedef struct _HybridConnection HybridConnection;
+typedef struct _HybridSslConnection HybridSslConnection;
 
 
 typedef gboolean (*connect_callback)(gint sk, gpointer user_data);
-typedef gboolean (*ssl_callback)(HybirdSslConnection *ssl_conn, gpointer user_data);
+typedef gboolean (*ssl_callback)(HybridSslConnection *ssl_conn, gpointer user_data);
 
 #include "eventloop.h"
 
-struct _HybirdConnection {
+struct _HybridConnection {
 	gint sk;
 	gchar *host;
 	gint port;
 };
 
-struct _HybirdSslConnection {
+struct _HybridSslConnection {
 	gint sk;
-	HybirdConnection *conn;
+	HybridConnection *conn;
 
 	ssl_callback conn_cb;
 	gpointer conn_data;
@@ -46,11 +46,11 @@ extern "C" {
  *        is established.
  * @param user_data User-specified data.
  *
- * @return HybirdConncetion if success, which can be used to cancel
+ * @return HybridConncetion if success, which can be used to cancel
  *         the pending connection, destroy it if don't use or after use.
  *         NULL if there was an error.
  */
-HybirdConnection* hybird_proxy_connect(const gchar *hostname, gint port,
+HybridConnection* hybrid_proxy_connect(const gchar *hostname, gint port,
 		connect_callback func, gpointer user_data);
 
 /**
@@ -62,11 +62,11 @@ HybirdConnection* hybird_proxy_connect(const gchar *hostname, gint port,
  *        is established.
  * @param user_data User-specified data.
  *
- * @return HybirdSslConncetion if success, which can be used to cancel
+ * @return HybridSslConncetion if success, which can be used to cancel
  *         the pending connection, destroy it if don't use or after use.
  *         NULL if there was an error.
  */
-HybirdSslConnection* hybird_ssl_connect(const gchar *hostname, gint port,
+HybridSslConnection* hybrid_ssl_connect(const gchar *hostname, gint port,
 		ssl_callback func, gpointer user_data);
 
 /**
@@ -78,7 +78,7 @@ HybirdSslConnection* hybird_ssl_connect(const gchar *hostname, gint port,
  *
  * @return The number of bytes written to the connection.
  */
-gint hybird_ssl_write(HybirdSslConnection *ssl, const gchar *buf, gint len);
+gint hybrid_ssl_write(HybridSslConnection *ssl, const gchar *buf, gint len);
 
 /**
  * Read data from a SSL connection.
@@ -89,21 +89,21 @@ gint hybird_ssl_write(HybirdSslConnection *ssl, const gchar *buf, gint len);
  *
  * @retutn The number of bytes read from the connection.
  */
-gint hybird_ssl_read(HybirdSslConnection *ssl, gchar *buf, gint len);
+gint hybrid_ssl_read(HybridSslConnection *ssl, gchar *buf, gint len);
 
 /**
  * Destroy a connection, free the memory and close the socket.
  *
  * @param conn Connection to destroy.
  */
-void hybird_connection_destroy(HybirdConnection *conn);
+void hybrid_connection_destroy(HybridConnection *conn);
 
 /**
  * Destroy a SSL connection, free the memory and close the socket.
  *
  * @param conn Connection to destroy.
  */
-void hybird_ssl_connection_destory(HybirdSslConnection *conn);
+void hybrid_ssl_connection_destory(HybridSslConnection *conn);
 
 
 /**
@@ -113,7 +113,7 @@ void hybird_ssl_connection_destory(HybirdSslConnection *conn);
  * 
  * @return The code.
  */
-gint hybird_get_http_code(const gchar *http_response);
+gint hybrid_get_http_code(const gchar *http_response);
 
 /**
  * Parse the body length of the http response string.
@@ -122,11 +122,11 @@ gint hybird_get_http_code(const gchar *http_response);
  * 
  * @return The length.
  */
-gint hybird_get_http_length(const gchar *http_response);
+gint hybrid_get_http_length(const gchar *http_response);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HYBIRD_CONNECT_H */
+#endif /* HYBRID_CONNECT_H */

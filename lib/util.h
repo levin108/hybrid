@@ -1,5 +1,5 @@
-#ifndef HYBIRD_UTIL_H
-#define HYBIRD_UTIL_H
+#ifndef HYBRID_UTIL_H
+#define HYBRID_UTIL_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +16,8 @@
 
 #include "debug.h"
 
-#define HYBIRD_OK    0
-#define HYBIRD_ERROR 1
+#define HYBRID_OK    0
+#define HYBRID_ERROR 1
 
 #define PATH_LENGTH 1024
 #define URL_LENGTH 1024

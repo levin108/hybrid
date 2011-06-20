@@ -38,17 +38,17 @@ fetion_buddy_scribe(gint sk, fetion_account *ac)
 
 	g_free(body);
 
-	hybird_debug_info("fetion", "send:\n%s", res);
+	hybrid_debug_info("fetion", "send:\n%s", res);
 
 	if (send(sk, res, strlen(res), 0) == -1) { 
 		g_free(res);
 
-		return HYBIRD_ERROR;
+		return HYBRID_ERROR;
 	}
 
 	g_free(res);
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 }
 
 fetion_buddy*
@@ -114,8 +114,8 @@ fetion_buddies_init(fetion_account *ac)
 	GSList *pos;
 	gchar *start, *stop, *id;
 	fetion_buddy *buddy;
-	HybirdGroup *imgroup;
-	HybirdBuddy *imbuddy;
+	HybridGroup *imgroup;
+	HybridBuddy *imbuddy;
 
 	for (pos = ac->buddies; pos; pos = pos->next) {
 		buddy = (fetion_buddy*)pos->data;
@@ -127,13 +127,13 @@ fetion_buddies_init(fetion_account *ac)
 			for (; *stop && *stop != ';'; stop ++);
 			id = g_strndup(start, stop - start);
 
-			imgroup = hybird_blist_find_group(ac->account, id);
+			imgroup = hybrid_blist_find_group(ac->account, id);
 
-			imbuddy = hybird_blist_add_buddy(ac->account, imgroup,
+			imbuddy = hybrid_blist_add_buddy(ac->account, imgroup,
 					buddy->userid, buddy->localname);
 
 			if (*(imbuddy->name) == '\0') {
-				hybird_blist_set_buddy_name(imbuddy, buddy->sid);
+				hybrid_blist_set_buddy_name(imbuddy, buddy->sid);
 			}
 
 			g_free(id);
@@ -158,11 +158,11 @@ portrait_recv_cb(gint sk, gpointer user_data)
 	gchar buf[BUF_LENGTH];
 	gint n;
 	gchar *pos;
-	HybirdBuddy *imbuddy;
+	HybridBuddy *imbuddy;
 	portrait_trans *trans = (portrait_trans*)user_data;
 
 	if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
-		hybird_debug_error("fetion", "get portrait for \'%s\':%s",
+		hybrid_debug_error("fetion", "get portrait for \'%s\':%s",
 				trans->buddy->sid, strerror(errno));
 		return FALSE;
 	}
@@ -170,10 +170,10 @@ portrait_recv_cb(gint sk, gpointer user_data)
 	buf[n] = '\0';
 
 	if (n == 0) {
-		imbuddy = hybird_blist_find_buddy(trans->ac->account,
+		imbuddy = hybrid_blist_find_buddy(trans->ac->account,
 				trans->buddy->userid);
 
-		if (hybird_get_http_code(trans->data) != 200) {
+		if (hybrid_get_http_code(trans->data) != 200) {
 			/* 
 			 * Note that we got no portrait, but we still need
 			 * to set buddy icon, just for the portrait checksum, we 
@@ -182,12 +182,12 @@ portrait_recv_cb(gint sk, gpointer user_data)
 			 * of the buddy's checksum to determine whether to fetch a 
 			 * portrait from the server. 
 			 */
-			hybird_blist_set_buddy_icon(imbuddy, NULL, 0,
+			hybrid_blist_set_buddy_icon(imbuddy, NULL, 0,
 					trans->buddy->portrait_crc);
 			goto pt_fin;
 		}
 
-		trans->data_len = hybird_get_http_length(trans->data);
+		trans->data_len = hybrid_get_http_length(trans->data);
 
 		if (!(pos = strstr(trans->data, "\r\n\r\n"))) {
 			goto pt_fin;
@@ -195,7 +195,7 @@ portrait_recv_cb(gint sk, gpointer user_data)
 
 		pos += 4;
 
-		hybird_blist_set_buddy_icon(imbuddy, (guchar*)pos,
+		hybrid_blist_set_buddy_icon(imbuddy, (guchar*)pos,
 				trans->data_len, trans->buddy->portrait_crc);
 
 		goto pt_fin;
@@ -262,10 +262,10 @@ portrait_conn_cb(gint sk, gpointer user_data)
 	g_free(encoded_ssic);
 	g_free(uri);
 
-	//hybird_debug_info("fetion", "send:\n%s", http_string);
+	//hybrid_debug_info("fetion", "send:\n%s", http_string);
 
 	if (send(sk, http_string, strlen(http_string), 0) == -1) {
-		hybird_debug_error("fetion", "download portrait for \'%s\':%s",
+		hybrid_debug_error("fetion", "download portrait for \'%s\':%s",
 				trans->buddy->sid, strerror(errno));
 		g_free(http_string);
 		return FALSE;
@@ -273,7 +273,7 @@ portrait_conn_cb(gint sk, gpointer user_data)
 
 	g_free(http_string);
 
-	hybird_event_add(sk, HYBIRD_EVENT_READ, portrait_recv_cb, trans);
+	hybrid_event_add(sk, HYBRID_EVENT_READ, portrait_recv_cb, trans);
 
 	return FALSE;
 }
@@ -282,7 +282,7 @@ void
 fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 {
 	portrait_data *data;
-	HybirdBuddy *hybird_buddy;
+	HybridBuddy *hybrid_buddy;
 	const gchar *checksum;
 
 	g_return_if_fail(ac != NULL);
@@ -292,19 +292,19 @@ fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 	data->buddy = buddy;
 	data->ac = ac;
 
-	if (!(hybird_buddy = hybird_blist_find_buddy(ac->account, buddy->userid))) {
-		hybird_debug_error("fetion", "FATAL, update portrait,"
+	if (!(hybrid_buddy = hybrid_blist_find_buddy(ac->account, buddy->userid))) {
+		hybrid_debug_error("fetion", "FATAL, update portrait,"
 				" unable to find a buddy.");
 		return;
 	}
 
-	checksum = hybird_blist_get_buddy_checksum(hybird_buddy);
+	checksum = hybrid_blist_get_buddy_checksum(hybrid_buddy);
 
 	if (checksum != NULL && g_strcmp0(checksum, buddy->portrait_crc) == 0) {
-		hybird_debug_info("fetion", "portrait for %s(%s) up to date",
+		hybrid_debug_info("fetion", "portrait for %s(%s) up to date",
 				checksum, buddy->portrait_crc);
 		return;
 	}
 
-	hybird_proxy_connect(ac->portrait_host_name, 80, portrait_conn_cb, data);
+	hybrid_proxy_connect(ac->portrait_host_name, 80, portrait_conn_cb, data);
 }

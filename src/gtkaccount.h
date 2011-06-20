@@ -3,16 +3,16 @@
 
 #include <gtk/gtk.h>
 
-typedef struct _HybirdAccountPanel HybirdAccountPanel;
-typedef struct _HybirdAccountEditPanel HybirdAccountEditPanel;
+typedef struct _HybridAccountPanel HybridAccountPanel;
+typedef struct _HybridAccountEditPanel HybridAccountEditPanel;
 
-struct _HybirdAccountPanel {
+struct _HybridAccountPanel {
 	GtkWidget *window;
 	GtkListStore *account_store;
 	GtkWidget *account_tree;
 };
 
-struct _HybirdAccountEditPanel {
+struct _HybridAccountEditPanel {
 	GtkWidget *window;
 	GtkWidget *username_entry;
 	GtkWidget *password_entry;
@@ -20,12 +20,12 @@ struct _HybirdAccountEditPanel {
 };
 
 enum {
-	HYBIRD_ENABLE_COLUMN,
-	HYBIRD_NAME_COLUMN,
-	HYBIRD_PROTO_ICON_COLUMN,
-	HYBIRD_PROTO_NAME_COLUMN,
-	HYBIRD_ACCOUNT_COLUMN,
-	HYBIRD_ACCOUNT_COLUMNS
+	HYBRID_ENABLE_COLUMN,
+	HYBRID_NAME_COLUMN,
+	HYBRID_PROTO_ICON_COLUMN,
+	HYBRID_PROTO_NAME_COLUMN,
+	HYBRID_ACCOUNT_COLUMN,
+	HYBRID_ACCOUNT_COLUMNS
 };
 
 #ifdef __cplusplus
@@ -35,7 +35,7 @@ extern "C" {
 /**
  * Create an account management panel.
  */
-HybirdAccountPanel *hybird_account_panel_create();
+HybridAccountPanel *hybrid_account_panel_create();
 
 #ifdef __cplusplus
 }

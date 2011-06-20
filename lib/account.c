@@ -6,25 +6,25 @@
 
 GSList *account_list = NULL;
 
-static void load_blist_from_disk(HybirdAccount *account);
+static void load_blist_from_disk(HybridAccount *account);
 
 void
-hybird_account_init(void)
+hybrid_account_init(void)
 {
-	extern HybirdConfig *global_config;
+	extern HybridConfig *global_config;
 	gchar *account_file;
 	gchar *config_path;
 	xmlnode *root;
 	xmlnode *node;
 	gboolean flush = FALSE;
 
-	config_path = hybird_config_get_path();
+	config_path = hybrid_config_get_path();
 	account_file = g_strdup_printf("%s/accounts.xml", config_path);
 	g_free(config_path);
 
 	if (!(root = xmlnode_root_from_file(account_file))) {
 		const gchar *root_name = "<accounts></accounts>";
-		hybird_debug_info("account", "accounts.xml doesn't exist or"
+		hybrid_debug_info("account", "accounts.xml doesn't exist or"
 				"in bad format, create a new one.");
 		root = xmlnode_root(root_name, strlen(root_name));
 		flush ^= 1;
@@ -32,9 +32,9 @@ hybird_account_init(void)
 
 	if ((node = xmlnode_child(root))) {
 		if (g_strcmp0(node->name, "account")) {
-			hybird_debug_error("account", "accounts.xml is in bad format,"
-					"please try to remove ~/.config/hybird/accounts.xml,"
-					"and then restart hybird :)");
+			hybrid_debug_error("account", "accounts.xml is in bad format,"
+					"please try to remove ~/.config/hybrid/accounts.xml,"
+					"and then restart hybrid :)");
 			xmlnode_free(root);
 			return;
 		}
@@ -50,17 +50,24 @@ hybird_account_init(void)
 	}
 }
 
-HybirdAccount*
-hybird_account_create(HybirdModule *proto)
+HybridAccount*
+hybrid_account_get_from_cache(const gchar *proto_name,
+		const gchar *username)
 {
-	extern HybirdConfig *global_config;
+	HybridAccount *account = NULL;
+
+	return account;
+}
+
+HybridAccount*
+hybrid_account_create(HybridModule *proto)
+{
+	extern HybridConfig *global_config;
 	g_return_val_if_fail(proto != NULL, NULL);
 
-	HybirdAccount *ac = g_new0(HybirdAccount, 1);
-	//hybird_account_set_username(ac, "547264589");
-	//hybird_account_set_password(ac, "lwp1279");
-	hybird_account_set_username(ac, "15210634361");
-	hybird_account_set_password(ac, "leveil926.n7");
+	HybridAccount *ac = g_new0(HybridAccount, 1);
+	hybrid_account_set_username(ac, "547264589");
+	hybrid_account_set_password(ac, "lwp1279");
 	
 	ac->config = global_config;
 	ac->proto = proto;
@@ -69,7 +76,7 @@ hybird_account_create(HybirdModule *proto)
 }
 
 void
-hybird_account_destroy(HybirdAccount *account)
+hybrid_account_destroy(HybridAccount *account)
 {
 	if (account) {
 		g_free(account->username);
@@ -79,7 +86,7 @@ hybird_account_destroy(HybirdAccount *account)
 }
 
 void 
-hybird_account_set_username(HybirdAccount *account, const gchar *username)
+hybrid_account_set_username(HybridAccount *account, const gchar *username)
 {
 	g_return_if_fail(account != NULL);
 
@@ -89,7 +96,7 @@ hybird_account_set_username(HybirdAccount *account, const gchar *username)
 }
 
 void 
-hybird_account_set_password(HybirdAccount *account, const gchar *password)
+hybrid_account_set_password(HybridAccount *account, const gchar *password)
 {
 	g_return_if_fail(account != NULL);
 
@@ -99,25 +106,25 @@ hybird_account_set_password(HybirdAccount *account, const gchar *password)
 }
 
 void
-hybird_account_error_reason(HybirdAccount *account, const gchar *reason)
+hybrid_account_error_reason(HybridAccount *account, const gchar *reason)
 {
 	/* TODO */
 	g_return_if_fail(account != NULL);
 
-	hybird_account_destroy(account);
+	hybrid_account_destroy(account);
 }
 
 void
-hybird_account_set_connection_status(HybirdAccount *account,
-		HybirdConnectionStatusType status)
+hybrid_account_set_connection_status(HybridAccount *account,
+		HybridConnectionStatusType status)
 {
-	if (account->connect_state != HYBIRD_CONNECTION_CONNECTED &&
-		status == HYBIRD_CONNECTION_CONNECTED) {
+	if (account->connect_state != HYBRID_CONNECTION_CONNECTED &&
+		status == HYBRID_CONNECTION_CONNECTED) {
 
 		/* 
 		 * It's necessary to set the status value here, because if
-		 * connection status is not HYBIRD_CONNECTION_CONNECTED, 
-		 * hybird_blist_add_buddy() just return without doing anything,
+		 * connection status is not HYBRID_CONNECTION_CONNECTED, 
+		 * hybrid_blist_add_buddy() just return without doing anything,
 		 * which will cause load_blist_from_disk() fail to add buddies.
 		 */
 		account->connect_state = status;
@@ -130,12 +137,12 @@ hybird_account_set_connection_status(HybirdAccount *account,
 }
 
 static void
-load_blist_from_disk(HybirdAccount *account)
+load_blist_from_disk(HybridAccount *account)
 {
-	HybirdConfig *config;
-	HybirdBlistCache *cache;
-	HybirdGroup *group;
-	HybirdBuddy *buddy;
+	HybridConfig *config;
+	HybridBlistCache *cache;
+	HybridGroup *group;
+	HybridBuddy *buddy;
 	xmlnode *root;
 	xmlnode *node;
 	xmlnode *group_node;
@@ -154,7 +161,7 @@ load_blist_from_disk(HybirdAccount *account)
 	root = cache->root;
 
 	if (!(node = xmlnode_find(root, "buddies"))) {
-		hybird_debug_error("account", 
+		hybrid_debug_error("account", 
 			"can't find node named 'buddies' in blist.xml");
 		return;
 	}
@@ -166,7 +173,7 @@ load_blist_from_disk(HybirdAccount *account)
 		if (!xmlnode_has_prop(group_node, "id") ||
 			!xmlnode_has_prop(group_node, "name")) {
 
-			hybird_debug_error("account", "invalid group node");
+			hybrid_debug_error("account", "invalid group node");
 			group_node = xmlnode_next(group_node);
 			continue;
 		}
@@ -174,11 +181,11 @@ load_blist_from_disk(HybirdAccount *account)
 		id = xmlnode_prop(group_node, "id");
 		name = xmlnode_prop(group_node, "name");
 
-		group = hybird_blist_add_group(account, id, name);
+		group = hybrid_blist_add_group(account, id, name);
 		
 		/*
 		 * Iterate the buddy nodes, use the attribute values
-		 * to create new HybirdBuddys, and add them to the 
+		 * to create new HybridBuddys, and add them to the 
 		 * buddy list and the GtkTreeView. 
 		 */
 		buddy_node = xmlnode_child(group_node);
@@ -188,7 +195,7 @@ load_blist_from_disk(HybirdAccount *account)
 			if (!xmlnode_has_prop(buddy_node, "id") ||
 				!xmlnode_has_prop(buddy_node, "name")) {
 
-				hybird_debug_error("account", "invalid buddy node");
+				hybrid_debug_error("account", "invalid buddy node");
 				buddy_node = xmlnode_next(buddy_node);
 				continue;
 			}
@@ -196,8 +203,8 @@ load_blist_from_disk(HybirdAccount *account)
 			id = xmlnode_prop(buddy_node, "id");
 			name = xmlnode_prop(buddy_node, "name");
 
-			buddy = hybird_blist_add_buddy(account, group, id, name);
-			buddy->state = HYBIRD_STATE_OFFLINE;
+			buddy = hybrid_blist_add_buddy(account, group, id, name);
+			buddy->state = HYBRID_STATE_OFFLINE;
 
 			//buddy_node = xmlnode_next(buddy_node);
 			//continue;
@@ -209,7 +216,7 @@ load_blist_from_disk(HybirdAccount *account)
 
 			if (xmlnode_has_prop(buddy_node, "mood")) {
 				value = xmlnode_prop(buddy_node, "mood");
-				hybird_blist_set_buddy_mood(buddy, value);
+				hybrid_blist_set_buddy_mood(buddy, value);
 				g_free(value);
 			}
 
@@ -218,7 +225,7 @@ load_blist_from_disk(HybirdAccount *account)
 			 * attribute is not empty, then load the file pointed by 
 			 * the icon value as the buddy's portrait, orelse load the 
 			 * default icon, we DONT need to load the default icon file
-			 * any more, let the hybird_blist_set_buddy_icon() do it, just
+			 * any more, let the hybrid_blist_set_buddy_icon() do it, just
 			 * set the relevant argument to NULL.
 			 */
 			if (xmlnode_has_prop(buddy_node, "icon")) {
@@ -257,7 +264,7 @@ load_blist_from_disk(HybirdAccount *account)
 				}
 			}
 
-			hybird_blist_set_buddy_icon(buddy, icon_data,
+			hybrid_blist_set_buddy_icon(buddy, icon_data,
 					icon_data_len, value);
 
 			g_free(value);

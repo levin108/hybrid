@@ -2,7 +2,7 @@
 #include "util.h"
 
 void 
-hybird_debug_info(const gchar *relm, const gchar *format, ...)
+hybrid_debug_info(const gchar *relm, const gchar *format, ...)
 {
 	gchar fmt[4096];
 	va_list ap;
@@ -14,7 +14,7 @@ hybird_debug_info(const gchar *relm, const gchar *format, ...)
 }
 
 void 
-hybird_debug_error(const gchar *relm, const gchar *format, ...)
+hybrid_debug_error(const gchar *relm, const gchar *format, ...)
 {
 	gchar fmt[4096];
 	va_list ap;

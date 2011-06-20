@@ -4,20 +4,20 @@
 #include "util.h"
 #include "config.h"
 
-static gint hybird_blist_cache_init(HybirdConfig *config);
+static gint hybrid_blist_cache_init(HybridConfig *config);
 
-HybirdConfig *global_config;
+HybridConfig *global_config;
 
 gchar*
-hybird_config_get_path(void)
+hybrid_config_get_path(void)
 {
 	gchar *home;
 	gchar *config_path;
-	gchar *hybird_path;
+	gchar *hybrid_path;
 	gint e;
 
 	if (!(home = getenv("HOME"))) {
-		hybird_debug_error("config", "No environment variable named HOME\n");
+		hybrid_debug_error("config", "No environment variable named HOME\n");
 		return NULL;
 	}
 
@@ -26,45 +26,45 @@ hybird_config_get_path(void)
 	e = mkdir(config_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
 	if (e && access(config_path, R_OK|W_OK)) {
-		hybird_debug_error("config", "%s,cannot create, read or write",
+		hybrid_debug_error("config", "%s,cannot create, read or write",
 				config_path);
 		g_free(config_path);
 
 		return NULL;
 	}
 
-	hybird_path = g_strdup_printf("%s/hybird", config_path);
+	hybrid_path = g_strdup_printf("%s/hybrid", config_path);
 
-	e = mkdir(hybird_path, S_IRWXU|S_IRWXO|S_IRWXG);
+	e = mkdir(hybrid_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
-	if (e && access(hybird_path, R_OK|W_OK)) {
-		hybird_debug_error("config", "%s,cannot create, read or write",
-				hybird_path);
+	if (e && access(hybrid_path, R_OK|W_OK)) {
+		hybrid_debug_error("config", "%s,cannot create, read or write",
+				hybrid_path);
 		g_free(config_path);
-		g_free(hybird_path);
+		g_free(hybrid_path);
 
 		return NULL;
 	}
 
 	g_free(config_path);
 
-	return hybird_path;
+	return hybrid_path;
 }
 
-HybirdConfig*
-hybird_config_create()
+HybridConfig*
+hybrid_config_create()
 {
-	HybirdConfig *config;
+	HybridConfig *config;
 
-	config = g_new0(HybirdConfig, 1);
+	config = g_new0(HybridConfig, 1);
 
-	config->config_path = hybird_config_get_path();
+	config->config_path = hybrid_config_get_path();
 
 	return config;
 }
 
 void
-hybird_config_destroy(HybirdConfig *config)
+hybrid_config_destroy(HybridConfig *config)
 {
 	if (config) {
 		g_free(config->config_path);
@@ -73,33 +73,33 @@ hybird_config_destroy(HybirdConfig *config)
 }
 
 gint
-hybird_config_init(void)
+hybrid_config_init(void)
 {
-	global_config = hybird_config_create();
+	global_config = hybrid_config_create();
 
-	if (hybird_blist_cache_init(global_config) != HYBIRD_OK ) {
-		return HYBIRD_ERROR;
+	if (hybrid_blist_cache_init(global_config) != HYBRID_OK ) {
+		return HYBRID_ERROR;
 	}
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 }
 
 static gint
-hybird_blist_cache_init(HybirdConfig *config)
+hybrid_blist_cache_init(HybridConfig *config)
 {
 	gchar *cache_file_name;
-	HybirdBlistCache *cache;
+	HybridBlistCache *cache;
 	xmlnode *root;
 	gint err;
 
-	g_return_val_if_fail(config != NULL, HYBIRD_ERROR);
+	g_return_val_if_fail(config != NULL, HYBRID_ERROR);
 
 	cache_file_name = g_strdup_printf("%s/blist.xml", config->config_path);
 
-	hybird_debug_info("config", "init the blist cache from %s",
+	hybrid_debug_info("config", "init the blist cache from %s",
 			cache_file_name);
 
-	cache = g_new0(HybirdBlistCache, 1);
+	cache = g_new0(HybridBlistCache, 1);
 	cache->cache_file_name = cache_file_name;
 
 	config->blist_cache = cache;
@@ -113,8 +113,8 @@ hybird_blist_cache_init(HybirdConfig *config)
 	}
 
 	if (!root) {
-		hybird_debug_error("config", "FATAL, init blist cache");
-		return HYBIRD_ERROR;
+		hybrid_debug_error("config", "FATAL, init blist cache");
+		return HYBRID_ERROR;
 	}
 
 	cache->root = root;
@@ -135,20 +135,20 @@ blist_cache_init_fin:
 	err = mkdir(config->icon_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
 	if (err && access(config->icon_path, R_OK|W_OK)) {
-		hybird_debug_error("config", "%s,cannot create, read or write",
+		hybrid_debug_error("config", "%s,cannot create, read or write",
 				config->icon_path);
 		g_free(config->icon_path);
 
-		return HYBIRD_ERROR;
+		return HYBRID_ERROR;
 	}
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 }
 
 void
-hybird_blist_cache_flush()
+hybrid_blist_cache_flush()
 {
-	HybirdBlistCache *cache;
+	HybridBlistCache *cache;
 
 	cache = global_config->blist_cache;
 

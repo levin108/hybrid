@@ -84,7 +84,7 @@ pixbuf_make_round(GdkPixbuf *pixbuf) {
 }
 
 GdkPixbuf*
-hybird_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
+hybrid_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 {
 	GdkPixbufLoader *loader;
 	GdkPixbuf *pixbuf;
@@ -115,7 +115,7 @@ hybird_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 }
 
 GdkPixbuf*
-hybird_create_default_icon(gint scale_size)
+hybrid_create_default_icon(gint scale_size)
 {
 	GdkPixbuf *pixbuf;
 
@@ -131,13 +131,13 @@ hybird_create_default_icon(gint scale_size)
 }
 
 GdkPixbuf*
-hybird_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
+hybrid_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_width, gint scale_height)
 {
 	GdkPixbuf *pixbuf;
 	GdkPixbuf *res;
 
-	pixbuf = hybird_create_pixbuf(pixbuf_data, pixbuf_len);
+	pixbuf = hybrid_create_pixbuf(pixbuf_data, pixbuf_len);
 
 	res = gdk_pixbuf_scale_simple(pixbuf,
 			scale_width, scale_height, GDK_INTERP_BILINEAR);
@@ -148,7 +148,7 @@ hybird_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
 }
 
 GdkPixbuf*
-hybird_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
+hybrid_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_size)
 {
 	GdkPixbufLoader *loader;
@@ -179,7 +179,7 @@ hybird_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 	g_object_unref(loader);
 
 	if (!pixbuf) {
-		hybird_debug_error("blist", "get pixbuf from loader");
+		hybrid_debug_error("blist", "get pixbuf from loader");
 		return NULL;
 	}
 
@@ -210,25 +210,25 @@ hybird_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 }
 
 GdkPixbuf*
-hybird_create_presence_pixbuf(gint presence, gint scale_size)
+hybrid_create_presence_pixbuf(gint presence, gint scale_size)
 {
 	const gchar *name;
 
 	switch (presence) {
 
-		case HYBIRD_STATE_OFFLINE:
+		case HYBRID_STATE_OFFLINE:
 			name = DATA_DIR"/offline.png";
 			break;
-		case HYBIRD_STATE_INVISIBLE:
+		case HYBRID_STATE_INVISIBLE:
 			name = DATA_DIR"/invisible.png";
 			break;
-		case HYBIRD_STATE_BUSY:
+		case HYBRID_STATE_BUSY:
 			name = DATA_DIR"/busy.png";
 			break;
-		case HYBIRD_STATE_AWAY:
+		case HYBRID_STATE_AWAY:
 			name = DATA_DIR"/away.png";
 			break;
-		case HYBIRD_STATE_ONLINE:
+		case HYBRID_STATE_ONLINE:
 			name = DATA_DIR"/available.png";
 			break;
 		default:
@@ -241,7 +241,7 @@ hybird_create_presence_pixbuf(gint presence, gint scale_size)
 }
 
 GtkWidget*
-hybird_create_menu(GtkWidget *parent, const gchar *title,
+hybrid_create_menu(GtkWidget *parent, const gchar *title,
 		const gchar *icon_name, gboolean sensitive,
 		void (*callback)(GtkWidget *widget, gpointer user_data),
 		gpointer user_data)
@@ -288,7 +288,7 @@ hybird_create_menu(GtkWidget *parent, const gchar *title,
 
 
 void
-hybird_create_menu_seperator(GtkWidget *parent)
+hybrid_create_menu_seperator(GtkWidget *parent)
 {
 	GtkWidget *seperator;
 
@@ -299,7 +299,7 @@ hybird_create_menu_seperator(GtkWidget *parent)
 }
 
 GtkWidget*
-hybird_create_window(const gchar *title, GdkPixbuf *icon,
+hybrid_create_window(const gchar *title, GdkPixbuf *icon,
 		GtkWindowPosition pos, gboolean resizable)
 {
 	GtkWidget *window;
@@ -307,7 +307,7 @@ hybird_create_window(const gchar *title, GdkPixbuf *icon,
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
 	if (!icon) {
-		icon = hybird_create_default_icon(0);
+		icon = hybrid_create_default_icon(0);
 	}
 
 	gtk_window_set_icon(GTK_WINDOW(window), icon);
@@ -322,7 +322,7 @@ hybird_create_window(const gchar *title, GdkPixbuf *icon,
 
 
 gchar*
-hybird_sha1(const gchar *in, gint size)
+hybrid_sha1(const gchar *in, gint size)
 {
 	SHA_CTX s;
 	guchar hash[20];

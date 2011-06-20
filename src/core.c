@@ -7,15 +7,15 @@
 #include "gtkaccount.h"
 #include "gtkutils.h"
 
-extern HybirdBlist *blist;
+extern HybridBlist *blist;
 
 void
-hybird_start_login()
+hybrid_start_login()
 {
-	HybirdModule *module;
+	HybridModule *module;
 
-	module = hybird_module_find("fetion");
-	HybirdAccount *ac = hybird_account_create(module);
+	module = hybrid_module_find("fetion");
+	HybridAccount *ac = hybrid_account_create(module);
 
 	module->info->login(ac);
 
@@ -28,28 +28,28 @@ window_destroy(GtkWidget *widget, gpointer user_data)
 	 * Now free the memory.
 	 */
 	GSList *pos;
-	HybirdGroup *group;
-	HybirdBuddy *buddy;
+	HybridGroup *group;
+	HybridBuddy *buddy;
 	
 	extern GSList *group_list;
 	extern GSList *buddy_list;
 
-	extern HybirdBlist *blist;
+	extern HybridBlist *blist;
 
 	g_free(blist);
 
 	while (group_list) {
 		pos = group_list;
-		group = (HybirdGroup*)pos->data;
+		group = (HybridGroup*)pos->data;
 		group_list = g_slist_remove(group_list, group);
-		hybird_blist_group_destroy(group);
+		hybrid_blist_group_destroy(group);
 	}
 
 	while (buddy_list) {
 		pos = buddy_list;
-		buddy = (HybirdBuddy*)pos->data;
+		buddy = (HybridBuddy*)pos->data;
 		buddy_list = g_slist_remove(buddy_list, buddy);
-		hybird_blist_buddy_destroy(buddy);
+		hybrid_blist_buddy_destroy(buddy);
 	}
 
 	gtk_main_quit();
@@ -58,9 +58,9 @@ window_destroy(GtkWidget *widget, gpointer user_data)
 static void
 manage_account_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybirdAccountPanel *panel;
+	HybridAccountPanel *panel;
 
-	panel = hybird_account_panel_create();
+	panel = hybrid_account_panel_create();
 	printf("abc\n");
 }
 
@@ -126,7 +126,7 @@ ui_init(void)
 								 GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
 
-	hybird_blist_init();
+	hybrid_blist_init();
 
 	gtk_container_add(GTK_CONTAINER(scroll), blist->treeview);
 
@@ -140,13 +140,13 @@ main(gint argc, gchar **argv)
 	
 	ui_init();
 
-	hybird_config_init();
+	hybrid_config_init();
 
-	hybird_module_init();
+	hybrid_module_init();
 
-	hybird_account_init();
+	hybrid_account_init();
 
-//	hybird_start_login();
+//	hybrid_start_login();
 
 	gtk_main();
 

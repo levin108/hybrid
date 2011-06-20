@@ -1,5 +1,5 @@
-#ifndef HYBIRD_GTKUTILS_H
-#define HYBIRD_GTKUTILS_H
+#ifndef HYBRID_GTKUTILS_H
+#define HYBRID_GTKUTILS_H
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -16,7 +16,7 @@ extern "C" {
  *
  * @return The pixbuf created.
  */
-GdkPixbuf *hybird_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len);
+GdkPixbuf *hybrid_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len);
 
 /**
  * Create a pixbuf of the default icon with the specified size.
@@ -26,7 +26,7 @@ GdkPixbuf *hybird_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len);
  *
  * @return The pixbuf created.
  */
-GdkPixbuf *hybird_create_default_icon(gint scale_size);
+GdkPixbuf *hybrid_create_default_icon(gint scale_size);
 
 /**
  * Create a pixbuf using the pixbuf binary data, and scale it to the given size.
@@ -38,7 +38,7 @@ GdkPixbuf *hybird_create_default_icon(gint scale_size);
  *
  * @return The pixbuf created.
  */
-GdkPixbuf *hybird_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
+GdkPixbuf *hybrid_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_width, gint scale_height);
 
 /**
@@ -52,7 +52,7 @@ GdkPixbuf *hybird_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_l
  *
  * return The pixbuf created.
  */
-GdkPixbuf *hybird_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
+GdkPixbuf *hybrid_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_size);
 
 /**
@@ -63,7 +63,7 @@ GdkPixbuf *hybird_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len
  *
  * @return The pixbuf created.
  */
-GdkPixbuf *hybird_create_presence_pixbuf(gint presence, gint scale_size);
+GdkPixbuf *hybrid_create_presence_pixbuf(gint presence, gint scale_size);
 
 /**
  * Create a child menu for the @parent menu. Create an image menu if 
@@ -73,7 +73,7 @@ GdkPixbuf *hybird_create_presence_pixbuf(gint presence, gint scale_size);
  * @param icon_name The name of icon without suffix and '/', The icon
  *                  must be in share/menus, and has suffix of '.png'.
  */
-GtkWidget *hybird_create_menu(GtkWidget *parent, const gchar *title,
+GtkWidget *hybrid_create_menu(GtkWidget *parent, const gchar *title,
 		const gchar *icon_name, gboolean sensitive,
 		void (*callback)(GtkWidget *widget, gpointer user_data),
 		gpointer user_data);
@@ -90,19 +90,19 @@ GtkWidget *hybird_create_menu(GtkWidget *parent, const gchar *title,
  *
  * @return The GtkWindow created.
  */
-GtkWidget *hybird_create_window(const gchar *title,	GdkPixbuf *icon,
+GtkWidget *hybrid_create_window(const gchar *title,	GdkPixbuf *icon,
 		GtkWindowPosition pos, gboolean resizable);
 /**
  * Create a seperator for a menu.
  *
  * @param parent The menu widget.
  */
-void hybird_create_menu_seperator(GtkWidget *parent);
+void hybrid_create_menu_seperator(GtkWidget *parent);
 
-gchar *hybird_sha1(const gchar *in, gint size);
+gchar *hybrid_sha1(const gchar *in, gint size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HYBIRD_GTKUTILS_H */
+#endif /* HYBRID_GTKUTILS_H */

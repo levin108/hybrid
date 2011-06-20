@@ -78,11 +78,11 @@ parse_ssi_response(fetion_account *ac, const gchar *response)
 	g_free(prop);
 #endif
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 ssi_term:
-	hybird_account_error_reason(ac->account, _("ssi authencation"));
+	hybrid_account_error_reason(ac->account, _("ssi authencation"));
 	xmlnode_free(root);
-	return HYBIRD_ERROR;
+	return HYBRID_ERROR;
 }
 
 /**
@@ -98,7 +98,7 @@ cfg_read_cb(gint sk, gpointer user_data)
 	fetion_account *ac = (fetion_account*)user_data;
 
 	if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
-		hybird_account_error_reason(ac->account, _("read cfg failed"));
+		hybrid_account_error_reason(ac->account, _("read cfg failed"));
 		return FALSE;
 	}
 
@@ -116,7 +116,7 @@ cfg_read_cb(gint sk, gpointer user_data)
 
 	} else { /* receive complete, start process */
 
-		if (hybird_get_http_code(ac->buffer) != 200) {
+		if (hybrid_get_http_code(ac->buffer) != 200) {
 			goto error;
 		}
 
@@ -126,11 +126,11 @@ cfg_read_cb(gint sk, gpointer user_data)
 
 		pos += 4;
 
-		if (strlen(pos) != hybird_get_http_length(ac->buffer)) {
+		if (strlen(pos) != hybrid_get_http_length(ac->buffer)) {
 			goto error;
 		}
 
-		if (parse_configuration(ac, pos) != HYBIRD_OK) {
+		if (parse_configuration(ac, pos) != HYBRID_OK) {
 			g_free(ac->buffer);
 			ac->buffer = NULL;
 			goto error;
@@ -141,13 +141,13 @@ cfg_read_cb(gint sk, gpointer user_data)
 
 		/* now we start sipc register */
 
-		hybird_proxy_connect(ac->sipc_proxy_ip, ac->sipc_proxy_port,
+		hybrid_proxy_connect(ac->sipc_proxy_ip, ac->sipc_proxy_port,
 				sipc_reg_action, ac);
 	}
 
 	return FALSE;
 error:
-	hybird_account_error_reason(ac->account, _("read cfg failed"));
+	hybrid_account_error_reason(ac->account, _("read cfg failed"));
 	return FALSE;
 }
 
@@ -171,10 +171,10 @@ cfg_connect_cb(gint sk, gpointer user_data)
 
 	g_free(body);
 
-	hybird_debug_info("fetion", "send:\n%s", http);
+	hybrid_debug_info("fetion", "send:\n%s", http);
 
 	if (send(sk, http, strlen(http), 0) == -1) {
-		hybird_account_error_reason(ac->account, "downloading cfg error");
+		hybrid_account_error_reason(ac->account, "downloading cfg error");
 		g_free(http);
 
 		return FALSE;
@@ -182,7 +182,7 @@ cfg_connect_cb(gint sk, gpointer user_data)
 
 	g_free(http);
 
-	hybird_event_add(sk, HYBIRD_EVENT_READ, cfg_read_cb, ac);
+	hybrid_event_add(sk, HYBRID_EVENT_READ, cfg_read_cb, ac);
 
 	return FALSE;
 }
@@ -192,25 +192,25 @@ cfg_connect_cb(gint sk, gpointer user_data)
  * string from the ssi server here.
  */
 static gboolean
-ssi_auth_cb(HybirdSslConnection *ssl, gpointer user_data)
+ssi_auth_cb(HybridSslConnection *ssl, gpointer user_data)
 {
 	gchar buf[BUF_LENGTH];
 	gchar *pos, *pos1;
 	gint ret;
 	fetion_account *ac = (fetion_account*)user_data;
 
-	ret = hybird_ssl_read(ssl, buf, sizeof(buf));
+	ret = hybrid_ssl_read(ssl, buf, sizeof(buf));
 
 	if (ret == -1 || ret == 0) {
-		hybird_debug_error("ssi", "ssi server response error");
+		hybrid_debug_error("ssi", "ssi server response error");
 		return FALSE;
 	}
 
 	buf[ret] = '\0';
 
-	hybird_debug_info("fetion", "recv:\n%s", buf);
+	hybrid_debug_info("fetion", "recv:\n%s", buf);
 
-	if (hybird_get_http_code(buf) != 200) {
+	if (hybrid_get_http_code(buf) != 200) {
 		goto ssi_auth_err;
 	}
 
@@ -230,26 +230,26 @@ ssi_auth_cb(HybirdSslConnection *ssl, gpointer user_data)
 
 	pos += 4;
 
-	if (strlen(pos) != hybird_get_http_length(buf)) {
+	if (strlen(pos) != hybrid_get_http_length(buf)) {
 		goto ssi_auth_err;
 	}
 
-	if (parse_ssi_response(ac, pos) != HYBIRD_OK) {
+	if (parse_ssi_response(ac, pos) != HYBRID_OK) {
 		goto ssi_auth_err;
 	}
 
 	/* now we will download the configuration */
-	hybird_proxy_connect(NAV_SERVER, 80, cfg_connect_cb, ac);
+	hybrid_proxy_connect(NAV_SERVER, 80, cfg_connect_cb, ac);
 
 	return FALSE;
 
 ssi_auth_err:
-	hybird_account_error_reason(ac->account, _("ssi authentication failed"));
+	hybrid_account_error_reason(ac->account, _("ssi authentication failed"));
 	return FALSE;
 }
 
 gboolean 
-ssi_auth_action(HybirdSslConnection *isc, gpointer user_data)
+ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
 {
 	gchar *password;
 	gchar no_url[URL_LENGTH];
@@ -258,7 +258,7 @@ ssi_auth_action(HybirdSslConnection *isc, gpointer user_data)
 	gint pass_type;
 	fetion_account *ac = (fetion_account*)user_data;
 	
-	hybird_debug_info("fetion", "ssi authencating");
+	hybrid_debug_info("fetion", "ssi authencating");
 	password = hash_password_v4(ac->userid, ac->password);
 
 	if (ac->mobileno) {
@@ -294,12 +294,12 @@ ssi_auth_action(HybirdSslConnection *isc, gpointer user_data)
 
 	g_free(password);
 
-	hybird_debug_info("fetion", "send:\n%s", ssl_buf);
+	hybrid_debug_info("fetion", "send:\n%s", ssl_buf);
 
 	/* write the request to ssl connection, and a callback function
 	 * to handle the read event. */
-	hybird_ssl_write(isc, ssl_buf, strlen(ssl_buf));
-	hybird_ssl_event_add(isc, ssi_auth_cb, ac);
+	hybrid_ssl_write(isc, ssl_buf, strlen(ssl_buf));
+	hybrid_ssl_event_add(isc, ssi_auth_cb, ac);
 
 	return FALSE;
 }
@@ -318,18 +318,18 @@ sipc_reg_cb(gint sk, gpointer user_data)
 	gint n;
 
 	if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
-		hybird_account_error_reason(ac->account, _("sipc reg error."));
+		hybrid_account_error_reason(ac->account, _("sipc reg error."));
 		return FALSE;
 	}
 
 	buf[n] = '\0';
 
-	hybird_debug_info("fetion", "recv:\n%s", buf);
+	hybrid_debug_info("fetion", "recv:\n%s", buf);
 
 	/* parse response, we need the key and nouce */
 	digest = sip_header_get_attr(buf, "W");
 
-	if (parse_sipc_reg_response(digest, &nonce, &key) != HYBIRD_OK) {
+	if (parse_sipc_reg_response(digest, &nonce, &key) != HYBRID_OK) {
 		g_free(digest);
 		return FALSE;
 	}
@@ -361,7 +361,7 @@ sipc_reg_action(gint sk, gpointer user_data)
 	fetion_account *ac = (fetion_account*)user_data;
 	fetion_sip *sip = ac->sip;
 
-	hybird_debug_info("fetion", "sipc registeration action");
+	hybrid_debug_info("fetion", "sipc registeration action");
 
 	fetion_sip_set_type(sip, SIP_REGISTER);
 
@@ -376,18 +376,18 @@ sipc_reg_action(gint sk, gpointer user_data)
 
 	sipmsg = fetion_sip_to_string(sip, NULL);
 
-	hybird_debug_info("fetion", "start registering to sip server(%s:%d)",
+	hybrid_debug_info("fetion", "start registering to sip server(%s:%d)",
 			ac->sipc_proxy_ip, ac->sipc_proxy_port);
 
-	hybird_debug_info("fetion", "send:\n%s", sipmsg);
+	hybrid_debug_info("fetion", "send:\n%s", sipmsg);
 
 	if (send(sk, sipmsg, strlen(sipmsg), 0) == -1) {
-		hybird_account_error_reason(ac->account, "sipc reg error");
+		hybrid_account_error_reason(ac->account, "sipc reg error");
 		g_free(sipmsg);
 		return FALSE;
 	}
 
-	hybird_event_add(sk, HYBIRD_EVENT_READ, sipc_reg_cb, ac);
+	hybrid_event_add(sk, HYBRID_EVENT_READ, sipc_reg_cb, ac);
 
 	g_free(sipmsg);
 
@@ -409,7 +409,7 @@ push_cb(gint sk, gpointer user_data)
 	guint len, data_len;
 
 	if ((n = recv(sk, sipmsg, sizeof(sipmsg), 0)) == -1) {
-		hybird_account_error_reason(ac->account, "connection terminated");
+		hybrid_account_error_reason(ac->account, "connection terminated");
 		return FALSE;
 	}
 
@@ -484,7 +484,7 @@ sipc_auth_cb(gint sk, gpointer user_data)
 	fetion_account *ac = (fetion_account*)user_data;
 
 	if ((n = recv(sk, sipmsg, sizeof(sipmsg), 0)) == -1) {
-		hybird_account_error_reason(ac->account, "sipc authentication error");
+		hybrid_account_error_reason(ac->account, "sipc authentication error");
 		return FALSE;
 	}
 	
@@ -523,7 +523,7 @@ aut_fin:
 		parse_sipc_resp(ac, pos, length);
 
 		/* set the connection status. */
-		hybird_account_set_connection_status(ac->account, HYBIRD_CONNECTION_CONNECTED);
+		hybrid_account_set_connection_status(ac->account, HYBRID_CONNECTION_CONNECTED);
 
 		/* init group list */
 		fetion_groups_init(ac);
@@ -535,10 +535,10 @@ aut_fin:
 		fetion_buddy_scribe(sk, ac);
 
 		/* now we start to handle the pushed messages */
-		hybird_event_add(sk, HYBIRD_EVENT_READ, push_cb, ac);
+		hybrid_event_add(sk, HYBRID_EVENT_READ, push_cb, ac);
 
 	} else {
-		hybird_debug_error("fetion", "sipc authentication error.");
+		hybrid_debug_error("fetion", "sipc authentication error.");
 		g_free(ac->buffer);
 		ac->buffer = NULL;
 
@@ -567,7 +567,7 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 
 	fetion_sip *sip = ac->sip;
 
-	hybird_debug_info("fetion", "sipc authencation action");
+	hybrid_debug_info("fetion", "sipc authencation action");
 
 	body = generate_auth_body(ac);
 
@@ -594,19 +594,19 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 
 	//g_free(body);
 
-	hybird_debug_info("fetion", "Start sipc authentication , with ak-value");
-	hybird_debug_info("fetion", "send:\n%s", sipmsg);
+	hybrid_debug_info("fetion", "Start sipc authentication , with ak-value");
+	hybrid_debug_info("fetion", "send:\n%s", sipmsg);
 
 	if(send(sk, sipmsg, strlen(sipmsg), 0) == -1) {
-		hybird_debug_error("fetion", "send sipc auth request:%s\n",
+		hybrid_debug_error("fetion", "send sipc auth request:%s\n",
 				strerror(errno));
 		g_free(sipmsg);
 
-		return HYBIRD_ERROR; 
+		return HYBRID_ERROR; 
 	}
 	g_free(sipmsg);
 
-	hybird_event_add(sk, HYBIRD_EVENT_READ, sipc_auth_cb, ac);
+	hybrid_event_add(sk, HYBRID_EVENT_READ, sipc_auth_cb, ac);
 
 	return 0;
 }
@@ -907,12 +907,12 @@ parse_configuration(fetion_account *ac, const gchar *cfg)
 
 	xmlnode_free(root);
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 
 cfg_parse_err:
 	xmlnode_free(root);
-	hybird_debug_error("fetion", "parse cfg body");
-	return HYBIRD_ERROR;
+	hybrid_debug_error("fetion", "parse cfg body");
+	return HYBRID_ERROR;
 }
 
 /**
@@ -925,7 +925,7 @@ parse_sipc_reg_response(const gchar *reg_response, gchar **nonce, gchar **key)
 	gchar key_flag[] = "key=\"";
 	gchar *pos, *cur;
 
-	g_return_val_if_fail(reg_response != NULL, HYBIRD_ERROR);
+	g_return_val_if_fail(reg_response != NULL, HYBRID_ERROR);
 
 	if (!(pos = g_strrstr(reg_response, nonce_flag))) {
 		goto parse_sipc_error;
@@ -955,11 +955,11 @@ parse_sipc_reg_response(const gchar *reg_response, gchar **nonce, gchar **key)
 
 	*key = g_strndup(pos, cur - pos);
 
-	return HYBIRD_OK;
+	return HYBRID_OK;
 
 parse_sipc_error:
-	hybird_debug_error("fetion", "parse sipc register response");
-	return HYBIRD_ERROR;
+	hybrid_debug_error("fetion", "parse sipc register response");
+	return HYBRID_ERROR;
 	
 }
 
@@ -1039,12 +1039,12 @@ generate_response(const gchar *nouce, const gchar *userid,
 //	RSA_print_fp(stdout, r, 5);
 	flen = RSA_size(r);
 	out =  (guchar*)g_malloc0(flen);
-	hybird_debug_info("fetion", "start encrypting response");
+	hybrid_debug_info("fetion", "start encrypting response");
 	ret = RSA_public_encrypt(nonce_len + aeskey_len + psd_len,
 			res, out, r, RSA_PKCS1_PADDING);
 
 	if (ret < 0) {
-		hybird_debug_info("fetion", "encrypt response failed!");
+		hybrid_debug_info("fetion", "encrypt response failed!");
 		g_free(res); 
 		g_free(aeskey);
 		g_free(psd);
@@ -1053,7 +1053,7 @@ generate_response(const gchar *nouce, const gchar *userid,
 	}
 
 	RSA_free(r);
-	hybird_debug_info("fetion", "encrypting reponse success");
+	hybrid_debug_info("fetion", "encrypting reponse success");
 	g_free(res); 
 	g_free(aeskey);
 	g_free(psd);

@@ -1,5 +1,5 @@
-#ifndef HYBIRD_FX_LOGIN_H
-#define HYBIRD_FX_LOGIN_H
+#ifndef HYBRID_FX_LOGIN_H
+#define HYBRID_FX_LOGIN_H
 
 #include "connect.h"
 
@@ -7,10 +7,10 @@
 extern "C" {
 #endif
 
-gboolean ssi_auth_action(HybirdSslConnection *isc, gpointer user_data);
+gboolean ssi_auth_action(HybridSslConnection *isc, gpointer user_data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HYBIRD_FX_LOGIN_H */
+#endif /* HYBRID_FX_LOGIN_H */

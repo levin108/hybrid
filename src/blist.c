@@ -11,19 +11,19 @@
 GSList *group_list = NULL;
 GSList *buddy_list = NULL;
 
-HybirdBlist *blist = NULL;
+HybridBlist *blist = NULL;
 
-static void hybird_blist_buddy_icon_save(HybirdBuddy *buddy);
+static void hybrid_blist_buddy_icon_save(HybridBuddy *buddy);
 
-HybirdBlist*
-hybird_blist_create()
+HybridBlist*
+hybrid_blist_create()
 {
-	HybirdBlist *imb = g_new0(HybirdBlist, 1);
+	HybridBlist *imb = g_new0(HybridBlist, 1);
 	return imb;
 }
 
 static void
-render_column(HybirdBlist *blist)
+render_column(HybridBlist *blist)
 {
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
@@ -45,22 +45,22 @@ render_column(HybirdBlist *blist)
 	g_object_set(renderer, "expander-visible", TRUE, NULL);
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-					    "visible", HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
+					    "visible", HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* contact expander */
 	renderer = pidgin_cell_renderer_expander_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-					    "visible", HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
+					    "visible", HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* portrait */
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", HYBIRD_BLIST_BUDDY_ICON,
-						"visible", HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
+						"pixbuf", HYBRID_BLIST_BUDDY_ICON,
+						"visible", HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
 						NULL);
 	g_object_set(renderer, "xalign", 1.0, "xpad", 3, "ypad", 0, NULL);
 
@@ -68,7 +68,7 @@ render_column(HybirdBlist *blist)
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, TRUE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"markup", HYBIRD_BLIST_BUDDY_NAME,
+						"markup", HYBRID_BLIST_BUDDY_NAME,
 						NULL);
 	g_object_set(renderer, "xalign", 0.0, "xpad", 3, "ypad", 0, NULL);
 	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -77,8 +77,8 @@ render_column(HybirdBlist *blist)
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", HYBIRD_BLIST_PROTO_ICON,
-						"visible", HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE,
+						"pixbuf", HYBRID_BLIST_PROTO_ICON,
+						"visible", HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE,
 						NULL);
 	g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 
@@ -87,8 +87,8 @@ render_column(HybirdBlist *blist)
 	g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(blist->column, renderer,
-						"pixbuf", HYBIRD_BLIST_STATUS_ICON,
-						"visible", HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE,
+						"pixbuf", HYBRID_BLIST_STATUS_ICON,
+						"visible", HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE,
 						NULL);
 
 }
@@ -96,21 +96,21 @@ render_column(HybirdBlist *blist)
 static void
 instant_message_menu_cb(GtkWidget *widget, gpointer user_data)
 {
-	hybird_chat_panel_create(user_data);
+	hybrid_chat_panel_create(user_data);
 }
 
 static void
 buddy_information_menu_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybirdBuddy *buddy = (HybirdBuddy*)user_data;
-	HybirdAccount *account = buddy->account;
-	HybirdModule *proto = account->proto;
-	HybirdInfo *info;
+	HybridBuddy *buddy = (HybridBuddy*)user_data;
+	HybridAccount *account = buddy->account;
+	HybridModule *proto = account->proto;
+	HybridInfo *info;
 
 	/* Call the get information callback in module space. */
 	if (proto->info->get_info) {
 		
-		info = hybird_info_create(buddy);
+		info = hybrid_info_create(buddy);
 
 		proto->info->get_info(account, buddy);
 	}
@@ -124,9 +124,9 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	GtkTreeIter iter;
 	GtkWidget *group_menu;
 	GtkWidget *child_menu;
-	HybirdAccount *account;
-	HybirdBuddy *buddy;
-	HybirdGroup *group;
+	HybridAccount *account;
+	HybridBuddy *buddy;
+	HybridGroup *group;
 	GSList *pos;
 
 	g_return_val_if_fail(treeview != NULL, NULL);
@@ -138,32 +138,32 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
 
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
-	gtk_tree_model_get(model, &iter, HYBIRD_BLIST_OBJECT_COLUMN, &buddy, -1);
+	gtk_tree_model_get(model, &iter, HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
 
 	account = buddy->account;
 	
-	hybird_create_menu(menu, _("Instant Message"), "instants", TRUE,
+	hybrid_create_menu(menu, _("Instant Message"), "instants", TRUE,
 			instant_message_menu_cb, buddy);
-	hybird_create_menu(menu, _("Buddy Information"), "profile", TRUE,
+	hybrid_create_menu(menu, _("Buddy Information"), "profile", TRUE,
 			buddy_information_menu_cb, buddy);
-	hybird_create_menu_seperator(menu);
-	child_menu = hybird_create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
+	hybrid_create_menu_seperator(menu);
+	child_menu = hybrid_create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
 
 	group_menu = gtk_menu_new();
 	
 	for (pos = group_list; pos; pos = pos->next) {
-		group = (HybirdGroup*)pos->data;
+		group = (HybridGroup*)pos->data;
 
 		if (account == group->account) {
-			hybird_create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
+			hybrid_create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
 		}
 	}
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(child_menu), group_menu);
 
-	hybird_create_menu(menu, _("Remove Buddy"), "remove", TRUE, NULL, NULL);
-	hybird_create_menu(menu, _("Rename Buddy"), "rename", TRUE, NULL, NULL);
-	hybird_create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
+	hybrid_create_menu(menu, _("Remove Buddy"), "remove", TRUE, NULL, NULL);
+	hybrid_create_menu(menu, _("Rename Buddy"), "rename", TRUE, NULL, NULL);
+	hybrid_create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
 
 	return menu;
 }
@@ -211,7 +211,7 @@ row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	HybirdBuddy *buddy;
+	HybridBuddy *buddy;
 	gint depth;
 
 	model = gtk_tree_view_get_model(treeview);
@@ -222,18 +222,18 @@ row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 	if (depth > 1) {
 
 		gtk_tree_model_get(model, &iter,
-				HYBIRD_BLIST_OBJECT_COLUMN, &buddy, -1);
+				HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
 
-		hybird_chat_panel_create(buddy);
+		hybrid_chat_panel_create(buddy);
 	}
 }
 
 void 
-hybird_blist_init()
+hybrid_blist_init()
 {
-	blist = hybird_blist_create();
+	blist = hybrid_blist_create();
 
-	blist->treemodel = gtk_tree_store_new(HYBIRD_BLIST_COLUMNS,
+	blist->treemodel = gtk_tree_store_new(HYBRID_BLIST_COLUMNS,
 			G_TYPE_STRING,
 			GDK_TYPE_PIXBUF,
 			G_TYPE_STRING,
@@ -256,7 +256,7 @@ hybird_blist_init()
 
 	gtk_tree_sortable_set_sort_column_id(
 			GTK_TREE_SORTABLE(blist->treemodel),
-			HYBIRD_BLIST_BUDDY_STATE, GTK_SORT_DESCENDING);
+			HYBRID_BLIST_BUDDY_STATE, GTK_SORT_DESCENDING);
 
 	g_signal_connect(blist->treeview, "button-press-event",
 			G_CALLBACK(button_press_cb), NULL);
@@ -266,13 +266,13 @@ hybird_blist_init()
 
 }
 
-HybirdGroup*
-hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
+HybridGroup*
+hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 {
 	g_return_val_if_fail(name != NULL && blist != NULL, NULL);
 
 	gchar *temp;
-	HybirdGroup *group;
+	HybridGroup *group;
 	GdkPixbuf *proto_icon;
 
 	g_return_val_if_fail(ac != NULL, NULL);
@@ -283,7 +283,7 @@ hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
 	 * Make sure we will add a group to an account only
 	 * when the account's connection status is CONNECTED 
 	 */
-	if (!HYBIRD_IS_CONNECTED(ac)) {
+	if (!HYBRID_IS_CONNECTED(ac)) {
 		return NULL;
 	}
 
@@ -291,11 +291,11 @@ hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
 	 * If current account has a group exists with the specified ID,
 	 * then just return the existing group.
 	 */
-	if ((group = hybird_blist_find_group(ac, id))) {
+	if ((group = hybrid_blist_find_group(ac, id))) {
 		return group;
 	}
 
-	group = g_new0(HybirdGroup, 1);
+	group = g_new0(HybridGroup, 1);
 	proto_icon  = gdk_pixbuf_new_from_file_at_size(
 			DATA_DIR"/msn.png", 16, 16, NULL);
 
@@ -304,14 +304,14 @@ hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
 	temp = g_strdup_printf("<b>%s</b>", name);
 
 	gtk_tree_store_set(blist->treemodel, &group->iter,
-			HYBIRD_BLIST_BUDDY_NAME, temp,
-			HYBIRD_BLIST_PROTO_ICON, proto_icon,
-			HYBIRD_BLIST_OBJECT_COLUMN, group,
-			HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, TRUE,
-			HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-			HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE, FALSE,
-			HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-			HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE, FALSE,
+			HYBRID_BLIST_BUDDY_NAME, temp,
+			HYBRID_BLIST_PROTO_ICON, proto_icon,
+			HYBRID_BLIST_OBJECT_COLUMN, group,
+			HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, TRUE,
+			HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+			HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE, FALSE,
+			HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+			HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, FALSE,
 			-1);
 
 	g_free(temp);
@@ -328,7 +328,7 @@ hybird_blist_add_group(HybirdAccount *ac, const gchar *id, const gchar *name)
 }
 
 void
-hybird_blist_group_destroy(HybirdGroup *group)
+hybrid_blist_group_destroy(HybridGroup *group)
 {
 	if (group) {
 		g_free(group->id);
@@ -338,14 +338,14 @@ hybird_blist_group_destroy(HybirdGroup *group)
 	}
 }
 
-HybirdBuddy*
-hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
+HybridBuddy*
+hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 		const gchar *name)
 {
 	GdkPixbuf *status_icon;
 	GdkPixbuf *proto_icon;
 	GdkPixbuf *buddy_icon;
-	HybirdBuddy *buddy;
+	HybridBuddy *buddy;
 
 	g_return_val_if_fail(blist != NULL, NULL);
 	g_return_val_if_fail(parent != NULL, NULL);
@@ -355,7 +355,7 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 	 * Make sure we will add a buddy to an account only
 	 * when the account's connection status is CONNECTED 
 	 */
-	if (!HYBIRD_IS_CONNECTED(ac)) {
+	if (!HYBRID_IS_CONNECTED(ac)) {
 		return NULL;
 	}
 
@@ -363,16 +363,16 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 	 * If current account has a buddy exists with the specified ID,
 	 * then just return the existing buddy.
 	 */
-	if ((buddy = hybird_blist_find_buddy(ac, id))) {
+	if ((buddy = hybrid_blist_find_buddy(ac, id))) {
 		return buddy;
 	}
 
-	status_icon = hybird_create_presence_pixbuf(HYBIRD_STATE_OFFLINE, 32);
+	status_icon = hybrid_create_presence_pixbuf(HYBRID_STATE_OFFLINE, 32);
 	proto_icon = gdk_pixbuf_new_from_file(DATA_DIR"/msn.png", NULL);
 
 	/*
 	 * Here we need to set a default icon for the buddy, never use 
-	 * hybird_blist_add_buddy_icon(), for it will modify the cache
+	 * hybrid_blist_add_buddy_icon(), for it will modify the cache
 	 * of "crc" attribute, but we only allow this function to modify
 	 * the "id" and "name" attribute, so we use the original method
 	 * to set a default icon.
@@ -380,23 +380,23 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 	buddy_icon = gdk_pixbuf_new_from_file_at_size(DATA_DIR"/icon.png",
 			16, 16, NULL);
 
-	buddy = g_new0(HybirdBuddy, 1);
+	buddy = g_new0(HybridBuddy, 1);
 	
 	gtk_tree_store_append(blist->treemodel, &buddy->iter, &parent->iter);
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			HYBIRD_BLIST_BUDDY_ID, id,
-			HYBIRD_BLIST_STATUS_ICON, buddy_icon,
-			HYBIRD_BLIST_STATUS_ICON, status_icon,
-			HYBIRD_BLIST_PROTO_ICON, proto_icon,
-			HYBIRD_BLIST_BUDDY_NAME, name,
-			HYBIRD_BLIST_OBJECT_COLUMN, buddy,
-			HYBIRD_BLIST_BUDDY_STATE, HYBIRD_STATE_OFFLINE,
-			HYBIRD_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
-			HYBIRD_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-			HYBIRD_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
-			HYBIRD_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-			HYBIRD_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
+			HYBRID_BLIST_BUDDY_ID, id,
+			HYBRID_BLIST_STATUS_ICON, buddy_icon,
+			HYBRID_BLIST_STATUS_ICON, status_icon,
+			HYBRID_BLIST_PROTO_ICON, proto_icon,
+			HYBRID_BLIST_BUDDY_NAME, name,
+			HYBRID_BLIST_OBJECT_COLUMN, buddy,
+			HYBRID_BLIST_BUDDY_STATE, HYBRID_STATE_OFFLINE,
+			HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
+			HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+			HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
+			HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+			HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
 			-1);
 
 	buddy->id = g_strdup(id);
@@ -410,13 +410,13 @@ hybird_blist_add_buddy(HybirdAccount *ac, HybirdGroup *parent, const gchar *id,
 	g_object_unref(proto_icon);
 	g_object_unref(buddy_icon);
 
-	hybird_blist_buddy_to_cache(buddy, HYBIRD_BLIST_CACHE_ADD);
+	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_ADD);
 
 	return buddy;
 }
 
 const gchar*
-hybird_blist_get_buddy_checksum(HybirdBuddy *buddy)
+hybrid_blist_get_buddy_checksum(HybridBuddy *buddy)
 {
 	g_return_val_if_fail(buddy != NULL, NULL);
 
@@ -424,7 +424,7 @@ hybird_blist_get_buddy_checksum(HybirdBuddy *buddy)
 }
 
 void
-hybird_blist_buddy_destroy(HybirdBuddy *buddy)
+hybrid_blist_buddy_destroy(HybridBuddy *buddy)
 {
 	if (buddy) {
 		g_free(buddy->id);
@@ -441,7 +441,7 @@ hybird_blist_buddy_destroy(HybirdBuddy *buddy)
  * Set the name field.
  */
 static void
-hybird_blist_set_name_field(HybirdBuddy *buddy)
+hybrid_blist_set_name_field(HybridBuddy *buddy)
 {
 	gchar *text;
 	gchar *mood;
@@ -475,7 +475,7 @@ hybird_blist_set_name_field(HybirdBuddy *buddy)
 	text = g_strdup_printf("%s%s", tmp, mood);
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			HYBIRD_BLIST_BUDDY_NAME, text, -1);
+			HYBRID_BLIST_BUDDY_NAME, text, -1);
 
 	g_free(mood);
 	g_free(text);
@@ -486,7 +486,7 @@ hybird_blist_set_name_field(HybirdBuddy *buddy)
  * Set the buddy state.
  */
 static void
-hybird_blist_set_state_field(HybirdBuddy *buddy)
+hybrid_blist_set_state_field(HybridBuddy *buddy)
 {
 	GdkPixbuf *pixbuf;
 	GError *err = NULL;
@@ -495,11 +495,11 @@ hybird_blist_set_state_field(HybirdBuddy *buddy)
 
 	g_return_if_fail(buddy != NULL);
 
-	pixbuf = hybird_create_presence_pixbuf(buddy->state, 16);
+	pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
 	
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			HYBIRD_BLIST_BUDDY_STATE, buddy->state,
-			HYBIRD_BLIST_STATUS_ICON, pixbuf, -1);
+			HYBRID_BLIST_BUDDY_STATE, buddy->state,
+			HYBRID_BLIST_STATUS_ICON, pixbuf, -1);
 
 	g_object_unref(pixbuf);
 	pixbuf = NULL;
@@ -519,16 +519,16 @@ hybird_blist_set_state_field(HybirdBuddy *buddy)
 		if (!g_file_get_contents(DATA_DIR"/icon.png", 
 					(gchar**)&icon_data, &icon_data_length, &err)) {
 
-			hybird_debug_error("blist", "load the default icon:%s", err->message);
+			hybrid_debug_error("blist", "load the default icon:%s", err->message);
 			g_error_free(err);
 			return;
 		}
 
-		pixbuf = hybird_create_round_pixbuf(icon_data, icon_data_length,
+		pixbuf = hybrid_create_round_pixbuf(icon_data, icon_data_length,
 				scale_size);
 
 	} else {
-		pixbuf = hybird_create_round_pixbuf(buddy->icon_data, 
+		pixbuf = hybrid_create_round_pixbuf(buddy->icon_data, 
 				buddy->icon_data_length, scale_size);
 	}
 
@@ -538,38 +538,38 @@ hybird_blist_set_state_field(HybirdBuddy *buddy)
 	}
 
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
-			HYBIRD_BLIST_BUDDY_ICON, pixbuf, -1);
+			HYBRID_BLIST_BUDDY_ICON, pixbuf, -1);
 
 	g_object_unref(pixbuf);
 
 }
 
 void
-hybird_blist_set_buddy_name(HybirdBuddy *buddy, const gchar *name)
+hybrid_blist_set_buddy_name(HybridBuddy *buddy, const gchar *name)
 {
 	g_return_if_fail(buddy != NULL);
 
 	g_free(buddy->name);
 	buddy->name = g_strdup(name);
 
-	hybird_blist_set_name_field(buddy);
-	hybird_blist_buddy_to_cache(buddy, HYBIRD_BLIST_CACHE_UPDATE_NAME);
+	hybrid_blist_set_name_field(buddy);
+	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_NAME);
 }
 
 void
-hybird_blist_set_buddy_mood(HybirdBuddy *buddy, const gchar *mood)
+hybrid_blist_set_buddy_mood(HybridBuddy *buddy, const gchar *mood)
 {
 	g_return_if_fail(buddy != NULL);
 
 	g_free(buddy->mood);
 	buddy->mood = g_strdup(mood);
 
-	hybird_blist_set_name_field(buddy);
-	hybird_blist_buddy_to_cache(buddy, HYBIRD_BLIST_CACHE_UPDATE_MOOD);
+	hybrid_blist_set_name_field(buddy);
+	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_MOOD);
 }
 
 void
-hybird_blist_set_buddy_icon(HybirdBuddy *buddy, const guchar *icon_data,
+hybrid_blist_set_buddy_icon(HybridBuddy *buddy, const guchar *icon_data,
 		gsize len, const gchar *crc)
 {
 	g_return_if_fail(buddy != NULL);
@@ -584,32 +584,32 @@ hybird_blist_set_buddy_icon(HybirdBuddy *buddy, const guchar *icon_data,
 		buddy->icon_data = g_memdup(icon_data, len);
 	}
 
-	hybird_blist_set_state_field(buddy);
-	hybird_blist_buddy_icon_save(buddy);
-	hybird_blist_buddy_to_cache(buddy, HYBIRD_BLIST_CACHE_UPDATE_ICON);
+	hybrid_blist_set_state_field(buddy);
+	hybrid_blist_buddy_icon_save(buddy);
+	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_ICON);
 }
 
 void
-hybird_blist_set_buddy_state(HybirdBuddy *buddy, gint state)
+hybrid_blist_set_buddy_state(HybridBuddy *buddy, gint state)
 {
 	g_return_if_fail(buddy != NULL);
 
 	buddy->state = state;
 
-	hybird_blist_set_state_field(buddy);
+	hybrid_blist_set_state_field(buddy);
 }
 
-HybirdGroup*
-hybird_blist_find_group(HybirdAccount *account, const gchar *id)
+HybridGroup*
+hybrid_blist_find_group(HybridAccount *account, const gchar *id)
 {
 	GSList *pos;
-	HybirdGroup *group;
+	HybridGroup *group;
 
 	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(id != NULL, NULL);
 
 	for (pos = group_list; pos; pos = pos->next) {
-		group = (HybirdGroup*)pos->data;
+		group = (HybridGroup*)pos->data;
 
 		if (g_strcmp0(group->id, id) == 0 && group->account == account) {
 			return group;
@@ -619,17 +619,17 @@ hybird_blist_find_group(HybirdAccount *account, const gchar *id)
 	return NULL;
 }
 
-HybirdGroup*
-hybird_blist_find_group_by_name(HybirdAccount *account, const gchar *name)
+HybridGroup*
+hybrid_blist_find_group_by_name(HybridAccount *account, const gchar *name)
 {
 	GSList *pos;
-	HybirdGroup *group;
+	HybridGroup *group;
 
 	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(name != NULL, NULL);
 
 	for (pos = group_list; pos; pos = pos->next) {
-		group = (HybirdGroup*)pos->data;
+		group = (HybridGroup*)pos->data;
 
 		if (g_strcmp0(group->name, name) == 0 && group->account == account) {
 			return group;
@@ -639,16 +639,16 @@ hybird_blist_find_group_by_name(HybirdAccount *account, const gchar *name)
 	return NULL;
 }
 
-HybirdBuddy*
-hybird_blist_find_buddy(HybirdAccount *account, const gchar *id)
+HybridBuddy*
+hybrid_blist_find_buddy(HybridAccount *account, const gchar *id)
 {
 	GSList *pos;
-	HybirdBuddy *buddy;
+	HybridBuddy *buddy;
 
 	g_return_val_if_fail(id != NULL, NULL);
 
 	for (pos = buddy_list; pos; pos = pos->next) {
-		buddy = (HybirdBuddy*)pos->data;
+		buddy = (HybridBuddy*)pos->data;
 
 		if (g_strcmp0(buddy->id, id) == 0 && buddy->account == account) {
 			return buddy;
@@ -659,11 +659,11 @@ hybird_blist_find_buddy(HybirdAccount *account, const gchar *id)
 }
 
 void
-hybird_blist_buddy_to_cache(HybirdBuddy *buddy, HybirdBlistCacheType type)
+hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
 {
-	HybirdAccount *ac;
-	HybirdConfig *config;
-	HybirdBlistCache *cache;
+	HybridAccount *ac;
+	HybridConfig *config;
+	HybridBlistCache *cache;
 	xmlnode *root;
 	xmlnode *node;
 	xmlnode *temp;
@@ -685,7 +685,7 @@ hybird_blist_buddy_to_cache(HybirdBuddy *buddy, HybirdBlistCacheType type)
 	root = cache->root;
 
 	if (!(node = xmlnode_find(root, "accounts"))) {
-		hybird_debug_error("blist", "can't find accounts node in blist cache");
+		hybrid_debug_error("blist", "can't find accounts node in blist cache");
 		return;
 	}
 
@@ -695,7 +695,7 @@ hybird_blist_buddy_to_cache(HybirdBuddy *buddy, HybirdBlistCacheType type)
 		while (temp) {
 			if (!xmlnode_has_prop(temp, "username") ||
 				!xmlnode_has_prop(temp, "proto")) {
-				hybird_debug_error("blist", "invalid blist cache node found");
+				hybrid_debug_error("blist", "invalid blist cache node found");
 				temp = xmlnode_next(temp);
 				continue;
 			}
@@ -741,7 +741,7 @@ account_exist:
 
 			if (!xmlnode_has_prop(temp, "id") ||
 				!xmlnode_has_prop(temp, "name")) {
-				hybird_debug_error("blist", "invalid blist cache group node found");
+				hybrid_debug_error("blist", "invalid blist cache group node found");
 				temp = xmlnode_next(temp);
 				continue;
 			}
@@ -775,7 +775,7 @@ group_exist:
 		while (temp) {
 
 			if (!xmlnode_has_prop(temp, "id")) {
-				hybird_debug_error("blist", "invalid blist cache buddy node found");
+				hybrid_debug_error("blist", "invalid blist cache buddy node found");
 				temp = xmlnode_next(temp);
 				continue;
 			}
@@ -798,7 +798,7 @@ group_exist:
 
 buddy_exist:
 
-	if (type == HYBIRD_BLIST_CACHE_ADD) {
+	if (type == HYBRID_BLIST_CACHE_ADD) {
 
 		if (xmlnode_has_prop(node, "id")) {
 			xmlnode_set_prop(node, "id", buddy->id);
@@ -808,8 +808,8 @@ buddy_exist:
 		}
 	}
 
-	if (type == HYBIRD_BLIST_CACHE_ADD ||
-		type == HYBIRD_BLIST_CACHE_UPDATE_NAME) {
+	if (type == HYBRID_BLIST_CACHE_ADD ||
+		type == HYBRID_BLIST_CACHE_UPDATE_NAME) {
 
 		if (xmlnode_has_prop(node, "name")) {
 			xmlnode_set_prop(node, "name", buddy->name);
@@ -819,7 +819,7 @@ buddy_exist:
 		}
 	}
 
-	if (type == HYBIRD_BLIST_CACHE_UPDATE_MOOD) {
+	if (type == HYBRID_BLIST_CACHE_UPDATE_MOOD) {
 
 		if (xmlnode_has_prop(node, "mood")) {
 			xmlnode_set_prop(node, "mood", buddy->mood);
@@ -829,7 +829,7 @@ buddy_exist:
 		}
 	}
 
-	if (type == HYBIRD_BLIST_CACHE_UPDATE_ICON) {
+	if (type == HYBRID_BLIST_CACHE_UPDATE_ICON) {
 
 		if (xmlnode_has_prop(node, "crc")) {
 			xmlnode_set_prop(node, "crc", buddy->icon_crc);
@@ -849,7 +849,7 @@ buddy_exist:
 	/* Set the buddy's xml cache node property. */
 	buddy->cache_node = node;
 
-	hybird_blist_cache_flush();
+	hybrid_blist_cache_flush();
 }
 
 
@@ -858,13 +858,13 @@ buddy_exist:
  * SHA1(buddy_id + '_' + proto_name).type
  */
 static void
-hybird_blist_buddy_icon_save(HybirdBuddy *buddy)
+hybrid_blist_buddy_icon_save(HybridBuddy *buddy)
 {
 	gchar *name;
 	gchar *hashed_name;
-	HybirdAccount *account;
-	HybirdModule *module;
-	HybirdConfig *config;
+	HybridAccount *account;
+	HybridModule *module;
+	HybridConfig *config;
 
 	g_return_if_fail(buddy != NULL);
 
@@ -879,7 +879,7 @@ hybird_blist_buddy_icon_save(HybirdBuddy *buddy)
 
 	if (!buddy->icon_name) {
 		name = g_strdup_printf("%s_%s", module->info->name, buddy->id);
-		hashed_name = hybird_sha1(name, strlen(name));
+		hashed_name = hybrid_sha1(name, strlen(name));
 		g_free(name);
 
 		buddy->icon_name = g_strdup_printf("%s.jpg", hashed_name);

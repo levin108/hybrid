@@ -1,5 +1,5 @@
-#ifndef HYBIRD_FX_SIP_H
-#define HYBIRD_FX_SIP_H
+#ifndef HYBRID_FX_SIP_H
+#define HYBRID_FX_SIP_H
 
 enum {
 	FETION_SIP_OK = 200,
