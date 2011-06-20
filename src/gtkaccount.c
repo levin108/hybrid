@@ -13,6 +13,8 @@ enum {
 static HybridAccountEditPanel *create_account_edit_panel(gboolean is_add);
 static void add_cb(GtkWidget *widget, gpointer user_data);
 
+static HybridAccountPanel *account_panel = NULL;
+
 static void
 enable_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 		gpointer user_data)
@@ -108,25 +110,26 @@ hybrid_account_panel_init(HybridAccountPanel *panel)
 {
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf;
+	HybridAccount *account;
+	extern GSList *account_list;
+	GSList *pos;
 
 	g_return_if_fail(panel != NULL);
 
+	for (pos = account_list; pos; pos = pos->next) {
+		
+		account = (HybridAccount*)pos->data;
+		pixbuf = hybrid_create_proto_icon(account->proto->info->name, 16);
+		gtk_list_store_append(GTK_LIST_STORE(panel->account_store), &iter);
+		gtk_list_store_set(GTK_LIST_STORE(panel->account_store), &iter,
+				HYBRID_ENABLE_COLUMN, TRUE,
+				HYBRID_NAME_COLUMN, account->username,
+				HYBRID_PROTO_ICON_COLUMN, pixbuf,
+				HYBRID_PROTO_NAME_COLUMN, account->proto->info->name, -1);
 
-	pixbuf = hybrid_create_default_icon(16);
-	gtk_list_store_append(GTK_LIST_STORE(panel->account_store), &iter);
-	gtk_list_store_set(GTK_LIST_STORE(panel->account_store), &iter,
-			HYBRID_ENABLE_COLUMN, TRUE,
-			HYBRID_NAME_COLUMN,"15210634361",
-			HYBRID_PROTO_ICON_COLUMN, pixbuf,
-			HYBRID_PROTO_NAME_COLUMN, "fetion", -1);
-	gtk_list_store_append(GTK_LIST_STORE(panel->account_store), &iter);
-	gtk_list_store_set(GTK_LIST_STORE(panel->account_store), &iter,
-			HYBRID_ENABLE_COLUMN, TRUE,
-			HYBRID_NAME_COLUMN,"18768140681",
-			HYBRID_PROTO_ICON_COLUMN, pixbuf,
-			HYBRID_PROTO_NAME_COLUMN, "fetion", -1);
+		g_object_unref(pixbuf);
+	}
 
-	g_object_unref(pixbuf);
 }
 
 static void
@@ -137,6 +140,8 @@ close_cb(GtkWidget *widget, gpointer user_data)
 	gtk_widget_destroy(panel->window);
 
 	g_free(panel);
+
+	account_panel = NULL;
 }
 
 HybridAccountPanel*
@@ -149,7 +154,14 @@ hybrid_account_panel_create()
 	GtkWidget *halign;
 	GtkWidget *action_area;
 
+	if (account_panel) {
+		gtk_window_present(GTK_WINDOW(account_panel->window));
+		return account_panel;
+	}
+
 	panel = g_new0(HybridAccountPanel, 1);
+
+	account_panel = panel;
 
 	panel->window = hybrid_create_window(_("Manage Account"), NULL,
 					GTK_WIN_POS_CENTER, FALSE);
@@ -227,8 +239,8 @@ create_protocol_model()
 
 	
 	for (pos = modules; pos; pos = pos->next) {
-		pixbuf = gdk_pixbuf_new_from_file_at_size(DATA_DIR"/icon.png", 16, 16, NULL);
 		module = (HybridModule*)pos->data;
+		pixbuf = hybrid_create_proto_icon(module->info->name, 16);
 		gtk_tree_store_append(store, &iter, NULL);
 		gtk_tree_store_set(store, &iter, PROTOCOL_ICON_COLUMN, pixbuf,
 						PROTOCOL_NAME_COLUMN, module->info->name, -1);

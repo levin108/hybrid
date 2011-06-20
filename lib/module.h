@@ -18,6 +18,11 @@ struct _HybridModuleInfo {
 	gchar *homepage;
 	gchar *major_version;
 	gchar *minor_version;
+	gchar *icon; /**< The name of the protocol icon, ie,
+				   "msn" for "msn.png", the protocol icon must
+				   be in "png" format, and stored in 
+				   HYBRID_INSTALL_DIR/share/hybrid/protocols
+				   */
 
 	gboolean (*login)(HybridAccount *ac);
 	void (*get_info)(HybridAccount *ac, HybridBuddy *buddy);

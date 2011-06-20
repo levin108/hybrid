@@ -29,6 +29,16 @@ GdkPixbuf *hybrid_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len);
 GdkPixbuf *hybrid_create_default_icon(gint scale_size);
 
 /**
+ * Create a protocol icon pixbuf.
+ *
+ * @param proto_name The name of the protocol.
+ * @param scale_size The scale size of the pixbuf.
+ *
+ * @return The pixbuf created.
+ */
+GdkPixbuf *hybrid_create_proto_icon(const gchar *proto_name, gint scale_size);
+
+/**
  * Create a pixbuf using the pixbuf binary data, and scale it to the given size.
  *
  * @param pixbuf_data  The binary data of the pixbuf.

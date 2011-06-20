@@ -131,6 +131,26 @@ hybrid_create_default_icon(gint scale_size)
 }
 
 GdkPixbuf*
+hybrid_create_proto_icon(const gchar *proto_name, gint scale_size)
+{
+	GdkPixbuf *pixbuf;
+	gchar *icon_name;
+
+	g_return_val_if_fail(proto_name != NULL, NULL);
+	g_return_val_if_fail(*proto_name != '\0', NULL);
+
+	icon_name = g_strdup_printf("%s/protocols/%s.png", DATA_DIR, proto_name);
+
+	pixbuf = gdk_pixbuf_new_from_file_at_size(icon_name,
+			scale_size, scale_size, NULL);
+
+	g_free(icon_name);
+
+	return pixbuf;
+
+}
+
+GdkPixbuf*
 hybrid_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_width, gint scale_height)
 {

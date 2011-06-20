@@ -123,6 +123,10 @@ install(FILES ${HYBRID_PIXMAPS} DESTINATION ${DATA_INSTALL_DIR})
 file(GLOB HYBRID_MENUS_PIXMAPS "share/menus/*.png")
 install(FILES ${HYBRID_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/menus/")
 
+# install protocols pixmaps
+file(GLOB HYBRID_MENUS_PIXMAPS "share/protocols/*.png")
+install(FILES ${HYBRID_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/protocols/")
+
 add_executable(hybrid ${hybrid_SRC})
 target_link_libraries(hybrid ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})
 

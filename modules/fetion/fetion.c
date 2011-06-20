@@ -184,6 +184,7 @@ HybridModuleInfo module_info = {
 	N_("libpurple plugin implementing Fetion Protocol version 4"),
 	"http://basiccoder.com",
 	"0","1",
+	"fetion",
 	fetion_login,
 	fetion_get_info,
 };
@@ -191,7 +192,7 @@ HybridModuleInfo module_info = {
 void 
 fetion_module_init(HybridModule *module)
 {
-	printf("hello world\n");
+
 }
 
 HYBRID_MODULE_INIT(fetion_module_init, &module_info);

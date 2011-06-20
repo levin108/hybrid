@@ -61,7 +61,6 @@ manage_account_cb(GtkWidget *widget, gpointer user_data)
 	HybridAccountPanel *panel;
 
 	panel = hybrid_account_panel_create();
-	printf("abc\n");
 }
 
 static void

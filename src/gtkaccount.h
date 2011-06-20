@@ -13,6 +13,7 @@ struct _HybridAccountPanel {
 };
 
 struct _HybridAccountEditPanel {
+	HybridAccountPanel *parent;
 	GtkWidget *window;
 	GtkWidget *username_entry;
 	GtkWidget *password_entry;

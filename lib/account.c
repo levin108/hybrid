@@ -15,7 +15,13 @@ hybrid_account_init(void)
 	gchar *config_path;
 	xmlnode *root;
 	xmlnode *node;
+	HybridAccount *account;
 	gboolean flush = FALSE;
+
+	gchar *username;
+	gchar *protoname;
+	gchar *password;
+	HybridModule *module;
 
 	config_path = hybrid_config_get_path();
 	account_file = g_strdup_printf("%s/accounts.xml", config_path);
@@ -30,15 +36,36 @@ hybrid_account_init(void)
 	}
 
 	if ((node = xmlnode_child(root))) {
-		if (g_strcmp0(node->name, "account")) {
-			hybrid_debug_error("account", "accounts.xml is in bad format,"
-					"please try to remove ~/.config/hybrid/accounts.xml,"
-					"and then restart hybrid :)");
-			xmlnode_free(root);
-			return;
-		}
 
 		while (node) {
+			if (g_strcmp0(node->name, "account") ||
+				!xmlnode_has_prop(node, "user") ||
+				!xmlnode_has_prop(node, "proto")) {
+				hybrid_debug_error("account", "accounts.xml is in bad format,"
+						"please try to remove ~/.config/hybrid/accounts.xml,"
+						"and then restart hybrid :)");
+				xmlnode_free(root);
+				return;
+			}
+
+			username = xmlnode_prop(node, "user");
+			protoname = xmlnode_prop(node, "proto");
+
+			module = hybrid_module_find(protoname);
+
+			account = hybrid_account_create(module);
+			hybrid_account_set_username(account, username);
+
+			if (xmlnode_has_prop(node, "pass")) {
+				password = xmlnode_prop(node, "pass");
+				hybrid_account_set_password(account, password);
+				g_free(password);
+			}
+
+			g_free(username);
+			g_free(protoname);
+
+			account_list = g_slist_append(account_list, account);
 				
 			node = node->next;
 		}
@@ -164,8 +191,6 @@ hybrid_account_create(HybridModule *proto)
 	g_return_val_if_fail(proto != NULL, NULL);
 
 	HybridAccount *ac = g_new0(HybridAccount, 1);
-	hybrid_account_set_username(ac, "547264589");
-	hybrid_account_set_password(ac, "lwp1279");
 	
 	ac->config = global_config;
 	ac->proto = proto;
