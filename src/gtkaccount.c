@@ -254,6 +254,7 @@ static void
 edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 {
 	HybridAccountEditPanel *panel;
+	HybridAccount *account;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	const gchar *username;
@@ -281,9 +282,19 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 		return;
 	}
 
+	if (!(account = hybrid_account_get(protoname, username))) {
+		g_free(protoname);
+		return;
+	}
+
+	hybrid_account_set_password(account, password);
+	hybrid_account_update(account);
+
 	g_free(protoname);
 
-
+	/* Destroy Edit Panel. */
+	gtk_widget_destroy(panel->window);
+	g_free(panel);
 }
 
 static HybridAccountEditPanel*
@@ -358,6 +369,7 @@ create_account_edit_panel(gboolean is_add)
 	gtk_fixed_put(GTK_FIXED(fixed), label, 20, 130);
 
 	panel->password_entry = gtk_entry_new();
+	gtk_entry_set_visibility(GTK_ENTRY(panel->password_entry) , FALSE);
 	gtk_widget_set_usize(panel->password_entry, 150, 25);
 	gtk_fixed_put(GTK_FIXED(fixed), panel->password_entry, 100, 130);
 

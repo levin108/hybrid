@@ -48,17 +48,27 @@ extern "C" {
 void hybrid_account_init(void);
 
 /**
- * Get an account from the cache file 'accounts.xml', if there's
- * no matching node found, create one in the memory, but not in the 
- * xml file.
+ * Get an account from the account list, if there's
+ * no matching node found, create one in the memory, 
+ * and append it to the account count.
  *
  * @param proto_name The name of the protocol.
  * @param username   The username of the account.
  *
  * @return The Account found or created.
  */
-HybridAccount *hybrid_account_get_from_cache(const gchar *proto_name,
+HybridAccount *hybrid_account_get(const gchar *proto_name,
 		const gchar *username);
+
+/**
+ * Synchronize the account information in the memory with 
+ * that in the local cache file which is in fact a XML file.
+ * The function first find the matching 'account' node, if found,
+ * update it, orelse create a new one.
+ *
+ * @param account The account to update.
+ */
+void hybrid_account_update(HybridAccount *account);
 
 /**
  * Create a new Hybrid account with the specified protocol module.

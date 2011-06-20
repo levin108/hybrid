@@ -11,7 +11,6 @@ static void load_blist_from_disk(HybridAccount *account);
 void
 hybrid_account_init(void)
 {
-	extern HybridConfig *global_config;
 	gchar *account_file;
 	gchar *config_path;
 	xmlnode *root;
@@ -48,15 +47,114 @@ hybrid_account_init(void)
 	if (flush) {
 		xmlnode_save_file(root, account_file);
 	}
+
+	xmlnode_free(root);
 }
 
 HybridAccount*
-hybrid_account_get_from_cache(const gchar *proto_name,
-		const gchar *username)
+hybrid_account_get(const gchar *proto_name,	const gchar *username)
 {
-	HybridAccount *account = NULL;
+	HybridAccount *account;
+	HybridModule *module;
+	GSList *pos;
+
+	for (pos = account_list; pos; pos = pos->next) {
+		account = (HybridAccount*)pos->data;
+
+		if (g_strcmp0(account->username, username) == 0 &&
+			g_strcmp0(account->proto->info->name, proto_name) == 0) {
+
+			return account;
+		}
+	}
+
+	if (!(module = hybrid_module_find(proto_name))) {
+		hybrid_debug_error("account", "create account error,"
+				"invalid protocal name.");
+		return NULL;
+	}
+
+	account = hybrid_account_create(module);
+	hybrid_account_set_username(account, username);
 
 	return account;
+}
+
+void
+hybrid_account_update(HybridAccount *account)
+{
+	gchar *account_file;
+	gchar *config_path;
+	xmlnode *root;
+	xmlnode *node;
+	gchar *username;
+	gchar *protoname;
+
+	config_path = hybrid_config_get_path();
+	account_file = g_strdup_printf("%s/accounts.xml", config_path);
+	g_free(config_path);
+
+	if (!(root = xmlnode_root_from_file(account_file))) {
+		hybrid_debug_error("account", "save account information failed,"
+				"invalid accounts.xml");
+		g_free(account_file);
+		return;
+	}
+
+	if ((node = xmlnode_child(root))) {
+
+		while (node) {
+			if (g_strcmp0(node->name, "account") ||
+				!xmlnode_has_prop(node, "user") ||
+				!xmlnode_has_prop(node, "proto")) {
+				hybrid_debug_error("account", 
+						"invalid node found in accounts.xml");
+				node = xmlnode_next(node);
+
+				continue;
+			}
+
+			username = xmlnode_prop(node, "user");
+			protoname = xmlnode_prop(node, "proto");
+
+			if (g_strcmp0(username, account->username) == 0 &&
+				g_strcmp0(protoname, account->proto->info->name) == 0) {
+				goto update_node;
+			}
+			
+			node = xmlnode_next(node);
+		}
+	}
+	
+	/* Node not found, create a new one. */
+	node = xmlnode_new_child(root, "account");
+update_node:
+
+	if (xmlnode_has_prop(node, "proto")) {
+		xmlnode_set_prop(node, "proto", account->proto->info->name);
+
+	} else {
+		xmlnode_new_prop(node, "proto", account->proto->info->name);
+	}
+
+	if (xmlnode_has_prop(node, "user")) {
+		xmlnode_set_prop(node, "user", account->username);
+
+	} else {
+		xmlnode_new_prop(node, "user", account->username);
+	}
+
+	if (xmlnode_has_prop(node, "pass")) {
+		xmlnode_set_prop(node, "pass", account->password);
+
+	} else {
+		xmlnode_new_prop(node, "pass", account->password);
+	}
+
+	xmlnode_save_file(root, account_file);
+
+	g_free(account_file);
+	xmlnode_free(root);
 }
 
 HybridAccount*
