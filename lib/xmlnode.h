@@ -10,6 +10,7 @@ struct _xmlnode {
 	xmlDoc  *doc;
 	gint is_root;
 	gchar *name;
+	xmlnode *parent;
 	xmlnode *child;
 	xmlnode *next;
 };
@@ -101,6 +102,13 @@ gchar *xmlnode_content(xmlnode *node);
  * @return The new node created.
  */
 xmlnode *xmlnode_new_child(xmlnode *node, const gchar *childname);
+
+/**
+ * Remove a specified node from the xml dom tree.
+ *
+ * @param node The node to remove.
+ */
+void xmlnode_remove_node(xmlnode *node);
 
 /**
  * Generate a xml string with the xml root node context,

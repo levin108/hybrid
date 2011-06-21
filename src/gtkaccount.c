@@ -10,8 +10,10 @@ enum {
 	PROTOCOL_COLUMNS
 };
 
-static HybridAccountEditPanel *create_account_edit_panel(gboolean is_add);
+static HybridAccountEditPanel *create_account_edit_panel(
+		HybridAccountPanel *parent, gboolean is_add);
 static void add_cb(GtkWidget *widget, gpointer user_data);
+static void delete_cb(GtkWidget *widget, gpointer user_data);
 
 static HybridAccountPanel *account_panel = NULL;
 
@@ -204,6 +206,7 @@ hybrid_account_panel_create()
 	button = gtk_button_new_with_label(_("Delete"));
 	gtk_widget_set_usize(button, 100, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 4);
+	g_signal_connect(button, "clicked", G_CALLBACK(delete_cb), panel);
 
 	button = gtk_button_new_with_label(_("Modify"));
 	gtk_widget_set_usize(button, 100, 30);
@@ -269,6 +272,7 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 	HybridAccount *account;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	GdkPixbuf *pixbuf;
 	const gchar *username;
 	const gchar *password;
 	gchar *protoname;
@@ -302,6 +306,21 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 	hybrid_account_set_password(account, password);
 	hybrid_account_update(account);
 
+	if (account_panel) {
+		/* Add an account to the account list panel. */
+		pixbuf = hybrid_create_proto_icon(protoname, 16);
+		model = gtk_tree_view_get_model(
+				GTK_TREE_VIEW(account_panel));
+		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+		gtk_list_store_set(GTK_LIST_STORE(model), &iter,
+				HYBRID_ENABLE_COLUMN, TRUE,
+				HYBRID_NAME_COLUMN, username,
+				HYBRID_PROTO_ICON_COLUMN, pixbuf,
+				HYBRID_PROTO_NAME_COLUMN, protoname, -1);
+
+		g_object_unref(pixbuf);
+	}
+
 	g_free(protoname);
 
 	/* Destroy Edit Panel. */
@@ -310,7 +329,7 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static HybridAccountEditPanel*
-create_account_edit_panel(gboolean is_add)
+create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 {
 	GtkWidget *fixed;
 	GtkWidget *label;
@@ -325,6 +344,7 @@ create_account_edit_panel(gboolean is_add)
 
 	panel = g_new0(HybridAccountEditPanel, 1);
 
+	panel->parent = parent;
 	panel->window = hybrid_create_window(
 				is_add ? _("Add a new account") : _("Edit the account"),
 				NULL, GTK_WIN_POS_CENTER, FALSE);
@@ -412,7 +432,39 @@ create_account_edit_panel(gboolean is_add)
 static void
 add_cb(GtkWidget *widget, gpointer user_data)
 {
+	HybridAccountPanel *panel;
 	HybridAccountEditPanel *edit_panel;
 
-	edit_panel = create_account_edit_panel(TRUE);
+	panel = (HybridAccountPanel*)user_data;
+
+	edit_panel = create_account_edit_panel(panel, TRUE);
+}
+
+static void
+delete_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridAccountPanel *panel;
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	GtkTreeIter iter;
+	gchar *username;
+	gchar *protoname;
+
+	panel = (HybridAccountPanel*)user_data;
+
+	tree = GTK_TREE_VIEW(panel->account_tree);
+
+	selection = gtk_tree_view_get_selection(tree);
+
+	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+		gtk_tree_model_get(model, &iter, HYBRID_NAME_COLUMN, &username,
+					HYBRID_PROTO_NAME_COLUMN, &protoname, -1);
+
+		hybrid_account_remove(protoname, username);
+		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+
+		g_free(username);
+		g_free(protoname);
+	}
 }

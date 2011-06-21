@@ -22,6 +22,7 @@ xmlnode_root(const gchar *xml_buf, gint size)
 	node->doc = doc;
 	node->is_root = 1;
 	node->next = NULL;
+	node->parent = NULL;
 	node->child = NULL;
 	node->name = g_strdup((gchar*)node->node->name);
 
@@ -47,6 +48,7 @@ xmlnode_root_from_file(const gchar *filepath)
 	node->node = xmlDocGetRootElement(doc);
 	node->doc = doc;
 	node->is_root = 1;
+	node->parent = NULL;
 	node->next = NULL;
 	node->child = NULL;
 	node->name = g_strdup((gchar*)node->node->name);
@@ -114,6 +116,7 @@ xmlnode_child(xmlnode *node)
 		new->is_root = 0;
 		new->doc = node->doc;
 		new->name = g_strdup((gchar*)cnode->name);
+		new->parent = node;
 		new->child = NULL;
 		new->next = NULL;
 
@@ -197,6 +200,7 @@ xmlnode_new_child(xmlnode *node, const gchar *childname)
 	new->is_root = 0;
 	new->next = NULL;
 	new->child = NULL;
+	new->parent = node;
 	new->name = g_strdup(childname);
 
 	child = xmlnode_child(node);
@@ -217,6 +221,41 @@ xmlnode_new_child(xmlnode *node, const gchar *childname)
 	}
 
 	return new;
+}
+
+void
+xmlnode_remove_node(xmlnode *node)
+{
+	xmlnode *pos;
+	xmlnode *list;
+	xmlnode *rmnode;
+
+	/* Remove the node from its parent's child list. */
+	if (node->parent) {
+		list = node->parent->child;
+		if (list == node) {
+			node->parent->child = node->next;
+
+		} else {
+			for (rmnode = list; rmnode; rmnode = rmnode->next) {
+				if (rmnode->next == node) {
+					rmnode->next = node->next;
+					break;
+				}
+			}
+		}
+	}
+
+	/* Remove its children recursively */
+	for (pos = node->child; pos; pos = pos->next) {
+		xmlnode_remove_node(pos);
+	}
+
+	/* Free the memory. */
+	xmlUnlinkNode(node->node);
+	
+	g_free(node->name);
+	g_free(node);
 }
 
 gchar*

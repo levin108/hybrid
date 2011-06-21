@@ -71,6 +71,16 @@ HybridAccount *hybrid_account_get(const gchar *proto_name,
 void hybrid_account_update(HybridAccount *account);
 
 /**
+ * If account with the given protoname and username exists, remove
+ * the account from the account list and remove the revelent node
+ * in accounts.xml, if it doesn't exist, do nothing.
+ *
+ * @param protoname The name of the protocol.
+ * @param username   The username of the account to remove.
+ */
+void hybrid_account_remove(const gchar *protoname, const gchar *username);
+
+/**
  * Create a new Hybrid account with the specified protocol module.
  *
  * @param proto Protocol Module that the account belongs to.

@@ -104,6 +104,8 @@ hybrid_account_get(const gchar *proto_name,	const gchar *username)
 	account = hybrid_account_create(module);
 	hybrid_account_set_username(account, username);
 
+	account_list = g_slist_append(account_list, account);
+
 	return account;
 }
 
@@ -182,6 +184,75 @@ update_node:
 
 	g_free(account_file);
 	xmlnode_free(root);
+}
+
+void
+hybrid_account_remove(const gchar *protoname, const gchar *username)
+{
+	gchar *account_file;
+	gchar *config_path;
+	HybridAccount *account;
+	xmlnode *root;
+	xmlnode *node;
+	GSList *pos;
+	gchar *user_name;
+	gchar *proto_name;
+
+	/* Remove the revelent node from accounts.xml */
+	config_path = hybrid_config_get_path();
+	account_file = g_strdup_printf("%s/accounts.xml", config_path);
+	g_free(config_path);
+
+	if (!(root = xmlnode_root_from_file(account_file))) {
+		hybrid_debug_error("account", "remove account information failed,"
+				"invalid accounts.xml");
+		g_free(account_file);
+		return;
+	}
+
+	if ((node = xmlnode_child(root))) {
+
+		while (node) {
+			if (g_strcmp0(node->name, "account") ||
+				!xmlnode_has_prop(node, "user") ||
+				!xmlnode_has_prop(node, "proto")) {
+				hybrid_debug_error("account", 
+						"invalid node found in accounts.xml");
+				node = xmlnode_next(node);
+
+				continue;
+			}
+
+			user_name = xmlnode_prop(node, "user");
+			proto_name = xmlnode_prop(node, "proto");
+
+			if (g_strcmp0(user_name, username) == 0 &&
+				g_strcmp0(proto_name, proto_name) == 0) {
+				xmlnode_remove_node(node);
+				xmlnode_save_file(root, account_file);
+				break;
+			}
+			
+			node = xmlnode_next(node);
+		}
+	}
+
+	g_free(account_file);
+	xmlnode_free(root);
+
+	/* Remove the account from the global account list. */
+	for (pos = account_list; pos; pos = pos->next) {
+		account = (HybridAccount*)pos->data;
+
+		if (g_strcmp0(account->username, username) == 0 &&
+			g_strcmp0(account->proto->info->name, protoname) == 0) {
+
+			account_list = g_slist_remove(account_list, account);
+			hybrid_account_destroy(account);
+
+			break;
+		}
+	}
 }
 
 HybridAccount*
@@ -332,7 +403,7 @@ load_blist_from_disk(HybridAccount *account)
 			//buddy_node = xmlnode_next(buddy_node);
 			//continue;
 
-			//buddy->cache_node = buddy_node;
+			buddy->cache_node = buddy_node;
 
 			g_free(id);
 			g_free(name);

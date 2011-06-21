@@ -8,17 +8,18 @@
 #include "gtkutils.h"
 
 extern HybridBlist *blist;
+extern GSList *account_list;
 
 void
 hybrid_start_login()
 {
-	HybridModule *module;
+	GSList *pos;
+	HybridAccount *account;
 
-	module = hybrid_module_find("fetion");
-	HybridAccount *ac = hybrid_account_create(module);
-
-	module->info->login(ac);
-
+	for (pos = account_list; pos; pos = pos->next) {
+		account = (HybridAccount*)pos->data;
+		account->proto->info->login(account);
+	}
 }
 
 static void
@@ -145,7 +146,7 @@ main(gint argc, gchar **argv)
 
 	hybrid_account_init();
 
-//	hybrid_start_login();
+	hybrid_start_login();
 
 	gtk_main();
 
