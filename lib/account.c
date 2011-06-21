@@ -281,6 +281,19 @@ hybrid_account_destroy(HybridAccount *account)
 	}
 }
 
+gpointer
+hybrid_account_get_protocol_data(HybridAccount *account)
+{
+	return account->protocol_data;
+}
+
+void
+hybrid_account_set_protocol_data(HybridAccount *account,
+		gpointer protocol_data)
+{
+	account->protocol_data = protocol_data;
+}
+
 void 
 hybrid_account_set_username(HybridAccount *account, const gchar *username)
 {
@@ -381,13 +394,21 @@ load_blist_from_disk(HybridAccount *account)
 		value = xmlnode_prop(account_node, "proto");
 
 		if (g_strcmp0(name, account->username) == 0 &&
-			g_strcmp0(name, account->proto->info->name) == 0) {
+			g_strcmp0(value, account->proto->info->name) == 0) {
 			node = xmlnode_find(account_node, "buddies");
+			g_free(name);
+			g_free(value);
 			goto account_found;
 		}
+		
+		g_free(name);
+		g_free(value);
 	}
 
+	hybrid_debug_error("account", "can't find 'account' node for this account");
+
 	return;
+
 account_found:
 
 	group_node = xmlnode_child(node);

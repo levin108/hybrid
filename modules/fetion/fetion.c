@@ -203,19 +203,55 @@ fetion_login(HybridAccount *imac)
 
 	ac = fetion_account_create(imac, imac->username, imac->password);
 
+	hybrid_account_set_protocol_data(imac, ac);
+
 	conn = hybrid_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
 
 	return TRUE;
+}
+
+/**
+ * Callback function for the get_info transaction.
+ */
+static gint get_info_cb(fetion_account *ac, const gchar *sipmsg,
+		fetion_transaction *trans)
+{
+	HybridInfo *info;
+	fetion_buddy *buddy;
+
+	info = (HybridInfo*)trans->data;
+
+	if (!(buddy = fetion_buddy_parse_info(ac, trans->userid, sipmsg))) {
+		/* TODO show an error msg in the get-info box. */
+		return HYBRID_ERROR;
+	}
+
+	hybrid_info_add_pair(info, _("Nickname"), buddy->nickname);
+	hybrid_info_add_pair(info, _("Fetion-no"), buddy->sid);
+	hybrid_info_add_pair(info, _("Mobile-no"), buddy->mobileno);
+	hybrid_info_add_pair(info, _("Gender"), 
+		buddy->gender == 1 ? _("Male") :
+		(buddy->gender == 2 ? _("Female") : _("Secrecy")));
+	hybrid_info_add_pair(info, _("Mood"), buddy->mood_phrase);
+	/* TODO convert the code into the name. */
+	hybrid_info_add_pair(info, _("Country"), buddy->country);
+	hybrid_info_add_pair(info, _("Province"), buddy->province);
+	hybrid_info_add_pair(info, _("City"), buddy->city);
+
+	return HYBRID_OK;
 }
 
 static void
 fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
 {
 	HybridInfo *info;
+	fetion_account *ac;
 
 	info = hybrid_info_create(buddy);
-	hybrid_info_add_pair(info, "Name", buddy->name);
-	hybrid_info_add_pair(info, "Mood", buddy->mood);
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	fetion_buddy_get_info(ac, buddy->id, get_info_cb, info);
 }
 
 HybridModuleInfo module_info = {

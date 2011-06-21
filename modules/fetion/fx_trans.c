@@ -51,6 +51,12 @@ transaction_set_callback(fetion_transaction *trans,	TransCallback callback)
 }
 
 void
+transaction_set_data(fetion_transaction *trans, gpointer data)
+{
+	trans->data = data;
+}
+
+void
 transaction_add(fetion_account *account, fetion_transaction *trans)
 {
 	account->trans_list = g_slist_append(account->trans_list, trans);

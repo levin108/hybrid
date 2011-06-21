@@ -12,6 +12,7 @@ struct transaction {
 	gint callid;
 	gchar *userid;
 	gchar *sipmsg;
+	gpointer data;
 	guint timer;
 	TransCallback callback;
 };
@@ -75,6 +76,14 @@ void transaction_set_sipmsg(fetion_transaction *trans, const gchar *sipmsg);
  */
 void transaction_set_callback(fetion_transaction *trans,
 		TransCallback callback);
+
+/**
+ * Set a user-specified data for the callback function.
+ *
+ * @param trans The transaction.
+ * @param data  The user-specified data.
+ */
+void transaction_set_data(fetion_transaction *trans, gpointer data);
 
 /**
  * Add the given transaction to the account's pending transaction list.

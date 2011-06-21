@@ -362,7 +362,7 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	}
 
 	status_icon = hybrid_create_presence_pixbuf(HYBRID_STATE_OFFLINE, 32);
-	proto_icon = gdk_pixbuf_new_from_file(DATA_DIR"/msn.png", NULL);
+	proto_icon = hybrid_create_proto_icon(ac->proto->info->name, 16);
 
 	/*
 	 * Here we need to set a default icon for the buddy, never use 
@@ -371,7 +371,7 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	 * the "id" and "name" attribute, so we use the original method
 	 * to set a default icon.
 	 */
-	buddy_icon = hybrid_create_proto_icon(ac->proto->info->name, 16);
+	buddy_icon = hybrid_create_default_icon(32);
 
 	buddy = g_new0(HybridBuddy, 1);
 	
@@ -620,12 +620,6 @@ hybrid_blist_find_buddy(HybridAccount *account, const gchar *id)
 	}
 
 	return NULL;
-}
-
-static void
-hybrid_blist_group_to_cache(HybridBuddy *buddy)
-{
-
 }
 
 void

@@ -2,6 +2,7 @@
 #define HYBRID_FX_BUDDY_H
 #include <glib.h>
 #include "fx_account.h"
+#include "fx_trans.h"
 
 typedef struct _fetion_buddy fetion_buddy;
 
@@ -10,13 +11,17 @@ struct _fetion_buddy {
 	gchar *sid;
 	gchar *sipuri;
 	gchar *mobileno;
+	gchar *localname;
 	gchar *nickname;
 	gchar *mood_phrase;
 	gchar *carrier;
-	gchar carrier_status;
-	gchar *localname;
+	gint carrier_status;
+	gint gender;
 	gchar *portrait_crc;
 	gchar *groups; /**< it's the group IDs,in form of 3,5,7 */
+	gchar *country;
+	gchar *province;
+	gchar *city;
 	gint state;
 };
 
@@ -70,6 +75,29 @@ fetion_buddy *fetion_buddy_create(void);
 gint fetion_buddy_scribe(fetion_account *ac);
 
 /**
+ * Get the detail information of a buddy.
+ *
+ * @param ac       The fetion account context.
+ * @param userid   The userid of the buddy.
+ * @param callback The callback function to handle the get-info response.
+ * @param data     The user-specified data for the callback function.
+ */
+gint fetion_buddy_get_info(fetion_account *ac, const gchar *userid,
+		TransCallback callback, gpointer data);
+
+/**
+ * Parse the detailed information by the get-info sip response.
+ *
+ * @param ac     The fetion account context.
+ * @param userid User ID of the buddy.
+ * @param sipmsg The get-info sip response string.
+ *
+ * @return The fetion buddy context with detailed information.
+ */
+fetion_buddy *fetion_buddy_parse_info(fetion_account *ac, 
+		const gchar *userid, const gchar *sipmsg);
+
+/**
  * Update the portrait of the specified buddy.
  *
  * @param ac The fetion account context.
@@ -93,14 +121,6 @@ fetion_buddy *fetion_buddy_find_by_userid(fetion_account *ac,
  * @param buddy The buddy to destroy.
  */
 void fetion_buddy_destroy(fetion_buddy *buddy);
-
-/**
- * Fetch the detail information from the server.
- *
- * @param ac    The fetion account context.
- * @param buddy The buddy whose detail information to fetch.
- */
-void fetion_buddy_get_info(fetion_account *ac, fetion_buddy *buddy);
 
 /* UI ops */
 

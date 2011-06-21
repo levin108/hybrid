@@ -15,6 +15,8 @@ struct _HybridAccount {
 	gint   state;    /**< online status. */
 	gint   connect_state; /**< connection status. */
 
+	gpointer protocol_data;
+
 	GHashTable *buddy_list;
 	GHashTable *group_list;
 
@@ -100,9 +102,27 @@ HybridAccount *hybrid_account_create(HybridModule *proto);
 void hybrid_account_destroy(HybridAccount *account);
 
 /**
- * Set the account's username.
+ * Get the account's protocol specified data.
  *
  * @param account The account.
+ *
+ * @return The protocol specified data of this account.
+ */
+gpointer hybrid_account_get_protocol_data(HybridAccount *account);
+
+/**
+ * Set the account's protocol specified data.
+ *
+ * @param account       The account.
+ * @param protocol_data The procotol data.
+ */
+void hybrid_account_set_protocol_data(HybridAccount *account,
+		gpointer protocol_data);
+
+/**
+ * Set the account's username.
+ *
+ * @param account  The account.
  * @param username The username.
  */
 void hybrid_account_set_username(HybridAccount *account, const gchar *username);
@@ -110,7 +130,7 @@ void hybrid_account_set_username(HybridAccount *account, const gchar *username);
 /**
  * Set the account's password.
  *
- * @param account The account.
+ * @param account  The account.
  * @param password The password.
  */
 void hybrid_account_set_password(HybridAccount *account, const gchar *password);
