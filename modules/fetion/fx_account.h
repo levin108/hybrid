@@ -20,6 +20,7 @@ struct _Verification {
 
 struct _fetion_account {
 	HybridAccount *account;
+	gint sk; /**< The socket descriptor. */
 
 	/* buffer for received data */
 	gchar *buffer;
@@ -90,6 +91,8 @@ struct _fetion_account {
 	/* a struct used to generate picture code */
 	Verification *verification;		 
 	fetion_sip *sip;
+
+	GSList *trans_list;
 };
 
 

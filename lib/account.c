@@ -263,6 +263,8 @@ hybrid_account_create(HybridModule *proto)
 
 	HybridAccount *ac = g_new0(HybridAccount, 1);
 	
+	ac->buddy_list = g_hash_table_new(g_str_hash, g_str_equal);
+	ac->group_list = g_hash_table_new(g_str_hash, g_str_equal);
 	ac->config = global_config;
 	ac->proto = proto;
 
@@ -305,7 +307,7 @@ hybrid_account_error_reason(HybridAccount *account, const gchar *reason)
 	/* TODO */
 	g_return_if_fail(account != NULL);
 
-	hybrid_account_destroy(account);
+	//hybrid_account_destroy(account);
 }
 
 void

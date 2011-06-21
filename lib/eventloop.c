@@ -19,7 +19,6 @@ read_event_cb(GIOChannel *source, GIOCondition condition, gpointer user_data)
 
 	if (!ret) {
 		g_source_remove(rv->result);
-		g_free(rv);
 	}
 
 	return ret;
@@ -38,8 +37,10 @@ hybrid_event_add(gint sk, gint event_type, input_func func, gpointer user_data)
 	data->user_data = user_data;
 
 	channel = g_io_channel_unix_new(sk);
+	g_io_channel_set_flags(channel, G_IO_FLAG_NONBLOCK, NULL);
 
-	data->result = g_io_add_watch(channel, event_type, read_event_cb, data);
+	data->result = g_io_add_watch_full(channel, G_PRIORITY_LOW,
+			event_type, read_event_cb, data, g_free);
 
 	g_io_channel_unref(channel);
 

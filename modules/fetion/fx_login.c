@@ -5,6 +5,7 @@
 #include "xmlnode.h"
 
 #include "fetion.h"
+#include "fx_trans.h"
 #include "fx_login.h"
 #include "fx_account.h"
 #include "fx_group.h"
@@ -473,52 +474,19 @@ recheck:
  * Callback function to handle the read event after
  * rendered sipc authentication.
  */
-static gboolean
-sipc_auth_cb(gint sk, gpointer user_data)
+static gint
+sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
+		fetion_transaction *trans)
 {
-	gchar sipmsg[BUF_LENGTH];
-	gchar *pos;
-	gint n;
-	gint length;
 	gint code;
-	fetion_account *ac = (fetion_account*)user_data;
+	gint length;
+	gchar *pos;
 
-	if ((n = recv(sk, sipmsg, sizeof(sipmsg), 0)) == -1) {
-		hybrid_account_error_reason(ac->account, "sipc authentication error");
-		return FALSE;
-	}
-	
-	sipmsg[n] = '\0';
-
-	length = ac->buffer ? strlen(ac->buffer) : 0;
-	ac->buffer = (gchar*)g_realloc(ac->buffer, length + strlen(sipmsg) + 1);
-	memcpy(ac->buffer + length, sipmsg, strlen(sipmsg) + 1);
-
-	if ((pos = strstr(ac->buffer, "\r\n\r\n"))) {
-
-		length = fetion_sip_get_length(ac->buffer);
-		pos += 4;
-
-		if (length < strlen(pos)) {
-			n = strlen(ac->buffer) - (strlen(pos) - length);
-			ac->buffer = (gchar*)realloc(ac->buffer, n + 1);
-			ac->buffer[n] = '\0';
-			goto aut_fin;
-
-		} else if (length == strlen(pos)) {
-			goto aut_fin;
-		}
-	}
-
-	return TRUE;
-
-aut_fin:
-
-	code = fetion_sip_get_code(ac->buffer);
+	code = fetion_sip_get_code(sipmsg);
 
 	if (code == FETION_SIP_OK) { /**< ok, we got the contact list */
 
-		length = fetion_sip_get_length(ac->buffer);
+		length = fetion_sip_get_length(sipmsg);
 		pos = strstr(ac->buffer, "\r\n\r\n") + 4;
 		parse_sipc_resp(ac, pos, length);
 
@@ -532,10 +500,7 @@ aut_fin:
 		fetion_buddies_init(ac);
 
 		/* start scribe the pushed msg */
-		fetion_buddy_scribe(sk, ac);
-
-		/* now we start to handle the pushed messages */
-		hybrid_event_add(sk, HYBRID_EVENT_READ, push_cb, ac);
+		fetion_buddy_scribe(ac);
 
 	} else {
 		hybrid_debug_error("fetion", "sipc authentication error.");
@@ -545,10 +510,7 @@ aut_fin:
 		return FALSE;
 	}
 
-	g_free(ac->buffer);
-	ac->buffer = NULL;
-
-	return FALSE;
+	return 0;
 }
 
 /**
@@ -564,8 +526,10 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 	sip_header *aheader;
 	sip_header *akheader;
 	sip_header *ackheader;
+	fetion_transaction *trans;
 
 	fetion_sip *sip = ac->sip;
+	ac->sk = sk;
 
 	hybrid_debug_info("fetion", "sipc authencation action");
 
@@ -575,6 +539,11 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 
 	aheader = sip_authentication_header_create(response);
 	akheader = sip_header_create("AK", "ak-value");
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, sipc_auth_cb);
+	transaction_add(ac, trans);
 	
 	fetion_sip_add_header(sip, aheader);
 	fetion_sip_add_header(sip, akheader);
@@ -592,7 +561,7 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 
 	sipmsg = fetion_sip_to_string(sip, body);
 
-	//g_free(body);
+	g_free(body);
 
 	hybrid_debug_info("fetion", "Start sipc authentication , with ak-value");
 	hybrid_debug_info("fetion", "send:\n%s", sipmsg);
@@ -606,7 +575,8 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 	}
 	g_free(sipmsg);
 
-	hybrid_event_add(sk, HYBRID_EVENT_READ, sipc_auth_cb, ac);
+	/* now we start to handle the pushed messages */
+	hybrid_event_add(sk, HYBRID_EVENT_READ, push_cb, ac);
 
 	return 0;
 }

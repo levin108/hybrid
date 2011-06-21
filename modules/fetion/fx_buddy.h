@@ -63,12 +63,11 @@ fetion_buddy *fetion_buddy_create(void);
  * <args><subscription self="v4default;mail-count"
  * buddy="v4default" version="0"/></args>
  *
- * @param sk The socket file descriptor to write sip msg to.
  * @param ac The fetion account context.
  *
  * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
  */
-gint fetion_buddy_scribe(gint sk, fetion_account *ac);
+gint fetion_buddy_scribe(fetion_account *ac);
 
 /**
  * Update the portrait of the specified buddy.

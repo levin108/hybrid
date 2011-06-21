@@ -187,15 +187,6 @@ const gchar *hybrid_blist_get_buddy_checksum(HybridBuddy *buddy);
 HybridGroup *hybrid_blist_find_group(HybridAccount *account, const gchar *id);
 
 /**
- * Find a group with the specified name.
- *
- * @param id Name of the group to find.
- *
- * @return HybridGroup if found, NULL if no group was found.
- */
-HybridGroup *hybrid_blist_find_group_by_name(HybridAccount *account, const gchar *name);
-
-/**
  * Find a buddy with the specified ID.
  *
  * @param account The account to which the buddy belongs.

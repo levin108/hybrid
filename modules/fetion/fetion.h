@@ -27,6 +27,7 @@ enum {
 extern "C" {
 #endif
 
+
 /**
  * Process the pushed sip message.
  *

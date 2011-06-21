@@ -8,9 +8,6 @@
 #include "gtkutils.h"
 #include "gtkcellrendererexpander.h"
 
-GSList *group_list = NULL;
-GSList *buddy_list = NULL;
-
 HybridBlist *blist = NULL;
 
 static void hybrid_blist_buddy_icon_save(HybridBuddy *buddy);
@@ -127,7 +124,9 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	HybridAccount *account;
 	HybridBuddy *buddy;
 	HybridGroup *group;
-	GSList *pos;
+
+	GHashTableIter hash_iter;
+	gpointer key;
 
 	g_return_val_if_fail(treeview != NULL, NULL);
 	g_return_val_if_fail(path != NULL, NULL);
@@ -151,12 +150,9 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 
 	group_menu = gtk_menu_new();
 	
-	for (pos = group_list; pos; pos = pos->next) {
-		group = (HybridGroup*)pos->data;
-
-		if (account == group->account) {
-			hybrid_create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
-		}
+	g_hash_table_iter_init(&hash_iter, account->group_list);
+	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
+		hybrid_create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
 	}
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(child_menu), group_menu);
@@ -320,7 +316,7 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 	group->id = g_strdup(id);
 	group->account = ac;
 
-	group_list = g_slist_append(group_list, group);
+	g_hash_table_insert(ac->group_list, group->id, group);
 
 	g_object_unref(proto_icon);
 
@@ -404,7 +400,8 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	buddy->account = ac;
 	buddy->parent = parent;
 
-	buddy_list = g_slist_append(buddy_list, buddy);
+	g_hash_table_insert(ac->buddy_list, buddy->id, buddy);
+	//buddy_list = g_slist_append(buddy_list, buddy);
 
 	g_object_unref(status_icon);
 	g_object_unref(proto_icon);
@@ -602,38 +599,13 @@ hybrid_blist_set_buddy_state(HybridBuddy *buddy, gint state)
 HybridGroup*
 hybrid_blist_find_group(HybridAccount *account, const gchar *id)
 {
-	GSList *pos;
 	HybridGroup *group;
 
 	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(id != NULL, NULL);
 
-	for (pos = group_list; pos; pos = pos->next) {
-		group = (HybridGroup*)pos->data;
-
-		if (g_strcmp0(group->id, id) == 0 && group->account == account) {
-			return group;
-		}
-	}
-
-	return NULL;
-}
-
-HybridGroup*
-hybrid_blist_find_group_by_name(HybridAccount *account, const gchar *name)
-{
-	GSList *pos;
-	HybridGroup *group;
-
-	g_return_val_if_fail(account != NULL, NULL);
-	g_return_val_if_fail(name != NULL, NULL);
-
-	for (pos = group_list; pos; pos = pos->next) {
-		group = (HybridGroup*)pos->data;
-
-		if (g_strcmp0(group->name, name) == 0 && group->account == account) {
-			return group;
-		}
+	if ((group = g_hash_table_lookup(account->group_list, id))) {
+		return group;
 	}
 
 	return NULL;
@@ -642,17 +614,13 @@ hybrid_blist_find_group_by_name(HybridAccount *account, const gchar *name)
 HybridBuddy*
 hybrid_blist_find_buddy(HybridAccount *account, const gchar *id)
 {
-	GSList *pos;
 	HybridBuddy *buddy;
 
+	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(id != NULL, NULL);
 
-	for (pos = buddy_list; pos; pos = pos->next) {
-		buddy = (HybridBuddy*)pos->data;
-
-		if (g_strcmp0(buddy->id, id) == 0 && buddy->account == account) {
-			return buddy;
-		}
+	if ((buddy = g_hash_table_lookup(account->buddy_list, id))) {
+		return buddy;
 	}
 
 	return NULL;
@@ -849,7 +817,7 @@ buddy_exist:
 	/* Set the buddy's xml cache node property. */
 	buddy->cache_node = node;
 
-	hybrid_blist_cache_flush();
+//	hybrid_blist_cache_flush();
 }
 
 

@@ -6,6 +6,7 @@
 #include "blist.h"
 
 #include "fetion.h"
+#include "fx_trans.h"
 #include "fx_login.h"
 #include "fx_account.h"
 #include "fx_buddy.h"
@@ -122,6 +123,46 @@ process_notify_cb(fetion_account *ac, const gchar *sipmsg)
 }
 
 /**
+ * Process the sip response message.
+ */
+static void
+process_sipc_cb(fetion_account *ac, const gchar *sipmsg)
+{
+	gchar *callid;
+	gint callid0;
+	fetion_transaction *trans;
+	GSList *trans_cur;
+
+	if (!(callid = sip_header_get_attr(sipmsg, "I"))) {
+		hybrid_debug_error("fetion", "invalid sipc message received\n%s",
+				sipmsg);
+		g_free(callid);
+		return;
+	}
+	
+	callid0 = atoi(callid);
+
+	trans_cur = ac->trans_list;
+
+	while(trans_cur) {
+		trans = (struct transaction*)(trans_cur->data);
+
+		if (trans->callid == callid0) {
+
+			if (trans->callback) {
+				(trans->callback)(ac, sipmsg, trans);
+			}
+
+			transaction_remove(ac, trans);
+
+			break;
+		}
+
+		trans_cur = g_slist_next(trans_cur);
+	}
+}
+
+/**
  * Process the pushed message.
  */
 void
@@ -145,7 +186,7 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 			//process_info_cb(ac, sipmsg);		
 			break;
 		case SIP_SIPC_4_0:
-			//process_sipc_cb(ac, sipmsg);	
+			process_sipc_cb(ac, sipmsg);	
 			break;
 		default:
 			hybrid_debug_info("fetion", "recevie unknown msg:\n%s", sipmsg);

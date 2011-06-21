@@ -20,7 +20,7 @@ fetion_buddy_create(void)
 }
 
 gint
-fetion_buddy_scribe(gint sk, fetion_account *ac)
+fetion_buddy_scribe(fetion_account *ac)
 {
 	gchar *res, *body;
 	fetion_sip *sip;
@@ -40,7 +40,7 @@ fetion_buddy_scribe(gint sk, fetion_account *ac)
 
 	hybrid_debug_info("fetion", "send:\n%s", res);
 
-	if (send(sk, res, strlen(res), 0) == -1) { 
+	if (send(ac->sk, res, strlen(res), 0) == -1) { 
 		g_free(res);
 
 		return HYBRID_ERROR;
@@ -302,7 +302,8 @@ fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 
 	if (checksum != NULL && g_strcmp0(checksum, buddy->portrait_crc) == 0) {
 		hybrid_debug_info("fetion", "portrait for %s(%s) up to date",
-				checksum, buddy->portrait_crc);
+		buddy->nickname && *(buddy->nickname) != '\0' ? buddy->nickname : buddy->userid,
+		buddy->portrait_crc);
 		return;
 	}
 

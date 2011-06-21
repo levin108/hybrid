@@ -15,6 +15,9 @@ struct _HybridAccount {
 	gint   state;    /**< online status. */
 	gint   connect_state; /**< connection status. */
 
+	GHashTable *buddy_list;
+	GHashTable *group_list;
+
 	HybridConfig *config;
 	HybridModule *proto;
 };
