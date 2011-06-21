@@ -310,7 +310,7 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 		/* Add an account to the account list panel. */
 		pixbuf = hybrid_create_proto_icon(protoname, 16);
 		model = gtk_tree_view_get_model(
-				GTK_TREE_VIEW(account_panel));
+				GTK_TREE_VIEW(account_panel->account_tree));
 		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 		gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 				HYBRID_ENABLE_COLUMN, TRUE,
@@ -320,6 +320,9 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 
 		g_object_unref(pixbuf);
 	}
+
+	/* enable the account */
+	account->proto->info->login(account);
 
 	g_free(protoname);
 

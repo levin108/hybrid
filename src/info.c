@@ -207,7 +207,13 @@ hybrid_info_add_pair(HybridInfo *info, const gchar *name, const gchar *value)
 	info->item_list = g_slist_append(info->item_list, item);
 
 	name_escaped = g_markup_escape_text(name, -1);
-	value_escaped = g_markup_escape_text(value, -1);
+
+	if (value) {
+		value_escaped = g_markup_escape_text(value, -1);
+	} else {
+		value_escaped = NULL;
+	}
+
 	name_markup = g_strdup_printf("<b>%s:</b>", name_escaped);	
 
 	gtk_list_store_append(info->store, &iter);
