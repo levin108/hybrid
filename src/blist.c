@@ -292,9 +292,7 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 	}
 
 	group = g_new0(HybridGroup, 1);
-	proto_icon  = gdk_pixbuf_new_from_file_at_size(
-			DATA_DIR"/msn.png", 16, 16, NULL);
-
+	proto_icon  = hybrid_create_proto_icon(ac->proto->info->name, 16);
 	gtk_tree_store_append(blist->treemodel, &group->iter, NULL);
 
 	temp = g_strdup_printf("<b>%s</b>", name);
@@ -373,8 +371,7 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	 * the "id" and "name" attribute, so we use the original method
 	 * to set a default icon.
 	 */
-	buddy_icon = gdk_pixbuf_new_from_file_at_size(DATA_DIR"/icon.png",
-			16, 16, NULL);
+	buddy_icon = hybrid_create_proto_icon(ac->proto->info->name, 16);
 
 	buddy = g_new0(HybridBuddy, 1);
 	
@@ -401,7 +398,6 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	buddy->parent = parent;
 
 	g_hash_table_insert(ac->buddy_list, buddy->id, buddy);
-	//buddy_list = g_slist_append(buddy_list, buddy);
 
 	g_object_unref(status_icon);
 	g_object_unref(proto_icon);
@@ -626,6 +622,12 @@ hybrid_blist_find_buddy(HybridAccount *account, const gchar *id)
 	return NULL;
 }
 
+static void
+hybrid_blist_group_to_cache(HybridBuddy *buddy)
+{
+
+}
+
 void
 hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
 {
@@ -817,7 +819,7 @@ buddy_exist:
 	/* Set the buddy's xml cache node property. */
 	buddy->cache_node = node;
 
-//	hybrid_blist_cache_flush();
+	hybrid_blist_cache_flush();
 }
 
 

@@ -222,7 +222,7 @@ HybridModuleInfo module_info = {
 	"fetion",
 	"levin108",
 	N_("fetion client"),
-	N_("libpurple plugin implementing Fetion Protocol version 4"),
+	N_("hybrid plugin implementing Fetion Protocol version 4"),
 	"http://basiccoder.com",
 	"0","1",
 	"fetion",

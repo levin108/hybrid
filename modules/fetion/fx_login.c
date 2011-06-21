@@ -482,6 +482,8 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 	gint length;
 	gchar *pos;
 
+	printf("%s\n", sipmsg);
+
 	code = fetion_sip_get_code(sipmsg);
 
 	if (code == FETION_SIP_OK) { /**< ok, we got the contact list */

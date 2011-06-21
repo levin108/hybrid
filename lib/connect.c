@@ -156,8 +156,6 @@ ssl_connect_cb(gint sk, gpointer user_data)
 	for ( ;; ) {
 		l = SSL_connect(ssl_conn->ssl);
 
-		g_usleep(100000);
-
 		switch (SSL_get_error(ssl_conn->ssl, l)) { 
 			case SSL_ERROR_NONE:
 				goto ssl_ok;

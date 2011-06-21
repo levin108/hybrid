@@ -107,10 +107,8 @@ ui_init(void)
 	GtkWidget *scroll;
 	GtkWidget *vbox;
 	
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	window = hybrid_create_window(_("Hybrid"), NULL, GTK_WIN_POS_CENTER, TRUE);
 	gtk_window_set_default_size(GTK_WINDOW(window), 250, 500);
-	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-	GTK_WINDOW(window)->allow_shrink = TRUE;
 
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);

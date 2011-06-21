@@ -343,6 +343,7 @@ load_blist_from_disk(HybridAccount *account)
 	xmlnode *node;
 	xmlnode *group_node;
 	xmlnode *buddy_node;
+	xmlnode *account_node;
 	gchar *id;
 	gchar *name;
 	gchar *value;
@@ -356,11 +357,38 @@ load_blist_from_disk(HybridAccount *account)
 	cache = config->blist_cache;
 	root = cache->root;
 
-	if (!(node = xmlnode_find(root, "buddies"))) {
+	if (!(node = xmlnode_find(root, "accounts"))) {
 		hybrid_debug_error("account", 
 			"can't find node named 'buddies' in blist.xml");
 		return;
 	}
+
+	for (account_node = xmlnode_child(node); account_node;
+			account_node = account_node->next) {
+		if (g_strcmp0(account_node->name, "account")) {
+			hybrid_debug_error("account", 
+				"invalid blist.xml");
+			return;
+		}
+
+		if (!xmlnode_has_prop(account_node, "proto") ||
+			!xmlnode_has_prop(account_node, "username")) {
+			hybrid_debug_error("account", 
+				"invalid account node in blist.xml");
+			continue;
+		}
+		name = xmlnode_prop(account_node, "username");
+		value = xmlnode_prop(account_node, "proto");
+
+		if (g_strcmp0(name, account->username) == 0 &&
+			g_strcmp0(name, account->proto->info->name) == 0) {
+			node = xmlnode_find(account_node, "buddies");
+			goto account_found;
+		}
+	}
+
+	return;
+account_found:
 
 	group_node = xmlnode_child(node);
 
@@ -378,6 +406,9 @@ load_blist_from_disk(HybridAccount *account)
 		name = xmlnode_prop(group_node, "name");
 
 		group = hybrid_blist_add_group(account, id, name);
+
+		g_free(id);
+		g_free(name);
 		
 		/*
 		 * Iterate the buddy nodes, use the attribute values
@@ -468,7 +499,6 @@ load_blist_from_disk(HybridAccount *account)
 
 			buddy_node = xmlnode_next(buddy_node);
 		}
-
 
 		group_node = xmlnode_next(group_node);
 	}
