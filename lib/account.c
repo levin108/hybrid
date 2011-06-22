@@ -2,6 +2,7 @@
 #include "util.h"
 #include "config.h"
 #include "account.h"
+#include "gtkutils.h"
 #include "blist.h"
 
 GSList *account_list = NULL;
@@ -345,6 +346,53 @@ hybrid_account_set_connection_status(HybridAccount *account,
 	account->connect_state = status;
 }
 
+/**
+ * You may ask why we need a new set_buddy_icon function since
+ * we alreay have hybrid_blist_set_buddy_icon() defined. The reason
+ * is that hybrid_blist_set_buddy_icon() should be used only when the
+ * buddy changed its icon from the server, and it will stored the new
+ * data into the disk, which would take much IO resouce, and even make the
+ * UI stuck for a while when data is large, so we need a new function
+ * here to just load the icon from disk, but not store it back again.
+ */
+static void
+blist_set_buddy_icon(HybridBuddy *buddy,
+	const guchar *icon_data, gsize len, const gchar *crc)
+{
+	GdkPixbuf *pixbuf = NULL;
+	extern HybridBlist *blist;
+
+	g_return_if_fail(buddy != NULL);
+
+	g_free(buddy->icon_crc);
+	g_free(buddy->icon_data);
+	buddy->icon_data = NULL;
+	buddy->icon_data_length = len;
+	buddy->icon_crc = g_strdup(crc);
+
+	if (icon_data != NULL) {
+		buddy->icon_data = g_memdup(icon_data, len);
+	}
+
+	/* set the portrait */
+	gint scale_size = 32;
+
+	if (buddy->icon_data && buddy->icon_data_length != 0) {
+		pixbuf = hybrid_create_round_pixbuf(buddy->icon_data, 
+				buddy->icon_data_length, scale_size);
+	}
+
+	/* Here the status if offline. */
+	if (pixbuf) {
+		gdk_pixbuf_saturate_and_pixelate(pixbuf, pixbuf, 0.0, FALSE);
+
+		gtk_tree_store_set(blist->treemodel, &buddy->iter,
+				HYBRID_BLIST_BUDDY_ICON, pixbuf, -1);
+
+		g_object_unref(pixbuf);
+	}
+}
+
 static void
 load_blist_from_disk(HybridAccount *account)
 {
@@ -454,9 +502,6 @@ account_found:
 			buddy = hybrid_blist_add_buddy(account, group, id, name);
 			buddy->state = HYBRID_STATE_OFFLINE;
 
-			//buddy_node = xmlnode_next(buddy_node);
-			//continue;
-
 			buddy->cache_node = buddy_node;
 
 			g_free(id);
@@ -473,7 +518,7 @@ account_found:
 			 * attribute is not empty, then load the file pointed by 
 			 * the icon value as the buddy's portrait, orelse load the 
 			 * default icon, we DONT need to load the default icon file
-			 * any more, let the hybrid_blist_set_buddy_icon() do it, just
+			 * any more, let the blist_set_buddy_icon() do it, just
 			 * set the relevant argument to NULL.
 			 */
 			if (xmlnode_has_prop(buddy_node, "icon")) {
@@ -512,7 +557,7 @@ account_found:
 				}
 			}
 
-			hybrid_blist_set_buddy_icon(buddy, icon_data,
+			blist_set_buddy_icon(buddy, icon_data,
 					icon_data_len, value);
 
 			g_free(value);

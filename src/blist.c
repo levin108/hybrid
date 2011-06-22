@@ -340,6 +340,8 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	GdkPixbuf *proto_icon;
 	GdkPixbuf *buddy_icon;
 	HybridBuddy *buddy;
+	GtkTreeModel *treemodel;
+	gchar *group_name;
 
 	g_return_val_if_fail(blist != NULL, NULL);
 	g_return_val_if_fail(parent != NULL, NULL);
@@ -361,7 +363,7 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 		return buddy;
 	}
 
-	status_icon = hybrid_create_presence_pixbuf(HYBRID_STATE_OFFLINE, 32);
+	status_icon = hybrid_create_presence_pixbuf(HYBRID_STATE_OFFLINE, 16);
 	proto_icon = hybrid_create_proto_icon(ac->proto->info->name, 16);
 
 	/*
@@ -372,16 +374,19 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	 * to set a default icon.
 	 */
 	buddy_icon = hybrid_create_default_icon(32);
+	gdk_pixbuf_saturate_and_pixelate(buddy_icon, buddy_icon, 0.0, FALSE);
 
 	buddy = g_new0(HybridBuddy, 1);
 	
-	gtk_tree_store_append(blist->treemodel, &buddy->iter, &parent->iter);
+	treemodel = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
 
-	gtk_tree_store_set(blist->treemodel, &buddy->iter,
+	gtk_tree_store_append(GTK_TREE_STORE(treemodel), &buddy->iter, &parent->iter);
+
+	gtk_tree_store_set(GTK_TREE_STORE(treemodel), &buddy->iter,
 			HYBRID_BLIST_BUDDY_ID, id,
-			HYBRID_BLIST_STATUS_ICON, buddy_icon,
+			HYBRID_BLIST_BUDDY_ICON, buddy_icon,
 			HYBRID_BLIST_STATUS_ICON, status_icon,
-			HYBRID_BLIST_PROTO_ICON, proto_icon,
+			//HYBRID_BLIST_PROTO_ICON, proto_icon,
 			HYBRID_BLIST_BUDDY_NAME, name,
 			HYBRID_BLIST_OBJECT_COLUMN, buddy,
 			HYBRID_BLIST_BUDDY_STATE, HYBRID_STATE_OFFLINE,
@@ -402,6 +407,19 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	g_object_unref(status_icon);
 	g_object_unref(proto_icon);
 	g_object_unref(buddy_icon);
+
+	/*
+	 * Now we should update the buddy count displayed besides the gruop name.
+	 * We did add a new buddy, so we show add the buddy_count by one.
+	 */
+	parent->buddy_count ++;
+	group_name = g_strdup_printf("<b>%s</b> (%d/%d)",
+			parent->name, parent->online_count, parent->buddy_count);
+
+	gtk_tree_store_set(GTK_TREE_STORE(treemodel), &parent->iter,
+			HYBRID_BLIST_BUDDY_NAME, group_name, -1);
+
+	g_free(group_name);
 
 	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_ADD);
 
@@ -585,11 +603,47 @@ hybrid_blist_set_buddy_icon(HybridBuddy *buddy, const guchar *icon_data,
 void
 hybrid_blist_set_buddy_state(HybridBuddy *buddy, gint state)
 {
+	HybridGroup *group;
+	GtkTreeModel *model;
+	gchar *group_name;
+	gint online;
+
 	g_return_if_fail(buddy != NULL);
 
-	buddy->state = state;
+	/*
+	 * Here we update the group's online count first by checking
+	 * whether state has changed
+	 */
+	group = buddy->parent;
 
-	hybrid_blist_set_state_field(buddy);
+	online = group->online_count;
+
+	if (buddy->state > 0 && state == 0) {
+		online = group->online_count - 1;
+
+	} else if (buddy->state == 0 && state > 0) {
+		online = group->online_count + 1;
+	}
+
+	if (online != group->online_count) {
+		group->online_count = online;
+
+		group_name = g_strdup_printf("<b>%s</b> (%d/%d)",
+				group->name, group->online_count, group->buddy_count);
+
+
+		model = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
+
+		gtk_tree_store_set(GTK_TREE_STORE(model),&group->iter,
+				HYBRID_BLIST_BUDDY_NAME, group_name, -1);
+
+		g_free(group_name);
+	}
+
+	if (buddy->state != state) {
+		buddy->state = state;
+		hybrid_blist_set_state_field(buddy);
+	}
 }
 
 HybridGroup*
@@ -813,7 +867,7 @@ buddy_exist:
 	/* Set the buddy's xml cache node property. */
 	buddy->cache_node = node;
 
-	hybrid_blist_cache_flush();
+//	hybrid_blist_cache_flush();
 }
 
 

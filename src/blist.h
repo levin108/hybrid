@@ -22,6 +22,8 @@ struct _HybridBlist {
 struct _HybridGroup {
 	GtkTreeIter iter;
 	HybridAccount *account;
+	gint buddy_count;
+	gint online_count;
 	gchar *id;
 	gchar *name;
 };
