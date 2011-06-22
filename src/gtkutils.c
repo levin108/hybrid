@@ -287,7 +287,7 @@ hybrid_create_menu(GtkWidget *parent, const gchar *title,
 		g_free(icon_path);
 
 	} else {
-		item = gtk_menu_item_new_with_label(title);
+		item = gtk_image_menu_item_new_with_label(title);
 	}
 
 	if (parent) {

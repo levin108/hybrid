@@ -72,6 +72,69 @@ quit_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
+create_account_child_menus(GtkWidget *account_menu)
+{
+	GtkWidget *menu_shell;
+	GtkWidget *menu_item;
+
+	menu_shell = gtk_menu_new();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(account_menu), menu_shell);
+
+	menu_item = hybrid_create_menu(menu_shell, _("Change State"), NULL,
+						TRUE, NULL, NULL);
+	hybrid_create_menu_seperator(menu_shell);
+
+	menu_item = hybrid_create_menu(menu_shell, _("Disable Account"), "close",
+						TRUE, NULL, NULL);
+
+}
+
+static void
+create_account_menus(GtkUIManager *ui)
+{
+	GtkWidget *account_shell;
+	GtkWidget *account_menu;
+	GtkWidget *seperator;
+	GdkPixbuf *presence_pixbuf;
+	GtkWidget *presence_image;
+	HybridAccount *account;
+	gchar *menu_name;
+	GSList *pos;
+	extern const gchar *hybrid_presence_name[];
+
+	if (!(account_shell = gtk_ui_manager_get_widget(ui, "/MenuBar/Account"))) {
+		hybrid_debug_error("core", "account menu init err");
+		return;
+	}
+
+	account_shell = gtk_menu_item_get_submenu(GTK_MENU_ITEM(account_shell));
+
+	if (account_list) {
+		seperator = gtk_separator_menu_item_new();
+		gtk_menu_shell_insert(GTK_MENU_SHELL(account_shell), seperator, 2);
+	}
+
+	for (pos = account_list; pos; pos = pos->next) {
+		account = (HybridAccount*)pos->data;
+		menu_name = g_strdup_printf("%s (%s)", account->username,
+				hybrid_presence_name[HYBRID_STATE_OFFLINE]);
+		account_menu = hybrid_create_menu(NULL, menu_name, NULL, TRUE,
+								NULL, NULL);
+		g_free(menu_name);
+
+		presence_pixbuf = hybrid_create_presence_pixbuf(HYBRID_STATE_OFFLINE, 16);
+		presence_image = gtk_image_new_from_pixbuf(presence_pixbuf);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(account_menu),
+				presence_image);
+		g_object_unref(presence_pixbuf);
+
+		create_account_child_menus(account_menu);
+
+		gtk_menu_shell_insert(GTK_MENU_SHELL(account_shell), account_menu, 3);
+	}
+}
+
+static void
 create_basic_menus(GtkBox *box)
 {
 	GtkUIManager *ui;
@@ -95,6 +158,8 @@ create_basic_menus(GtkBox *box)
 	gtk_ui_manager_add_ui_from_file(ui, UI_DIR"menu.xml", NULL);
 
 	g_object_unref(actionGroup);
+
+	create_account_menus(ui);
 
 	gtk_box_pack_start(box, gtk_ui_manager_get_widget(ui, "/MenuBar"),
 			FALSE, FALSE, 0);
@@ -140,16 +205,16 @@ main(gint argc, gchar **argv)
 	gdk_threads_init();
 
 	gtk_init(&argc, &argv);
-	
-	ui_init();
 
 	hybrid_config_init();
 
 	hybrid_module_init();
 
 	hybrid_account_init();
+	
+	ui_init();
 
-	hybrid_start_login();
+//	hybrid_start_login();
 
 	gtk_main();
 

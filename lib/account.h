@@ -6,6 +6,7 @@
 typedef struct _HybridAccount HybridAccount;
 typedef enum _HybridConnectionStatusType HybridConnectionStatusType;
 
+#include "util.h"
 #include "config.h"
 #include "module.h"
 
