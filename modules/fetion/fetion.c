@@ -163,6 +163,22 @@ process_sipc_cb(fetion_account *ac, const gchar *sipmsg)
 }
 
 /**
+ * Process the message sip message.
+ */
+static void
+process_message_cb(fetion_account *ac, const gchar *sipmsg)
+{
+	gchar *event;
+
+	if ((event = sip_header_get_attr(sipmsg, "N")) &&
+			g_strcmp0(event, "system-message") == 0) {
+		g_print("%s\n", sipmsg);
+	}
+
+	g_free(event);
+}
+
+/**
  * Process the pushed message.
  */
 void
@@ -177,7 +193,7 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 			process_notify_cb(ac, sipmsg);
 			break;
 		case SIP_MESSAGE:
-			//process_message_cb(ac, sipmsg);
+			process_message_cb(ac, sipmsg);
 			break;
 		case SIP_INVITATION:
 			//process_invite_cb(ac, sipmsg);

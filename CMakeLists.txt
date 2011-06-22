@@ -105,6 +105,7 @@ set(hybrid_SRC
 	src/blist.c
 	src/conv.c
 	src/info.c
+	src/notify.c
 	src/gtkcellrendererexpander.c
 	src/core.c
 )

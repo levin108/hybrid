@@ -7,6 +7,8 @@
 #include "gtkaccount.h"
 #include "gtkutils.h"
 
+#include "notify.h"
+
 extern HybridBlist *blist;
 extern GSList *account_list;
 
