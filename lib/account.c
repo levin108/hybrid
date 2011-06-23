@@ -7,6 +7,8 @@
 
 GSList *account_list = NULL;
 
+extern HybridBlist *blist;
+
 static void hybrid_account_icon_save(HybridAccount *account);
 static void account_set_icon(HybridAccount *account, const guchar *icon_data,
 		gint icon_data_len, const gchar *icon_crc);
@@ -452,12 +454,60 @@ hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 }
 
 void
-hybrid_account_error_reason(HybridAccount *account, const gchar *reason)
+hybrid_account_close(HybridAccount *account)
 {
-	/* TODO */
+	GHashTableIter hash_iter;
+	HybridGroup *group;
+	HybridBuddy *buddy;
+	HybridModule *module;
+	gpointer key;
+	GtkTreeModel *model;
+
 	g_return_if_fail(account != NULL);
 
-	//hybrid_account_destroy(account);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
+
+	g_hash_table_iter_init(&hash_iter, account->group_list);
+	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
+		/*
+		 * Remove the group in blist, it will remove the
+		 * buddies belongs to these groups, free the GUI
+		 * resource automaticly.
+		 */
+		gtk_tree_store_remove(GTK_TREE_STORE(model), &group->iter);
+
+		/* Free the memory of the HybridGroups in hashtable */
+		hybrid_blist_group_destroy(group);
+	}
+
+	g_hash_table_destroy(account->group_list);
+	account->group_list = NULL;
+
+	g_hash_table_iter_init(&hash_iter, account->buddy_list);
+	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&buddy)) {
+		/* Free the memory of the HybridBuddys in hashtable */
+		hybrid_blist_buddy_destroy(buddy);
+	}
+	g_hash_table_destroy(account->buddy_list);
+	account->buddy_list = NULL;
+
+	/*
+	 * There's NO need to destroy the account here, we need it
+	 * in the account management panel, or to restart it again.
+	 */
+	module = account->proto;
+
+	if (module->info->close) {
+		module->info->close(account);
+	}
+}
+
+void
+hybrid_account_error_reason(HybridAccount *account, const gchar *reason)
+{
+	hybrid_account_close(account);
+
+	/* TODO popup an notification box. */
 }
 
 void
@@ -512,7 +562,6 @@ blist_set_buddy_icon(HybridBuddy *buddy,
 	const guchar *icon_data, gsize len, const gchar *crc)
 {
 	GdkPixbuf *pixbuf = NULL;
-	extern HybridBlist *blist;
 
 	g_return_if_fail(buddy != NULL);
 

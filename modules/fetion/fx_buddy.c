@@ -369,7 +369,6 @@ portrait_recv_cb(gint sk, gpointer user_data)
 						trans->buddy->portrait_crc);
 
 			} else {
-				printf("####################################3333\n");
 				hybrid_account_set_icon(trans->ac->account, NULL,
 						0, trans->ac->portrait_crc);
 			}

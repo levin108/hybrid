@@ -10,6 +10,7 @@
 #include "fx_trans.h"
 #include "fx_login.h"
 #include "fx_account.h"
+#include "fx_group.h"
 #include "fx_buddy.h"
 #include "fx_msg.h"
 
@@ -62,6 +63,16 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 }
 
 /**
+ * Process deregister message. When the same account logins
+ * at somewhere else, this message will be received.
+ */
+static void
+process_dereg_cb(fetion_account *ac, const gchar *sipmsg)
+{
+	printf("%s\n", sipmsg);
+}
+
+/**
  * Process notification routine.
  */
 static void
@@ -100,7 +111,7 @@ process_notify_cb(fetion_account *ac, const gchar *sipmsg)
 
 		case NOTIFICATION_TYPE_REGISTRATION :
 			if (event_type == NOTIFICATION_EVENT_DEREGISTRATION) {
-			//	process_dereg_cb(ac, sipmsg);
+				process_dereg_cb(ac, sipmsg);
 			}
 			break;
 
@@ -330,19 +341,51 @@ fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
 	fetion_buddy_get_info(ac, buddy->id, get_info_cb, info);
 }
 
-HybridModuleInfo module_info = {
-	"fetion",
-	"levin108",
-	N_("fetion client"),
-	N_("hybrid plugin implementing Fetion Protocol version 4"),
-	"http://basiccoder.com",
-	"0","1",
-	"fetion",
+static void
+fetion_close(HybridAccount *account)
+{
+	GSList *pos;
+	fetion_account *ac;
+	fetion_buddy *buddy;
+	fetion_group *group;
 
-	fetion_login,
-	fetion_get_info,
-	fetion_change_state,
-	fetion_buddy_move,
+	ac = hybrid_account_get_protocol_data(account);
+
+	/* close the socket */
+	close(ac->sk);
+
+	/* destroy the group list */
+	while (ac->groups) {
+		pos = ac->groups;
+		group = (fetion_group*)pos->data;
+		ac->groups = g_slist_remove(ac->groups, group);
+		fetion_group_destroy(group);
+	}
+
+	/* destroy the buddy list */
+	while (ac->buddies) {
+		pos = ac->buddies;
+		buddy = (fetion_buddy*)pos->data;
+		ac->buddies = g_slist_remove(ac->buddies, buddy);
+		fetion_buddy_destroy(buddy);
+	}
+}
+
+HybridModuleInfo module_info = {
+	"fetion",                     /**< name */
+	"levin108",                   /**< author */
+	N_("fetion client"),          /**< summary */
+	/* description */
+	N_("hybrid plugin implementing Fetion Protocol version 4"), 
+	"http://basiccoder.com",      /**< homepage */
+	"0","1",                      /**< major version, minor version */
+	"fetion",                     /**< icon name */
+
+	fetion_login,                 /**< login */
+	fetion_get_info,              /**< get_info */
+	fetion_change_state,          /**< change_state */
+	fetion_buddy_move,            /**< buddy_move */
+	fetion_close,                 /**< close */
 };
 
 void 

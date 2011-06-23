@@ -35,31 +35,6 @@ window_destroy(GtkWidget *widget, gpointer user_data)
 	/*
 	 * Now free the memory.
 	 */
-/*
-	GSList *pos;
-	HybridGroup *group;
-	HybridBuddy *buddy;
-	
-	extern GSList *group_list;
-	extern GSList *buddy_list;
-
-	extern HybridBlist *blist;
-
-	g_free(blist);
-
-	while (group_list) {
-		pos = group_list;
-		group = (HybridGroup*)pos->data;
-		group_list = g_slist_remove(group_list, group);
-		hybrid_blist_group_destroy(group);
-	}
-	while (buddy_list) {
-		pos = buddy_list;
-		buddy = (HybridBuddy*)pos->data;
-		buddy_list = g_slist_remove(buddy_list, buddy);
-		hybrid_blist_buddy_destroy(buddy);
-	}
-	*/
 
 	gtk_main_quit();
 }
