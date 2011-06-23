@@ -13,8 +13,14 @@ typedef enum _HybridConnectionStatusType HybridConnectionStatusType;
 struct _HybridAccount {
 	gchar *username;
 	gchar *password;
+	gchar *nickname;
 	gint   state;    /**< online status. */
 	gint   connect_state; /**< connection status. */
+
+	guchar *icon_data; /**< binary data of the icon. */
+	gint icon_data_len; /**< size of the binary data. */
+	gchar *icon_crc; /**< checksum of the icon */
+	gchar *icon_name; /**< file name of the local file. */
 
 	gpointer protocol_data;
 
@@ -143,6 +149,25 @@ void hybrid_account_set_password(HybridAccount *account, const gchar *password);
  * @param state The state.
  */
 void hybrid_account_set_state(HybridAccount *account, gint state);
+
+/**
+ * Set the account's nickname.
+ *
+ * @param account  The account.
+ * @param nickname The nickname.
+ */
+void hybrid_account_set_nickname(HybridAccount *account, const gchar *nickname);
+
+/**
+ * Set the account's icon.
+ *
+ * @param account   The account.
+ * @param icon_data     The binary data of the account's icon.
+ * @param icon_data_len The size of the binary data.
+ * @param icon_crc      The checksum of the icon.
+ */
+void hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
+		gint icon_data_len, const gchar *icon_crc);
 
 /**
  * Close an account and give an error notification.

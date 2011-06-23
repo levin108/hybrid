@@ -128,6 +128,15 @@ fetion_account *fetion_account_create(HybridAccount *account, const gchar *no,
  */
 void fetion_account_destroy(fetion_account *ac);
 
+/**
+ * Fetch the portrait of the account from the server.
+ *
+ * @param ac The account.
+ *
+ * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
+ */
+gint fetion_account_update_portrait(fetion_account *ac);
+
 
 #ifdef __cplusplus
 }

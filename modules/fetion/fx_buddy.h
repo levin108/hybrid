@@ -32,6 +32,7 @@ struct _portrait_trans {
 	gchar *data; /**< portrait image data. */
 	gint data_size; /**< length of the portrait buffer data. */
 	gint data_len; /**< length of the portrait image data. */
+	gint portrait_type;
 	fetion_buddy *buddy;
 	fetion_account *ac;
 };
@@ -41,7 +42,13 @@ struct _portrait_trans {
  */
 struct _portrait_data {
 	fetion_buddy *buddy;
+	gint portrait_type;
 	fetion_account *ac;
+};
+
+enum {
+	PORTRAIT_TYPE_BUDDY, /**< flag to fetch buddy's portrait. */
+	PORTRAIT_TYPE_ACCOUNT /**< flag to fetch account's portrait. */
 };
 
 #ifdef __cplusplus
@@ -75,7 +82,16 @@ fetion_buddy *fetion_buddy_create(void);
 gint fetion_buddy_scribe(fetion_account *ac);
 
 /**
- * Get the detail information of a buddy.
+ * Get the detail information of a buddy. The message is:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 547264589
+ * I: 4
+ * Q: 2 S
+ * N: GetContactInfoV4
+ * L: 45
+ *
+ * <args><contact user-id="773350619"/></args>
  *
  * @param ac       The fetion account context.
  * @param userid   The userid of the buddy.
@@ -130,6 +146,23 @@ void fetion_buddy_destroy(fetion_buddy *buddy);
  * @param ac The fetion account context.
  */
 void fetion_buddies_init(fetion_account *ac);
+
+
+/**
+ * Callback function to handle the portriat connection event. This callback
+ * function may be used by the fx_acccount.c, so we define it as global.
+ * It start a http GET request, the full string is like:
+ *
+ * GET /HDS_S00/getportrait.aspx?Uri=sip%3A642781687%40fetion.com.cn
+ * %3Bp%3D6543&Size=120&c=CBIOAACvnz7yxTih9INomOTTPvbcRQgbv%2BWSdvSlGM5711%2BZL9
+ * GUQL4ohBdnDsU1uq0IU9piw2w8wRHIztMX6JmkQzB%2B0nEcndn0kYSKtSDg3JDaj3s%2BZePi9SU
+ * HO9BIHaZ5vOsAAA%3D%3D HTTP/1.1
+ * User-Agent: IIC2.0/PC 4.0.2510
+ * Accept: image/pjpeg;image/jpeg;image/bmp;image/x-windows-bmp;image/png;image/gif
+ * Host: hdss1fta.fetion.com.cn
+ * Connection: Keep-Alive
+ */
+gboolean portrait_conn_cb(gint sk, gpointer user_data);
 
 #ifdef __cplusplus
 }

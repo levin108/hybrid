@@ -7,6 +7,10 @@
 
 GSList *account_list = NULL;
 
+static void hybrid_account_icon_save(HybridAccount *account);
+static void account_set_icon(HybridAccount *account, const guchar *icon_data,
+		gint icon_data_len, const gchar *icon_crc);
+
 /**
  * The human readable presence name.
  */
@@ -33,11 +37,15 @@ hybrid_account_init(void)
 	gchar *username;
 	gchar *protoname;
 	gchar *password;
+	gchar *value;
+	gchar *icon_data;
+	gsize icon_data_len;
+	gchar *icon_path;
+	gchar *crc;
 	HybridModule *module;
 
 	config_path = hybrid_config_get_path();
 	account_file = g_strdup_printf("%s/accounts.xml", config_path);
-	g_free(config_path);
 
 	if (!(root = xmlnode_root_from_file(account_file))) {
 		const gchar *root_name = "<accounts></accounts>";
@@ -57,6 +65,7 @@ hybrid_account_init(void)
 						"please try to remove ~/.config/hybrid/accounts.xml,"
 						"and then restart hybrid :)");
 				xmlnode_free(root);
+				g_free(config_path);
 				return;
 			}
 
@@ -68,6 +77,7 @@ hybrid_account_init(void)
 			account = hybrid_account_create(module);
 			hybrid_account_set_username(account, username);
 
+			/* load password */
 			if (xmlnode_has_prop(node, "pass")) {
 				password = xmlnode_prop(node, "pass");
 				hybrid_account_set_password(account, password);
@@ -76,6 +86,44 @@ hybrid_account_init(void)
 
 			g_free(username);
 			g_free(protoname);
+
+			/* load the icon data. */
+			if (xmlnode_has_prop(node, "icon")) {
+				value = xmlnode_prop(node, "icon");
+				if (*value != '\0') {
+					icon_path = g_strdup_printf("%s/icons/%s",
+							config_path, value);
+					g_file_get_contents(icon_path, &icon_data,
+							&icon_data_len, NULL);
+					g_free(icon_path);
+
+					if (xmlnode_has_prop(node, "crc")) {
+						crc = xmlnode_prop(node, "crc");
+
+					} else {
+						crc = NULL;
+					}
+
+					account_set_icon(account, (guchar*)icon_data,
+							icon_data_len, crc);
+
+					g_free(crc);
+					g_free(icon_data);
+
+				}
+
+				g_free(value);
+			}
+
+			/* load the nickname */
+			if (xmlnode_has_prop(node, "nam")) {
+				value = xmlnode_prop(node, "name");
+				if (*value != '\0') {
+					hybrid_account_set_nickname(account, value);
+				}
+
+				g_free(value);
+			}
 
 			account_list = g_slist_append(account_list, account);
 				
@@ -87,6 +135,7 @@ hybrid_account_init(void)
 		xmlnode_save_file(root, account_file);
 	}
 
+	g_free(config_path);
 	xmlnode_free(root);
 }
 
@@ -192,6 +241,27 @@ update_node:
 		xmlnode_new_prop(node, "pass", account->password);
 	}
 
+	if (xmlnode_has_prop(node, "icon")) {
+		xmlnode_set_prop(node, "icon", account->icon_name);
+
+	} else {
+		xmlnode_new_prop(node, "icon", account->icon_name);
+	}
+
+	if (xmlnode_has_prop(node, "name")) {
+		xmlnode_set_prop(node, "name", account->nickname);
+
+	} else {
+		xmlnode_new_prop(node, "name", account->nickname);
+	}
+
+	if (xmlnode_has_prop(node, "crc")) {
+		xmlnode_set_prop(node, "crc", account->icon_crc);
+
+	} else {
+		xmlnode_new_prop(node, "crc", account->icon_crc);
+	}
+
 	xmlnode_save_file(root, account_file);
 
 	g_free(account_file);
@@ -289,6 +359,10 @@ hybrid_account_destroy(HybridAccount *account)
 	if (account) {
 		g_free(account->username);
 		g_free(account->password);
+		g_free(account->nickname);
+		g_free(account->icon_data);
+		g_free(account->icon_crc);
+		g_free(account->icon_name);
 		g_free(account);
 	}
 }
@@ -324,6 +398,40 @@ hybrid_account_set_password(HybridAccount *account, const gchar *password)
 	g_free(account->password);
 
 	account->password = g_strdup(password);
+}
+
+void
+hybrid_account_set_state(HybridAccount *account, gint state)
+{
+	g_return_if_fail(account != NULL);
+
+	account->state = state;
+}
+
+void
+hybrid_account_set_nickname(HybridAccount *account, const gchar *nickname)
+{
+	g_return_if_fail(account != NULL);
+
+	g_free(account->nickname);
+
+	account->nickname = g_strdup(nickname);
+}
+
+void
+hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
+		gint icon_data_len, const gchar *icon_crc)
+{
+	g_return_if_fail(account != NULL);
+
+	/* Just set the attribute. */
+	account_set_icon(account, icon_data, icon_data_len, icon_crc);
+
+	/* Save the icon the local fs. */
+	hybrid_account_icon_save(account);
+
+	/* Save to the local xml cache file. */
+	hybrid_account_update(account);
 }
 
 void
@@ -580,4 +688,62 @@ account_found:
 		group_node = xmlnode_next(group_node);
 	}
 
+}
+
+/**
+ * Save the account's icon to the local file.The naming method is:
+ * SHA1(proto_name + '_' + username).type
+ */
+static void
+hybrid_account_icon_save(HybridAccount *account)
+{
+	gchar *name;
+	gchar *hashed_name;
+	HybridModule *module;
+	HybridConfig *config;
+
+	g_return_if_fail(account != NULL);
+
+	if (account->icon_data == NULL || account->icon_data_len == 0) {
+		return;
+	}
+
+	module = account->proto;
+	config = account->config;
+
+	if (!account->icon_name) {
+		name = g_strdup_printf("%s_%s", module->info->name, account->username);
+		hashed_name = hybrid_sha1(name, strlen(name));
+		g_free(name);
+
+		account->icon_name = g_strdup_printf("%s.jpg", hashed_name);
+
+		name = g_strdup_printf("%s/%s.jpg", config->icon_path, hashed_name);
+		g_free(hashed_name);
+
+	} else {
+		name = g_strdup_printf("%s/%s", config->icon_path, account->icon_name);
+	}
+
+	g_file_set_contents(name, (gchar*)account->icon_data,
+			account->icon_data_len, NULL);
+
+	g_free(name);
+}
+
+/**
+ * Save the icon related attribute only.
+ */
+static void
+account_set_icon(HybridAccount *account, const guchar *icon_data,
+		gint icon_data_len, const gchar *icon_crc)
+{
+	g_return_if_fail(account != NULL);
+
+	g_free(account->icon_data);
+	g_free(account->icon_crc);
+
+	account->icon_data = g_memdup(icon_data, icon_data_len);
+	account->icon_crc = g_strdup(icon_crc);
+	account->icon_data_len = icon_data_len;
 }

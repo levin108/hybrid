@@ -82,6 +82,8 @@ fetion_buddy_get_info(fetion_account *ac, const gchar *userid,
 	res = fetion_sip_to_string(sip, body);
 	g_free(body);
 
+	hybrid_debug_info("fetion", "send:\n%s", res);
+
 	if (send(ac->sk, res, strlen(res), 0) == -1) {
 		g_free(res);
 		return HYBRID_ERROR;
@@ -300,15 +302,19 @@ portrait_recv_cb(gint sk, gpointer user_data)
 
 	if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
 		hybrid_debug_error("fetion", "get portrait for \'%s\':%s",
-				trans->buddy->sid, strerror(errno));
+				trans->buddy ? trans->buddy->sid : trans->ac->sid, 
+				strerror(errno));
 		return FALSE;
 	}
 
 	buf[n] = '\0';
 
 	if (n == 0) {
-		imbuddy = hybrid_blist_find_buddy(trans->ac->account,
-				trans->buddy->userid);
+
+		if (trans->portrait_type == PORTRAIT_TYPE_BUDDY) {
+			imbuddy = hybrid_blist_find_buddy(trans->ac->account,
+					trans->buddy->userid);
+		}
 
 		if (hybrid_get_http_code(trans->data) != 200) {
 			/* 
@@ -319,8 +325,16 @@ portrait_recv_cb(gint sk, gpointer user_data)
 			 * of the buddy's checksum to determine whether to fetch a 
 			 * portrait from the server. 
 			 */
-			hybrid_blist_set_buddy_icon(imbuddy, NULL, 0,
-					trans->buddy->portrait_crc);
+			if (trans->portrait_type == PORTRAIT_TYPE_BUDDY) {
+				hybrid_blist_set_buddy_icon(imbuddy, NULL, 0,
+						trans->buddy->portrait_crc);
+
+			} else {
+				printf("####################################3333\n");
+				hybrid_account_set_icon(trans->ac->account, NULL,
+						0, trans->ac->portrait_crc);
+			}
+
 			goto pt_fin;
 		}
 
@@ -332,8 +346,14 @@ portrait_recv_cb(gint sk, gpointer user_data)
 
 		pos += 4;
 
-		hybrid_blist_set_buddy_icon(imbuddy, (guchar*)pos,
-				trans->data_len, trans->buddy->portrait_crc);
+		if (trans->portrait_type == PORTRAIT_TYPE_BUDDY) { /**< buddy portrait */
+			hybrid_blist_set_buddy_icon(imbuddy, (guchar*)pos,
+					trans->data_len, trans->buddy->portrait_crc);
+
+		} else {
+			hybrid_account_set_icon(trans->ac->account, (guchar*)pos,
+					trans->data_len, trans->ac->portrait_crc);
+		}
 
 		goto pt_fin;
 
@@ -352,20 +372,7 @@ pt_fin:
 	return FALSE;
 }
 
-/**
- * Callback function to handle the portriat connection event. 
- * It start a http GET request, the full string is like:
- *
- * GET /HDS_S00/getportrait.aspx?Uri=sip%3A642781687%40fetion.com.cn
- * %3Bp%3D6543&Size=120&c=CBIOAACvnz7yxTih9INomOTTPvbcRQgbv%2BWSdvSlGM5711%2BZL9
- * GUQL4ohBdnDsU1uq0IU9piw2w8wRHIztMX6JmkQzB%2B0nEcndn0kYSKtSDg3JDaj3s%2BZePi9SU
- * HO9BIHaZ5vOsAAA%3D%3D HTTP/1.1
- * User-Agent: IIC2.0/PC 4.0.2510
- * Accept: image/pjpeg;image/jpeg;image/bmp;image/x-windows-bmp;image/png;image/gif
- * Host: hdss1fta.fetion.com.cn
- * Connection: Keep-Alive
- */
-static gboolean
+gboolean
 portrait_conn_cb(gint sk, gpointer user_data)
 {
 	portrait_data *data = (portrait_data*)user_data;
@@ -378,10 +385,17 @@ portrait_conn_cb(gint sk, gpointer user_data)
 	trans = g_new0(portrait_trans, 1);
 	trans->buddy = data->buddy;
 	trans->ac = data->ac;
+	trans->portrait_type = data->portrait_type;
 
 	g_free(data);
 
-	encoded_sipuri = g_uri_escape_string(trans->buddy->sipuri, NULL, TRUE);
+	if (trans->portrait_type == PORTRAIT_TYPE_BUDDY) {
+		encoded_sipuri = g_uri_escape_string(trans->buddy->sipuri, NULL, TRUE);
+
+	} else {
+		encoded_sipuri = g_uri_escape_string(trans->ac->sipuri, NULL, TRUE);
+	}
+
 	encoded_ssic = g_uri_escape_string(trans->ac->ssic, NULL, TRUE);
 
 	uri = g_strdup_printf("/%s/getportrait.aspx", trans->ac->portrait_host_path);
@@ -398,8 +412,6 @@ portrait_conn_cb(gint sk, gpointer user_data)
 	g_free(encoded_sipuri);
 	g_free(encoded_ssic);
 	g_free(uri);
-
-	//hybrid_debug_info("fetion", "send:\n%s", http_string);
 
 	if (send(sk, http_string, strlen(http_string), 0) == -1) {
 		hybrid_debug_error("fetion", "download portrait for \'%s\':%s",
@@ -428,6 +440,7 @@ fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 	data = g_new0(portrait_data, 1);
 	data->buddy = buddy;
 	data->ac = ac;
+	data->portrait_type = PORTRAIT_TYPE_BUDDY;
 
 	if (!(hybrid_buddy = hybrid_blist_find_buddy(ac->account, buddy->userid))) {
 		hybrid_debug_error("fetion", "FATAL, update portrait,"

@@ -486,12 +486,19 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 
 	if (code == FETION_SIP_OK) { /**< ok, we got the contact list */
 
+		/* update the portrait. */
+		fetion_account_update_portrait(ac);
+
 		length = fetion_sip_get_length(sipmsg);
 		pos = strstr(ac->buffer, "\r\n\r\n") + 4;
 		parse_sipc_resp(ac, pos, length);
 
+		/* set the nickname of the hybrid account. */
+		hybrid_account_set_nickname(ac->account, ac->nickname);
+
 		/* set the connection status. */
-		hybrid_account_set_connection_status(ac->account, HYBRID_CONNECTION_CONNECTED);
+		hybrid_account_set_connection_status(ac->account,
+				HYBRID_CONNECTION_CONNECTED);
 
 		/* init group list */
 		fetion_groups_init(ac);
@@ -1111,6 +1118,7 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 	ac->nickname = xmlnode_prop(node, "nickname");
 	ac->mood_phrase = xmlnode_prop(node, "impresa");
 	ac->personal_version = xmlnode_prop(node, "version");
+	ac->portrait_crc = xmlnode_prop(node, "portrait-crc");
 	temp = xmlnode_prop(node, "carrier-region");
 
 	/* region */

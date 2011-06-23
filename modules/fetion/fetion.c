@@ -184,7 +184,6 @@ process_message_cb(fetion_account *ac, const gchar *sipmsg)
 
 		notify = hybrid_notify_create(ac->account, _("System Message"));
 		hybrid_notify_set_text(notify, sysmsg_text);
-		hybrid_notify_set_name(notify, ac->nickname);
 
 		g_free(sysmsg_text);
 		g_free(sysmsg_url);

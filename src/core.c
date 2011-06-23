@@ -214,7 +214,7 @@ main(gint argc, gchar **argv)
 	
 	ui_init();
 
-//	hybrid_start_login();
+	hybrid_start_login();
 
 	gtk_main();
 
