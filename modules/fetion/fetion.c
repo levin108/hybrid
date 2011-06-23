@@ -4,12 +4,14 @@
 #include "module.h"
 #include "info.h"
 #include "blist.h"
+#include "notify.h"
 
 #include "fetion.h"
 #include "fx_trans.h"
 #include "fx_login.h"
 #include "fx_account.h"
 #include "fx_buddy.h"
+#include "fx_msg.h"
 
 fetion_account *ac;
 
@@ -169,10 +171,23 @@ static void
 process_message_cb(fetion_account *ac, const gchar *sipmsg)
 {
 	gchar *event;
+	gchar *sysmsg_text;
+	gchar *sysmsg_url;
+	HybridNotify *notify;
 
 	if ((event = sip_header_get_attr(sipmsg, "N")) &&
 			g_strcmp0(event, "system-message") == 0) {
-		g_print("%s\n", sipmsg);
+		if (fetion_message_parse_sysmsg(sipmsg, &sysmsg_text,
+					&sysmsg_url) != HYBRID_OK) {
+			return;
+		}
+
+		notify = hybrid_notify_create(ac->account, _("System Message"));
+		hybrid_notify_set_text(notify, sysmsg_text);
+		hybrid_notify_set_name(notify, ac->nickname);
+
+		g_free(sysmsg_text);
+		g_free(sysmsg_url);
 	}
 
 	g_free(event);

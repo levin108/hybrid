@@ -140,6 +140,7 @@ set(fetion_SRC
 	modules/fetion/fx_group.c
 	modules/fetion/fx_buddy.c
 	modules/fetion/fx_trans.c
+	modules/fetion/fx_msg.c
 )
 
 add_library(fetion SHARED ${fetion_SRC})
