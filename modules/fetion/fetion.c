@@ -304,6 +304,14 @@ fetion_change_state(HybridAccount *account, gint state)
 	return TRUE;
 }
 
+static gboolean 
+fetion_buddy_move(HybridAccount *account, HybridBuddy *buddy,
+		HybridGroup *new_group)
+{
+
+	return TRUE;
+}
+
 static void
 fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
 {
@@ -329,6 +337,7 @@ HybridModuleInfo module_info = {
 	fetion_login,
 	fetion_get_info,
 	fetion_change_state,
+	fetion_buddy_move,
 };
 
 void 

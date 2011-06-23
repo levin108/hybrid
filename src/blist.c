@@ -11,6 +11,11 @@
 HybridBlist *blist = NULL;
 
 static void hybrid_blist_buddy_icon_save(HybridBuddy *buddy);
+static void hybrid_blist_buddy_to_cache(HybridBuddy *buddy,
+							HybridBlistCacheType type);
+static void hybrid_blist_group_to_cache(HybridGroup *group);
+static HybridGroup *hybrid_blist_find_group_by_name(
+							HybridAccount *account, const gchar *name);
 
 HybridBlist*
 hybrid_blist_create()
@@ -113,6 +118,137 @@ buddy_information_menu_cb(GtkWidget *widget, gpointer user_data)
 	}
 }
 
+/**
+ * Callback function of the buddy-move menu's activate event.
+ */
+static void
+buddy_move_cb(GtkWidget *widget, gpointer user_data)
+{
+	gchar *group_name;
+	const gchar *new_group_name;
+	HybridBuddy *buddy;
+	HybridGroup *group;
+	HybridGroup *orig_group;
+	HybridAccount *account;
+	HybridModule *module;
+		
+	GdkPixbuf *status_icon;
+	GdkPixbuf *proto_icon;
+	GdkPixbuf *buddy_icon;
+
+	GtkTreeView  *tree;
+	GtkTreeModel *model;
+
+	buddy = (HybridBuddy*)user_data;
+	account = buddy->account;
+	module = account->proto;
+
+	new_group_name = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
+
+	if (!(group = hybrid_blist_find_group_by_name(account, new_group_name))) {
+		hybrid_debug_error("blist", "find group by name:%s", new_group_name);
+
+		return;
+	}
+
+	if (module->info->buddy_move) {
+		if (!module->info->buddy_move(account, buddy, group)) {
+			hybrid_debug_error("blist", "move buddy protocol error");
+			return;
+		}
+
+		/* 
+		 * Move the buddy to the dst group. My method is to remove the buddy in 
+		 * the old group, and then create a new one in the new group, and set it
+		 * with the same attribute. I don't know how to do in other way, if you 
+		 * know, tell me :)
+		 */
+		tree = GTK_TREE_VIEW(blist->treeview);
+		model = gtk_tree_view_get_model(tree);
+
+		gtk_tree_store_remove(GTK_TREE_STORE(model), &buddy->iter);
+		gtk_tree_store_append(GTK_TREE_STORE(model), &buddy->iter, &group->iter);
+
+		status_icon = hybrid_create_presence_pixbuf(buddy->state, 16);
+		proto_icon = hybrid_create_proto_icon(module->info->name, 16);
+
+		buddy_icon = hybrid_create_round_pixbuf(buddy->icon_data,
+				buddy->icon_data_length, 32);
+
+		if (BUDDY_IS_INVISIBLE(buddy) || BUDDY_IS_OFFLINE(buddy)) {
+			gdk_pixbuf_saturate_and_pixelate(buddy_icon, buddy_icon, 0.0, FALSE);
+		}
+
+		gtk_tree_store_set(GTK_TREE_STORE(model), &buddy->iter,
+				HYBRID_BLIST_BUDDY_ID, buddy->id,
+				HYBRID_BLIST_BUDDY_ICON, buddy_icon,
+				HYBRID_BLIST_STATUS_ICON, status_icon,
+				HYBRID_BLIST_BUDDY_NAME, buddy->name,
+				HYBRID_BLIST_OBJECT_COLUMN, buddy,
+				HYBRID_BLIST_BUDDY_STATE, buddy->state,
+				HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
+				HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+				HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
+				HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+				HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
+				-1);
+		/* 
+		 * Change the number of total buddies and online buddies
+		 * of the source group and the destination group. 
+		 */
+		orig_group = buddy->parent;
+
+		group->buddy_count ++;
+		orig_group->buddy_count --;
+
+		if (!BUDDY_IS_INVISIBLE(buddy) && !BUDDY_IS_OFFLINE(buddy)) {
+			group->online_count ++;
+			orig_group->online_count --;
+		}
+
+
+		group_name = g_strdup_printf("<b>%s</b> (%d/%d)",
+				group->name, group->online_count, group->buddy_count);
+
+		gtk_tree_store_set(GTK_TREE_STORE(model), &group->iter,
+				HYBRID_BLIST_BUDDY_NAME, group_name, -1);
+
+		g_free(group_name);
+
+		group_name = g_strdup_printf("<b>%s</b> (%d/%d)",
+				orig_group->name, orig_group->online_count,
+				orig_group->buddy_count);
+
+		gtk_tree_store_set(GTK_TREE_STORE(model), &orig_group->iter,
+				HYBRID_BLIST_BUDDY_NAME, group_name, -1);
+
+		g_free(group_name);
+
+		/*
+		 * Now we need to process the local cache file blist.xml,
+		 * move the xml node to the new group. My method is also
+		 * remove the old one and create a new one in the new group node.
+		 */
+		if (!buddy->cache_node) {
+			hybrid_debug_error("blist",
+					"the buddy to move has no xml cache node.");
+			return;
+		}
+
+		xmlnode_remove_node(buddy->cache_node);
+
+		buddy->cache_node = xmlnode_new_child(group->cache_node, "buddy");
+		xmlnode_new_prop(buddy->cache_node, "id", buddy->id);
+		xmlnode_new_prop(buddy->cache_node, "mood", buddy->mood);
+		xmlnode_new_prop(buddy->cache_node, "name", buddy->name);
+		xmlnode_new_prop(buddy->cache_node, "icon", buddy->icon_name);
+		xmlnode_new_prop(buddy->cache_node, "crc", buddy->icon_crc);
+
+		hybrid_blist_cache_flush();
+
+	}
+}
+
 static GtkWidget*
 create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 {
@@ -152,7 +288,8 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	
 	g_hash_table_iter_init(&hash_iter, account->group_list);
 	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
-		hybrid_create_menu(group_menu, group->name, NULL, TRUE, NULL, NULL);
+		hybrid_create_menu(group_menu, group->name, NULL, TRUE,
+				buddy_move_cb, buddy);
 	}
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(child_menu), group_menu);
@@ -317,6 +454,8 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 	g_hash_table_insert(ac->group_list, group->id, group);
 
 	g_object_unref(proto_icon);
+
+	hybrid_blist_group_to_cache(group);
 
 	return group;
 }
@@ -661,6 +800,28 @@ hybrid_blist_find_group(HybridAccount *account, const gchar *id)
 	return NULL;
 }
 
+static HybridGroup*
+hybrid_blist_find_group_by_name(HybridAccount *account, const gchar *name)
+{
+	GHashTableIter hash_iter;
+	gpointer key;
+	HybridGroup *group;
+
+	g_return_val_if_fail(account != NULL, NULL);
+	g_return_val_if_fail(name != NULL, NULL);
+
+	g_hash_table_iter_init(&hash_iter, account->group_list);
+
+	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
+
+		if (g_strcmp0(group->name, name) == 0) {
+			return group;
+		}
+	}
+
+	return NULL;
+}
+
 HybridBuddy*
 hybrid_blist_find_buddy(HybridAccount *account, const gchar *id)
 {
@@ -676,8 +837,8 @@ hybrid_blist_find_buddy(HybridAccount *account, const gchar *id)
 	return NULL;
 }
 
-void
-hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
+static void 
+hybrid_blist_group_to_cache(HybridGroup *group)
 {
 	HybridAccount *ac;
 	HybridConfig *config;
@@ -690,14 +851,14 @@ hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
 	gchar *id;
 	gchar *name;
 
-	g_return_if_fail(buddy != NULL);
+	g_return_if_fail(group != NULL);
 
-	if (buddy->cache_node) {
-		node = buddy->cache_node;
-		goto buddy_exist;
+	if (group->cache_node) {
+		node = group->cache_node;
+		goto group_exist;
 	}
 
-	ac = buddy->account;
+	ac = group->account;
 	config = ac->config;
 	cache = config->blist_cache;
 	root = cache->root;
@@ -767,8 +928,8 @@ account_exist:
 			id = xmlnode_prop(temp, "id");
 			name = xmlnode_prop(temp, "name");
 
-			if (g_strcmp0(id, buddy->parent->id) == 0 &&
-				g_strcmp0(name, buddy->parent->name) == 0) {
+			if (g_strcmp0(id, group->id) == 0 &&
+				g_strcmp0(name, group->name) == 0) {
 				g_free(id);
 				g_free(name);
 				node = temp;
@@ -783,17 +944,73 @@ account_exist:
 	}
 
 	node = xmlnode_new_child(node, "group");
-	xmlnode_new_prop(node, "id", buddy->parent->id);
-	xmlnode_new_prop(node, "name", buddy->parent->name);
 
 group_exist:
+	if (xmlnode_has_prop(node, "id")) {
+		xmlnode_set_prop(node, "id", group->id);
+
+	} else {
+		xmlnode_new_prop(node, "id", group->id);
+	}
+
+	if (xmlnode_has_prop(node, "name")) {
+		xmlnode_set_prop(node, "name", group->name);
+
+	} else {
+		xmlnode_new_prop(node, "name", group->name);
+	}
+
+	group->cache_node = node;
+
+	hybrid_blist_cache_flush();
+}
+
+
+/**
+ * Write the buddy information to the cache which in fact is 
+ * a XML tree in the memory, if you want to synchronize the cache
+ * with the cache file, use hybrid_blist_cache_flush().
+ *
+ * @param buddy The buddy to write to cache.
+ * @param type  The action of writing to cache.
+ */
+static void
+hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
+{
+	HybridAccount *ac;
+	HybridConfig *config;
+	HybridBlistCache *cache;
+	xmlnode *root;
+	xmlnode *node;
+	xmlnode *temp;
+	gchar *id;
+
+	g_return_if_fail(buddy != NULL);
+
+	if (buddy->cache_node) {
+		node = buddy->cache_node;
+		goto buddy_exist;
+	}
+
+	ac = buddy->account;
+	config = ac->config;
+	cache = config->blist_cache;
+	root = cache->root;
+
+	if (!(node = buddy->parent->cache_node)) {
+		hybrid_debug_error("blist", 
+				"group node isn't cached, cache buddy failed");
+		return;
+	}
+
 	/* whether there's a buddy node */
 	if ((temp = xmlnode_child(node))) {
 		
 		while (temp) {
 
 			if (!xmlnode_has_prop(temp, "id")) {
-				hybrid_debug_error("blist", "invalid blist cache buddy node found");
+				hybrid_debug_error("blist",
+						"invalid blist cache buddy node found");
 				temp = xmlnode_next(temp);
 				continue;
 			}

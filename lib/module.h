@@ -27,6 +27,7 @@ struct _HybridModuleInfo {
 	gboolean (*login)(HybridAccount *);
 	void (*get_info)(HybridAccount *, HybridBuddy *);
 	gboolean (*change_state)(HybridAccount *, gint);
+	gboolean (*buddy_move)(HybridAccount *, HybridBuddy *,HybridGroup *);
 };
 
 struct _HybridModule {

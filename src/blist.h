@@ -22,10 +22,14 @@ struct _HybridBlist {
 struct _HybridGroup {
 	GtkTreeIter iter;
 	HybridAccount *account;
+
+	xmlnode *cache_node;
+
 	gint buddy_count;
 	gint online_count;
 	gchar *id;
 	gchar *name;
+
 };
 
 struct _HybridBuddy {
@@ -197,16 +201,6 @@ HybridGroup *hybrid_blist_find_group(HybridAccount *account, const gchar *id);
  * @return HybridBuddy if found, NULL if no buddy was found.
  */
 HybridBuddy *hybrid_blist_find_buddy(HybridAccount *account, const gchar *id);
-
-/**
- * Write the buddy information to the cache which in fact is 
- * a XML tree in the memory, if you want to synchronize the cache
- * with the cache file, use hybrid_blist_cache_flush().
- *
- * @param buddy The buddy to write to cache.
- * @param type  The action of writing to cache.
- */
-void hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type);
 
 #ifdef _cplusplus
 }

@@ -627,6 +627,7 @@ account_found:
 		name = xmlnode_prop(group_node, "name");
 
 		group = hybrid_blist_add_group(account, id, name);
+		group->cache_node = group_node;
 
 		g_free(id);
 		g_free(name);
