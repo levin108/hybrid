@@ -7,6 +7,17 @@
 
 GSList *account_list = NULL;
 
+/**
+ * The human readable presence name.
+ */
+const gchar *hybrid_presence_name[] = {
+	N_("Offline"),
+	N_("Invisible"),
+	N_("Busy"),
+	N_("Away"),
+	N_("Online")
+};
+
 static void load_blist_from_disk(HybridAccount *account);
 
 void
