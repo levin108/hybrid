@@ -9,6 +9,8 @@
 
 static gchar *generate_subscribe_body(void);
 static gchar *generate_get_info_body(const gchar *userid);
+static gchar *generate_buddy_move_body(const gchar *userid,
+				const gchar *groupid);
 
 fetion_buddy*
 fetion_buddy_create(void)
@@ -86,6 +88,43 @@ fetion_buddy_get_info(fetion_account *ac, const gchar *userid,
 
 	if (send(ac->sk, res, strlen(res), 0) == -1) {
 		g_free(res);
+		return HYBRID_ERROR;
+	}
+
+	g_free(res);
+
+	return HYBRID_OK;
+}
+
+gint
+fetion_buddy_move_to(fetion_account *ac, const gchar *userid,
+		const gchar *groupid)
+{
+	fetion_sip *sip;
+	sip_header *eheader;
+	gchar *res, *body;
+
+	g_return_val_if_fail(ac != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(userid != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(groupid != NULL, HYBRID_ERROR);
+
+	sip = ac->sip;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+
+	eheader = sip_event_header_create(SIP_EVENT_SETCONTACTINFO);
+
+	fetion_sip_add_header(sip , eheader);
+
+	body = generate_buddy_move_body(userid, groupid);
+
+	res = fetion_sip_to_string(sip , body);
+	g_free(body);
+
+	hybrid_debug_info("fetion", "%s moved to group %s, send:\n%s",
+					userid, groupid, res);
+
+	if (send(ac->sk, res, strlen(res), 0) == -1) {
 		return HYBRID_ERROR;
 	}
 
@@ -472,6 +511,26 @@ generate_get_info_body(const gchar *userid)
 	root = xmlnode_root(body, strlen(body));
 	node = xmlnode_new_child(root, "contact");
 	xmlnode_new_prop(node, "user-id", userid);
+
+	return xmlnode_to_string(root);
+}
+
+static gchar*
+generate_buddy_move_body(const gchar *userid, const gchar *groupid)
+{
+	const gchar *body;
+	xmlnode *root;
+	xmlnode *node;
+	
+	body = "<args></args>";
+
+	root = xmlnode_root(body, strlen(body));
+	
+	node = xmlnode_new_child(root, "contacts");
+	node = xmlnode_new_child(node, "contact");
+
+	xmlnode_new_prop(node, "user-id", userid);
+	xmlnode_new_prop(node, "buddy-lists", groupid);
 
 	return xmlnode_to_string(root);
 }

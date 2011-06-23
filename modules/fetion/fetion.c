@@ -162,6 +162,7 @@ process_sipc_cb(fetion_account *ac, const gchar *sipmsg)
 
 		trans_cur = g_slist_next(trans_cur);
 	}
+	printf("%s\n", sipmsg);
 }
 
 /**
@@ -308,7 +309,11 @@ static gboolean
 fetion_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 		HybridGroup *new_group)
 {
+	fetion_account *ac;
 
+	ac = hybrid_account_get_protocol_data(account);
+
+	fetion_buddy_move_to(ac, buddy->id, new_group->id);
 	return TRUE;
 }
 

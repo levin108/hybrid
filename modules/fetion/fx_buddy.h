@@ -66,7 +66,7 @@ fetion_buddy *fetion_buddy_create(void);
  * Scribe the msg pushed from the server. The message is:
  *
  * SUB fetion.com.cn SIP-C/4.0
- * F: 916098834
+ * F: 999999999
  * I: 3
  * Q: 2 SUB
  * N: PresenceV4
@@ -82,16 +82,38 @@ fetion_buddy *fetion_buddy_create(void);
 gint fetion_buddy_scribe(fetion_account *ac);
 
 /**
+ * Move the buddy to a new group. The message is:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 999999999
+ * I: 4
+ * Q: 2 S
+ * N: SetContactInfoV4
+ * L: 82
+ *
+ * <args><contacts><contact user-id="777777777" buddy-lists="0"/>
+ * </contacts></args>
+ *
+ * @param ac      The fetion account context.
+ * @param userid  The userid of the buddy.
+ * @param groupid The group id of the new group.
+ *
+ * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
+ */
+gint fetion_buddy_move_to(fetion_account *ac, const gchar *userid,
+		const gchar *groupid);
+
+/**
  * Get the detail information of a buddy. The message is:
  *
  * S fetion.com.cn SIP-C/4.0
- * F: 547264589
+ * F: 999999999
  * I: 4
  * Q: 2 S
  * N: GetContactInfoV4
  * L: 45
  *
- * <args><contact user-id="773350619"/></args>
+ * <args><contact user-id="777777777"/></args>
  *
  * @param ac       The fetion account context.
  * @param userid   The userid of the buddy.
