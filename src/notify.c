@@ -82,7 +82,6 @@ hybrid_notify_create(HybridAccount *account, const gchar *title)
 	/* default account info. */
 	gchar *account_text;
 
-	printf("############################ %d\n", notify->account->icon_data == NULL);
 	pixbuf = hybrid_create_round_pixbuf(notify->account->icon_data,
 			notify->account->icon_data_len, 32);
 	account_text = g_strdup_printf("<b>%s</b> (%s):",

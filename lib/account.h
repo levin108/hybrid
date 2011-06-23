@@ -22,6 +22,8 @@ struct _HybridAccount {
 	gchar *icon_crc; /**< checksum of the icon */
 	gchar *icon_name; /**< file name of the local file. */
 
+	GtkWidget *account_menu;
+
 	gpointer protocol_data;
 
 	GHashTable *buddy_list;
@@ -159,6 +161,15 @@ void hybrid_account_set_state(HybridAccount *account, gint state);
 void hybrid_account_set_nickname(HybridAccount *account, const gchar *nickname);
 
 /**
+ * Get the checksum of the account's icon.
+ * 
+ * @param account The account.
+ *
+ * @return The checksum.
+ */
+const gchar* hybrid_account_get_checksum(HybridAccount *account);
+
+/**
  * Set the account's icon.
  *
  * @param account   The account.
@@ -188,6 +199,13 @@ void hybrid_account_error_reason(HybridAccount *account, const gchar *reason);
  */
 void hybrid_account_set_connection_status(HybridAccount *account,
 		HybridConnectionStatusType status);
+
+/**
+ * Get the human readable name of the given presence state.
+ *
+ * @return The name of the presence state.
+ */
+const gchar *hybrid_get_presence_name(gint presence_state);
 
 #ifdef __cplusplus
 }

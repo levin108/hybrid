@@ -11,17 +11,6 @@ static void hybrid_account_icon_save(HybridAccount *account);
 static void account_set_icon(HybridAccount *account, const guchar *icon_data,
 		gint icon_data_len, const gchar *icon_crc);
 
-/**
- * The human readable presence name.
- */
-const gchar *hybrid_presence_name[] = {
-	N_("Offline"),
-	N_("Invisible"),
-	N_("Busy"),
-	N_("Away"),
-	N_("Online")
-};
-
 static void load_blist_from_disk(HybridAccount *account);
 
 void
@@ -403,9 +392,31 @@ hybrid_account_set_password(HybridAccount *account, const gchar *password)
 void
 hybrid_account_set_state(HybridAccount *account, gint state)
 {
+	gchar *menu_name;
+	GdkPixbuf *presence_pixbuf;
+	GtkWidget *presence_image;
+
 	g_return_if_fail(account != NULL);
 
 	account->state = state;
+
+	/* 
+	 * This function will do something more, that is to set
+	 * the icon and name of the account menu to make to 
+	 * show the current state .
+	 */
+
+	menu_name = g_strdup_printf("%s (%s)", account->username, 
+					hybrid_get_presence_name(state));
+	presence_pixbuf = hybrid_create_presence_pixbuf(state, 16);
+	presence_image = gtk_image_new_from_pixbuf(presence_pixbuf);
+
+	gtk_menu_item_set_label(GTK_MENU_ITEM(account->account_menu), menu_name);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(account->account_menu),
+					presence_image);
+
+	g_free(menu_name);
+	g_object_unref(presence_pixbuf);
 }
 
 void
@@ -416,6 +427,12 @@ hybrid_account_set_nickname(HybridAccount *account, const gchar *nickname)
 	g_free(account->nickname);
 
 	account->nickname = g_strdup(nickname);
+}
+
+const gchar*
+hybrid_account_get_checksum(HybridAccount *account)
+{
+	return account->icon_crc;
 }
 
 void
@@ -463,6 +480,22 @@ hybrid_account_set_connection_status(HybridAccount *account,
 	}
 
 	account->connect_state = status;
+}
+
+
+const gchar*
+hybrid_get_presence_name(gint presence_state)
+{
+	/* The human readable presence names. */
+	const gchar *presence_names[] = {
+		N_("Offline"),
+		N_("Invisible"),
+		N_("Busy"),
+		N_("Away"),
+		N_("Online")
+	};
+
+	return presence_names[presence_state];
 }
 
 /**

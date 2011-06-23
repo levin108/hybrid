@@ -243,8 +243,8 @@ fetion_login(HybridAccount *imac)
 /**
  * Callback function for the get_info transaction.
  */
-static gint get_info_cb(fetion_account *ac, const gchar *sipmsg,
-		fetion_transaction *trans)
+static gint 
+get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 {
 	HybridInfo *info;
 	fetion_buddy *buddy;
@@ -271,6 +271,39 @@ static gint get_info_cb(fetion_account *ac, const gchar *sipmsg,
 	return HYBRID_OK;
 }
 
+static gboolean
+fetion_change_state(HybridAccount *account, gint state)
+{
+	fetion_account *ac;
+	gint fetion_state;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	switch(state) {
+		case HYBRID_STATE_ONLINE:
+			fetion_state = P_ONLINE;
+			break;
+		case HYBRID_STATE_AWAY:
+			fetion_state = P_AWAY;
+			break;
+		case HYBRID_STATE_BUSY:
+			fetion_state = P_BUSY;
+			break;
+		case HYBRID_STATE_INVISIBLE:
+			fetion_state = P_INVISIBLE;
+			break;
+		default:
+			fetion_state = P_ONLINE;
+			break;
+	}
+
+	if (fetion_account_update_state(ac, fetion_state) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void
 fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
 {
@@ -292,8 +325,10 @@ HybridModuleInfo module_info = {
 	"http://basiccoder.com",
 	"0","1",
 	"fetion",
+
 	fetion_login,
 	fetion_get_info,
+	fetion_change_state,
 };
 
 void 

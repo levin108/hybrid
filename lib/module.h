@@ -24,8 +24,9 @@ struct _HybridModuleInfo {
 				   HYBRID_INSTALL_DIR/share/hybrid/protocols
 				   */
 
-	gboolean (*login)(HybridAccount *ac);
-	void (*get_info)(HybridAccount *ac, HybridBuddy *buddy);
+	gboolean (*login)(HybridAccount *);
+	void (*get_info)(HybridAccount *, HybridBuddy *);
+	gboolean (*change_state)(HybridAccount *, gint);
 };
 
 struct _HybridModule {

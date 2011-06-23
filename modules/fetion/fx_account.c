@@ -5,6 +5,8 @@
 #include "fx_account.h"
 #include "fx_buddy.h"
 
+static gchar *generate_set_state_body(gint state);
+
 fetion_account*
 fetion_account_create(HybridAccount *account, const gchar *no, const gchar *password)
 {
@@ -30,6 +32,39 @@ fetion_account_create(HybridAccount *account, const gchar *no, const gchar *pass
 	return ac;
 }
 
+gint
+fetion_account_update_state(fetion_account *ac, gint state)
+{
+
+	sip_header *eheader;
+	fetion_sip *sip = ac->sip;
+	gchar *body;
+	gchar *res;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+
+	eheader = sip_event_header_create(SIP_EVENT_SETPRESENCE);
+	fetion_sip_add_header(sip, eheader);
+
+	body = generate_set_state_body(state);
+	res = fetion_sip_to_string(sip, body);
+	g_free(body);
+
+	hybrid_debug_info("fetion", 
+			"user state changed to %d,send:\n%s", state, res);
+
+	if (send(ac->sk, res, strlen(res), 0) == -1) {
+		g_free(res);
+
+		return HYBRID_ERROR;
+	}
+
+	ac->state = state;
+
+	g_free(res);
+
+	return HYBRID_OK;
+}
 
 void 
 fetion_account_destroy(fetion_account *ac)
@@ -72,7 +107,6 @@ gint
 fetion_account_update_portrait(fetion_account *ac)
 {
 	portrait_data *data;
-	HybridBuddy *hybrid_buddy;
 	const gchar *checksum;
 
 	g_return_val_if_fail(ac != NULL, HYBRID_ERROR);
@@ -81,18 +115,32 @@ fetion_account_update_portrait(fetion_account *ac)
 	data->ac = ac;
 	data->portrait_type = PORTRAIT_TYPE_ACCOUNT;
 
-#if 0
-	checksum = hybrid_blist_get_buddy_checksum(hybrid_buddy);
+	checksum = hybrid_account_get_checksum(ac->account);
 
-	if (checksum != NULL && g_strcmp0(checksum, buddy->portrait_crc) == 0) {
-		hybrid_debug_info("fetion", "portrait for %s(%s) up to date",
-		buddy->nickname && *(buddy->nickname) != '\0' ? buddy->nickname : buddy->userid,
-		buddy->portrait_crc);
-		return;
+	if (checksum != NULL && g_strcmp0(checksum, ac->portrait_crc) == 0) {
+		return HYBRID_OK;
 	}
-#endif
 
 	hybrid_proxy_connect(ac->portrait_host_name, 80, portrait_conn_cb, data);
 
 	return HYBRID_OK;
+}
+
+static gchar*
+generate_set_state_body(gint state)
+{
+	xmlnode *root;
+	xmlnode *node;
+	gchar *s;
+	gchar data[] = "<args></args>";
+
+	root = xmlnode_root(data, strlen(data));
+	node = xmlnode_new_child(root, "presence");
+	node = xmlnode_new_child(node, "basic");
+
+	s = g_strdup_printf("%d", state);
+	xmlnode_new_prop(node, "value", s);
+	g_free(s);
+
+	return xmlnode_to_string(root);
 }

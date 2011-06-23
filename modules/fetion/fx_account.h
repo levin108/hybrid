@@ -129,6 +129,20 @@ fetion_account *fetion_account_create(HybridAccount *account, const gchar *no,
 void fetion_account_destroy(fetion_account *ac);
 
 /**
+ * Update the presence state of the account, the message is:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 547264589
+ * I: 7
+ * Q: 2 S
+ * N: SetPresenceV4
+ * L: 56
+ *
+ * <args><presence><basic value="400"/></presence></args>
+ */
+gint fetion_account_update_state(fetion_account *ac, gint state);
+
+/**
  * Fetch the portrait of the account from the server.
  *
  * @param ac The account.

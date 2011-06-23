@@ -10,6 +10,13 @@
 extern HybridBlist *blist;
 extern GSList *account_list;
 
+typedef struct state_menus HybridAccountMenuData;
+
+struct state_menus {
+	HybridAccount *account;
+	gint presence_state;
+};
+
 void
 hybrid_start_login()
 {
@@ -72,35 +79,93 @@ quit_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
-create_account_child_menus(GtkWidget *account_menu)
+change_state_cb(GtkWidget *widget, gpointer user_data)
 {
+	HybridAccount *account;
+	HybridModule *module;
+	HybridAccountMenuData *data;
+
+	data = (HybridAccountMenuData*)user_data;
+	account = data->account;
+
+	module = account->proto;
+
+	if (module->info->change_state) {
+		account->state = data->presence_state;
+
+		if (module->info->change_state(account,
+					data->presence_state)) {
+			hybrid_account_set_state(account, data->presence_state);
+		}
+	}
+}
+
+static void
+create_account_child_menus(HybridAccount *account)
+{
+	GtkWidget *account_menu;
 	GtkWidget *menu_shell;
 	GtkWidget *menu_item;
+	GtkWidget *child_menu;
+	GtkWidget *child_menu_item;
+	GdkPixbuf *presence_pixbuf;
+	GtkWidget *presence_image;
+	HybridAccountMenuData *data;
+	gint state;
+
+	account_menu = account->account_menu;
 
 	menu_shell = gtk_menu_new();
+
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(account_menu), menu_shell);
 
 	menu_item = hybrid_create_menu(menu_shell, _("Change State"), NULL,
 						TRUE, NULL, NULL);
+
+	/* ==== change state child menus start ==== */
+
+	child_menu = gtk_menu_new();
+
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), child_menu);
+
+	for (state = HYBRID_STATE_INVISIBLE; state <= HYBRID_STATE_ONLINE;
+			state ++) {
+
+		presence_pixbuf = hybrid_create_presence_pixbuf(state, 16);
+		child_menu_item = hybrid_create_menu(child_menu, 
+								hybrid_get_presence_name(state), 
+								NULL, TRUE, NULL, NULL);
+		presence_image = gtk_image_new_from_pixbuf(presence_pixbuf);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(child_menu_item),
+				presence_image);
+		g_object_unref(presence_pixbuf);
+
+		data = g_new0(HybridAccountMenuData, 1);
+		data->account = account;
+		data->presence_state = state;
+
+		g_signal_connect(child_menu_item, "activate",
+				G_CALLBACK(change_state_cb), data);
+	}
+
+	/* ==== change state child menus end   ==== */
+
 	hybrid_create_menu_seperator(menu_shell);
 
 	menu_item = hybrid_create_menu(menu_shell, _("Disable Account"), "close",
 						TRUE, NULL, NULL);
-
 }
 
 static void
 create_account_menus(GtkUIManager *ui)
 {
 	GtkWidget *account_shell;
-	GtkWidget *account_menu;
 	GtkWidget *seperator;
 	GdkPixbuf *presence_pixbuf;
 	GtkWidget *presence_image;
 	HybridAccount *account;
 	gchar *menu_name;
 	GSList *pos;
-	extern const gchar *hybrid_presence_name[];
 
 	if (!(account_shell = gtk_ui_manager_get_widget(ui, "/MenuBar/Account"))) {
 		hybrid_debug_error("core", "account menu init err");
@@ -115,22 +180,26 @@ create_account_menus(GtkUIManager *ui)
 	}
 
 	for (pos = account_list; pos; pos = pos->next) {
+
+		/* set the name of the account menu. */
 		account = (HybridAccount*)pos->data;
 		menu_name = g_strdup_printf("%s (%s)", account->username,
-				hybrid_presence_name[HYBRID_STATE_OFFLINE]);
-		account_menu = hybrid_create_menu(NULL, menu_name, NULL, TRUE,
+				hybrid_get_presence_name(account->state));
+		account->account_menu = hybrid_create_menu(NULL, menu_name, NULL, TRUE,
 								NULL, NULL);
 		g_free(menu_name);
 
-		presence_pixbuf = hybrid_create_presence_pixbuf(HYBRID_STATE_OFFLINE, 16);
+		/* set the icon of the account menu */
+		presence_pixbuf = hybrid_create_presence_pixbuf(account->state, 16);
 		presence_image = gtk_image_new_from_pixbuf(presence_pixbuf);
-		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(account_menu),
-				presence_image);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(account->account_menu),
+							presence_image);
 		g_object_unref(presence_pixbuf);
 
-		create_account_child_menus(account_menu);
+		create_account_child_menus(account);
 
-		gtk_menu_shell_insert(GTK_MENU_SHELL(account_shell), account_menu, 3);
+		gtk_menu_shell_insert(GTK_MENU_SHELL(account_shell),
+						account->account_menu, 3);
 	}
 }
 

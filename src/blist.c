@@ -867,7 +867,7 @@ buddy_exist:
 	/* Set the buddy's xml cache node property. */
 	buddy->cache_node = node;
 
-//	hybrid_blist_cache_flush();
+	hybrid_blist_cache_flush();
 }
 
 
