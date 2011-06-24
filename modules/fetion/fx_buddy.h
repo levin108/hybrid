@@ -124,6 +124,24 @@ gint fetion_buddy_get_info(fetion_account *ac, const gchar *userid,
 		TransCallback callback, gpointer data);
 
 /**
+ * Remove a buddy. The message if:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 999999999
+ * I: 7
+ * Q: 2 S
+ * N: DeleteBuddyV4
+ * L: 83
+ *
+ * <args><contacts><buddies><buddy user-id="777777777"/>
+ * </buddies></contacts></args>
+ *
+ * @param ac     The account context.
+ * @param userid The userid of the buddy.
+ */
+gint fetion_buddy_remove(fetion_account *ac, const gchar *userid);
+
+/**
  * Parse the detailed information by the get-info sip response.
  *
  * @param ac     The fetion account context.
