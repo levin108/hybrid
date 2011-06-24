@@ -69,7 +69,8 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 static void
 process_dereg_cb(fetion_account *ac, const gchar *sipmsg)
 {
-	printf("%s\n", sipmsg);
+	hybrid_account_error_reason(ac->account, 
+			_("Your account has logined elsewhere. You are forced to quit."));
 }
 
 /**

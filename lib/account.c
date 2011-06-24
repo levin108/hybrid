@@ -3,6 +3,7 @@
 #include "config.h"
 #include "account.h"
 #include "gtkutils.h"
+#include "notify.h"
 #include "blist.h"
 
 GSList *account_list = NULL;
@@ -414,7 +415,6 @@ hybrid_account_set_state(HybridAccount *account, gint state)
 	 * the icon and name of the account menu to make to 
 	 * show the current state .
 	 */
-
 	menu_name = g_strdup_printf("%s (%s)", account->username, 
 					hybrid_get_presence_name(state));
 	presence_pixbuf = hybrid_create_presence_pixbuf(state, 16);
@@ -525,9 +525,17 @@ hybrid_account_close(HybridAccount *account)
 void
 hybrid_account_error_reason(HybridAccount *account, const gchar *reason)
 {
+	HybridNotify *notify;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(reason != NULL);
+
+	/* Sure, we should close the account first. */
 	hybrid_account_close(account);
 
-	/* TODO popup an notification box. */
+	/* Popup an notification box. */
+	notify = hybrid_notify_create(account, NULL);
+	hybrid_notify_set_text(notify, reason);
 }
 
 void
@@ -587,6 +595,7 @@ blist_set_buddy_icon(HybridBuddy *buddy,
 
 	g_free(buddy->icon_crc);
 	g_free(buddy->icon_data);
+
 	buddy->icon_data = NULL;
 	buddy->icon_data_length = len;
 	buddy->icon_crc = g_strdup(crc);

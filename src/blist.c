@@ -452,8 +452,6 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 	group->id = g_strdup(id);
 	group->account = ac;
 
-	printf("%s\n", group->name);
-
 	g_hash_table_insert(ac->group_list, group->id, group);
 
 	g_object_unref(proto_icon);
