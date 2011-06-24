@@ -4,6 +4,15 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
+typedef struct _HybridConfirm HybridConfirm;
+typedef void (*confirm_cb)(gpointer user_data);
+
+struct _HybridConfirm {
+	GtkWidget *window;
+	confirm_cb btn_callback;
+	gpointer user_data;
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -89,6 +98,13 @@ GtkWidget *hybrid_create_menu(GtkWidget *parent, const gchar *title,
 		gpointer user_data);
 
 /**
+ * Create a seperator for a menu.
+ *
+ * @param parent The menu widget.
+ */
+void hybrid_create_menu_seperator(GtkWidget *parent);
+
+/**
  * Create a GtkWindow.
  *
  * @param title The window title.
@@ -102,12 +118,22 @@ GtkWidget *hybrid_create_menu(GtkWidget *parent, const gchar *title,
  */
 GtkWidget *hybrid_create_window(const gchar *title,	GdkPixbuf *icon,
 		GtkWindowPosition pos, gboolean resizable);
+
 /**
- * Create a seperator for a menu.
+ * Create a confirm window.
  *
- * @param parent The menu widget.
+ * @param title        The title of the confirm window.
+ * @param text         The text to show in the window.
+ * @param btn_text     The displayed text in the user-defined button.
+ * @param btn_callback The callback function of the user-defined button.
+ * @param user_data    The user-specified data for the callback function.
+ *
+ * @return The confirm box created. You don't have to destroy it manually,
+ *         it will be destroyed when the box was closed automaticly.
  */
-void hybrid_create_menu_seperator(GtkWidget *parent);
+HybridConfirm *hybrid_confirm_show(const gchar *title, const gchar *text,
+		const gchar *btn_text, confirm_cb btn_callback, gpointer user_data);
+
 
 gchar *hybrid_sha1(const gchar *in, gint size);
 

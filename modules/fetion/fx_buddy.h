@@ -171,6 +171,7 @@ void fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy);
  */
 fetion_buddy *fetion_buddy_find_by_userid(fetion_account *ac,
 		const gchar *userid);
+
 /**
  * Destroy a fetion buddy.
  *

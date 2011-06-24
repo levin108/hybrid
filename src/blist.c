@@ -250,20 +250,19 @@ buddy_move_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
-remove_buddy_menu_cb(GtkWidget *widget, gpointer user_data)
+hybrid_buddy_remove(HybridBuddy *buddy)
 {
-	HybridBuddy *buddy;
 	HybridAccount *account;
 	HybridModule *module;
 	GtkTreeView *tree;
 	GtkTreeModel *model;
 
-	buddy   = (HybridBuddy*)user_data;
-	account = buddy->account;
-	module  = account->proto;
+	g_return_if_fail(buddy != NULL);
 
 	tree    = GTK_TREE_VIEW(blist->treeview);
 	model   = gtk_tree_view_get_model(tree);
+	account = buddy->account;
+	module  = account->proto;
 
 	/*
 	 * If the buddy_remove hook function not defined, or if the
@@ -288,6 +287,22 @@ remove_buddy_menu_cb(GtkWidget *widget, gpointer user_data)
 	hybrid_blist_cache_flush();
 
 	hybrid_blist_buddy_destroy(buddy);
+}
+
+static void
+remove_buddy_menu_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridBuddy *buddy;
+	gchar *confirm_text;
+
+	buddy = (HybridBuddy*)user_data;
+
+	confirm_text = g_strdup_printf(_("Are you sure to delete"
+				" the buddy <b>%s</b> (%s)"), buddy->name, buddy->id);
+	hybrid_confirm_show(_("Confirm"), confirm_text, _("Delete"),
+			(confirm_cb)hybrid_buddy_remove, buddy);
+	g_free(confirm_text);
+
 }
 
 static GtkWidget*

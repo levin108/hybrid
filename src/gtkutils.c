@@ -340,6 +340,108 @@ hybrid_create_window(const gchar *title, GdkPixbuf *icon,
 	return window;
 }
 
+/* ================ Confirm Box Start =======================*/
+static void
+confirm_destroy(GtkWidget *widget, gpointer user_data)
+{
+	HybridConfirm *confirm = (HybridConfirm*)user_data;
+
+	g_free(confirm);
+}
+
+static void
+confirm_cancel_btn_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridConfirm *confirm;
+
+	confirm = (HybridConfirm*)user_data;
+
+	gtk_widget_destroy(confirm->window);
+}
+
+static void
+confirm_user_btn_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridConfirm *confirm;
+	confirm_cb callback;
+	gpointer cb_user_data;
+
+	confirm = (HybridConfirm*)user_data;
+	callback = confirm->btn_callback;
+	cb_user_data = confirm->user_data;
+
+	gtk_widget_destroy(confirm->window);
+
+	if (callback) {
+		callback(cb_user_data);
+	}
+}
+
+HybridConfirm*
+hybrid_confirm_show(const gchar *title, const gchar *text,
+		const gchar *btn_text, confirm_cb btn_callback, gpointer user_data)
+{
+	GtkWidget *window;
+	GtkWidget *vbox;
+	GtkWidget *hbox;
+	GtkWidget *action_area;
+	GdkPixbuf *pixbuf;
+	GtkWidget *image;
+	GtkWidget *label;
+	GtkWidget *button;
+	HybridConfirm *confirm;
+
+	g_return_val_if_fail(title != NULL, NULL);
+	g_return_val_if_fail(text != NULL, NULL);
+
+	confirm = g_new0(HybridConfirm, 1);
+	confirm->btn_callback = btn_callback;
+	confirm->user_data = user_data;
+
+	window = hybrid_create_window(title, NULL, GTK_WIN_POS_CENTER, TRUE);
+	gtk_container_set_border_width(GTK_CONTAINER(window), 8);
+	g_signal_connect(window, "destroy", G_CALLBACK(confirm_destroy), confirm);
+
+	confirm->window = window;
+
+	vbox = gtk_vbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(window), vbox);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+
+	pixbuf = hybrid_create_default_icon(64);
+	image = gtk_image_new_from_pixbuf(pixbuf);
+	g_object_unref(pixbuf);
+
+	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
+
+	label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label), text);
+
+	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 5);
+
+	action_area = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 0);
+
+	button = gtk_button_new_with_label(btn_text);
+	gtk_widget_set_usize(button, 100, 30);
+	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
+	g_signal_connect(button, "clicked",
+			G_CALLBACK(confirm_user_btn_cb), confirm);
+
+	button = gtk_button_new_with_label(_("Cancel"));
+	gtk_widget_set_usize(button, 100, 30);
+	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
+	g_signal_connect(button, "clicked",
+			G_CALLBACK(confirm_cancel_btn_cb), confirm);
+
+	gtk_widget_show_all(confirm->window);
+
+	return confirm;
+}
+/* ================== Confirm Box End ======================= */
+
 
 gchar*
 hybrid_sha1(const gchar *in, gint size)
