@@ -47,6 +47,12 @@ hybrid_event_add(gint sk, gint event_type, input_func func, gpointer user_data)
 	return data->result;
 }
 
+gboolean
+hybrid_event_remove(guint source)
+{
+	return g_source_remove(source);
+}
+
 static gboolean
 ssl_recv_cb(gint sk, gpointer user_data)
 {

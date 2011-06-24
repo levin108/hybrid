@@ -416,7 +416,6 @@ push_cb(gint sk, gpointer user_data)
 
 	sipmsg[n] = '\0';
 
-
 	data_len = ac->buffer ? strlen(ac->buffer) : 0;
 	ac->buffer = (gchar*)realloc(ac->buffer, data_len + n + 1);
 	memcpy(ac->buffer + data_len, sipmsg, n + 1);
@@ -585,7 +584,7 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 	g_free(sipmsg);
 
 	/* now we start to handle the pushed messages */
-	hybrid_event_add(sk, HYBRID_EVENT_READ, push_cb, ac);
+	ac->source = hybrid_event_add(sk, HYBRID_EVENT_READ, push_cb, ac);
 
 	return 0;
 }

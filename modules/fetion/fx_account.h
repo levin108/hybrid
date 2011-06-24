@@ -21,6 +21,7 @@ struct _Verification {
 struct _fetion_account {
 	HybridAccount *account;
 	gint sk; /**< The socket descriptor. */
+	guint source; /**< The ID of the event source. */
 
 	/* buffer for received data */
 	gchar *buffer;

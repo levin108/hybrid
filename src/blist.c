@@ -288,6 +288,7 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	
 	g_hash_table_iter_init(&hash_iter, account->group_list);
 	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
+
 		hybrid_create_menu(group_menu, group->name, NULL, TRUE,
 				buddy_move_cb, buddy);
 	}
@@ -450,6 +451,8 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 	group->name = g_strdup(name);
 	group->id = g_strdup(id);
 	group->account = ac;
+
+	printf("%s\n", group->name);
 
 	g_hash_table_insert(ac->group_list, group->id, group);
 

@@ -15,7 +15,7 @@ extern "C" {
 #endif
 	
 /**
- * Add an read event handler.
+ * Add an event handler.
  *
  * @param sk The input socket descriptor.
  * @param func The callback function.
@@ -25,6 +25,15 @@ extern "C" {
  */
 guint hybrid_event_add(gint sk, gint event_type, input_func func,
 		gpointer user_data);
+
+/**
+ * Remove an event handler.
+ *
+ * @param source The event source descriptor.
+ *
+ * @return TRUE if event was removed.
+ */
+gboolean hybrid_event_remove(guint source);
 
 /**
  * Add an ssl read event handler.

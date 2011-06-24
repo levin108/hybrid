@@ -49,6 +49,11 @@ hybrid_account_init(void)
 	if ((node = xmlnode_child(root))) {
 
 		while (node) {
+			/*
+			 * The name of the current node must be 'account', and
+			 * it must has two nodes with the name 'user' and 'proto'
+			 * respectively, otherwise the node is invalid. 
+			 */
 			if (g_strcmp0(node->name, "account") ||
 				!xmlnode_has_prop(node, "user") ||
 				!xmlnode_has_prop(node, "proto")) {
@@ -146,6 +151,8 @@ hybrid_account_get(const gchar *proto_name,	const gchar *username)
 			return account;
 		}
 	}
+
+	/* Well, the account we're finding doesn't exist, then we create one. */
 
 	if (!(module = hybrid_module_find(proto_name))) {
 		hybrid_debug_error("account", "create account error,"
@@ -465,6 +472,17 @@ hybrid_account_close(HybridAccount *account)
 
 	g_return_if_fail(account != NULL);
 
+	/*
+	 * Set the account' state to be offline, it'll also
+	 * change the appearance of the account menus 
+	 */
+	hybrid_account_set_state(account, HYBRID_STATE_OFFLINE);
+
+	/*
+	 * Set the account's state to be closed.
+	 */
+	hybrid_account_set_connection_status(account, HYBRID_CONNECTION_CLOSED);
+
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
 
 	g_hash_table_iter_init(&hash_iter, account->group_list);
@@ -479,17 +497,19 @@ hybrid_account_close(HybridAccount *account)
 		/* Free the memory of the HybridGroups in hashtable */
 		hybrid_blist_group_destroy(group);
 	}
-
-	g_hash_table_destroy(account->group_list);
-	account->group_list = NULL;
+	/*
+	 * Note that we only remove all the item from the hashtable
+	 * but not destroy it, so is the buddy_list hashtable 
+	 */
+	g_hash_table_remove_all(account->group_list);
 
 	g_hash_table_iter_init(&hash_iter, account->buddy_list);
 	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&buddy)) {
 		/* Free the memory of the HybridBuddys in hashtable */
 		hybrid_blist_buddy_destroy(buddy);
 	}
-	g_hash_table_destroy(account->buddy_list);
-	account->buddy_list = NULL;
+	
+	g_hash_table_remove_all(account->buddy_list);
 
 	/*
 	 * There's NO need to destroy the account here, we need it

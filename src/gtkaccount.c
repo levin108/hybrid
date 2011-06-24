@@ -17,6 +17,8 @@ static void delete_cb(GtkWidget *widget, gpointer user_data);
 
 static HybridAccountPanel *account_panel = NULL;
 
+extern GSList *account_list;
+
 static void
 enable_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 		gpointer user_data)
@@ -26,23 +28,55 @@ enable_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 	GtkTreeIter  iter;
 	GtkTreePath *path;
 	gboolean fixed;
+	gchar *username;
+	HybridAccount *account;
+	GSList *pos = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(panel->account_tree));
 	path = gtk_tree_path_new_from_string(path_str);
 
 	/* get toggled iter */
 	gtk_tree_model_get_iter(model, &iter, path);
-	gtk_tree_model_get(model, &iter, HYBRID_ENABLE_COLUMN, &fixed, -1);
+	gtk_tree_model_get(model, &iter,
+			HYBRID_ENABLE_COLUMN, &fixed,
+			HYBRID_NAME_COLUMN, &username, -1);
+	gtk_tree_path_free(path);
 
-	/* do something with the value */
 	fixed ^= 1;
 
 	/* set new value */
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 			HYBRID_ENABLE_COLUMN, fixed, -1);
 
+	/* find the account by username */
+	for (pos = account_list; pos; pos = pos->next) {
+
+		account = (HybridAccount*)pos->data;
+
+		if (g_strcmp0(account->username, username) == 0) {
+
+			break;
+		}
+	}
+
+	if (!account) { /**< not found... */
+
+		hybrid_debug_error("account", "FATAL account not found");
+		g_free(username);
+
+		return;
+	}
+
+	if (fixed) { /**< enable the account */
+		account->proto->info->login(account);
+
+	} else { /**< disable the account */
+		hybrid_account_close(account);
+	}
+
+	g_free(username);
+
 	/* clean up */
-	gtk_tree_path_free(path);
 }
 
 static void
