@@ -45,6 +45,7 @@ endif(NOT DEFINED MODULE_INSTALL_DIR)
 add_definitions(-DRESOURCE_DIR="${RESOURCE_INSTALL_DIR}")
 add_definitions(-DDESKTOP_DIR="${DESKTOP_INSTALL_DIR}")
 add_definitions(-DDATA_DIR="${DATA_INSTALL_DIR}")
+add_definitions(-DPIXMAPS_DIR="${DATA_INSTALL_DIR}/pixmaps/")
 
 # im build requirements
 find_package(PkgConfig REQUIRED)
@@ -69,7 +70,6 @@ if(NLS AND GETTEXT_FOUND)
 else(NLS AND GETTEXT_FOUND)
 	message(STATUS "Native language support:  NO" )
 endif(NLS AND GETTEXT_FOUND)
-add_definitions(-DPIXMAP_DIR="${DATA_INSTALL_DIR}")
 add_definitions(-DLOCALE_DIR="${LOCALE_INSTALL_DIR}")
 #add_definitions(-DMODULE_DIR="${MODULE_INSTALL_DIR}")
 add_definitions(-DMODULE_DIR=".")
@@ -114,19 +114,21 @@ set(hybrid_SRC
 file(GLOB HYBRID_INCLUDES "src/*.h" "lib/*.h")
 install(FILES ${HYBRID_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
 
-# install pixmaps
-file(GLOB HYBRID_PIXMAPS 
-	"share/*.png"
-	"share/*.jpg")
-install(FILES ${HYBRID_PIXMAPS} DESTINATION ${DATA_INSTALL_DIR})
-
 # install menus pixmaps
-file(GLOB HYBRID_MENUS_PIXMAPS "share/menus/*.png")
-install(FILES ${HYBRID_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/menus/")
+file(GLOB HYBRID_MENUS_PIXMAPS "share/pixmaps/menus/*.png")
+install(FILES ${HYBRID_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/menus/")
 
 # install protocols pixmaps
-file(GLOB HYBRID_MENUS_PIXMAPS "share/protocols/*.png")
-install(FILES ${HYBRID_MENUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/protocols/")
+file(GLOB HYBRID_PROTOCOLS_PIXMAPS "share/pixmaps/protocols/*.png")
+install(FILES ${HYBRID_PROTOCOLS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/protocols/")
+
+# install status pixmaps
+file(GLOB HYBRID_STATUS_PIXMAPS "share/pixmaps/status/*.png")
+install(FILES ${HYBRID_STATUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/status/")
+
+# install icons pixmaps
+file(GLOB HYBRID_ICONS_PIXMAPS "share/pixmaps/icons/*.png")
+install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/icons/")
 
 add_executable(hybrid ${hybrid_SRC})
 target_link_libraries(hybrid ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})

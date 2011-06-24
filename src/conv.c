@@ -446,7 +446,7 @@ create_note_label(HybridChatPanel *chat)
 
 	/* close button */
 	eventbox = gtk_event_box_new();
-	close_image = gtk_image_new_from_file(DATA_DIR"/close.png");
+	close_image = gtk_image_new_from_file(PIXMAPS_DIR"menus/close.png");
 	g_signal_connect(G_OBJECT(eventbox), "button-press-event",
 			G_CALLBACK(tab_close_press_cb), chat);
 	gtk_container_add(GTK_CONTAINER(eventbox), close_image);
@@ -580,13 +580,13 @@ init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
 	gtk_toolbar_set_style(GTK_TOOLBAR(chat->toolbar), GTK_TOOLBAR_ICONS);
 	gtk_box_pack_start(GTK_BOX(vbox), chat->toolbar, FALSE, FALSE, 0);
 	
-	image_icon = gtk_image_new_from_file(DATA_DIR"/history.png");
+	image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/log.png");
 	button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
 			_("Chat logs"), _("View chat logs"), NULL, image_icon,
 			NULL, NULL);
 	gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
 
-	image_icon = gtk_image_new_from_file(DATA_DIR"/nudge.png");
+	image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/nudge.png");
 	button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
 			_("Screen jitter"), _("Send a screen jitter"), NULL,
 			image_icon, NULL, NULL);

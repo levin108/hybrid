@@ -724,7 +724,7 @@ hybrid_blist_set_state_field(HybridBuddy *buddy)
 		 * default icon, so if buddy doesn't have a self-defined icon,
 		 * keep its icon_data attribute NULL :) .
 		 */
-		if (!g_file_get_contents(DATA_DIR"/icon.png", 
+		if (!g_file_get_contents(PIXMAPS_DIR"icons/icon.png", 
 					(gchar**)&icon_data, &icon_data_length, &err)) {
 
 			hybrid_debug_error("blist", "load the default icon:%s", err->message);

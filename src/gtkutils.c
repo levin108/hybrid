@@ -94,7 +94,7 @@ hybrid_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 	loader = gdk_pixbuf_loader_new();
 
 	if (!pixbuf_data || pixbuf_len == 0) { /**< Load the default. */
-		g_file_get_contents(DATA_DIR"/icon.png",
+		g_file_get_contents(PIXMAPS_DIR"icons/icon.png",
 				(gchar**)&default_pixbuf_data, &default_pixbuf_size, NULL);
 		gdk_pixbuf_loader_write(loader, default_pixbuf_data,
 				default_pixbuf_size, NULL);
@@ -120,11 +120,11 @@ hybrid_create_default_icon(gint scale_size)
 	GdkPixbuf *pixbuf;
 
 	if (scale_size) {
-		pixbuf = gdk_pixbuf_new_from_file_at_size(DATA_DIR"/icon.png",
+		pixbuf = gdk_pixbuf_new_from_file_at_size(PIXMAPS_DIR"icons/icon.png",
 				scale_size, scale_size, NULL);
 
 	} else {
-		pixbuf = gdk_pixbuf_new_from_file(DATA_DIR"/icon.png", NULL);
+		pixbuf = gdk_pixbuf_new_from_file(PIXMAPS_DIR"icons/icon.png", NULL);
 	}
 
 	return pixbuf;
@@ -139,7 +139,7 @@ hybrid_create_proto_icon(const gchar *proto_name, gint scale_size)
 	g_return_val_if_fail(proto_name != NULL, NULL);
 	g_return_val_if_fail(*proto_name != '\0', NULL);
 
-	icon_name = g_strdup_printf("%s/protocols/%s.png", DATA_DIR, proto_name);
+	icon_name = g_strdup_printf(PIXMAPS_DIR"protocols/%s.png",  proto_name);
 
 	pixbuf = gdk_pixbuf_new_from_file_at_size(icon_name,
 			scale_size, scale_size, NULL);
@@ -181,7 +181,7 @@ hybrid_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 
 	loader = gdk_pixbuf_loader_new();
 	if (!pixbuf_data || pixbuf_len == 0) { /**< Load the default. */
-		g_file_get_contents(DATA_DIR"/icon.png",
+		g_file_get_contents(PIXMAPS_DIR"icons/icon.png",
 				(gchar**)&default_pixbuf_data, &default_pixbuf_size, NULL);
 		gdk_pixbuf_loader_write(loader, default_pixbuf_data,
 				default_pixbuf_size, NULL);
@@ -237,22 +237,22 @@ hybrid_create_presence_pixbuf(gint presence, gint scale_size)
 	switch (presence) {
 
 		case HYBRID_STATE_OFFLINE:
-			name = DATA_DIR"/offline.png";
+			name = PIXMAPS_DIR"status/offline.png";
 			break;
 		case HYBRID_STATE_INVISIBLE:
-			name = DATA_DIR"/invisible.png";
+			name = PIXMAPS_DIR"status/invisible.png";
 			break;
 		case HYBRID_STATE_BUSY:
-			name = DATA_DIR"/busy.png";
+			name = PIXMAPS_DIR"status/busy.png";
 			break;
 		case HYBRID_STATE_AWAY:
-			name = DATA_DIR"/away.png";
+			name = PIXMAPS_DIR"status/away.png";
 			break;
 		case HYBRID_STATE_ONLINE:
-			name = DATA_DIR"/available.png";
+			name = PIXMAPS_DIR"status/available.png";
 			break;
 		default:
-			name = DATA_DIR"/offline.png";
+			name = PIXMAPS_DIR"status/offline.png";
 			break;
 	};
 
@@ -274,7 +274,7 @@ hybrid_create_menu(GtkWidget *parent, const gchar *title,
 	g_return_val_if_fail(title != NULL, NULL);
 
 	if (icon_name) {
-		icon_path = g_strdup_printf(DATA_DIR"/menus/%s.png", icon_name);
+		icon_path = g_strdup_printf(PIXMAPS_DIR"menus/%s.png", icon_name);
 		item = gtk_image_menu_item_new_with_label(title);
 		pixbuf = gdk_pixbuf_new_from_file_at_size(icon_path, 16, 16, NULL);
 
