@@ -115,9 +115,7 @@ fetion_buddy_move_to(fetion_account *ac, const gchar *userid,
 	eheader = sip_event_header_create(SIP_EVENT_SETCONTACTINFO);
 
 	fetion_sip_add_header(sip , eheader);
-
 	body = generate_buddy_move_body(userid, groupid);
-
 	res = fetion_sip_to_string(sip , body);
 	g_free(body);
 

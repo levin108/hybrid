@@ -169,7 +169,6 @@ void fetion_buddy_destroy(fetion_buddy *buddy);
  */
 void fetion_buddies_init(fetion_account *ac);
 
-
 /**
  * Callback function to handle the portriat connection event. This callback
  * function may be used by the fx_acccount.c, so we define it as global.

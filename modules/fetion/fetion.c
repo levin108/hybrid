@@ -342,6 +342,13 @@ fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
 	fetion_buddy_get_info(ac, buddy->id, get_info_cb, info);
 }
 
+static gboolean
+fetion_buddy_remove(HybridAccount *account, HybridBuddy *buddy)
+{
+
+	return TRUE;
+}
+
 static void
 fetion_close(HybridAccount *account)
 {
@@ -387,6 +394,7 @@ HybridModuleInfo module_info = {
 	fetion_get_info,              /**< get_info */
 	fetion_change_state,          /**< change_state */
 	fetion_buddy_move,            /**< buddy_move */
+	fetion_buddy_remove,          /**< buddy_remove */
 	fetion_close,                 /**< close */
 };
 

@@ -249,6 +249,47 @@ buddy_move_cb(GtkWidget *widget, gpointer user_data)
 	}
 }
 
+static void
+remove_buddy_menu_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridBuddy *buddy;
+	HybridAccount *account;
+	HybridModule *module;
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+
+	buddy   = (HybridBuddy*)user_data;
+	account = buddy->account;
+	module  = account->proto;
+
+	tree    = GTK_TREE_VIEW(blist->treeview);
+	model   = gtk_tree_view_get_model(tree);
+
+	/*
+	 * If the buddy_remove hook function not defined, or if the
+	 * buddy_remove defined but returned FALSE, then we should
+	 * cancel the remove action in GUI, yes, we just return.
+	 */
+	if (!module->info->buddy_remove ||
+		!module->info->buddy_remove(account, buddy)) {
+		return;
+	}
+
+	/* Remove the buddy from account's buddy_list hashtable. */
+	g_hash_table_remove(account->buddy_list, buddy);
+
+	/* Remove the buddy from the blist's TreeView. */
+	gtk_tree_store_remove(GTK_TREE_STORE(model), &buddy->iter);
+
+	/* Remove the buddy from the xml cache context. */
+	xmlnode_remove_node(buddy->cache_node);
+
+	/* Synchronize the xml cache with the local xml file. */
+	hybrid_blist_cache_flush();
+
+	hybrid_blist_buddy_destroy(buddy);
+}
+
 static GtkWidget*
 create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 {
@@ -295,7 +336,8 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(child_menu), group_menu);
 
-	hybrid_create_menu(menu, _("Remove Buddy"), "remove", TRUE, NULL, NULL);
+	hybrid_create_menu(menu, _("Remove Buddy"), "remove", TRUE,
+					remove_buddy_menu_cb, buddy);
 	hybrid_create_menu(menu, _("Rename Buddy"), "rename", TRUE, NULL, NULL);
 	hybrid_create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
 

@@ -28,6 +28,7 @@ struct _HybridModuleInfo {
 	void (*get_info)(HybridAccount *, HybridBuddy *);
 	gboolean (*change_state)(HybridAccount *, gint);
 	gboolean (*buddy_move)(HybridAccount *, HybridBuddy *,HybridGroup *);
+	gboolean (*buddy_remove)(HybridAccount *, HybridBuddy *);
 	void (*close)(HybridAccount *);
 };
 
