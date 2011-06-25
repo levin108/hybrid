@@ -263,7 +263,7 @@ hybrid_create_presence_pixbuf(gint presence, gint scale_size)
 GtkWidget*
 hybrid_create_menu(GtkWidget *parent, const gchar *title,
 		const gchar *icon_name, gboolean sensitive,
-		void (*callback)(GtkWidget *widget, gpointer user_data),
+		GCallback callback,
 		gpointer user_data)
 {
 	GtkWidget *item;

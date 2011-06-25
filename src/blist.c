@@ -24,6 +24,96 @@ hybrid_blist_create()
 	return imb;
 }
 
+
+static void
+editing_started_cb(GtkCellRenderer *renderer, GtkCellEditable *editable,
+		gchar *path_str, gpointer user_data)
+{
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	HybridBuddy *buddy;
+	GtkEntry *entry;
+	const gchar *text;
+
+	tree  = GTK_TREE_VIEW(blist->treeview);
+	model = gtk_tree_view_get_model(tree);
+	path  = gtk_tree_path_new_from_string(path_str);
+
+	gtk_tree_model_get_iter(model, &iter, path);
+	gtk_tree_path_free(path);
+
+	gtk_tree_model_get(model, &iter,
+			HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
+
+	text = buddy->name;
+
+	if (GTK_IS_ENTRY(editable)) {
+		entry = GTK_ENTRY(editable);
+
+		if (!text) {
+			gtk_entry_set_text(entry, "");
+
+		} else {
+			gtk_entry_set_text(entry, text);
+		}
+	}
+}
+
+
+static void
+editing_canceled_cb(GtkCellRenderer *renderer, gpointer user_data)
+{
+	g_print("ended\n");
+}
+
+
+static void
+edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
+		gpointer user_data)
+{
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	HybridBuddy *buddy;
+	HybridAccount *account;
+	HybridModule *module;
+
+	tree  = GTK_TREE_VIEW(blist->treeview);
+	model = gtk_tree_view_get_model(tree);
+	path  = gtk_tree_path_new_from_string(path_str);
+
+	gtk_tree_model_get_iter(model, &iter, path);
+	gtk_tree_path_free(path);
+
+	gtk_tree_model_get(model, &iter,
+			HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
+
+	g_object_set(G_OBJECT(text_rend), "editable", FALSE, NULL);
+
+	/* if the text hasn't been changed, do nothing but return. */
+	if ((*text == '\0') || g_strcmp0(text, buddy->name) == 0) {
+		return;
+	}
+
+	/*
+	 * yes, we've changed the alias name of the buddy, we should
+	 * call the protocol-specified hook function. 
+	 */
+	account = buddy->account;
+	module  = account->proto;
+
+	if (module->info->buddy_rename) {
+		if (!module->info->buddy_rename(account, buddy, text)) {
+			return;
+		}
+
+		hybrid_blist_set_buddy_name(buddy, text);
+	}
+}
+
 static void
 render_column(HybridBlist *blist)
 {
@@ -37,30 +127,29 @@ render_column(HybridBlist *blist)
 	gtk_tree_view_set_expander_column(GTK_TREE_VIEW(blist->treeview), column);
 
 	/* main column */
-	blist->column = gtk_tree_view_column_new ();
-	gtk_tree_view_append_column(GTK_TREE_VIEW(blist->treeview), blist->column);
+	blist->text_column = gtk_tree_view_column_new ();
+	gtk_tree_view_append_column(GTK_TREE_VIEW(blist->treeview), blist->text_column);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(blist->treeview));
-	//gtk_tree_view_column_set_sizing(blist->column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
 	/* group expander */
 	renderer = pidgin_cell_renderer_expander_new();
 	g_object_set(renderer, "expander-visible", TRUE, NULL);
-	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes(blist->column, renderer,
+	gtk_tree_view_column_pack_start(blist->text_column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(blist->text_column, renderer,
 					    "visible", HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* contact expander */
 	renderer = pidgin_cell_renderer_expander_new();
-	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes(blist->column, renderer,
+	gtk_tree_view_column_pack_start(blist->text_column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(blist->text_column, renderer,
 					    "visible", HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
 					    NULL);
 
 	/* portrait */
 	renderer = gtk_cell_renderer_pixbuf_new();
-	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes(blist->column, renderer,
+	gtk_tree_view_column_pack_start(blist->text_column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(blist->text_column, renderer,
 						"pixbuf", HYBRID_BLIST_BUDDY_ICON,
 						"visible", HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
 						NULL);
@@ -68,17 +157,22 @@ render_column(HybridBlist *blist)
 
 	/* name */
 	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(blist->column, renderer, TRUE);
-	gtk_tree_view_column_set_attributes(blist->column, renderer,
+	gtk_tree_view_column_pack_start(blist->text_column, renderer, TRUE);
+	gtk_tree_view_column_set_attributes(blist->text_column, renderer,
 						"markup", HYBRID_BLIST_BUDDY_NAME,
 						NULL);
 	g_object_set(renderer, "xalign", 0.0, "xpad", 3, "ypad", 0, NULL);
 	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+	g_signal_connect(G_OBJECT(renderer), "editing-started", G_CALLBACK(editing_started_cb), NULL);
+	g_signal_connect(G_OBJECT(renderer), "editing-canceled", G_CALLBACK(editing_canceled_cb), NULL);
+	g_signal_connect(G_OBJECT(renderer), "edited", G_CALLBACK(edited_cb), NULL);
+
+	blist->text_renderer = renderer;
 
 	/* protocol icon */
 	renderer = gtk_cell_renderer_pixbuf_new();
-	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes(blist->column, renderer,
+	gtk_tree_view_column_pack_start(blist->text_column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(blist->text_column, renderer,
 						"pixbuf", HYBRID_BLIST_PROTO_ICON,
 						"visible", HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE,
 						NULL);
@@ -87,8 +181,8 @@ render_column(HybridBlist *blist)
 	/* status icon */
 	renderer = gtk_cell_renderer_pixbuf_new();
 	g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 0, NULL);
-	gtk_tree_view_column_pack_start(blist->column, renderer, FALSE);
-	gtk_tree_view_column_set_attributes(blist->column, renderer,
+	gtk_tree_view_column_pack_start(blist->text_column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(blist->text_column, renderer,
 						"pixbuf", HYBRID_BLIST_STATUS_ICON,
 						"visible", HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE,
 						NULL);
@@ -96,15 +190,14 @@ render_column(HybridBlist *blist)
 }
 
 static void
-instant_message_menu_cb(GtkWidget *widget, gpointer user_data)
+instant_message_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
-	hybrid_chat_panel_create(user_data);
+	hybrid_chat_panel_create(buddy);
 }
 
 static void
-buddy_information_menu_cb(GtkWidget *widget, gpointer user_data)
+buddy_information_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
-	HybridBuddy *buddy = (HybridBuddy*)user_data;
 	HybridAccount *account = buddy->account;
 	HybridModule *proto = account->proto;
 	HybridInfo *info;
@@ -122,11 +215,10 @@ buddy_information_menu_cb(GtkWidget *widget, gpointer user_data)
  * Callback function of the buddy-move menu's activate event.
  */
 static void
-buddy_move_cb(GtkWidget *widget, gpointer user_data)
+buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
 	gchar *group_name;
 	const gchar *new_group_name;
-	HybridBuddy *buddy;
 	HybridGroup *group;
 	HybridGroup *orig_group;
 	HybridAccount *account;
@@ -139,7 +231,6 @@ buddy_move_cb(GtkWidget *widget, gpointer user_data)
 	GtkTreeView  *tree;
 	GtkTreeModel *model;
 
-	buddy = (HybridBuddy*)user_data;
 	account = buddy->account;
 	module = account->proto;
 
@@ -290,12 +381,9 @@ hybrid_buddy_remove(HybridBuddy *buddy)
 }
 
 static void
-remove_buddy_menu_cb(GtkWidget *widget, gpointer user_data)
+remove_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
-	HybridBuddy *buddy;
 	gchar *confirm_text;
-
-	buddy = (HybridBuddy*)user_data;
 
 	confirm_text = g_strdup_printf(_("Are you sure to delete"
 				" the buddy <b>%s</b> (%s)"), buddy->name, buddy->id);
@@ -303,6 +391,24 @@ remove_buddy_menu_cb(GtkWidget *widget, gpointer user_data)
 			(confirm_cb)hybrid_buddy_remove, buddy);
 	g_free(confirm_text);
 
+}
+
+static void
+rename_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
+{
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreePath *path;
+
+	tree = GTK_TREE_VIEW(blist->treeview);
+	model = gtk_tree_view_get_model(tree);
+	path = gtk_tree_model_get_path(model, &buddy->iter);
+	g_object_set(blist->text_renderer, "editable", TRUE, NULL);
+
+	gtk_widget_grab_focus(blist->treeview);
+	gtk_tree_view_set_cursor_on_cell(GTK_TREE_VIEW(blist->treeview), path,
+			blist->text_column, blist->text_renderer, TRUE);
+	gtk_tree_path_free(path);
 }
 
 static GtkWidget*
@@ -334,9 +440,9 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	account = buddy->account;
 	
 	hybrid_create_menu(menu, _("Instant Message"), "instants", TRUE,
-			instant_message_menu_cb, buddy);
+			G_CALLBACK(instant_message_menu_cb), buddy);
 	hybrid_create_menu(menu, _("Buddy Information"), "profile", TRUE,
-			buddy_information_menu_cb, buddy);
+			G_CALLBACK(buddy_information_menu_cb), buddy);
 	hybrid_create_menu_seperator(menu);
 	child_menu = hybrid_create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
 
@@ -346,14 +452,15 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
 
 		hybrid_create_menu(group_menu, group->name, NULL, TRUE,
-				buddy_move_cb, buddy);
+				G_CALLBACK(buddy_move_cb), buddy);
 	}
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(child_menu), group_menu);
 
 	hybrid_create_menu(menu, _("Remove Buddy"), "remove", TRUE,
-					remove_buddy_menu_cb, buddy);
-	hybrid_create_menu(menu, _("Rename Buddy"), "rename", TRUE, NULL, NULL);
+					G_CALLBACK(remove_buddy_menu_cb), buddy);
+	hybrid_create_menu(menu, _("Rename Buddy"), "rename", TRUE,
+					G_CALLBACK(rename_buddy_menu_cb), buddy);
 	hybrid_create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
 
 	return menu;

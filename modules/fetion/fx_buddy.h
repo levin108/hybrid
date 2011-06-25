@@ -138,8 +138,31 @@ gint fetion_buddy_get_info(fetion_account *ac, const gchar *userid,
  *
  * @param ac     The account context.
  * @param userid The userid of the buddy.
+ *
+ * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
  */
 gint fetion_buddy_remove(fetion_account *ac, const gchar *userid);
+
+/**
+ * Rename a buddy. The message is:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 547264589
+ * I: 4
+ * Q: 2 S
+ * N: GetContactInfoV4
+ * L: 45
+ *
+ * <args><contact user-id="547123726"/></args>
+ *
+ * @param ac The account context.
+ * @param userid The userid of the buddy.
+ * @param newname The new name of the buddy.
+ *
+ * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
+ */
+gint fetion_buddy_rename(fetion_account *ac, const gchar *userid,
+		const gchar *newname);
 
 /**
  * Parse the detailed information by the get-info sip response.

@@ -13,6 +13,7 @@
 #include "fx_group.h"
 #include "fx_buddy.h"
 #include "fx_msg.h"
+#include "fx_util.h"
 
 fetion_account *ac;
 
@@ -34,7 +35,9 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 		buddy = (fetion_buddy*)pos->data;
 		imbuddy = hybrid_blist_find_buddy(ac->account, buddy->userid);
 
-		hybrid_blist_set_buddy_name(imbuddy, buddy->nickname);
+		if (!buddy->localname || *(buddy->localname) == '\0') {
+			hybrid_blist_set_buddy_name(imbuddy, buddy->nickname);
+		}
 		hybrid_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);
 
 		switch (buddy->state) {
@@ -261,6 +264,8 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 {
 	HybridInfo *info;
 	fetion_buddy *buddy;
+	gchar *province;
+	gchar *city;
 
 	info = (HybridInfo*)trans->data;
 
@@ -269,17 +274,29 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 		return HYBRID_ERROR;
 	}
 
+	province = buddy->province && *(buddy->province) != '\0' ?
+				get_province_name(buddy->province) : g_strdup(_("Unknown"));
+
+	city = buddy->city && *(buddy->city) != '\0' ?
+				get_city_name(buddy->province, buddy->city) :
+				g_strdup(_("Unknown"));
+
 	hybrid_info_add_pair(info, _("Nickname"), buddy->nickname);
+	hybrid_info_add_pair(info, _("Localname"), buddy->localname);
 	hybrid_info_add_pair(info, _("Fetion-no"), buddy->sid);
 	hybrid_info_add_pair(info, _("Mobile-no"), buddy->mobileno);
 	hybrid_info_add_pair(info, _("Gender"), 
 		buddy->gender == 1 ? _("Male") :
 		(buddy->gender == 2 ? _("Female") : _("Secrecy")));
 	hybrid_info_add_pair(info, _("Mood"), buddy->mood_phrase);
-	/* TODO convert the code into the name. */
-	hybrid_info_add_pair(info, _("Country"), buddy->country);
-	hybrid_info_add_pair(info, _("Province"), buddy->province);
-	hybrid_info_add_pair(info, _("City"), buddy->city);
+
+	hybrid_info_add_pair(info, _("Country"),
+			g_strcmp0(buddy->country, "CN") == 0 ? "China" : buddy->country);
+	hybrid_info_add_pair(info, _("Province"), province);
+	hybrid_info_add_pair(info, _("City"), city);
+
+	g_free(province);
+	g_free(city);
 
 	return HYBRID_OK;
 }
@@ -356,6 +373,20 @@ fetion_remove(HybridAccount *account, HybridBuddy *buddy)
 	return TRUE;
 }
 
+static gboolean
+fetion_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (fetion_buddy_rename(ac, buddy->id, text) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void
 fetion_close(HybridAccount *account)
 {
@@ -402,6 +433,7 @@ HybridModuleInfo module_info = {
 	fetion_change_state,          /**< change_state */
 	fetion_buddy_move,            /**< buddy_move */
 	fetion_remove,                /**< buddy_remove */
+	fetion_rename,                /**< buddy_rename */
 	fetion_close,                 /**< close */
 };
 

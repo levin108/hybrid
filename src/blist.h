@@ -16,7 +16,8 @@ typedef enum _HybridBlistCacheType HybridBlistCacheType;
 struct _HybridBlist {
 	GtkWidget *treeview;
 	GtkTreeStore *treemodel;
-	GtkTreeViewColumn *column;
+	GtkTreeViewColumn *text_column;
+	GtkCellRenderer *text_renderer;
 };
 
 struct _HybridGroup {

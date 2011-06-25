@@ -142,8 +142,14 @@ set(fetion_SRC
 	modules/fetion/fx_group.c
 	modules/fetion/fx_buddy.c
 	modules/fetion/fx_trans.c
+	modules/fetion/fx_util.c
 	modules/fetion/fx_msg.c
 )
+
+# install fetion resource xml files
+file(GLOB FETION_RESOURCE_XML "share/protocols/fetion/*.xml")
+install(FILES ${FETION_RESOURCE_XML} DESTINATION "${DATA_INSTALL_DIR}/protocols/fetion/")
+add_definitions(-DFETION_RES_DIR="${DATA_INSTALL_DIR}/protocols/fetion/")
 
 add_library(fetion SHARED ${fetion_SRC})
 
