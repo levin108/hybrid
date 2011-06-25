@@ -144,6 +144,7 @@ set(fetion_SRC
 	modules/fetion/fx_trans.c
 	modules/fetion/fx_util.c
 	modules/fetion/fx_msg.c
+	modules/fetion/fx_config.c
 )
 
 # install fetion resource xml files
