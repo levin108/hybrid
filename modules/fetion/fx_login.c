@@ -1075,9 +1075,6 @@ generate_auth_body(fetion_account *ac)
 	xmlnode_new_prop(subnode, "version", "0");
 	xmlnode_new_prop(subnode, "buddy-attributes", "v4default");
 
-	node = xmlnode_new_child(root, "credentials");
-	xmlnode_new_prop(node, "domains", "fetion.com.cn");
-
 	node = xmlnode_new_child(root, "presence");
 	subnode = xmlnode_new_child(node, "basic");
 	xmlnode_new_prop(subnode, "value", "0");
@@ -1105,6 +1102,8 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 	g_return_if_fail(ac != NULL);
 	g_return_if_fail(body != NULL);
 	g_return_if_fail(len != 0);
+
+	printf("%s\n", body);
 
 	root = xmlnode_root(body, len);
 
