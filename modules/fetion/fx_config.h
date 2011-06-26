@@ -18,6 +18,14 @@ extern "C" {
  */
 gchar *fetion_get_config_dir(fetion_account *account);
 
+/**
+ * Save the contact-list node in the sipc response message.
+ *
+ * @param account The fetiona account.
+ * @param node    The contact-list xml node.
+ */
+void fetion_config_save_buddies(fetion_account *account, xmlnode *node);
+
 #ifdef __cplusplus
 }
 #endif

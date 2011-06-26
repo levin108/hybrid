@@ -18,7 +18,8 @@ fetion_get_config_dir(fetion_account *account)
 		return NULL;
 	}
 
-	fetion_dir = g_strdup_printf("%s/%s", hybrid_dir, account->sid);
+	fetion_dir = g_strdup_printf("%s/%s/%s",
+			hybrid_dir, account->account->proto->info->name, account->sid);
 	g_free(hybrid_dir);
 
 	e = mkdir(fetion_dir, S_IRWXU|S_IRWXO|S_IRWXG);
@@ -32,4 +33,26 @@ fetion_get_config_dir(fetion_account *account)
 	}
 
 	return fetion_dir;
+}
+
+void
+fetion_config_save_buddies(fetion_account * account, xmlnode *node)
+{
+	gchar *fetion_dir;
+	gchar *buddies_dir;
+	const gchar *body;
+	xmlnode *root;
+
+	fetion_dir = fetion_get_config_dir(account);
+	buddies_dir = g_strdup_printf("%s/buddies.xml", fetion_dir);
+	g_free(fetion_dir);
+
+	body = "<root></root>";
+	root = xmlnode_root(body, strlen(body));
+
+	xmlnode_add_child(root, node);
+
+	xmlnode_save_file(root, buddies_dir);
+	xmlnode_free(root);
+	g_free(buddies_dir);
 }
