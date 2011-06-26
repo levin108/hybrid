@@ -23,8 +23,7 @@ struct _fetion_account {
 	gint sk; /**< The socket descriptor. */
 	guint source; /**< The ID of the event source. */
 
-	/* buffer for received data */
-	gchar *buffer;
+	gchar *buffer; /**< buffer for received data */
 
 	gchar *sid;      /**< Fetion number. */
 	gchar *userid;   /**< user id */
@@ -47,21 +46,16 @@ struct _fetion_account {
 	gchar *last_login_ip;				
 	gchar *last_login_time;				
 
-	/* ip address for sipc host */
-	gchar *sipc_proxy_ip;
+	gchar *sipc_proxy_ip; /**< ip address of the sipc host */
+	gint  sipc_proxy_port; /**< port of the sipc host */
+	gchar *portrait_host_name; /**< host name of the portrait server */
+	gchar *portrait_host_path; /**< path on the portrait server */
 
-	/* port for sipc host */
-	gint  sipc_proxy_port;
-
-	/* host name for portrait server */
-	gchar *portrait_host_name;		
-
-	/* path on the portrait server */
-	gchar *portrait_host_path;	
-
+	/* config versions */
 	gchar *cfg_server_version;
 	gchar *cfg_param_version;
 	gchar *cfg_hint_version;
+	gchar *cfg_client_version;
 
 	gint sms_day_limit;
 	gint sms_day_count;

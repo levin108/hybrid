@@ -84,8 +84,15 @@ hybrid_notify_create(HybridAccount *account, const gchar *title)
 
 	pixbuf = hybrid_create_round_pixbuf(notify->account->icon_data,
 			notify->account->icon_data_len, 32);
-	account_text = g_strdup_printf("<b>%s</b> (%s):",
-			notify->account->nickname, notify->account->username);
+
+	if (notify->account->nickname) {
+		account_text = g_strdup_printf("<b>%s</b> (%s):",
+				notify->account->nickname, notify->account->username);
+
+	} else {
+		account_text = g_strdup_printf("%s:", notify->account->username);
+	}
+
 	gtk_list_store_set(store, &notify->iter,
 			NOTIFY_NAME_COLUMN, account_text,
 			NOTIFY_ICON_COLUMN, pixbuf, -1);

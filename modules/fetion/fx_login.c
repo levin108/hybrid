@@ -122,6 +122,8 @@ cfg_read_cb(gint sk, gpointer user_data)
 			goto error;
 		}
 
+		hybrid_debug_info("fetion", "cfg recv:\n%s", ac->buffer);
+
 		if (!(pos = g_strrstr(ac->buffer, "\r\n\r\n"))) {
 			goto error;
 		}
@@ -239,6 +241,15 @@ ssi_auth_cb(HybridSslConnection *ssl, gpointer user_data)
 	if (parse_ssi_response(ac, pos) != HYBRID_OK) {
 		goto ssi_auth_err;
 	}
+
+	/*
+	 * First of all, we load the account's version information from the disk,
+	 * so that we can use it for authenticating, if the server find the versions
+	 * are up-to-date, it would return a brief response message in stead of the
+	 * full version, so that we can use the information store locally. This method
+	 * makes account logining more faster.
+	 */
+	fetion_config_load_account(ac);
 
 	/* now we will download the configuration */
 	hybrid_proxy_connect(NAV_SERVER, 80, cfg_connect_cb, ac);
@@ -365,6 +376,7 @@ sipc_reg_action(gint sk, gpointer user_data)
 
 	hybrid_debug_info("fetion", "sipc registeration action");
 
+	/* Now we start to register to the sipc server. */
 	fetion_sip_set_type(sip, SIP_REGISTER);
 
 	sip_header *cheader = sip_header_create("CN", cnouce);
@@ -483,6 +495,8 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 	gchar *pos;
 
 	code = fetion_sip_get_code(sipmsg);
+
+	hybrid_debug_info("fetion", "sipc recv:\n%s", sipmsg);
 
 	if (code == FETION_SIP_OK) { /**< ok, we got the contact list */
 
@@ -793,13 +807,13 @@ generate_configuration_body(fetion_account *ac)
 	xmlnode_new_prop(node, "platform", "W5.1");
 
 	node = xmlnode_new_child(root, "servers");
-	xmlnode_new_prop(node, "version", "0");
+	xmlnode_new_prop(node, "version", ac->cfg_server_version);
 
 	node = xmlnode_new_child(root, "parameters");
-	xmlnode_new_prop(node, "version", "0");
+	xmlnode_new_prop(node, "version", ac->cfg_param_version);
 
 	node = xmlnode_new_child(root, "hints");
-	xmlnode_new_prop(node, "version", "0");
+	xmlnode_new_prop(node, "version", ac->cfg_hint_version);
 
 	return xmlnode_to_string(root);
 }
@@ -815,6 +829,7 @@ parse_configuration(fetion_account *ac, const gchar *cfg)
 	xmlnode *node;
 	xmlnode *root;
 	gchar *value;
+	gchar *version;
 	gchar *pos, *pos1;
 
 	g_return_val_if_fail(cfg != NULL, 0);
@@ -826,63 +841,77 @@ parse_configuration(fetion_account *ac, const gchar *cfg)
 	}
 
 	if ((node = xmlnode_find(root, "servers"))) {
-		ac->cfg_server_version = xmlnode_prop(node, "version");
+		version = xmlnode_prop(node, "version");
+		if (g_strcmp0(version, ac->cfg_server_version) != 0) {
+			g_free(ac->cfg_server_version);
+			ac->cfg_server_version = version;
+
+			if (!(node = xmlnode_find(root, "sipc-proxy"))) {
+				goto cfg_parse_err;
+			}
+
+			value = xmlnode_content(node);
+
+			for (pos = value; *pos && *pos != ':'; pos ++ );
+
+			if (*pos == '\0') {
+				g_free(value);
+				goto cfg_parse_err;
+			}
+
+			ac->sipc_proxy_ip = g_strndup(value, pos - value);
+			ac->sipc_proxy_port = atoi(pos + 1);
+
+			g_free(value);
+
+			if (!(node = xmlnode_find(root, "get-uri"))) {
+				goto cfg_parse_err;
+			}
+
+			value = xmlnode_content(node);
+			
+			for (pos1 = value; *pos1 && *pos1 != '/'; pos1 ++);
+			if (*pos1 == '\0' || *(pos1 + 1) != '/') {
+				goto cfg_parse_err;
+			}
+
+			pos1 += 2;
+
+			for (pos = pos1; *pos && *pos != '/'; pos ++);
+			if (*pos == '\0') {
+				goto cfg_parse_err;
+			}
+
+			ac->portrait_host_name = g_strndup(pos1, pos - pos1);
+
+			pos1 = pos + 1;
+
+			for (pos = pos1; *pos && *pos != '/'; pos ++);
+			if (*pos == '\0') {
+				goto cfg_parse_err;
+			}
+
+			ac->portrait_host_path = g_strndup(pos1, pos - pos1);
+
+		} else {
+			g_free(version);
+		}
 	}
 
 	if ((node = xmlnode_find(root, "parameters"))) {
+		g_free(ac->cfg_param_version);
 		ac->cfg_param_version = xmlnode_prop(node, "version");
 	}
 
 	if ((node = xmlnode_find(root, "hints"))) {
-		ac->cfg_hint_version = xmlnode_prop(node, "hints");
+		g_free(ac->cfg_hint_version);
+		ac->cfg_hint_version = xmlnode_prop(node, "version");
 	}
 
-	if (!(node = xmlnode_find(root, "sipc-proxy"))) {
-		goto cfg_parse_err;
+	if ((node = xmlnode_find(root, "client"))) {
+		g_free(ac->cfg_client_version);
+		ac->cfg_client_version = xmlnode_prop(node, "version");
 	}
-
-	value = xmlnode_content(node);
-
-	for (pos = value; *pos && *pos != ':'; pos ++ );
-
-	if (*pos == '\0') {
-		g_free(value);
-		goto cfg_parse_err;
-	}
-
-	ac->sipc_proxy_ip = g_strndup(value, pos - value);
-	ac->sipc_proxy_port = atoi(pos + 1);
-
-	g_free(value);
-
-	if (!(node = xmlnode_find(root, "get-uri"))) {
-		goto cfg_parse_err;
-	}
-
-	value = xmlnode_content(node);
-	
-	for (pos1 = value; *pos1 && *pos1 != '/'; pos1 ++);
-	if (*pos1 == '\0' || *(pos1 + 1) != '/') {
-		goto cfg_parse_err;
-	}
-
-	pos1 += 2;
-
-	for (pos = pos1; *pos && *pos != '/'; pos ++);
-	if (*pos == '\0') {
-		goto cfg_parse_err;
-	}
-
-	ac->portrait_host_name = g_strndup(pos1, pos - pos1);
-
-	pos1 = pos + 1;
-
-	for (pos = pos1; *pos && *pos != '/'; pos ++);
-	if (*pos == '\0') {
-		goto cfg_parse_err;
-	}
-
-	ac->portrait_host_path = g_strndup(pos1, pos - pos1);
 
 	xmlnode_free(root);
 
@@ -1066,14 +1095,14 @@ generate_auth_body(fetion_account *ac)
 	xmlnode_new_prop(node, "user-id", ac->userid);
 	
 	subnode = xmlnode_new_child(node, "personal");
-	xmlnode_new_prop(subnode, "version", "0");
+	xmlnode_new_prop(subnode, "version", ac->personal_version);
 	xmlnode_new_prop(subnode, "attributes", "v4default");
 
 	subnode = xmlnode_new_child(node, "custom-config");
-	xmlnode_new_prop(subnode, "version", "0");
+	xmlnode_new_prop(subnode, "version", ac->custom_config_version);
 
 	subnode = xmlnode_new_child(node, "contact-list");
-	xmlnode_new_prop(subnode, "version", "0");
+	xmlnode_new_prop(subnode, "version", ac->contact_list_version);
 	xmlnode_new_prop(subnode, "buddy-attributes", "v4default");
 
 	node = xmlnode_new_child(root, "presence");
@@ -1085,64 +1114,25 @@ generate_auth_body(fetion_account *ac)
 }
 
 /**
- * parse the sipc authentication response, we can get the basic 
- * information and the contact list of this account.
+ * Get the contact list from the xmlnode with name 'contact-list',
+ * note that this node can either be a child node of the sipc 
+ * response xml message , or a child node of the local xml file.
  */
 static void
-parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
+get_contact_list(fetion_account *ac, xmlnode *contact_node)
 {
-	xmlnode *root;
+	gchar *temp;
+	gchar *temp1;
 	xmlnode *node;
-	gchar *temp, *temp1;
-	gchar *pos, *stop;
 	fetion_group *group;
 	fetion_buddy *buddy;
-
 	gboolean has_ungroup = FALSE;
 
 	g_return_if_fail(ac != NULL);
-	g_return_if_fail(body != NULL);
-	g_return_if_fail(len != 0);
-
-	printf("%s\n", body);
-
-	root = xmlnode_root(body, len);
-
-	/* login info */
-	node = xmlnode_find(root, "client");
-	ac->last_login_ip = xmlnode_prop(root, "last-login-ip");
-	ac->public_ip = xmlnode_prop(root, "public-ip");
-	ac->last_login_time = xmlnode_prop(root, "last-login-time");
-
-	/* personal info */
-	node = xmlnode_find(root, "personal");
-	ac->nickname = xmlnode_prop(node, "nickname");
-	ac->mood_phrase = xmlnode_prop(node, "impresa");
-	ac->personal_version = xmlnode_prop(node, "version");
-	ac->portrait_crc = xmlnode_prop(node, "portrait-crc");
-	temp = xmlnode_prop(node, "carrier-region");
-
-	/* region */
-	if (temp) {
-		for (stop = temp, pos = temp; *stop && *stop != '.'; stop ++);
-		ac->country = g_strndup(pos, stop - pos);
-
-		for (pos = stop + 1, stop ++; *stop && *stop != '.'; stop ++);
-		ac->province = g_strndup(pos, stop - pos);
-
-		for (pos = stop + 1, stop ++; *stop && *stop != '.'; stop ++);
-		ac->city = g_strndup(pos, stop - pos);
-	}
-
-	g_free(temp);
-
-	/* contact list version */
-	node = xmlnode_find(root, "contact-list");
-	fetion_config_save_buddies(ac, node);
-	ac->contact_list_version = xmlnode_prop(node, "version");
+	g_return_if_fail(contact_node != NULL);
 
 	/* group list */
-	node = xmlnode_find(root, "buddy-lists");
+	node = xmlnode_find(contact_node, "buddy-lists");
 	node = xmlnode_child(node);
 
 	while (node) {
@@ -1159,7 +1149,7 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 	}
 
 	/* contact list  */
-	node = xmlnode_find(root, "buddies");
+	node = xmlnode_find(contact_node, "buddies");
 	node = xmlnode_child(node);
 
 	while (node) {
@@ -1187,11 +1177,156 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 
 		node = node->next;
 	}
+}
+/*
+ * Get the personal information from the xmlnode with name 'personal',
+ * note that this node can either be a child node of the sipc 
+ * response xml message , or a child node of the local xml file.
+ */
+static void
+get_personal(fetion_account *ac, xmlnode *node)
+{
+	gchar *pos;
+	gchar *temp;
+	gchar *stop;
+	
+	g_return_if_fail(ac != NULL);
+	g_return_if_fail(node != NULL);
+
+	ac->nickname = xmlnode_prop(node, "nickname");
+	ac->mood_phrase = xmlnode_prop(node, "impresa");
+	ac->portrait_crc = xmlnode_prop(node, "portrait-crc");
+	temp = xmlnode_prop(node, "carrier-region");
+
+	/* region */
+	if (temp) {
+		for (stop = temp, pos = temp; *stop && *stop != '.'; stop ++);
+		ac->country = g_strndup(pos, stop - pos);
+
+		for (pos = stop + 1, stop ++; *stop && *stop != '.'; stop ++);
+		ac->province = g_strndup(pos, stop - pos);
+
+		for (pos = stop + 1, stop ++; *stop && *stop != '.'; stop ++);
+		ac->city = g_strndup(pos, stop - pos);
+	}
+
+	g_free(temp);
+}
+
+/**
+ * parse the sipc authentication response, we can get the basic 
+ * information and the contact list of this account.
+ */
+static void
+parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
+{
+	xmlnode *root;
+	xmlnode *node;
+	gchar *version;
+
+	g_return_if_fail(ac != NULL);
+	g_return_if_fail(body != NULL);
+	g_return_if_fail(len != 0);
+
+	root = xmlnode_root(body, len);
+
+	/* login info */
+	node = xmlnode_find(root, "client");
+	ac->last_login_ip = xmlnode_prop(root, "last-login-ip");
+	ac->public_ip = xmlnode_prop(root, "public-ip");
+	ac->last_login_time = xmlnode_prop(root, "last-login-time");
+
+	/* personal info */
+	node = xmlnode_find(root, "personal");
+	version = xmlnode_prop(node, "version");
+
+	if (g_strcmp0(version, ac->personal_version) == 0) {
+		/* load from disk. */
+		g_free(version);
+
+		xmlnode *personal_root;
+		xmlnode *personal_node;
+
+		if (!(personal_root = fetion_config_load_personal(ac))) {
+			hybrid_debug_error("fetion", "invalid personal.xml");
+			xmlnode_free(root);
+			return;
+		} 
+
+		if (!(personal_node = xmlnode_find(personal_root, "personal"))) {
+			hybrid_debug_error("fetion", "invalid personal.xml");
+			xmlnode_free(personal_root);
+			xmlnode_free(root);
+			return;
+		}
+		get_personal(ac, personal_node);
+		xmlnode_free(personal_root);
+		
+	} else {
+		/* update the version */
+		g_free(ac->personal_version);
+		ac->personal_version = version;
+		/* get the personal information */
+		get_personal(ac, node);
+		/* save the personal information */
+		fetion_config_save_personal(ac, node);
+	}
+
+
+	/* contact list version */
+	node = xmlnode_find(root, "contact-list");
+	version = xmlnode_prop(node, "version");
+
+	if (g_strcmp0(version, ac->contact_list_version) == 0) { 
+		/* load from disk. */
+		g_free(version);
+
+		xmlnode *contact_root;
+		xmlnode *contact_node;
+
+		if (!(contact_root = fetion_config_load_buddies(ac))) {
+			hybrid_debug_error("fetion", "invalid buddies.xml");
+			xmlnode_free(root);
+			return;
+		}
+
+		if (!(contact_node = xmlnode_find(contact_root, "contact-list"))) {
+			hybrid_debug_error("fetion", "invalid buddies.xml");
+			xmlnode_free(contact_root);
+			xmlnode_free(root);
+			return;
+		}
+
+		get_contact_list(ac, contact_node);
+		xmlnode_free(contact_root);
+
+	} else {
+		/* update the version */
+		g_free(ac->contact_list_version);
+		ac->contact_list_version = version;
+		/* get the contact list */
+		get_contact_list(ac, node);
+		/* save the contact list */
+		fetion_config_save_buddies(ac, node);
+	}
+
 
 	/* custom config */
 	node = xmlnode_find(root, "custom-config");
-	ac->custom_config = xmlnode_content(node);
-	ac->custom_config_version = xmlnode_prop(node, "version");
+	version = xmlnode_prop(node, "version");
+
+	if (g_strcmp0(version, ac->custom_config_version) != 0) {
+		g_free(ac->custom_config);
+		g_free(ac->custom_config_version);
+		ac->custom_config = xmlnode_content(node);
+		ac->custom_config_version = version;
+	}
 
 	xmlnode_free(root);
+
+	/*
+	 * OK, now we need to save the account's version information, so
+	 * next time we can use it to register to sipc server.
+	 */
+	fetion_config_save_account(ac);
 }

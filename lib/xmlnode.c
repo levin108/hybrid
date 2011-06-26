@@ -184,6 +184,14 @@ xmlnode_content(xmlnode *node)
 	return value;
 }
 
+void
+xmlnode_set_content(xmlnode *node, const gchar *content)
+{
+	g_return_if_fail(node != NULL);
+
+	xmlNodeSetContent(node->node, BAD_CAST content);
+}
+
 xmlnode*
 xmlnode_new_child(xmlnode *node, const gchar *childname)
 {

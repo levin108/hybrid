@@ -29,6 +29,15 @@ fetion_account_create(HybridAccount *account, const gchar *no, const gchar *pass
 	ac->sip = fetion_sip_create(ac);
 	ac->password = g_strdup(password);
 
+	ac->cfg_server_version = g_strdup("0");
+	ac->cfg_param_version = g_strdup("0");
+	ac->cfg_hint_version = g_strdup("0");
+	ac->cfg_client_version = g_strdup("2.0.0.0");
+
+	ac->personal_version = g_strdup("0");
+	ac->contact_list_version = g_strdup("0");
+	ac->custom_config_version = g_strdup("0");
+
 	return ac;
 }
 
@@ -92,6 +101,7 @@ fetion_account_destroy(fetion_account *ac)
 		g_free(ac->cfg_server_version);
 		g_free(ac->cfg_param_version);
 		g_free(ac->cfg_hint_version);
+		g_free(ac->cfg_client_version);
 		g_free(ac->personal_version);
 		g_free(ac->contact_list_version);
 		g_free(ac->custom_config_version);
