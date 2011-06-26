@@ -10,6 +10,7 @@
 #include "fx_account.h"
 #include "fx_group.h"
 #include "fx_buddy.h"
+#include "fx_config.h"
 
 static gchar *hash_password_v1(const guchar *b0, gint b0len,
 		const guchar *password,	gint psdlen);
@@ -1137,6 +1138,7 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 
 	/* contact list version */
 	node = xmlnode_find(root, "contact-list");
+	fetion_config_save_buddies(ac, node);
 	ac->contact_list_version = xmlnode_prop(node, "version");
 
 	/* group list */

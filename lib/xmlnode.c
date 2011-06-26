@@ -223,6 +223,55 @@ xmlnode_new_child(xmlnode *node, const gchar *childname)
 	return new;
 }
 
+xmlnode*
+xmlnode_add_child(xmlnode *parent, xmlnode *child)
+{
+	xmlNode *new_child;
+	xmlnode *new;
+	xmlnode *children;
+	xmlnode *pos;
+
+	g_return_val_if_fail(parent != NULL, NULL);
+	g_return_val_if_fail(child != NULL, NULL);
+
+	if (xmlDOMWrapCloneNode(NULL, child->doc, child->node, &new_child, 
+			parent->doc, parent->node, 1, 0) != 0) {
+		return NULL;
+	}
+
+	if (!(new_child = xmlAddChild(parent->node, new_child))) {
+		return NULL;
+	}
+
+	new = g_new0(xmlnode, 1);
+	new->node = new_child;
+	new->doc = parent->doc;
+	new->is_root = 0;
+	new->next = NULL;
+	new->child = NULL;
+	new->parent = parent;
+	new->name = g_strdup((gchar*)new_child->name);
+
+	children = xmlnode_child(parent);
+
+	if (children) {
+		pos = children;
+		while (pos) {
+			if (pos->next == NULL) {
+				pos->next = new;
+				break;
+			}
+
+			pos = pos->next;
+		}
+
+	} else {
+		parent->child = new;
+	}
+
+	return new;
+}
+
 void
 xmlnode_remove_node(xmlnode *node)
 {

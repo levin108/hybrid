@@ -104,6 +104,16 @@ gchar *xmlnode_content(xmlnode *node);
 xmlnode *xmlnode_new_child(xmlnode *node, const gchar *childname);
 
 /**
+ * Add a new node to @parent
+ *
+ * @param parent The parent node.
+ * @param child  The child node.
+ *
+ * @return The child added or NULL in case of error.
+ */
+xmlnode *xmlnode_add_child(xmlnode *parent, xmlnode *child);
+
+/**
  * Remove a specified node from the xml dom tree.
  *
  * @param node The node to remove.
