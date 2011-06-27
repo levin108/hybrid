@@ -11,7 +11,7 @@ typedef gint (*TransCallback)(fetion_account *,
 struct transaction {
 	gint callid;
 	gchar *userid;
-	gchar *sipmsg;
+	gchar *msg;
 	gpointer data;
 	guint timer;
 	TransCallback callback;
@@ -65,7 +65,7 @@ void transaction_set_userid(fetion_transaction *trans, const gchar *userid);
  * @param trans The transaction.
  * @param sipmsg The response sip message for this transaction.
  */
-void transaction_set_sipmsg(fetion_transaction *trans, const gchar *sipmsg);
+void transaction_set_msg(fetion_transaction *trans, const gchar *msg);
 
 
 /**
@@ -84,6 +84,16 @@ void transaction_set_callback(fetion_transaction *trans,
  * @param data  The user-specified data.
  */
 void transaction_set_data(fetion_transaction *trans, gpointer data);
+
+/**
+ * Set the timeout callback function.
+ *
+ * @param trans      The transaction.
+ * @param timeout_cb The callback function of the timeout event.
+ * @param user_data  User-specified data for callback function.
+ */
+void transaction_set_timeout(fetion_transaction *trans, 
+					GSourceFunc timeout_cb, gpointer user_data);
 
 /**
  * Add the given transaction to the account's pending transaction list.

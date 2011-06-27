@@ -63,6 +63,9 @@ extern "C" {
  */
 HybridChatPanel *hybrid_chat_panel_create(HybridBuddy *buddy);
 
+void hybrid_conv_got_message(HybridAccount *account,
+				const gchar *buddy_id, const gchar *message);
+
 #ifdef __cplusplus
 }
 #endif

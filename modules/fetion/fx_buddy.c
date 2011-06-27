@@ -307,6 +307,9 @@ fetion_buddy_find_by_userid(fetion_account *ac, const gchar *userid)
 	GSList *pos;
 	fetion_buddy *buddy;
 
+	g_return_val_if_fail(ac != NULL, NULL);
+	g_return_val_if_fail(userid != NULL, NULL);
+
 	for (pos = ac->buddies; pos; pos = pos->next) {
 		buddy = (fetion_buddy*)pos->data;
 
@@ -315,7 +318,27 @@ fetion_buddy_find_by_userid(fetion_account *ac, const gchar *userid)
 		}
 	}
 
-	return 0;
+	return NULL;
+}
+
+fetion_buddy*
+fetion_buddy_find_by_sid(fetion_account *ac, const gchar *sid)
+{
+	GSList *pos;
+	fetion_buddy *buddy;
+
+	g_return_val_if_fail(ac != NULL, NULL);
+	g_return_val_if_fail(sid != NULL, NULL);
+
+	for (pos = ac->buddies; pos; pos = pos->next) {
+		buddy = (fetion_buddy*)pos->data;
+
+		if (g_strcmp0(buddy->sid, sid) == 0) {
+			return buddy;
+		}
+	}
+
+	return NULL;
 }
 
 static gchar*

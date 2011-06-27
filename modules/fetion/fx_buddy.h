@@ -196,6 +196,16 @@ fetion_buddy *fetion_buddy_find_by_userid(fetion_account *ac,
 		const gchar *userid);
 
 /**
+ * Find the fetion buddy with the specified sid in the buddy list.
+ *
+ * @param ac  The fetion account.
+ * @param sid The buddy's fetion no.
+ *
+ * @return The fetion buddy if found. NULL if not found.
+ */
+fetion_buddy *fetion_buddy_find_by_sid(fetion_account *ac, const gchar *userid);
+
+/**
  * Destroy a fetion buddy.
  *
  * @param buddy The buddy to destroy.

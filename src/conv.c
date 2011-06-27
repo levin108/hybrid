@@ -641,7 +641,7 @@ init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
 	gtk_toolbar_set_style(GTK_TOOLBAR(chat->toolbar), GTK_TOOLBAR_ICONS);
 	gtk_box_pack_start(GTK_BOX(vbox), chat->toolbar, FALSE, FALSE, 0);
 	
-	image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/log.png");
+	image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/logs.png");
 	button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
 			_("Chat logs"), _("View chat logs"), NULL, image_icon,
 			NULL, NULL);
@@ -760,4 +760,46 @@ found:
 		gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook), chat->vbox));
 
 	return chat;
+}
+
+void
+hybrid_conv_got_message(HybridAccount *account,
+				const gchar *buddy_id, const gchar *message)
+{
+	GSList *conv_pos;
+	GSList *chat_pos;
+	HybridConversation *conv;
+	HybridChatPanel *chat;
+	HybridBuddy *temp_buddy;
+	HybridBuddy *buddy;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(buddy_id != NULL);
+	g_return_if_fail(message != NULL);
+
+	if (!(buddy = hybrid_blist_find_buddy(account, buddy_id))) {
+		hybrid_debug_error("conv", "buddy doesn't exist.");
+		return;
+	}
+
+	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
+		conv = (HybridConversation*)conv_pos->data;
+
+		for (chat_pos = conv->chat_buddies; chat_pos; 
+				chat_pos = chat_pos->next) {
+			chat = (HybridChatPanel*)chat_pos->data;
+
+			temp_buddy = chat->buddy;
+
+			if (g_strcmp0(temp_buddy->id, buddy_id) == 0) {
+				goto got_chat_found;
+			}
+		}
+	}
+	
+	/* Well, we haven't find an existing chat panel so far, so create one. */
+	chat = hybrid_chat_panel_create(buddy);
+
+got_chat_found:
+	hybrid_chat_textview_append(chat->textview, buddy, message, FALSE);
 }

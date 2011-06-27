@@ -205,6 +205,10 @@ process_message_cb(fetion_account *ac, const gchar *sipmsg)
 		g_free(sysmsg_url);
 	}
 
+	hybrid_debug_info("fetion", "received message:\n%s", sipmsg);
+
+	fetion_process_message(ac, sipmsg);
+
 	g_free(event);
 }
 
@@ -404,7 +408,21 @@ fetion_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 static void
 fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
-	printf("%s\n", text);
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (BUDDY_IS_OFFLINE(buddy) || BUDDY_IS_INVISIBLE(buddy)) {
+		fetion_message_send(ac, buddy->id, text);
+
+	} else {
+		/*
+		 * If the buddy's state is greater than 0, then we should 
+		 * invite the buddy first to start a new socket channel,
+		 * then we can send the message through the new channel.
+		 */
+		fetion_message_new_chat(ac, buddy->id, text);
+	}
 }
 
 static void

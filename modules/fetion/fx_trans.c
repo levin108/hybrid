@@ -15,7 +15,7 @@ transaction_destroy(fetion_transaction *trans)
 {
 	if (trans) {
 		g_free(trans->userid);
-		g_free(trans->sipmsg);
+		g_free(trans->msg);
 		g_free(trans);
 	}
 }
@@ -36,12 +36,12 @@ transaction_set_userid(fetion_transaction *trans, const gchar *userid)
 }
 
 void
-transaction_set_sipmsg(fetion_transaction *trans, const gchar *sipmsg)
+transaction_set_msg(fetion_transaction *trans, const gchar *msg)
 {
 	g_return_if_fail(trans != NULL);
 
-	g_free(trans->sipmsg);
-	trans->sipmsg = g_strdup(sipmsg);
+	g_free(trans->msg);
+	trans->msg = g_strdup(msg);
 }
 
 void
@@ -54,6 +54,13 @@ void
 transaction_set_data(fetion_transaction *trans, gpointer data)
 {
 	trans->data = data;
+}
+
+void
+transaction_set_timeout(fetion_transaction *trans, GSourceFunc timeout_cb,
+						gpointer user_data)
+{
+	trans->timer = g_timeout_add_seconds(1, timeout_cb, user_data);
 }
 
 void

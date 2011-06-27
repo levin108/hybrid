@@ -15,6 +15,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include <glib.h>
+
 #include "debug.h"
 
 #define HYBRID_OK    0
