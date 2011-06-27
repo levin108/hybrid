@@ -802,7 +802,7 @@ generate_configuration_body(fetion_account *ac)
 	}
 
 	node = xmlnode_new_child(root, "client");
-	xmlnode_new_prop(node, "type", "PC");
+	xmlnode_new_prop(node, "type", "HYBRID");
 	xmlnode_new_prop(node, "version", PROTO_VERSION);
 	xmlnode_new_prop(node, "platform", "W5.1");
 

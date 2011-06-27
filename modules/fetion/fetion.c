@@ -334,6 +334,20 @@ fetion_change_state(HybridAccount *account, gint state)
 	return TRUE;
 }
 
+static gboolean
+fetion_keep_alive(HybridAccount *account)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (fetion_account_keep_alive(ac) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static gboolean 
 fetion_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 		HybridGroup *new_group)
@@ -431,6 +445,7 @@ HybridModuleInfo module_info = {
 	fetion_login,                 /**< login */
 	fetion_get_info,              /**< get_info */
 	fetion_change_state,          /**< change_state */
+	fetion_keep_alive,            /**< keep_alive */
 	fetion_buddy_move,            /**< buddy_move */
 	fetion_remove,                /**< buddy_remove */
 	fetion_rename,                /**< buddy_rename */

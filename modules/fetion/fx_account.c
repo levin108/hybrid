@@ -6,6 +6,7 @@
 #include "fx_buddy.h"
 
 static gchar *generate_set_state_body(gint state);
+static gchar *generate_keep_alive_body();
 
 fetion_account*
 fetion_account_create(HybridAccount *account, const gchar *no, const gchar *password)
@@ -71,6 +72,44 @@ fetion_account_update_state(fetion_account *ac, gint state)
 	ac->state = state;
 
 	g_free(res);
+
+	return HYBRID_OK;
+}
+
+gint
+fetion_account_keep_alive(fetion_account *ac)
+{
+
+	fetion_sip *sip;
+	sip_header *eheader;
+	gchar *res;
+	gchar *body;
+	fetion_transaction *trans;
+
+	g_return_val_if_fail(ac != NULL, HYBRID_ERROR);
+
+	sip = ac->sip;
+
+	fetion_sip_set_type(sip, SIP_REGISTER);
+	eheader = sip_event_header_create(SIP_EVENT_KEEPALIVE);
+	fetion_sip_add_header(sip, eheader);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_add(ac, trans);
+
+	body = generate_keep_alive_body();
+	res = fetion_sip_to_string(sip , body);
+	g_free(body);
+
+	hybrid_debug_info("fetion", "keep alive,send:\n%s", res);
+
+	if (send(ac->sk, res, strlen(res), 0) == -1) {
+		g_free(res);
+		return HYBRID_ERROR;
+	}
+
+	g_free(res); 
 
 	return HYBRID_OK;
 }
@@ -151,6 +190,21 @@ generate_set_state_body(gint state)
 	s = g_strdup_printf("%d", state);
 	xmlnode_new_prop(node, "value", s);
 	g_free(s);
+
+	return xmlnode_to_string(root);
+}
+
+
+static gchar*
+generate_keep_alive_body()
+{
+	xmlnode *root;
+	xmlnode *node;
+	gchar data[] = "<args></args>";
+
+	root = xmlnode_root(data, strlen(data));
+	node = xmlnode_new_child(root, "credentials");
+	xmlnode_new_prop(node, "domains", "fetion.com.cn");
 
 	return xmlnode_to_string(root);
 }

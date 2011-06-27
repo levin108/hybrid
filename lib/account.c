@@ -483,6 +483,11 @@ hybrid_account_close(HybridAccount *account)
 	 */
 	hybrid_account_set_connection_status(account, HYBRID_CONNECTION_CLOSED);
 
+	/*
+	 * Remove the keep alive event source.
+	 */
+	g_source_remove(account->keep_alive_source);
+
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
 
 	g_hash_table_iter_init(&hash_iter, account->group_list);
@@ -538,6 +543,22 @@ hybrid_account_error_reason(HybridAccount *account, const gchar *reason)
 	hybrid_notify_set_text(notify, reason);
 }
 
+static gboolean
+keep_alive_cb(HybridAccount *account)
+{
+	HybridModule *module;
+
+	g_return_val_if_fail(account != NULL, FALSE);
+
+	module = account->proto;
+
+	if (module->info->keep_alive) {
+		return module->info->keep_alive(account);
+	}
+
+	return TRUE;
+}
+
 void
 hybrid_account_set_connection_status(HybridAccount *account,
 		HybridConnectionStatusType status)
@@ -555,6 +576,13 @@ hybrid_account_set_connection_status(HybridAccount *account,
 
 		/* here we load the blist from the local cache file. */
 		load_blist_from_disk(account);
+
+		/*
+		 * Now we start keep alive thread, the keep alive hook function
+		 * was called every 20s.
+		 */
+		account->keep_alive_source = 
+			g_timeout_add_seconds(20, (GSourceFunc)keep_alive_cb, account);
 	}
 
 	account->connect_state = status;

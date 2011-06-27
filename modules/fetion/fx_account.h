@@ -138,6 +138,15 @@ void fetion_account_destroy(fetion_account *ac);
 gint fetion_account_update_state(fetion_account *ac, gint state);
 
 /**
+ * Set a keep alive message to the server.
+ *
+ * @param ac The fetion account.
+ *
+ * @return HYBRID_OK if success, HYBRID_ERROR if there was an error.
+ */
+gint fetion_account_keep_alive(fetion_account *ac);
+
+/**
  * Fetch the portrait of the account from the server.
  *
  * @param ac The account.

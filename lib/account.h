@@ -16,6 +16,7 @@ struct _HybridAccount {
 	gchar *nickname;
 	gint   state;    /**< online status. */
 	gint   connect_state; /**< connection status. */
+	gint   keep_alive_source; /**< source id of the keep alive. */
 
 	guchar *icon_data; /**< binary data of the icon. */
 	gint icon_data_len; /**< size of the binary data. */
