@@ -1,4 +1,5 @@
 #include "gtkutils.h"
+#include "chat-textview.h"
 #include "conv.h"
 #include "util.h"
 
@@ -81,6 +82,67 @@ page_found:
 		(!buddy->name || *(buddy->name) == '\0') ? buddy->id : buddy->name);
 }
 
+static void
+conv_send_cb(GtkWidget *widget, HybridConversation *conv)
+{
+	GtkTextBuffer *send_tb;
+	GtkTextIter start_iter;
+	GtkTextIter stop_iter;
+	GtkTextView *textview;
+	GSList *pos;
+	HybridChatPanel *chat;
+	gint current_page;
+	gchar *text;
+
+	HybridBuddy   *buddy;
+	HybridAccount *account;
+	HybridModule  *module;
+
+	/* find the current chat panel. */
+	current_page = gtk_notebook_current_page(GTK_NOTEBOOK(conv->notebook));
+	for (pos = conv->chat_buddies; pos; pos = pos->next) {
+		chat = (HybridChatPanel*)pos->data;
+
+		if (current_page == gtk_notebook_page_num(
+					GTK_NOTEBOOK(conv->notebook), chat->vbox)) {
+			goto chat_found;
+		}
+	}
+
+	hybrid_debug_error("conv", "FATAL, can't find chat panel");
+
+	return;
+
+chat_found:
+
+	textview = GTK_TEXT_VIEW(chat->sendtext);
+	send_tb  = gtk_text_view_get_buffer(textview);
+
+	gtk_text_buffer_get_start_iter(send_tb, &start_iter);
+	gtk_text_buffer_get_end_iter(send_tb, &stop_iter);
+
+	text = gtk_text_buffer_get_text(send_tb, &start_iter, &stop_iter, TRUE);
+
+	if (*text == '\0') { 
+		/* Yes, nothing was input, just return. */
+		return;
+	}
+
+	gtk_text_buffer_delete(send_tb, &start_iter, &stop_iter);
+
+	/* Add message to the textview. */
+	hybrid_chat_textview_append(chat->textview, chat->buddy, text, TRUE);
+
+	/* Call the protocol hook function. */
+	buddy   = chat->buddy;
+	account = buddy->account;
+	module  = account->proto;
+
+	if (module->info->chat_send) {
+		module->info->chat_send(account, buddy, text);
+	}
+}
+
 /**
  * Create a new Hybrid Conversation Dialog.
  */
@@ -99,6 +161,7 @@ hybrid_conv_create()
 	/* create window */
 	imconv->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(imconv->window), 550, 500);
+	gtk_widget_set_size_request(imconv->window, 550, 500);
 	gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 5);
 	g_signal_connect(imconv->window, "destroy", G_CALLBACK(conv_destroy_cb),
 			imconv);
@@ -133,7 +196,7 @@ hybrid_conv_create()
 	button = gtk_button_new_with_label(_("Send"));
 	gtk_widget_set_usize(button, 100, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 2);
-	//g_signal_connect(send_button , "clicked" , G_CALLBACK(fx_chat_on_send_clicked) , fxchat);
+	g_signal_connect(button, "clicked", G_CALLBACK(conv_send_cb), imconv);
 
 	gtk_widget_show_all(imconv->window);
 
@@ -570,9 +633,7 @@ init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 			GTK_SHADOW_ETCHED_IN);
 
-	chat->textview = gtk_text_view_new();
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat->textview),
-			GTK_WRAP_WORD_CHAR);
+	chat->textview = hybrid_chat_textview_create();
 	gtk_container_add(GTK_CONTAINER(scroll), chat->textview);
 
 	/* create toolbar */

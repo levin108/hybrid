@@ -402,6 +402,12 @@ fetion_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 }
 
 static void
+fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
+{
+	printf("%s\n", text);
+}
+
+static void
 fetion_close(HybridAccount *account)
 {
 	GSList *pos;
@@ -449,6 +455,7 @@ HybridModuleInfo module_info = {
 	fetion_buddy_move,            /**< buddy_move */
 	fetion_remove,                /**< buddy_remove */
 	fetion_rename,                /**< buddy_rename */
+	fetion_chat_send,             /**< chat_send */
 	fetion_close,                 /**< close */
 };
 

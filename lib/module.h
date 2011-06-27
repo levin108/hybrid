@@ -25,13 +25,14 @@ struct _HybridModuleInfo {
 				   */
 
 	gboolean (*login)(HybridAccount *);
-	void (*get_info)(HybridAccount *, HybridBuddy *);
+	void     (*get_info)(HybridAccount *, HybridBuddy *);
 	gboolean (*change_state)(HybridAccount *, gint);
 	gboolean (*keep_alive)(HybridAccount *);
 	gboolean (*buddy_move)(HybridAccount *, HybridBuddy *,HybridGroup *);
 	gboolean (*buddy_remove)(HybridAccount *, HybridBuddy *);
 	gboolean (*buddy_rename)(HybridAccount *, HybridBuddy *, const gchar *);
-	void (*close)(HybridAccount *);
+	void     (*chat_send)(HybridAccount *, HybridBuddy *, const gchar *);
+	void     (*close)(HybridAccount *);
 };
 
 struct _HybridModule {
