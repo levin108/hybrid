@@ -76,7 +76,7 @@ void
 transaction_set_timeout(fetion_transaction *trans, GSourceFunc timeout_cb,
 						gpointer user_data)
 {
-	trans->timer = g_timeout_add_seconds(1, timeout_cb, user_data);
+	trans->timer = g_timeout_add_seconds(30, timeout_cb, user_data);
 }
 
 void

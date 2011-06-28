@@ -466,8 +466,6 @@ fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 		for (pos = channel_list; pos; pos = pos->next) {
 			ac = (fetion_account*)pos->data;
 
-			printf("###################333333333 %s, %s\n", ac->who, buddy->id);
-
 			if (g_strcmp0(ac->who, buddy->id) == 0) {
 				/* yes, we got one. */
 				fetion_message_send(ac, ac->who, text);

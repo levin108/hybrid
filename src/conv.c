@@ -1,3 +1,5 @@
+#include <gdk/gdkkeysyms.h>
+
 #include "gtkutils.h"
 #include "chat-textview.h"
 #include "conv.h"
@@ -83,7 +85,7 @@ page_found:
 }
 
 static void
-conv_send_cb(GtkWidget *widget, HybridConversation *conv)
+message_send(HybridConversation *conv)
 {
 	GtkTextBuffer *send_tb;
 	GtkTextIter start_iter;
@@ -141,6 +143,54 @@ chat_found:
 	if (module->info->chat_send) {
 		module->info->chat_send(account, buddy, text);
 	}
+}
+
+static void
+conv_send_cb(GtkWidget *widget, HybridConversation *conv)
+{
+	message_send(conv);
+}
+
+static gboolean
+key_pressed_cb(GtkWidget* widget, GdkEventKey* event, gpointer user_data)
+{
+	HybridConversation *conv;
+
+	conv = (HybridConversation*)user_data;
+
+	if (event->keyval == GDK_Return ||
+		event->keyval == GDK_ISO_Enter ||
+		event->keyval == GDK_KP_Enter) {
+
+		if (event->state & GDK_CONTROL_MASK ||
+		   event->state & GDK_SHIFT_MASK) {
+
+			return FALSE;
+		} else {
+
+			/* find the current chat panel. */
+			if (gtk_im_context_filter_keypress(
+						GTK_TEXT_VIEW(widget)->im_context, event)) {
+
+				GTK_TEXT_VIEW(widget)->need_im_reset = TRUE;
+
+				return TRUE;
+			}
+
+			message_send(conv);
+
+			return TRUE;
+		}
+#if 0
+		if(event->state & GDK_CONTROL_MASK)	{
+			return TRUE;
+		}else{
+			return FALSE;
+		}
+#endif
+	}
+
+	return FALSE;
 }
 
 /**
@@ -667,6 +717,9 @@ init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat->sendtext),
 			GTK_WRAP_WORD_CHAR);
 	gtk_container_add(GTK_CONTAINER(scroll), chat->sendtext);
+	g_signal_connect(chat->sendtext, "key-press-event",
+			G_CALLBACK(key_pressed_cb), chat->parent);
+
 	gtk_widget_show_all(scroll);
 
 	gtk_widget_show_all(vbox);
@@ -802,4 +855,77 @@ hybrid_conv_got_message(HybridAccount *account,
 
 got_chat_found:
 	hybrid_chat_textview_append(chat->textview, buddy, message, FALSE);
+}
+
+static gchar*
+strip_html(const gchar *html)
+{
+	gchar *pos;
+	gchar *tag_name;
+	gchar *temp;
+	gchar *text_start;
+	gchar *text_end;
+	gchar *html_start_enter;
+	gchar *html_start_leave;
+	gchar *html_stop_enter;
+	gchar *html_enter_leave;
+
+	for (pos = (gchar*)html; *pos && *pos != '<'; pos ++);
+
+	if (*pos == '\0') {
+		return g_strdup(html);
+	}
+
+	pos ++;
+
+	for (html_start_enter = pos; *pos && *pos != ' ' && *pos != '>'; pos ++);
+
+	if (*pos == '\0') {
+		return g_strdup(html);
+	}
+
+	tag_name = g_strndup(html_start_enter, pos - html_start_enter);
+
+	pos ++;
+
+	for (; *pos && *pos != '>'; pos ++);
+
+	if (*pos == '\0') {
+
+		g_free(tag_name);
+
+		return g_strdup(html);
+	}
+
+	pos ++;
+
+	text_start = pos;
+
+	for (; *pos && *pos != '<'; pos ++);
+
+	if (*pos == '\0') {
+
+		g_free(tag_name);
+
+		return g_strdup(html);
+	}
+
+	text_end = pos;
+
+	pos ++;
+
+	for (html_stop_enter = pos; *pos && *pos != ' ' && *pos != '>'; pos ++);
+
+	if (*pos == '\0') {
+
+		g_free(tag_name);
+
+		return g_strdup(html);
+	}
+
+	temp = g_strndup(html_stop_enter, pos - html_stop_enter);
+	
+	if (g_strcmp0(tag_name, temp) == 0) {
+		//text = g_strdup()
+	}
 }
