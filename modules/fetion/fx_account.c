@@ -8,6 +8,14 @@
 static gchar *generate_set_state_body(gint state);
 static gchar *generate_keep_alive_body();
 
+/**
+ * List of existing channels, whose element is fetion_account.
+ * An element should be removed when User-Left message received,
+ * and the whole list should be destroyed when this fetion account
+ * was closed. Only cloned fetion_account is stored in this list.
+ */
+GSList *channel_list = NULL;
+
 fetion_account*
 fetion_account_create(HybridAccount *account, const gchar *no, const gchar *password)
 {
@@ -27,6 +35,8 @@ fetion_account_create(HybridAccount *account, const gchar *no, const gchar *pass
 		ac->sid = g_strdup(no);
 	}
 
+	ac->channel_ready = TRUE;
+
 	ac->sip = fetion_sip_create(ac);
 	ac->password = g_strdup(password);
 
@@ -38,6 +48,30 @@ fetion_account_create(HybridAccount *account, const gchar *no, const gchar *pass
 	ac->personal_version = g_strdup("0");
 	ac->contact_list_version = g_strdup("0");
 	ac->custom_config_version = g_strdup("0");
+
+	return ac;
+}
+
+fetion_account*
+fetion_account_clone(fetion_account *account)
+{
+	fetion_account *ac;
+
+	g_return_val_if_fail(account != NULL, NULL);
+
+	ac = g_new0(fetion_account, 1);
+	ac->account = account->account;
+	ac->buddies = account->buddies;
+	ac->groups  = account->groups;
+	ac->sid     = g_strdup(account->sid);
+	ac->mobileno = g_strdup(account->mobileno);
+	ac->sipuri  = g_strdup(account->sipuri);
+
+	channel_list = g_slist_append(channel_list, ac);
+
+	fetion_sip_create(ac);
+
+	ac->channel_ready = FALSE;
 
 	return ac;
 }
@@ -77,6 +111,15 @@ fetion_account_update_state(fetion_account *ac, gint state)
 }
 
 gint
+keep_alive_cb(fetion_account *ac, const gchar *sipmsg,
+				fetion_transaction *trans)
+{
+	hybrid_debug_info("fetion", "keep alive, response:\n%s", sipmsg);
+
+	return HYBRID_OK;
+}
+
+gint
 fetion_account_keep_alive(fetion_account *ac)
 {
 
@@ -96,6 +139,7 @@ fetion_account_keep_alive(fetion_account *ac)
 
 	trans = transaction_create();
 	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, keep_alive_cb);
 	transaction_add(ac, trans);
 
 	body = generate_keep_alive_body();
@@ -146,6 +190,8 @@ fetion_account_destroy(fetion_account *ac)
 		g_free(ac->custom_config_version);
 		g_free(ac->custom_config);
 		g_free(ac->ssic);
+
+		g_free(ac->who);
 
 		fetion_sip_destroy(ac->sip);
 		g_free(ac);

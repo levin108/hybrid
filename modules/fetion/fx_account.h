@@ -46,10 +46,10 @@ struct _fetion_account {
 	gchar *last_login_ip;				
 	gchar *last_login_time;				
 
-	gchar *sipc_proxy_ip; /**< ip address of the sipc host */
-	gint  sipc_proxy_port; /**< port of the sipc host */
 	gchar *portrait_host_name; /**< host name of the portrait server */
 	gchar *portrait_host_path; /**< path on the portrait server */
+	gchar *sipc_proxy_ip; /**< ip address of the sipc host */
+	gint  sipc_proxy_port; /**< port of the sipc host */
 
 	/* config versions */
 	gchar *cfg_server_version;
@@ -85,9 +85,22 @@ struct _fetion_account {
 
 	/* a struct used to generate picture code */
 	Verification *verification;		 
+
 	fetion_sip *sip;
 
 	GSList *trans_list;
+
+	GSList *trans_wait_list;
+	/*
+	 * only used in the conversation with an online buddy, if channel
+	 * is not ready, transaction should be stored in the trans_wait_list
+	 * until the channel is ready, so it's always TRUE for the main channel.
+	 */
+	gboolean channel_ready;
+	
+	/* only used in the conversation with an online buddy, the buddy's userid. */
+	gchar *who;
+
 };
 
 
@@ -106,6 +119,17 @@ extern "C" {
  */
 fetion_account *fetion_account_create(HybridAccount *account, const gchar *no,
 		const gchar *password);
+
+/**
+ * Clone an account with the basic attribute, when we start a new socket channel,
+ * we will use the new account context to make sip request, it should be freed
+ * with fetion_account_destroy() when no longer needed.
+ *
+ * @param account The fetion account.
+ *
+ * @return The fetion account cloned.
+ */
+fetion_account *fetion_account_clone(fetion_account *account);
 
 /**
  * Set the attribute value of the fetion account.

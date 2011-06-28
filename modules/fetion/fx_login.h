@@ -9,6 +9,8 @@ extern "C" {
 
 gboolean ssi_auth_action(HybridSslConnection *isc, gpointer user_data);
 
+gboolean hybrid_push_cb(gint sk, gpointer user_data);
+
 #ifdef __cplusplus
 }
 #endif

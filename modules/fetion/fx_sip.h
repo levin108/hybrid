@@ -268,6 +268,20 @@ sip_header *sip_event_header_create(gint event_type);
 gchar *sip_header_get_attr(const gchar *header_string, const gchar *name);
 
 /**
+ * Parse the authentication header to strip the ip address and port of the
+ * new server, and the credential string.
+ *
+ * @param header_string The authentication attribute.
+ * @param ip            The ip address of the server returned.
+ * @param port          The port of the server returned.
+ * @param credential    The credential string returned.
+ *
+ * HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint sip_header_get_auth(const gchar *header_string, gchar **ip, gint *port,
+		gchar **credential);
+
+/**
  * Destroy a sip header.
  *
  * @param header The sip header to destroy.

@@ -77,6 +77,44 @@ process_dereg_cb(fetion_account *ac, const gchar *sipmsg)
 }
 
 /**
+ * Process the user entered message. The fetion prococol dont allow us
+ * to send messages to an online buddy who's conversation channel is not
+ * ready, so before chating with an online buddy, we should first start
+ * a new conversation channel, and invite the buddy to the conversation,
+ * but when the channel is ready? yes, when we got the User-Entered 
+ * message through the new channel established, the channel is ready!
+ */
+static void
+process_enter_cb(fetion_account *ac, const gchar *sipmsg)
+{
+	GSList *pos;
+	fetion_transaction *trans;
+
+	g_return_if_fail(ac != NULL);
+	g_return_if_fail(sipmsg != NULL);
+
+	hybrid_debug_info("fetion", "user entered:\n%s", sipmsg);
+
+	/* Set the channel's ready flag. */
+	ac->channel_ready = TRUE;
+
+	/* Check the transaction waiting list, wakeup the sleeping transaction,
+	 * the transaction is either sending a SMS or sending a nudge, we got
+	 * the information from the transaction context, and restore the transaction. */
+	while (ac->trans_wait_list) {
+		pos = ac->trans_wait_list;
+		trans = (fetion_transaction*)pos->data;
+
+		if (trans->msg && *(trans->msg) != '\0') {
+			fetion_message_send(ac, trans->userid, trans->msg);
+		}
+
+		transaction_wakeup(ac, trans);
+
+	}
+}
+
+/**
  * Process notification routine.
  */
 static void
@@ -108,7 +146,7 @@ process_notify_cb(fetion_account *ac, const gchar *sipmsg)
 				break;
 
 			} else 	if (event_type == NOTIFICATION_EVENT_USERENTER) {
-			//	process_enter_cb(ac, sipmsg);
+				process_enter_cb(ac, sipmsg);
 				break;
 			}
 			break;
@@ -162,7 +200,7 @@ process_sipc_cb(fetion_account *ac, const gchar *sipmsg)
 	trans_cur = ac->trans_list;
 
 	while(trans_cur) {
-		trans = (struct transaction*)(trans_cur->data);
+		trans = (fetion_transaction*)(trans_cur->data);
 
 		if (trans->callid == callid0) {
 
@@ -177,7 +215,6 @@ process_sipc_cb(fetion_account *ac, const gchar *sipmsg)
 
 		trans_cur = g_slist_next(trans_cur);
 	}
-	printf("%s\n", sipmsg);
 }
 
 /**
@@ -409,6 +446,8 @@ static void
 fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
 	fetion_account *ac;
+	extern GSList *channel_list;
+	GSList *pos;
 
 	ac = hybrid_account_get_protocol_data(account);
 
@@ -420,7 +459,23 @@ fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 		 * If the buddy's state is greater than 0, then we should 
 		 * invite the buddy first to start a new socket channel,
 		 * then we can send the message through the new channel.
+		 * Now, we check whether a channel related to this buddy has
+		 * been established, if so, just send the message through
+		 * the existing one, otherwise, start a new channel.
 		 */
+		for (pos = channel_list; pos; pos = pos->next) {
+			ac = (fetion_account*)pos->data;
+
+			printf("###################333333333 %s, %s\n", ac->who, buddy->id);
+
+			if (g_strcmp0(ac->who, buddy->id) == 0) {
+				/* yes, we got one. */
+				fetion_message_send(ac, ac->who, text);
+
+				return;
+			}
+		}
+
 		fetion_message_new_chat(ac, buddy->id, text);
 	}
 }

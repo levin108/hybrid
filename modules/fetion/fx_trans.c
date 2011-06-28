@@ -10,6 +10,22 @@ transaction_create()
 	return trans;
 }
 
+fetion_transaction*
+transaction_clone(fetion_transaction *trans)
+{
+	fetion_transaction *new_trans;
+
+	g_return_val_if_fail(trans != NULL, NULL);
+
+	new_trans = g_new0(fetion_transaction, 1);
+
+	transaction_set_userid(new_trans, trans->userid);
+	transaction_set_msg(new_trans, trans->msg);
+	new_trans->data = trans->data;
+
+	return new_trans;
+}
+
 void
 transaction_destroy(fetion_transaction *trans)
 {
@@ -74,4 +90,16 @@ transaction_remove(fetion_account *account, fetion_transaction *trans)
 {
 	account->trans_list = g_slist_remove(account->trans_list, trans);
 	transaction_destroy(trans);
+}
+
+void
+transaction_wait(fetion_account *account, fetion_transaction *trans)
+{
+	account->trans_wait_list = g_slist_append(account->trans_wait_list, trans);
+}
+
+void
+transaction_wakeup(fetion_account *account, fetion_transaction *trans)
+{
+	account->trans_wait_list = g_slist_remove(account->trans_wait_list, trans);
 }

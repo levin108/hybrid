@@ -411,8 +411,8 @@ sipc_reg_action(gint sk, gpointer user_data)
 /**
  * Callback function to handle the pushed message.
  */
-static gboolean
-push_cb(gint sk, gpointer user_data)
+gboolean
+hybrid_push_cb(gint sk, gpointer user_data)
 {
 	gchar sipmsg[BUF_LENGTH];
 	gchar *pos;
@@ -599,7 +599,7 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 	g_free(sipmsg);
 
 	/* now we start to handle the pushed messages */
-	ac->source = hybrid_event_add(sk, HYBRID_EVENT_READ, push_cb, ac);
+	ac->source = hybrid_event_add(sk, HYBRID_EVENT_READ, hybrid_push_cb, ac);
 
 	return 0;
 }

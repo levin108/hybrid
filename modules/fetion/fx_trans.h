@@ -37,6 +37,15 @@ extern "C" {
 fetion_transaction *transaction_create();
 
 /**
+ * Clone an existing transaction.
+ *
+ * @param trans The transaction to be cloned.
+ *
+ * @return The transaction cloned.
+ */
+fetion_transaction *transaction_clone(fetion_transaction *trans);
+
+/**
  * Destroy an existing transaction.
  *
  * @param trans The transaction to destroy.
@@ -108,9 +117,27 @@ void transaction_add(fetion_account *account, fetion_transaction *trans);
  * and destroy it, so you don't need to destroy it again.
  *
  * @param account The fetion account context.
- * @param tran    The transaction to remove.
+ * @param trans    The transaction to remove.
  */
 void transaction_remove(fetion_account *account, fetion_transaction *trans);
+
+/**
+ * Make the transaction wait to be processed until the channel is ready,
+ * in this function we just put the transaction into the transaction waiting list.
+ *
+ * @param account The fetion account context.
+ * @param trans   The transaction to wait;
+ */
+void transaction_wait(fetion_account *account, fetion_transaction *trans);
+
+/**
+ * Wake up the transaction to be processed, in this function we just remove
+ * the transaction from the waiting list.
+ *
+ * @param account The fetion account context.
+ * @param trans   The transaction to wakeup;
+ */
+void transaction_wakeup(fetion_account *account, fetion_transaction *trans);
 #ifdef __cplusplus
 }
 #endif

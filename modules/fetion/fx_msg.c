@@ -1,10 +1,20 @@
 #include "util.h"
 #include "conv.h"
+#include "connect.h"
 #include "xmlnode.h"
 
+#include "fx_login.h"
 #include "fx_msg.h"
 #include "fx_buddy.h"
 #include "fx_trans.h"
+
+typedef struct {
+	fetion_transaction *trans;
+	gchar *credential;
+} invite_data;
+
+
+static gchar *generate_invite_buddy_body(const gchar *sipuri);
 
 gint
 fetion_message_parse_sysmsg(const gchar *sipmsg, gchar **content, gchar **url)
@@ -54,6 +64,8 @@ sms_response_cb(fetion_account *account, const gchar *sipmsg,
 	g_source_remove(trans->timer);
 
 	code = fetion_sip_get_code(sipmsg);
+
+	hybrid_debug_info("fetion", "send message response:\n%s", sipmsg);
 
 	if (code != 200 && code != 280) {
 		return HYBRID_ERROR;
@@ -106,7 +118,17 @@ fetion_message_send(fetion_account *account, const gchar *userid,
 	fetion_transaction *trans = transaction_create();
 
 	transaction_set_userid(trans, userid);
-	//transaction_set_msg(trans, text);
+	transaction_set_msg(trans, text);
+
+	if (!account->channel_ready) {
+		/* If the channel is not ready, make the transaction to wait
+		 * until the transaction is ready */
+		transaction_wait(account, trans);
+
+		hybrid_debug_info("fetion", "channel not ready, transaction sleep.");
+
+		return HYBRID_OK;
+	}
 
 	fetion_sip_set_type(sip, SIP_MESSAGE);
 
@@ -127,6 +149,8 @@ fetion_message_send(fetion_account *account, const gchar *userid,
 	transaction_add(account, trans);
 
 	sip_text = fetion_sip_to_string(sip, text);
+
+	hybrid_debug_info("fetion", "send message, send:\n%s", sip_text);
 
 	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
 		g_free(sip_text);
@@ -176,6 +200,8 @@ fetion_process_message(fetion_account *account, const gchar *sipmsg)
 	g_free(sendtime);
 	g_free(sequence);
 
+	hybrid_debug_info("fetion", "message response, send:\n%s", sip_text);
+
 	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
 		g_free(sip_text);
 		g_free(from);
@@ -204,6 +230,162 @@ fetion_process_message(fetion_account *account, const gchar *sipmsg)
 	return HYBRID_OK;
 }
 
+static gint
+invite_buddy_cb(fetion_account *account, const gchar *sipmsg,
+				fetion_transaction *trans)
+{
+	hybrid_debug_info("fetion", "invite buddy response:\n%s", sipmsg);
+
+	if (trans->msg && *(trans->msg) != '\0') {
+		fetion_message_send(account, trans->userid, trans->msg);
+	}
+
+	return HYBRID_OK;
+}
+
+/**
+ * Callback function to handle the invite-connect event, when we
+ * get this acknowledge message, we should start to invite the buddy
+ * to the conversation.
+ *
+ * The message received is:
+ *
+ * SIP-C/4.0 200 OK
+ * I: 5
+ * Q: 2 R
+ * XI: 3d2ef745db9741a8946a57c40b0eb4d5
+ * X: 1200
+ * K: text/plain
+ * K: text/html-fragment
+ * K: multiparty
+ * K: nudge
+ *
+ * then we send out invite-buddy request:
+ *
+ */
+static gint
+chat_reg_cb(fetion_account *account, const gchar *sipmsg,
+			fetion_transaction *trans)
+{
+	fetion_sip *sip;
+	sip_header *eheader;
+	gchar *body;
+	gchar *sip_text;
+	fetion_transaction *new_trans;
+	fetion_buddy *buddy;
+
+	sip = account->sip;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+
+	if (!(buddy = fetion_buddy_find_by_userid(account, trans->userid))) {
+
+		hybrid_debug_error("fetion", "invite new buddy failed");
+
+		return HYBRID_ERROR;
+	}
+
+	eheader = sip_event_header_create(SIP_EVENT_INVITEBUDDY);
+	fetion_sip_add_header(sip, eheader);
+
+	body = generate_invite_buddy_body(buddy->sipuri);
+
+	new_trans = transaction_clone(trans);
+	transaction_set_callid(new_trans, sip->callid);
+	transaction_set_callback(new_trans, invite_buddy_cb);
+	transaction_add(account, new_trans);
+
+	sip_text = fetion_sip_to_string(sip, body);
+	g_free(body);
+
+	hybrid_debug_info("fetion", "invite new buddy,send:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+
+		hybrid_debug_error("fetion", "invite new buddy failed");
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+
+	return HYBRID_OK;
+}
+
+/**
+ * Callback function to handle the new-chat connecting event.
+ * The message is:
+ *
+ * R fetion.com.cn SIP-C/4.0
+ * F: 547264589
+ * I: 5
+ * Q: 2 R
+ * A: TICKS auth="2051600954.830102111"
+ * K: text/html-fragment
+ * K: multiparty
+ * K: nudge
+ */
+static gint
+invite_connect_cb(gint sk, gpointer user_data)
+{
+	fetion_transaction *trans;
+	fetion_account *account;
+	fetion_sip *sip;
+	invite_data *data;
+	gchar *credential;
+	gchar *sip_text;
+
+	sip_header *aheader;
+	sip_header *theader;
+	sip_header *mheader;
+	sip_header *nheader;
+
+	data       = (invite_data*)user_data;
+	trans      = data->trans;
+	credential = data->credential;
+	account    = trans->data;
+
+	g_free(data);
+
+	sip = account->sip;
+	account->sk = sk;
+
+	/* listen for this thread */
+	account->source = hybrid_event_add(sk, HYBRID_EVENT_READ,
+						hybrid_push_cb, account);
+
+	fetion_sip_set_type(sip, SIP_REGISTER);
+	aheader = sip_credential_header_create(credential);
+	theader = sip_header_create("K", "text/html-fragment");
+	mheader = sip_header_create("K", "multiparty");
+	nheader = sip_header_create("K", "nudge");
+	
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, chat_reg_cb);
+	transaction_add(account, trans);
+
+	fetion_sip_add_header(sip, aheader);
+	fetion_sip_add_header(sip, theader);
+	fetion_sip_add_header(sip, mheader);
+	fetion_sip_add_header(sip, nheader);
+
+	sip_text = fetion_sip_to_string(sip, NULL);
+
+	hybrid_debug_info("fetion", "register, send:\n%s", sip_text);
+	
+	if (send(sk, sip_text, strlen(sip_text), 0) == -1) {
+
+		hybrid_debug_error("fetion", "register to the new chat channel failed");
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+	g_free(credential);
+
+	return HYBRID_OK;
+}
+
 /**
  * Callback function to handle the new_chat response message, if success
  * we would get the following message:
@@ -220,7 +402,43 @@ gint
 new_chat_cb(fetion_account *account, const gchar *sipmsg,
 				fetion_transaction *trans)
 {
-	printf("%s\n", sipmsg);
+	gchar *auth;
+	gchar *ip;
+	gint port;
+	gchar *credential;
+	invite_data *data;
+	fetion_transaction *new_trans;
+	fetion_account *new_account;
+
+	if (!(auth = sip_header_get_attr(sipmsg, "A"))) {
+
+		hybrid_debug_error("fetion", "invalid invitation response.");
+
+		return HYBRID_ERROR;
+	}
+
+	if (sip_header_get_auth(auth, &ip, &port, &credential) != HYBRID_OK) {
+
+		hybrid_debug_error("fetion", "invalid invitation response.");
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(auth);
+
+	new_trans = transaction_clone(trans);
+	new_account = fetion_account_clone(account);
+	g_free(new_account->who);
+	new_account->who = g_strdup(trans->userid);
+	transaction_set_data(new_trans, new_account);
+
+	data = g_new0(invite_data, 1);
+	data->trans = new_trans;
+	data->credential = credential;
+
+	hybrid_proxy_connect(ip, port, invite_connect_cb, data);
+
+	g_free(ip);
 
 	return HYBRID_OK;
 }
@@ -265,4 +483,24 @@ fetion_message_new_chat(fetion_account *account, const gchar *userid,
 	g_free(sip_text); 
 
 	return HYBRID_OK;
+}
+
+static gchar*
+generate_invite_buddy_body(const gchar *sipuri)
+{
+	const gchar *body;
+	xmlnode *root;
+	xmlnode *node;
+
+	g_return_val_if_fail(sipuri != NULL, NULL);
+
+	body = "<args></args>";
+
+	root = xmlnode_root(body, strlen(body));
+
+	node = xmlnode_new_child(root, "contacts");
+	node = xmlnode_new_child(node, "contact");
+	xmlnode_new_prop(node, "uri", sipuri);
+
+	return xmlnode_to_string(root);
 }

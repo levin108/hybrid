@@ -451,6 +451,64 @@ sip_header_get_attr(const gchar *header_string, const gchar *name)
 	return g_strndup(pos, stop - pos);
 }
 
+gint
+sip_header_get_auth(const gchar *header_string, gchar **ip, gint *port,
+		gchar **credential)
+{
+	gchar *pos;
+	gchar *temp;
+	gchar *port_str;
+
+	*ip = NULL;
+	*port = 0;
+	*credential = NULL;
+
+	g_return_val_if_fail(header_string != NULL, HYBRID_ERROR);
+
+	for (pos = (gchar*)header_string; *pos && *pos != '\"'; pos ++);
+
+	if (*pos == '\0') {
+		return HYBRID_ERROR;
+	}
+
+	pos ++;
+
+	for (temp = pos; *pos && *pos != ':'; pos ++);
+
+	if (*pos =='\0') {
+		return HYBRID_ERROR;
+	}
+
+	*ip = g_strndup(temp, pos - temp);
+
+	pos ++;
+
+	for (temp = pos; *pos && *pos != ';'; pos ++);
+
+	port_str = g_strndup(temp, pos - temp);
+	*port = atoi(port_str);
+	g_free(port_str);
+
+	for (; *pos && *pos != '='; pos ++);
+	for (; *pos && *pos != '\"'; pos ++);
+
+	if (*pos =='\0') {
+		return HYBRID_ERROR;
+	}
+
+	pos ++;
+
+	for (temp = pos; *pos && *pos != '\"'; pos ++);
+
+	if (*pos =='\0') {
+		return HYBRID_ERROR;
+	}
+
+	*credential = g_strndup(temp, pos - temp);
+
+	return HYBRID_OK;
+}
+
 void
 sip_header_destroy(sip_header *header)
 {
@@ -518,6 +576,21 @@ sip_parse_notify(const gchar *sipmsg, gint *notify_type, gint *event_type)
 
 	if (!(event = xmlnode_prop(node, "type"))) {
 		goto notify_err;
+	}
+
+	if (g_strcmp0(event, "Support") == 0) {
+		if (!(node = xmlnode_next(node))) {
+			goto notify_err;
+		}
+
+		if (g_strcmp0(node->name, "event") != 0) {
+			goto notify_err;
+		}
+
+		if (!(event = xmlnode_prop(node, "type"))) {
+			goto notify_err;
+		}
+
 	}
 
 	if (g_strcmp0(event, "PresenceChanged") == 0) {
