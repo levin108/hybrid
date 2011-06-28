@@ -43,6 +43,29 @@ gint fetion_message_send(fetion_account *account, const gchar *userid,
 gint fetion_process_message(fetion_account *account, const gchar *sipmsg);
 
 /**
+ * Process the received invitation messsage, send back a response message,
+ * and start a new channel with the endpoint specified by the server, the
+ * message we received is:
+ *
+ * I 547264589 SIP-C/4.0
+ * F: sip:547306298@fetion.com.cn;p=16165
+ * I: -25
+ * K: text/plain
+ * K: text/html-fragment
+ * K: multiparty
+ * K: nudge
+ * XI: 2b2b8c5041424159b61cab9992a58ce3
+ * L: 111
+ * Q: 200002 I
+ * AL: buddy
+ * A: CS address="221.176.31.12:8080;221.176.31.12:443",credential="1627694049.781705893"
+ *
+ * then we should send back a response message:
+ *
+ */
+gint fetion_process_invite(fetion_account *account, const gchar *sipmsg);
+
+/**
  * Start a new chat channel, and send the text through the new channel.
  * The message is:
  *

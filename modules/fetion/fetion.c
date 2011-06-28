@@ -250,6 +250,17 @@ process_message_cb(fetion_account *ac, const gchar *sipmsg)
 }
 
 /**
+ * Process the invitation message.
+ */
+static void
+process_invite_cb(fetion_account *ac, const gchar *sipmsg)
+{
+	hybrid_debug_info("fetion", "invitation message recv:\n%s", sipmsg);
+
+	fetion_process_invite(ac, sipmsg);
+}
+
+/**
  * Process the pushed message.
  */
 void
@@ -267,7 +278,7 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 			process_message_cb(ac, sipmsg);
 			break;
 		case SIP_INVITATION:
-			//process_invite_cb(ac, sipmsg);
+			process_invite_cb(ac, sipmsg);
 			break;
 		case SIP_INFO:
 			//process_info_cb(ac, sipmsg);		

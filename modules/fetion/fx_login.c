@@ -1107,7 +1107,7 @@ generate_auth_body(fetion_account *ac)
 
 	node = xmlnode_new_child(root, "presence");
 	subnode = xmlnode_new_child(node, "basic");
-	xmlnode_new_prop(subnode, "value", "0");
+	xmlnode_new_prop(subnode, "value", "400");
 	xmlnode_new_prop(subnode, "desc", "");
 
 	return xmlnode_to_string(root);

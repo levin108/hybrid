@@ -13,6 +13,11 @@ typedef struct {
 	gchar *credential;
 } invite_data;
 
+typedef struct {
+	fetion_account *account;
+	gchar *credential;
+} invite_conn_data;
+
 
 static gchar *generate_invite_buddy_body(const gchar *sipuri);
 
@@ -231,6 +236,143 @@ fetion_process_message(fetion_account *account, const gchar *sipmsg)
 }
 
 static gint
+process_invite_conn_cb(gint sk, gpointer user_data)
+{
+	invite_conn_data *data;
+	fetion_account *account;
+	fetion_sip *sip;
+	gchar *credential;
+	gchar *sip_text;
+	sip_header *aheader;
+	sip_header *theader;
+	sip_header *mheader;
+	sip_header *nheader;
+
+	data = (invite_conn_data*)user_data;
+	account = data->account;
+	credential = data->credential;
+	g_free(data);
+
+	account->sk = sk;
+	sip = account->sip;
+
+	account->source = hybrid_event_add(sk, HYBRID_EVENT_READ,
+							hybrid_push_cb, account);
+
+	if (account->source == 0) {
+
+		hybrid_debug_error("fetion", "add read event error");
+
+		return HYBRID_ERROR;
+	}
+
+	fetion_sip_set_type(sip, SIP_REGISTER);
+	aheader = sip_credential_header_create(credential);
+	theader = sip_header_create("K", "text/html-fragment");
+	mheader = sip_header_create("K", "multiparty");
+	nheader = sip_header_create("K", "nudge");
+
+	g_free(credential);
+
+	fetion_sip_add_header(sip, aheader);
+	fetion_sip_add_header(sip, theader);
+	fetion_sip_add_header(sip, mheader);
+	fetion_sip_add_header(sip, nheader);
+
+	sip_text = fetion_sip_to_string(sip, NULL);
+
+	hybrid_debug_info("feiton", "register to a new channel:\n%s", sip_text);
+
+	if (send(sk, sip_text, strlen(sip_text), 0) == -1) {
+		
+		hybrid_debug_error("fetion", "register to new channel error.");
+
+		g_free(sip_text);
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+
+	return HYBRID_OK;
+}
+
+gint
+fetion_process_invite(fetion_account *account, const gchar *sipmsg)
+{
+	gchar *from;
+	gchar *auth;
+	gchar *ip;
+	gchar *credential;
+	gchar *sid;
+	gint port;
+	gchar *sip_text;
+	fetion_account *new_account;
+	fetion_buddy *buddy;
+	invite_conn_data *data;
+
+	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(sipmsg != NULL, HYBRID_ERROR);
+
+	from = sip_header_get_attr(sipmsg, "F");
+	auth = sip_header_get_attr(sipmsg, "A");
+
+	sip_header_get_auth(auth, &ip, &port, &credential);
+	g_free(auth);
+
+	sip_text = g_strdup_printf("SIP-C/4.0 200 OK\r\n"
+								"F: %s\r\n"
+								"I: 61\r\n"
+								"Q: 200002 I\r\n\r\n", from);
+
+	hybrid_debug_info("fetion", "invite, send back:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+
+		hybrid_debug_error("fetion", "process an invitation error.");
+
+		g_free(from);
+		g_free(ip);
+		g_free(credential);
+		g_free(sip_text);
+
+		return HYBRID_ERROR;
+	}
+	
+	g_free(sip_text);
+
+	sid = get_sid_from_sipuri(from);
+
+	if (!(buddy = fetion_buddy_find_by_sid(account, sid))) {
+
+		hybrid_debug_error("fetion", "can't find buddy %s", from);
+
+		g_free(from);
+		g_free(ip);
+		g_free(credential);
+		g_free(sid);
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sid);
+
+	new_account = fetion_account_clone(account);
+	fetion_account_set_who(new_account, buddy->userid);
+
+	data = g_new0(invite_conn_data, 1);
+	data->account = new_account;
+	data->credential = credential;
+
+	hybrid_proxy_connect(ip, port, process_invite_conn_cb, data);
+
+	g_free(from);
+	g_free(ip);
+
+	return HYBRID_OK;
+}
+
+static gint
 invite_buddy_cb(fetion_account *account, const gchar *sipmsg,
 				fetion_transaction *trans)
 {
@@ -427,9 +569,10 @@ new_chat_cb(fetion_account *account, const gchar *sipmsg,
 	g_free(auth);
 
 	new_trans = transaction_clone(trans);
+
 	new_account = fetion_account_clone(account);
-	g_free(new_account->who);
-	new_account->who = g_strdup(trans->userid);
+	fetion_account_set_who(new_account, trans->userid);
+
 	transaction_set_data(new_trans, new_account);
 
 	data = g_new0(invite_data, 1);

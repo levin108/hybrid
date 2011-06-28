@@ -134,10 +134,11 @@ fetion_account *fetion_account_clone(fetion_account *account);
 /**
  * Set the attribute value of the fetion account.
  */
-#define fetion_account_set_sipuri(ac,v)	    ((ac)->sipuri = g_strdup(v))
-#define fetion_account_set_userid(ac,v)	    ((ac)->userid = g_strdup(v))
-#define fetion_account_set_mobileno(ac,v)	((ac)->mobileno = g_strdup(v))
-#define fetion_account_set_ssic(ac,v)	    ((ac)->ssic = g_strdup(v))
+#define fetion_account_set_sipuri(ac,v)	    do { g_free((ac)->sipuri);   (ac)->sipuri = g_strdup(v); }   while(0)
+#define fetion_account_set_userid(ac,v)	    do { g_free((ac)->userid);   (ac)->userid = g_strdup(v); }   while(0)
+#define fetion_account_set_mobileno(ac,v)	do { g_free((ac)->mobileno); (ac)->mobileno = g_strdup(v); } while(0)
+#define fetion_account_set_ssic(ac,v)	    do { g_free((ac)->ssic);     (ac)->ssic = g_strdup(v); }     while(0)
+#define fetion_account_set_who(ac,v)	    do { g_free((ac)->who);      (ac)->who = g_strdup(v); }      while(0)
 //#define fetion_account_set_sipuri(ac,v)	((ac)->sipuri = g_strdup(v))
 
 /**
