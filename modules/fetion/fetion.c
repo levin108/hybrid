@@ -77,6 +77,44 @@ process_dereg_cb(fetion_account *ac, const gchar *sipmsg)
 }
 
 /**
+ * Process the user left message, we close the current channel,
+ * and remove the session from the session list.
+ */
+static void
+process_left_cb(fetion_account *ac, const gchar *sipmsg)
+{
+	extern GSList *channel_list;
+	GSList *pos;
+
+	g_return_if_fail(ac != NULL);
+	g_return_if_fail(sipmsg != NULL);
+
+	hybrid_debug_info("fetion", "buddy left, recv:\n%s", sipmsg);
+
+	for (pos = channel_list; pos; pos = pos->next) {
+		if (pos->data == ac) {
+			channel_list = g_slist_remove(channel_list, ac);
+
+			goto channel_removed;
+		}
+	}
+
+	hybrid_debug_error("fetion", "FATAL, can't find channel");
+
+	return;
+
+channel_removed:
+	/* remove the read event source. */
+	g_source_remove(ac->source);
+
+	/* close the channel. */
+	close(ac->sk);
+
+	/* destroy the account. */
+	fetion_account_destroy(ac);
+}
+
+/**
  * Process the user entered message. The fetion prococol dont allow us
  * to send messages to an online buddy who's conversation channel is not
  * ready, so before chating with an online buddy, we should first start
@@ -110,7 +148,6 @@ process_enter_cb(fetion_account *ac, const gchar *sipmsg)
 		}
 
 		transaction_wakeup(ac, trans);
-
 	}
 }
 
@@ -142,7 +179,7 @@ process_notify_cb(fetion_account *ac, const gchar *sipmsg)
 
 		case NOTIFICATION_TYPE_CONVERSATION :
 			if (event_type == NOTIFICATION_EVENT_USERLEFT) {
-			//	process_left_cb(ac, sipmsg);
+				process_left_cb(ac, sipmsg);
 				break;
 
 			} else 	if (event_type == NOTIFICATION_EVENT_USERENTER) {
