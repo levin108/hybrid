@@ -68,6 +68,26 @@ void hybrid_stack_push(HybridStack *stack, gpointer data);
  */
 gpointer hybrid_stack_pop(HybridStack *stack);
 
+
+/**
+ * Check whether the stack is empty.
+ *
+ * @param stack The stack.
+ *
+ * @return TRUE if empty, FALSE if not empty.
+ */
+gboolean hybrid_stack_empty(HybridStack *stack);
+
+/**
+ * Strip the html tags from the string, We check the html tags'
+ * validaty, if invalid, just return the input html string.
+ *
+ * @html The string that may contains html tags.
+ *
+ * @return The string with no html tags in it, should be freed
+ *         with g_free() when no longer needed.
+ */
+gchar *hybrid_strip_html(const gchar *html);
 #ifdef __cplusplus
 }
 #endif

@@ -100,6 +100,7 @@ set(hybrid_SRC
 	lib/account.c
 	lib/xmlnode.c
 	lib/config.c
+	lib/util.c
 	src/gtkutils.c
 	src/gtkaccount.c
 	src/blist.c

@@ -825,13 +825,19 @@ hybrid_conv_got_message(HybridAccount *account,
 	HybridChatPanel *chat;
 	HybridBuddy *temp_buddy;
 	HybridBuddy *buddy;
+	gchar *msg;
+
+	msg = hybrid_strip_html(message);
 
 	g_return_if_fail(account != NULL);
 	g_return_if_fail(buddy_id != NULL);
 	g_return_if_fail(message != NULL);
 
 	if (!(buddy = hybrid_blist_find_buddy(account, buddy_id))) {
+
 		hybrid_debug_error("conv", "buddy doesn't exist.");
+		g_free(msg);
+
 		return;
 	}
 
@@ -854,78 +860,8 @@ hybrid_conv_got_message(HybridAccount *account,
 	chat = hybrid_chat_panel_create(buddy);
 
 got_chat_found:
-	hybrid_chat_textview_append(chat->textview, buddy, message, FALSE);
+	hybrid_chat_textview_append(chat->textview, buddy, msg, FALSE);
+
+	g_free(msg);
 }
 
-static gchar*
-strip_html(const gchar *html)
-{
-	gchar *pos;
-	gchar *tag_name;
-	gchar *temp;
-	gchar *text_start;
-	gchar *text_end;
-	gchar *html_start_enter;
-	gchar *html_start_leave;
-	gchar *html_stop_enter;
-	gchar *html_enter_leave;
-
-	for (pos = (gchar*)html; *pos && *pos != '<'; pos ++);
-
-	if (*pos == '\0') {
-		return g_strdup(html);
-	}
-
-	pos ++;
-
-	for (html_start_enter = pos; *pos && *pos != ' ' && *pos != '>'; pos ++);
-
-	if (*pos == '\0') {
-		return g_strdup(html);
-	}
-
-	tag_name = g_strndup(html_start_enter, pos - html_start_enter);
-
-	pos ++;
-
-	for (; *pos && *pos != '>'; pos ++);
-
-	if (*pos == '\0') {
-
-		g_free(tag_name);
-
-		return g_strdup(html);
-	}
-
-	pos ++;
-
-	text_start = pos;
-
-	for (; *pos && *pos != '<'; pos ++);
-
-	if (*pos == '\0') {
-
-		g_free(tag_name);
-
-		return g_strdup(html);
-	}
-
-	text_end = pos;
-
-	pos ++;
-
-	for (html_stop_enter = pos; *pos && *pos != ' ' && *pos != '>'; pos ++);
-
-	if (*pos == '\0') {
-
-		g_free(tag_name);
-
-		return g_strdup(html);
-	}
-
-	temp = g_strndup(html_stop_enter, pos - html_stop_enter);
-	
-	if (g_strcmp0(tag_name, temp) == 0) {
-		//text = g_strdup()
-	}
-}
