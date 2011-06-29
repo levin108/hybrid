@@ -24,9 +24,11 @@ GtkWidget *hybrid_chat_textview_create();
  * @param message  The message.
  * @param sendout  TRUE if message is sent to buddy, FALSE if message is sent
  *                 from buddy.
+ * @param msg_time The time displayed together with the message.
  */
 void hybrid_chat_textview_append(GtkWidget *textview, HybridBuddy *buddy,
-								const gchar *message, gboolean sendout);
+								const gchar *message, time_t msg_time, 
+								gboolean sendout);
 #ifdef __cplusplus
 }
 #endif

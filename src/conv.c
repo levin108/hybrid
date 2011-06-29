@@ -133,7 +133,7 @@ chat_found:
 	gtk_text_buffer_delete(send_tb, &start_iter, &stop_iter);
 
 	/* Add message to the textview. */
-	hybrid_chat_textview_append(chat->textview, chat->buddy, text, TRUE);
+	hybrid_chat_textview_append(chat->textview, chat->buddy, text, time(NULL), TRUE);
 
 	/* Call the protocol hook function. */
 	buddy   = chat->buddy;
@@ -211,8 +211,8 @@ hybrid_conv_create()
 	/* create window */
 	imconv->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(imconv->window), 550, 500);
-	gtk_widget_set_size_request(imconv->window, 550, 500);
-	gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 5);
+	gtk_widget_set_size_request(imconv->window, 550, 550);
+	gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 3);
 	g_signal_connect(imconv->window, "destroy", G_CALLBACK(conv_destroy_cb),
 			imconv);
 
@@ -236,7 +236,7 @@ hybrid_conv_create()
 
 	halign = gtk_alignment_new(1, 0, 0, 0);
 	gtk_container_add(GTK_CONTAINER(halign), action_area);
-	gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 5);
 
 	button = gtk_button_new_with_label(_("Close"));
 	gtk_widget_set_usize(button, 100, 30);
@@ -720,8 +720,11 @@ init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
 	g_signal_connect(chat->sendtext, "key-press-event",
 			G_CALLBACK(key_pressed_cb), chat->parent);
 
-	gtk_widget_show_all(scroll);
+	/* focus the send textview */
+	GTK_WIDGET_SET_FLAGS(chat->sendtext, GTK_CAN_FOCUS);
+	gtk_widget_grab_focus(chat->sendtext);
 
+	gtk_widget_show_all(scroll);
 	gtk_widget_show_all(vbox);
 }
 
@@ -749,6 +752,7 @@ init_chat_panel(HybridChatPanel *chat)
 	}
 
 	vbox = gtk_vbox_new(FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox), 4);
 	chat->vbox = vbox;
 
 	chat->pagelabel = create_note_label(chat);
@@ -817,7 +821,8 @@ found:
 
 void
 hybrid_conv_got_message(HybridAccount *account,
-				const gchar *buddy_id, const gchar *message)
+				const gchar *buddy_id, const gchar *message,
+				time_t time)
 {
 	GSList *conv_pos;
 	GSList *chat_pos;
@@ -860,7 +865,7 @@ hybrid_conv_got_message(HybridAccount *account,
 	chat = hybrid_chat_panel_create(buddy);
 
 got_chat_found:
-	hybrid_chat_textview_append(chat->textview, buddy, msg, FALSE);
+	hybrid_chat_textview_append(chat->textview, buddy, msg, time, FALSE);
 
 	g_free(msg);
 }

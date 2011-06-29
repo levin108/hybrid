@@ -227,7 +227,7 @@ fetion_process_message(fetion_account *account, const gchar *sipmsg)
 		return HYBRID_ERROR;
 	}
 
-	hybrid_conv_got_message(account->account, buddy->userid, text);
+	hybrid_conv_got_message(account->account, buddy->userid, text, time(NULL));
 
 	g_free(sid);
 

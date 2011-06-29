@@ -17,6 +17,7 @@ hybrid_chat_textview_create()
 	gtk_text_buffer_create_tag(buffer, "blue", "foreground", "#639900", NULL);
 	gtk_text_buffer_create_tag(buffer, "grey", "foreground", "#808080", NULL);
 	gtk_text_buffer_create_tag(buffer, "green", "foreground", "#0088bf", NULL);
+	gtk_text_buffer_create_tag(buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
 	gtk_text_buffer_create_tag(buffer, "lm10", "left_margin", 10, NULL);
 	gtk_text_buffer_create_tag(buffer, "small", "left_margin", 5, NULL);
 	gtk_text_buffer_get_end_iter(buffer, &end_iter);
@@ -27,13 +28,16 @@ hybrid_chat_textview_create()
 
 void
 hybrid_chat_textview_append(GtkWidget *textview, HybridBuddy *buddy,
-							const gchar *message, gboolean sendout)
+							const gchar *message, time_t msg_time,
+							gboolean sendout)
 {
 	GtkTextBuffer *recv_tb;
 	GtkTextIter end_iter;
 	GtkTextMark *mark;
 	HybridAccount *account;
 	gchar *names;
+	struct tm *tm_time;
+	gchar time[128];
 
 	g_return_if_fail(textview != NULL);
 	g_return_if_fail(buddy != NULL);
@@ -41,18 +45,22 @@ hybrid_chat_textview_append(GtkWidget *textview, HybridBuddy *buddy,
 
 	account = buddy->account;
 
+	tm_time = localtime(&msg_time);
+	strftime(time, sizeof(time) - 1, _("%H:%M:%S"), tm_time);
+
 	recv_tb  = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
 	gtk_text_buffer_get_end_iter(recv_tb, &end_iter);
 
 	if (sendout) {
-		names = g_strdup_printf("%s said:", account->nickname);
+
+		names = g_strdup_printf(_("%s said (%s):"), account->nickname, time);
 		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
-							names, strlen(names), "blue", NULL);
+							names, strlen(names), "blue", "bold", NULL);
 
 	} else {
-		names = g_strdup_printf("%s said:", buddy->name);
+		names = g_strdup_printf(_("%s said (%s):"), buddy->name, time);
 		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
-							names, strlen(names), "green", NULL);
+							names, strlen(names), "green", "bold", NULL);
 	}
 
 	g_free(names);
