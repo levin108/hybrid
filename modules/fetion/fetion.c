@@ -6,6 +6,7 @@
 #include "blist.h"
 #include "notify.h"
 #include "action.h"
+#include "conv.h"
 
 #include "fetion.h"
 #include "fx_trans.h"
@@ -392,9 +393,31 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 }
 
 static void
+sms_to_me_send_cb(HybridAccount *account, const gchar *text)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	/* TODO set feedback to the chat window. */
+	fetion_message_send_to_me(ac, text);
+}
+
+
+static void
 sms_to_me_cb(HybridAction *action)
 {
-	printf("text\n");
+	HybridAccount *account;
+	HybridChatWindow *window;
+
+	account = hybrid_action_get_account(action);
+
+	window = hybrid_chat_window_create(
+				account, "000000", HYBRID_CHAT_PANEL_USER_DEFINED
+			);
+
+	hybrid_chat_window_set_title(window, _("SMS To Me"));
+	hybrid_chat_window_set_callback(window, (ChatCallback)sms_to_me_send_cb);
 }
 
 static gboolean

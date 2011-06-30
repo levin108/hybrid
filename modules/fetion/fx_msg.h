@@ -32,6 +32,16 @@ gint fetion_message_send(fetion_account *account, const gchar *userid,
 						const gchar *text);
 
 /**
+ * Send a text message to ourselves.
+ *
+ * @param account The fetion account.
+ * @param text    The content of the message.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint fetion_message_send_to_me(fetion_account *account, const gchar *text);
+
+/**
  * Process the received message, send back a response message, and show
  * the message in the chat panel.
  *
@@ -83,6 +93,7 @@ gint fetion_process_invite(fetion_account *account, const gchar *sipmsg);
  */
 gint fetion_message_new_chat(fetion_account *account, const gchar *userid,
 								const gchar *text);
+
 
 #ifdef __cplusplus
 }

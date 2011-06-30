@@ -25,3 +25,11 @@ hybrid_action_destroy(HybridAction *action)
 		g_free(action);
 	}
 }
+
+HybridAccount*
+hybrid_action_get_account(HybridAction *action)
+{
+	g_return_val_if_fail(action != NULL, NULL);
+
+	return action->account;
+}

@@ -25,12 +25,20 @@ struct _HybridAction {
 HybridAction *hybrid_action_create(HybridAccount *account,
 				const gchar *text, ActionCallback callback);
 
-
 /**
  * Destroy an action menu.
  *
  * @param action The action menu to destroy.
  */
 void hybrid_action_destroy(HybridAction *action);
+
+/**
+ * Get the account context through the action context.
+ *
+ * @param action The action context.
+ *
+ * @return The account context.
+ */
+HybridAccount *hybrid_action_get_account(HybridAction *action);
 
 #endif /* HYBRID_ACTION_H */

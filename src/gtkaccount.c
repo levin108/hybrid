@@ -558,28 +558,6 @@ change_state_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
-sms_to_me_cb(HybridAccount *account, const gchar *text)
-{
-	printf("%s\n", text);
-}
-
-static void
-message_to_youself(GtkWidget *widget, gpointer user_data)
-{
-	HybridAccount *account;
-	HybridChatWindow *window;
-
-	account = (HybridAccount*)user_data;
-
-	window = hybrid_chat_window_create(
-				account, "000000", HYBRID_CHAT_PANEL_USER_DEFINED
-			);
-
-	hybrid_chat_window_set_title(window, _("SMS To Me"));
-	hybrid_chat_window_set_callback(window, (ChatCallback)sms_to_me_cb);
-}
-
-static void
 action_cb(GtkWidget *widget, HybridAction *action)
 {
 	if (action->callback) {

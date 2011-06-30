@@ -168,6 +168,58 @@ fetion_message_send(fetion_account *account, const gchar *userid,
 	return HYBRID_OK;
 }
 
+static gint
+sms_to_me_cb(fetion_account *account, const gchar *sipmsg,
+			fetion_transaction *trans)
+{
+	printf("%s\n", sipmsg);
+	
+	return HYBRID_OK;
+}
+
+gint
+fetion_message_send_to_me(fetion_account *account, const gchar *text)
+{
+	sip_header *toheader;
+	sip_header *eheader;
+	gchar *sip_text;
+	fetion_sip *sip;
+	fetion_transaction *trans;
+
+	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(text != NULL, HYBRID_ERROR);
+
+	sip = account->sip;
+
+	fetion_sip_set_type(sip, SIP_MESSAGE);
+
+	toheader = sip_header_create("T", account->sipuri);
+	eheader  = sip_event_header_create(SIP_EVENT_SENDCATMESSAGE);
+
+	fetion_sip_add_header(sip, toheader);
+	fetion_sip_add_header(sip, eheader);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, sms_to_me_cb);
+	transaction_add(account, trans);
+
+	sip_text = fetion_sip_to_string(sip, text);
+
+	hybrid_debug_info("fetion", "send sms to youself,send:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+
+		hybrid_debug_error("fetion", "send message to yourself error.");
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+
+	return HYBRID_OK;
+}
+
 gint
 fetion_process_message(fetion_account *account, const gchar *sipmsg)
 {
