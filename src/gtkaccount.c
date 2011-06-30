@@ -3,6 +3,7 @@
 #include "gtkaccount.h"
 #include "gtkutils.h"
 #include "conv.h"
+#include "action.h"
 
 /* Protocol combo box columns. */
 enum {
@@ -557,6 +558,12 @@ change_state_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
+sms_to_me_cb(HybridAccount *account, const gchar *text)
+{
+	printf("%s\n", text);
+}
+
+static void
 message_to_youself(GtkWidget *widget, gpointer user_data)
 {
 	HybridAccount *account;
@@ -569,7 +576,15 @@ message_to_youself(GtkWidget *widget, gpointer user_data)
 			);
 
 	hybrid_chat_window_set_title(window, _("SMS To Me"));
+	hybrid_chat_window_set_callback(window, (ChatCallback)sms_to_me_cb);
+}
 
+static void
+action_cb(GtkWidget *widget, HybridAction *action)
+{
+	if (action->callback) {
+		action->callback(action);
+	}
 }
 
 static void
@@ -583,6 +598,9 @@ create_account_child_menus(HybridAccount *account)
 	GdkPixbuf *presence_pixbuf;
 	GtkWidget *presence_image;
 	HybridAccountMenuData *data;
+	HybridAction *action;
+	HybridModule *proto;
+	GSList *pos;
 	gint state;
 
 	account_menu = account->account_menu;
@@ -594,7 +612,7 @@ create_account_child_menus(HybridAccount *account)
 	menu_item = hybrid_create_menu(menu_shell, _("Change State"), NULL,
 						TRUE, NULL, NULL);
 
-	/* ==== change state child menus start ==== */
+	/* change state child menus. */
 
 	child_menu = gtk_menu_new();
 
@@ -620,9 +638,21 @@ create_account_child_menus(HybridAccount *account)
 				G_CALLBACK(change_state_cb), data);
 	}
 
-	hybrid_create_menu(menu_shell, _("Message To Me"), NULL, TRUE, G_CALLBACK(message_to_youself), account);
+	/* create protocol-specified menus. */
+	proto = account->proto;
 
-	/* ==== change state child menus end   ==== */
+	if (account->action_list) {
+
+		hybrid_create_menu_seperator(menu_shell);
+
+		for (pos = account->action_list; pos; pos = pos->next) {
+
+			action = pos->data;
+
+			hybrid_create_menu(menu_shell, action->text, NULL, TRUE,
+					G_CALLBACK(action_cb), action);
+		}
+	}
 
 	hybrid_create_menu_seperator(menu_shell);
 

@@ -27,6 +27,8 @@ struct _HybridAccount {
 
 	gpointer protocol_data;
 
+	GSList *action_list; /* list of action menus. */
+
 	GHashTable *buddy_list;
 	GHashTable *group_list;
 

@@ -5,6 +5,7 @@
 #include "info.h"
 #include "blist.h"
 #include "notify.h"
+#include "action.h"
 
 #include "fetion.h"
 #include "fx_trans.h"
@@ -390,6 +391,12 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 	return HYBRID_OK;
 }
 
+static void
+sms_to_me_cb(HybridAction *action)
+{
+	printf("text\n");
+}
+
 static gboolean
 fetion_change_state(HybridAccount *account, gint state)
 {
@@ -557,6 +564,18 @@ fetion_close(HybridAccount *account)
 	}
 }
 
+static GSList*
+fetion_actions(HybridAccount *account)
+{
+	GSList *list = NULL;
+	HybridAction *action;
+
+	action = hybrid_action_create(account, _("SMS To Me"), sms_to_me_cb);
+	list   = g_slist_append(list, action);
+
+	return list;
+}
+
 HybridModuleInfo module_info = {
 	"fetion",                     /**< name */
 	"levin108",                   /**< author */
@@ -576,6 +595,7 @@ HybridModuleInfo module_info = {
 	fetion_rename,                /**< buddy_rename */
 	fetion_chat_send,             /**< chat_send */
 	fetion_close,                 /**< close */
+	fetion_actions,               /**< actions */
 };
 
 void 

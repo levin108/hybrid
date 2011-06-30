@@ -5,6 +5,7 @@
 #include "gtkutils.h"
 #include "notify.h"
 #include "blist.h"
+#include "action.h"
 
 GSList *account_list = NULL;
 
@@ -120,6 +121,11 @@ hybrid_account_init(void)
 				}
 
 				g_free(value);
+			}
+
+			/* init actions. */
+			if (module->info->actions) {
+				account->action_list = module->info->actions(account);
 			}
 
 			account_list = g_slist_append(account_list, account);
@@ -355,6 +361,9 @@ hybrid_account_create(HybridModule *proto)
 void
 hybrid_account_destroy(HybridAccount *account)
 {
+	GSList *pos;
+	HybridAction *action;
+
 	if (account) {
 		g_free(account->username);
 		g_free(account->password);
@@ -362,6 +371,18 @@ hybrid_account_destroy(HybridAccount *account)
 		g_free(account->icon_data);
 		g_free(account->icon_crc);
 		g_free(account->icon_name);
+
+		while (account->action_list) {
+
+			pos = account->action_list;
+
+			action = pos->data;
+
+			account->action_list = g_slist_remove(account->action_list, action);
+
+			hybrid_action_destroy(action);
+		}
+
 		g_free(account);
 	}
 }

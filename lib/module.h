@@ -33,6 +33,9 @@ struct _HybridModuleInfo {
 	gboolean (*buddy_rename)(HybridAccount *, HybridBuddy *, const gchar *);
 	void     (*chat_send)(HybridAccount *, HybridBuddy *, const gchar *);
 	void     (*close)(HybridAccount *);
+
+	/* To tell the plugin which menus this account have. */
+	GSList*  (*actions)(HybridAccount *account);
 };
 
 struct _HybridModule {
