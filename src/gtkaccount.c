@@ -10,6 +10,8 @@ enum {
 	PROTOCOL_COLUMNS
 };
 
+extern GtkUIManager *menu_ui_manager;
+
 static HybridAccountEditPanel *create_account_edit_panel(
 		HybridAccountPanel *parent, gboolean is_add);
 static void add_cb(GtkWidget *widget, gpointer user_data);
@@ -355,6 +357,9 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 		g_object_unref(pixbuf);
 	}
 
+	/* create account's menus */
+	hybrid_account_create_menu(account);
+
 	/* enable the account */
 	account->proto->info->login(account);
 
@@ -481,6 +486,7 @@ static void
 delete_cb(GtkWidget *widget, gpointer user_data)
 {
 	HybridAccountPanel *panel;
+	HybridAccount *account;
 	GtkTreeView *tree;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -494,14 +500,164 @@ delete_cb(GtkWidget *widget, gpointer user_data)
 
 	selection = gtk_tree_view_get_selection(tree);
 
-	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
-		gtk_tree_model_get(model, &iter, HYBRID_NAME_COLUMN, &username,
-					HYBRID_PROTO_NAME_COLUMN, &protoname, -1);
 
+	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+
+		gtk_tree_model_get(model, &iter, 
+					HYBRID_NAME_COLUMN, &username,
+					HYBRID_PROTO_NAME_COLUMN, &protoname,
+					-1);
+
+		if (!(account = hybrid_account_get(protoname, username))) {
+			
+			hybrid_debug_error("account", "FATAL, account doesn't exist.");
+			
+			g_free(username);
+			g_free(protoname);
+
+			return;
+		}
+
+		/* close the account. */
+		hybrid_account_close(account);
+
+		/* remove the menus. */
+		hybrid_account_remove_menu(account);
+
+		/* remove the item in the management panel. */
 		hybrid_account_remove(protoname, username);
 		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
 
 		g_free(username);
 		g_free(protoname);
 	}
+}
+
+static void
+change_state_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridAccount *account;
+	HybridModule *module;
+	HybridAccountMenuData *data;
+
+	data = (HybridAccountMenuData*)user_data;
+	account = data->account;
+
+	module = account->proto;
+
+	if (module->info->change_state) {
+		account->state = data->presence_state;
+
+		if (module->info->change_state(account,
+					data->presence_state)) {
+			hybrid_account_set_state(account, data->presence_state);
+		}
+	}
+}
+
+static void
+create_account_child_menus(HybridAccount *account)
+{
+	GtkWidget *account_menu;
+	GtkWidget *menu_shell;
+	GtkWidget *menu_item;
+	GtkWidget *child_menu;
+	GtkWidget *child_menu_item;
+	GdkPixbuf *presence_pixbuf;
+	GtkWidget *presence_image;
+	HybridAccountMenuData *data;
+	gint state;
+
+	account_menu = account->account_menu;
+
+	menu_shell = gtk_menu_new();
+
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(account_menu), menu_shell);
+
+	menu_item = hybrid_create_menu(menu_shell, _("Change State"), NULL,
+						TRUE, NULL, NULL);
+
+	/* ==== change state child menus start ==== */
+
+	child_menu = gtk_menu_new();
+
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), child_menu);
+
+	for (state = HYBRID_STATE_INVISIBLE; state <= HYBRID_STATE_ONLINE;
+			state ++) {
+
+		presence_pixbuf = hybrid_create_presence_pixbuf(state, 16);
+		child_menu_item = hybrid_create_menu(child_menu, 
+								hybrid_get_presence_name(state), 
+								NULL, TRUE, NULL, NULL);
+		presence_image = gtk_image_new_from_pixbuf(presence_pixbuf);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(child_menu_item),
+				presence_image);
+		g_object_unref(presence_pixbuf);
+
+		data = g_new0(HybridAccountMenuData, 1);
+		data->account = account;
+		data->presence_state = state;
+
+		g_signal_connect(child_menu_item, "activate",
+				G_CALLBACK(change_state_cb), data);
+	}
+
+	/* ==== change state child menus end   ==== */
+
+	hybrid_create_menu_seperator(menu_shell);
+
+	menu_item = hybrid_create_menu(menu_shell, _("Disable Account"), "close",
+						TRUE, NULL, NULL);
+}
+
+
+void
+hybrid_account_create_menu(HybridAccount *account)
+{
+	gchar *menu_name;
+	GdkPixbuf *presence_pixbuf;
+	GtkWidget *presence_image;
+	GtkWidget *account_shell;
+
+	g_return_if_fail(account != NULL);
+
+	menu_name = g_strdup_printf("%s (%s)", account->username,
+			hybrid_get_presence_name(account->state));
+	account->account_menu = 
+		hybrid_create_menu(NULL, menu_name, NULL, TRUE, NULL, NULL);
+	g_free(menu_name);
+
+	/* set the icon of the account menu */
+	presence_pixbuf = hybrid_create_presence_pixbuf(account->state, 16);
+	presence_image = gtk_image_new_from_pixbuf(presence_pixbuf);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(account->account_menu),
+						presence_image);
+	g_object_unref(presence_pixbuf);
+
+	create_account_child_menus(account);
+
+	if (!(account_shell = 
+			gtk_ui_manager_get_widget(menu_ui_manager, "/MenuBar/Account"))) {
+
+		hybrid_debug_error("core", "account menu init err");
+
+		return;
+	}
+
+	account_shell = gtk_menu_item_get_submenu(GTK_MENU_ITEM(account_shell));
+
+	gtk_menu_shell_insert(
+			GTK_MENU_SHELL(account_shell), account->account_menu, 3);
+
+	gtk_widget_show_all(account_shell);
+}
+
+void
+hybrid_account_remove_menu(HybridAccount *account)
+{
+	g_return_if_fail(account != NULL);
+
+	gtk_widget_destroy(account->account_menu);
+	account->account_menu = NULL;
 }

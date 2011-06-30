@@ -5,6 +5,7 @@
 
 typedef struct _HybridAccountPanel HybridAccountPanel;
 typedef struct _HybridAccountEditPanel HybridAccountEditPanel;
+typedef struct _HybridAccountMenuData HybridAccountMenuData;
 
 struct _HybridAccountPanel {
 	GtkWidget *window;
@@ -19,6 +20,13 @@ struct _HybridAccountEditPanel {
 	GtkWidget *password_entry;
 	GtkWidget *proto_combo;
 };
+
+
+struct _HybridAccountMenuData {
+	HybridAccount *account;
+	gint presence_state;
+};
+
 
 enum {
 	HYBRID_ENABLE_COLUMN,
@@ -35,9 +43,24 @@ extern "C" {
 
 /**
  * Create an account management panel.
+ *
+ * @return The account management panel created.
  */
 HybridAccountPanel *hybrid_account_panel_create();
 
+/**
+ * Create the account's menu.
+ *
+ * @param account The account context.
+ */
+void hybrid_account_create_menu(HybridAccount *account);
+
+/**
+ * Remove the account's menu.
+ *
+ * @param account The account context.
+ */
+void hybrid_account_remove_menu(HybridAccount *account);
 #ifdef __cplusplus
 }
 #endif

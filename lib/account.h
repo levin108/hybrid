@@ -183,7 +183,7 @@ void hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 
 /**
  * Close an account. Remove it from the blist panel. Free the 
- * memory of the buddis and groups. But not free the memory of 
+ * memory of the buddis and groups. But dont free the memory of 
  * the account. The call the protocol close callback function.
  *
  * @param account The account the close.
