@@ -5,7 +5,9 @@
 #include "blist.h"
 
 typedef struct _HybridConversation HybridConversation;
-typedef struct _HybridChatPanel HybridChatPanel;
+typedef struct _HybridChatWindow HybridChatWindow;
+typedef enum _HybridChatWindowType HybridChatWindowType;
+typedef void (*ChatCallback)(HybridAccount *, const gchar *);
 
 struct _HybridConversation {
 	GtkWidget *window;
@@ -13,10 +15,37 @@ struct _HybridConversation {
 	GSList *chat_buddies;
 };
 
-struct _HybridChatPanel {
+enum _HybridChatWindowType {
+	/*
+	 * system panel, double-click on buddy in the buddy list,
+	 * then the popuped panel is in this type
+	 */
+	HYBRID_CHAT_PANEL_SYSTEM,      
+
+	/*
+	 * Group chat panel. UNUSED now (6-30)
+	 */
+	HYBRID_CHAT_PANEL_GROUP_CHAT,
+
+	/*
+	 * use-defined panel, should specify the callback function
+	 * for the send button click signal.
+	 */
+	HYBRID_CHAT_PANEL_USER_DEFINED
+};
+
+struct _HybridChatWindow {
 	HybridConversation *parent;
-	HybridBuddy *buddy;
+	HybridChatWindowType type;
+	HybridAccount *account;
+	gchar *id;
+
+	gchar *title;   /**< only be used when it's user-defined window. */
+	GdkPixbuf *icon;/**< only be used when it's user-defined window. */
+
+	gpointer data;
 	GtkWidget *pagelabel;
+
 	GtkWidget *textview;
 	GtkWidget *toolbar;
 	GtkWidget *sendtext;
@@ -26,9 +55,18 @@ struct _HybridChatPanel {
 	GtkWidget *tablabel;
 	GtkTreeIter tabiter;
 
+	/* tip label */
 	GtkWidget *tiplabel;
 	GtkTreeIter tipiter;
+
+	/* callback function called when the send button clicked,
+	 * only be used when it's user-defined window. */
+	ChatCallback callback;
 };
+
+#define IS_SYSTEM_CHAT(chat_window)       ((chat_window)->type == HYBRID_CHAT_PANEL_SYSTEM)
+#define IS_GROUP_CHAT(chat_window)        ((chat_window)->type == HYBRID_CHAT_PANEL_GROUP_CHAT)
+#define IS_USER_DEFINED_CHAT(chat_window) ((chat_window)->type == HYBRID_CHAT_PANEL_USER_DEFINED)
 
 /**
  * Notebook tab columns.
@@ -57,11 +95,47 @@ extern "C" {
 /**
  * Create a chat panel.
  *
- * @param buddy The buddy to chat with.
+ * @param account The account context.
+ * @param buddy   ID of the panel.
+ * @param type    The type of the chat panel.
  *
- * @return The HybridChatPanel created.
+ * @return The HybridChatWindow created.
  */
-HybridChatPanel *hybrid_chat_panel_create(HybridBuddy *buddy);
+HybridChatWindow *hybrid_chat_window_create(HybridAccount *account,
+					const gchar *id, HybridChatWindowType type);
+
+/**
+ * Set the title of the chat window, it's only used when 
+ * the window is a user-defined window, otherwise this function
+ * will be ignored.
+ *
+ * @param window The user-defined chat window.
+ * @param title  The title of the chat window.
+ */
+void hybrid_chat_window_set_title(HybridChatWindow *window,
+					const gchar *title);
+
+/**
+ * Set the icon of the chat window, it's only used when
+ * the window is a user-defined window, otherwise this function
+ * will be ignored.
+ *
+ * @param window The user-defined chat window.
+ * @param pixbuf The icon.
+ */
+void hybrid_chat_window_set_icon(HybridChatWindow *window,
+					GdkPixbuf *pixbuf);
+
+/**
+ * Set the callback function for the send button click event,
+ * it's only used when the window is a user-defined window,
+ * otherwise this function will be ignored.
+ *
+ * @param window   The user-defined chat window.
+ * @param callback The callback function.
+ */
+void hybrid_chat_window_set_callback(HybridChatWindow *window,
+					ChatCallback callback);
 
 void hybrid_conv_got_message(HybridAccount *account,
 				const gchar *buddy_id, const gchar *message,

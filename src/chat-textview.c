@@ -27,23 +27,19 @@ hybrid_chat_textview_create()
 }
 
 void
-hybrid_chat_textview_append(GtkWidget *textview, HybridBuddy *buddy,
+hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 							const gchar *message, time_t msg_time,
 							gboolean sendout)
 {
 	GtkTextBuffer *recv_tb;
 	GtkTextIter end_iter;
 	GtkTextMark *mark;
-	HybridAccount *account;
 	gchar *names;
 	struct tm *tm_time;
 	gchar time[128];
 
 	g_return_if_fail(textview != NULL);
-	g_return_if_fail(buddy != NULL);
 	g_return_if_fail(message != NULL);
-
-	account = buddy->account;
 
 	tm_time = localtime(&msg_time);
 	strftime(time, sizeof(time) - 1, _("%H:%M:%S"), tm_time);
@@ -51,14 +47,14 @@ hybrid_chat_textview_append(GtkWidget *textview, HybridBuddy *buddy,
 	recv_tb  = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
 	gtk_text_buffer_get_end_iter(recv_tb, &end_iter);
 
+	names = g_strdup_printf(_("%s said (%s):"), name, time);
+
 	if (sendout) {
 
-		names = g_strdup_printf(_("%s said (%s):"), account->nickname, time);
 		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
 							names, strlen(names), "blue", "bold", NULL);
 
 	} else {
-		names = g_strdup_printf(_("%s said (%s):"), buddy->name, time);
 		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
 							names, strlen(names), "green", "bold", NULL);
 	}

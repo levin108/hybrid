@@ -2,6 +2,7 @@
 #include "module.h"
 #include "gtkaccount.h"
 #include "gtkutils.h"
+#include "conv.h"
 
 /* Protocol combo box columns. */
 enum {
@@ -556,6 +557,22 @@ change_state_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
+message_to_youself(GtkWidget *widget, gpointer user_data)
+{
+	HybridAccount *account;
+	HybridChatWindow *window;
+
+	account = (HybridAccount*)user_data;
+
+	window = hybrid_chat_window_create(
+				account, "000000", HYBRID_CHAT_PANEL_USER_DEFINED
+			);
+
+	hybrid_chat_window_set_title(window, _("SMS To Me"));
+
+}
+
+static void
 create_account_child_menus(HybridAccount *account)
 {
 	GtkWidget *account_menu;
@@ -602,6 +619,8 @@ create_account_child_menus(HybridAccount *account)
 		g_signal_connect(child_menu_item, "activate",
 				G_CALLBACK(change_state_cb), data);
 	}
+
+	hybrid_create_menu(menu_shell, _("Message To Me"), NULL, TRUE, G_CALLBACK(message_to_youself), account);
 
 	/* ==== change state child menus end   ==== */
 

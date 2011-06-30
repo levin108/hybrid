@@ -8,7 +8,8 @@
 /* The list of the currently opened conversation dialogs. */
 GSList *conv_list = NULL; 
 
-static GtkWidget *create_note_label(HybridChatPanel *chat);
+static GtkWidget *create_note_label(HybridChatWindow *chat);
+static void chat_window_destroy(HybridChatWindow *chat);
 
 /**
  * Callback function to handle the close button click event.
@@ -31,14 +32,17 @@ conv_destroy_cb(GtkWidget *widget, gpointer user_data)
 {
 	HybridConversation *conv = (HybridConversation*)user_data;
 	GSList *pos;
-	HybridChatPanel *temp_chat;
+	HybridChatWindow *temp_chat;
 
-	/* First we should free the memory in the list of HybridChatPanel. */
+	/* First we should free the memory in the list of HybridChatWindow. */
 	while (conv->chat_buddies) {
+
 		pos = conv->chat_buddies;
-		temp_chat = (HybridChatPanel*)pos->data;
-		conv->chat_buddies = g_slist_remove(conv->chat_buddies, pos->data);
-		g_free(temp_chat);
+
+		temp_chat = (HybridChatWindow*)pos->data;
+		conv->chat_buddies = g_slist_remove(conv->chat_buddies, temp_chat);
+
+		chat_window_destroy(temp_chat);
 	}
 
 	conv_list = g_slist_remove(conv_list, conv);
@@ -46,18 +50,33 @@ conv_destroy_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
+chat_window_destroy(HybridChatWindow *chat)
+{
+	if (chat) {
+		g_free(chat->id);
+		g_free(chat->title);
+
+		if (chat->icon) {
+			g_object_unref(chat->icon);
+		}
+
+		g_free(chat);
+	}
+}
+
+static void
 switch_page_cb(GtkNotebook *notebook, gpointer newpage, guint newpage_nth,
 		gpointer user_data)
 {
 	GSList *pos;
-	HybridChatPanel *chat;
+	HybridChatWindow *chat;
 	HybridBuddy *buddy;
 	GdkPixbuf *pixbuf;
 	HybridConversation *conv = (HybridConversation*)user_data;	
 	gint page_index;
 
 	for (pos = conv->chat_buddies; pos; pos = pos->next) {
-		chat = (HybridChatPanel*)pos->data;
+		chat = (HybridChatWindow*)pos->data;
 
 		page_index = gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook),
 				chat->vbox);
@@ -72,16 +91,20 @@ switch_page_cb(GtkNotebook *notebook, gpointer newpage, guint newpage_nth,
 	return;
 
 page_found:
-	buddy = chat->buddy;
+	
+	if (IS_SYSTEM_CHAT(chat)) {
 
-	/* Set the conversation window's icon. */
-	pixbuf = hybrid_create_pixbuf(buddy->icon_data, buddy->icon_data_length);
-	gtk_window_set_icon(GTK_WINDOW(conv->window), pixbuf);
-	g_object_unref(pixbuf);
+		buddy = chat->data;
 
-	/* Set the conversation window's title */
-	gtk_window_set_title(GTK_WINDOW(conv->window), 
-		(!buddy->name || *(buddy->name) == '\0') ? buddy->id : buddy->name);
+		/* Set the conversation window's icon. */
+		pixbuf = hybrid_create_pixbuf(buddy->icon_data, buddy->icon_data_length);
+		gtk_window_set_icon(GTK_WINDOW(conv->window), pixbuf);
+		g_object_unref(pixbuf);
+
+		/* Set the conversation window's title */
+		gtk_window_set_title(GTK_WINDOW(conv->window), 
+			(!buddy->name || *(buddy->name) == '\0') ? buddy->id : buddy->name);
+	}
 }
 
 static void
@@ -92,7 +115,7 @@ message_send(HybridConversation *conv)
 	GtkTextIter stop_iter;
 	GtkTextView *textview;
 	GSList *pos;
-	HybridChatPanel *chat;
+	HybridChatWindow *chat;
 	gint current_page;
 	gchar *text;
 
@@ -103,7 +126,7 @@ message_send(HybridConversation *conv)
 	/* find the current chat panel. */
 	current_page = gtk_notebook_current_page(GTK_NOTEBOOK(conv->notebook));
 	for (pos = conv->chat_buddies; pos; pos = pos->next) {
-		chat = (HybridChatPanel*)pos->data;
+		chat = (HybridChatWindow*)pos->data;
 
 		if (current_page == gtk_notebook_page_num(
 					GTK_NOTEBOOK(conv->notebook), chat->vbox)) {
@@ -132,16 +155,28 @@ chat_found:
 
 	gtk_text_buffer_delete(send_tb, &start_iter, &stop_iter);
 
+	account = chat->account;
+
 	/* Add message to the textview. */
-	hybrid_chat_textview_append(chat->textview, chat->buddy, text, time(NULL), TRUE);
+	hybrid_chat_textview_append(chat->textview,
+								account->nickname,
+								text, time(NULL), TRUE);
 
 	/* Call the protocol hook function. */
-	buddy   = chat->buddy;
-	account = buddy->account;
-	module  = account->proto;
+	if (IS_SYSTEM_CHAT(chat)) {
+		buddy   = chat->data;
+		module  = account->proto;
 
-	if (module->info->chat_send) {
-		module->info->chat_send(account, buddy, text);
+		if (module->info->chat_send) {
+			module->info->chat_send(account, buddy, text);
+		}
+	}
+
+	if (IS_USER_DEFINED_CHAT(chat)) {
+
+		if (chat->callback) {
+			chat->callback(account, text);
+		}
 	}
 }
 
@@ -256,7 +291,7 @@ hybrid_conv_create()
 static void
 menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridChatPanel *chat = (HybridChatPanel*)user_data;
+	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 	HybridConversation *conv = chat->parent;
 	GtkNotebook *notebook = GTK_NOTEBOOK(conv->notebook);
 	gint page_index = gtk_notebook_page_num(notebook, chat->vbox);
@@ -268,7 +303,7 @@ menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
  * Close a single tab.
  */
 static void 
-close_tab(HybridChatPanel *chat)
+close_tab(HybridChatWindow *chat)
 {
 	HybridConversation *conv;
 	gint page_index;
@@ -284,7 +319,7 @@ close_tab(HybridChatPanel *chat)
 	conv->chat_buddies = g_slist_remove(conv->chat_buddies, chat);
 
 	if (g_slist_length(conv->chat_buddies) == 1) {
-		 /*
+		/*
 		 * We don't want to show the tabs any more 
 		 * when we have only one tab left.  	
 		 */
@@ -295,7 +330,7 @@ close_tab(HybridChatPanel *chat)
 
 	if (conv->chat_buddies == NULL) { 
 
-		/*
+	   /*
 		* Now we need to destroy the conversation window.
 		* NOTE: We don't have to free the resource here,
 		*       it will be done in the callback function
@@ -309,7 +344,7 @@ close_tab(HybridChatPanel *chat)
 static void
 menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridChatPanel *chat = (HybridChatPanel*)user_data;
+	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 
 	close_tab(chat);
 }
@@ -317,10 +352,9 @@ menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 static void
 menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridChatPanel *chat = (HybridChatPanel*)user_data;
-	HybridChatPanel *newchat;
+	HybridChatWindow *chat = (HybridChatWindow*)user_data;
+	HybridChatWindow *newchat;
 	GtkWidget *vbox;
-	HybridBuddy *buddy;
 	gint page_index;
 
 	HybridConversation *newconv;
@@ -336,15 +370,14 @@ menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 	close_tab(chat);
 
 	parent = chat->parent;
-	buddy = chat->buddy;
 
 	newconv = hybrid_conv_create();
 	conv_list = g_slist_append(conv_list, newconv);
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(newconv->notebook), FALSE);
 
-	newchat = g_new0(HybridChatPanel, 1);
+	newchat = g_new0(HybridChatWindow, 1);
 	newchat->parent = newconv;
-	newchat->buddy = buddy;
+	newchat->data = chat->data;
 	newchat->vbox = vbox;
 	newconv->chat_buddies = g_slist_append(newconv->chat_buddies, newchat);
 
@@ -360,7 +393,7 @@ menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 static void
 menu_close_other_pages_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridChatPanel *chat = (HybridChatPanel*)user_data;
+	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 	HybridConversation *conv;
 	GSList *pos;
 
@@ -385,7 +418,7 @@ menu_close_other_pages_cb(GtkWidget *widget, gpointer user_data)
 static void
 menu_close_all_pages_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridChatPanel *chat = (HybridChatPanel*)user_data;
+	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 
 	gtk_widget_destroy(chat->parent->window);
 }
@@ -394,8 +427,8 @@ static gboolean
 tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 {
 	if (e->button == 3) { /**< right button clicked */
-		HybridChatPanel *chat = (HybridChatPanel*)user_data;
-		HybridChatPanel *temp_chat;
+		HybridChatWindow *chat = (HybridChatWindow*)user_data;
+		HybridChatWindow *temp_chat;
 		HybridBuddy *temp_buddy;
 		GdkPixbuf *pixbuf;
 		GtkWidget *img;
@@ -409,23 +442,30 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 		/* create labels menu */
 		for (pos = chat->parent->chat_buddies; pos; pos = pos->next) {
 
-			temp_chat = (HybridChatPanel*)pos->data;	
-			temp_buddy = temp_chat->buddy;
+			temp_chat = (HybridChatWindow*)pos->data;	
 
-			pixbuf = hybrid_create_pixbuf_at_size(temp_buddy->icon_data,
-						temp_buddy->icon_data_length, 16, 16);
-			img = gtk_image_new_from_pixbuf(pixbuf);
-			g_object_unref(pixbuf);
+			if (IS_SYSTEM_CHAT(temp_chat)) {
 
-			submenu = gtk_image_menu_item_new_with_label(
-					temp_buddy->name && *(temp_buddy->name) != '\0' ?
-					temp_buddy->name : temp_buddy->id);
+				temp_buddy = temp_chat->data;
 
-			g_signal_connect(submenu, "activate",
-					G_CALLBACK(menu_switch_page_cb), temp_chat);
+				pixbuf = hybrid_create_pixbuf_at_size(temp_buddy->icon_data,
+							temp_buddy->icon_data_length, 16, 16);
 
-			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(submenu), img);
-			gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+				img = gtk_image_new_from_pixbuf(pixbuf);
+
+				g_object_unref(pixbuf);
+
+				submenu = gtk_image_menu_item_new_with_label(
+						temp_buddy->name && *(temp_buddy->name) != '\0' ?
+						temp_buddy->name : temp_buddy->id);
+				gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(submenu), img);
+
+				g_signal_connect(submenu, "activate",
+						G_CALLBACK(menu_switch_page_cb), temp_chat);
+
+
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+			}
 		}
 
 		/* create seperator */
@@ -434,25 +474,32 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 
 		/* create move menu */
 		submenu = gtk_menu_item_new_with_label(_("Close Current Page"));
+
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+
 		g_signal_connect(submenu, "activate",
 				G_CALLBACK(menu_close_current_page_cb), temp_chat);
 
 		submenu = gtk_menu_item_new_with_label(_("Popup Current Page"));
+
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+
 		g_signal_connect(submenu, "activate",
 				G_CALLBACK(menu_popup_current_page_cb), temp_chat);
 
 		submenu = gtk_menu_item_new_with_label(_("Close Other Pages"));
+
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+
 		g_signal_connect(submenu, "activate",
 				G_CALLBACK(menu_close_other_pages_cb), temp_chat);
 
 		submenu = gtk_menu_item_new_with_label(_("Close All Pages"));
+
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
+
 		g_signal_connect(submenu, "activate",
 				G_CALLBACK(menu_close_all_pages_cb), temp_chat);
-
 
 		gtk_widget_show_all(menu);
 
@@ -469,7 +516,7 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 static gboolean
 tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 {
-	HybridChatPanel *chat = (HybridChatPanel*)user_data;
+	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 
 	if (e->button == 1) {
 		close_tab(chat);
@@ -490,7 +537,7 @@ tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
  * |- GtkEventBox -> GtkCellView  -|--- GtkEventBox ---|
  */
 static GtkWidget*
-create_note_label(HybridChatPanel *chat)
+create_note_label(HybridChatWindow *chat)
 {
 	GtkWidget *hbox;
 	GtkWidget *eventbox;
@@ -504,7 +551,6 @@ create_note_label(HybridChatPanel *chat)
 
 	g_return_val_if_fail(chat != NULL, NULL);
 
-	buddy = chat->buddy;
 
 	hbox = gtk_hbox_new(FALSE, 0);
 
@@ -540,14 +586,19 @@ create_note_label(HybridChatPanel *chat)
 	gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(label), path);
 	gtk_tree_path_free(path);
 
-	icon_pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
+	if (IS_SYSTEM_CHAT(chat)) {
 
-	gtk_list_store_set(store, &chat->tabiter, 
-			TAB_STATUS_ICON_COLUMN, icon_pixbuf, TAB_NAME_COLUMN,
-			buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
-			-1);
+		buddy = chat->data;
 
-	g_object_unref(icon_pixbuf);
+		icon_pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
+
+		gtk_list_store_set(store, &chat->tabiter, 
+				TAB_STATUS_ICON_COLUMN, icon_pixbuf, TAB_NAME_COLUMN,
+				buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
+				-1);
+
+		g_object_unref(icon_pixbuf);
+	}
 
 	eventbox = gtk_event_box_new();
 	gtk_container_add(GTK_CONTAINER(eventbox), label);
@@ -582,20 +633,23 @@ create_note_label(HybridChatPanel *chat)
  * -----------------------------------------------------
  */
 static void
-create_buddy_tips_panel(GtkWidget *vbox, HybridChatPanel *chat)
+create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 {
 	GtkWidget *cellview;
 	GtkListStore *store;
 	GtkCellRenderer *renderer; 
 	GtkTreePath *path;
+	HybridAccount *account;
+	HybridModule *proto;
 	HybridBuddy *buddy;
 	gchar *name_text;
 	gchar *mood_text;
 	GdkPixbuf *icon_pixbuf;
+	GdkPixbuf *proto_pixbuf;
+	GdkPixbuf *presence_pixbuf;
 
 	g_return_if_fail(vbox != NULL);
 
-	buddy = chat->buddy;
 
 	cellview = gtk_cell_view_new();
 	
@@ -641,29 +695,51 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatPanel *chat)
 	gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(cellview), path);
 	gtk_tree_path_free(path);
 
-	icon_pixbuf = hybrid_create_round_pixbuf(buddy->icon_data,
-					buddy->icon_data_length, 32);
+	chat->tiplabel = cellview;
 
-	mood_text = g_markup_escape_text(buddy->mood ? buddy->mood : "", -1);
+	if (IS_SYSTEM_CHAT(chat)) {
 
-	name_text = g_strdup_printf(
-			"<b>%s</b>\n<small><span font=\"#8f8f8f\">%s</span></small>",
-			buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
-			mood_text);
+		buddy = chat->data;
 
-	gtk_list_store_set(store, &chat->tipiter, 
-			BUDDY_ICON_COLUMN, icon_pixbuf,
-			BUDDY_NAME_COLUMN, name_text, -1);
+		icon_pixbuf = hybrid_create_round_pixbuf(buddy->icon_data,
+						buddy->icon_data_length, 32);
 
-	g_object_unref(icon_pixbuf);
-	g_free(name_text);
-	g_free(mood_text);
+		presence_pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
+
+		mood_text = g_markup_escape_text(buddy->mood ? buddy->mood : "", -1);
+
+		name_text = g_strdup_printf(
+				"<b>%s</b>\n<small><span font=\"#8f8f8f\">%s</span></small>",
+				buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
+				mood_text);
+
+		gtk_list_store_set(store, &chat->tipiter, 
+				BUDDY_ICON_COLUMN, icon_pixbuf,
+				BUDDY_NAME_COLUMN, name_text, 
+				BUDDY_STATUS_ICON_COLUMN, presence_pixbuf, -1);
+
+		g_object_unref(icon_pixbuf);
+		g_object_unref(presence_pixbuf);
+
+		g_free(name_text);
+		g_free(mood_text);
+	}
+
+	account = chat->account;
+	proto   = account->proto;
+
+	proto_pixbuf = hybrid_create_proto_icon(proto->info->name, 16);
+
+	gtk_list_store_set(store, &chat->tipiter,
+					BUDDY_PROTO_ICON_COLUMN, proto_pixbuf, -1);
+
+	g_object_unref(proto_pixbuf);
 
 	gtk_box_pack_start(GTK_BOX(vbox), cellview, FALSE, FALSE, 5);
 }
 
 static void
-init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
+init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 {
 	GtkWidget *scroll;
 	GtkWidget *button;
@@ -695,13 +771,16 @@ init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
 	button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
 			_("Chat logs"), _("View chat logs"), NULL, image_icon,
 			NULL, NULL);
-	gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
 
-	image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/nudge.png");
-	button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
-			_("Screen jitter"), _("Send a screen jitter"), NULL,
-			image_icon, NULL, NULL);
-	gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
+	if (IS_SYSTEM_CHAT(chat)) {
+		gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
+		image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/nudge.png");
+		button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
+				_("Screen jitter"), _("Send a screen jitter"), NULL,
+				image_icon, NULL, NULL);
+		gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
+	}
+
 	gtk_widget_show_all(chat->toolbar);
 
 	/* create textview */
@@ -732,17 +811,15 @@ init_chat_panel_body(GtkWidget *vbox, HybridChatPanel *chat)
  * Initialize the chat panel.
  */
 static void
-init_chat_panel(HybridChatPanel *chat)
+init_chat_window(HybridChatWindow *chat)
 {
 	GtkWidget *vbox;
 	HybridConversation *conv;
-	HybridBuddy *buddy;
 	gint page_index;
 
 	g_return_if_fail(chat != NULL);
 
 	conv = chat->parent;
-	buddy = chat->buddy;
 
 	if (g_slist_length(conv->chat_buddies) == 1) {
 		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), FALSE);
@@ -763,7 +840,7 @@ init_chat_panel(HybridChatPanel *chat)
 	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(conv->notebook),
 			vbox, TRUE, TRUE, GTK_PACK_START);
 
-	init_chat_panel_body(vbox, chat);
+	init_chat_window_body(vbox, chat);
 
 	/*
 	 * The function should stay here. Because of the following reason:
@@ -775,15 +852,18 @@ init_chat_panel(HybridChatPanel *chat)
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook), page_index);
 }
 
-HybridChatPanel*
-hybrid_chat_panel_create(HybridBuddy *buddy)
+HybridChatWindow*
+hybrid_chat_window_create(HybridAccount *account, const gchar *id,
+		HybridChatWindowType type)
 {
-	HybridChatPanel *chat = NULL;
+	HybridChatWindow *chat = NULL;
 	HybridConversation *conv = NULL;
+	HybridBuddy *buddy;
 	GSList *conv_pos;
 	GSList *chat_pos;
 
-	g_return_val_if_fail(buddy != NULL, NULL);
+	g_return_val_if_fail(account != NULL, NULL);
+	g_return_val_if_fail(id != NULL, NULL);
 
 	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
 		conv = (HybridConversation*)conv_pos->data;
@@ -791,9 +871,9 @@ hybrid_chat_panel_create(HybridBuddy *buddy)
 		for (chat_pos = conv->chat_buddies; chat_pos;
 				chat_pos = chat_pos->next) {
 
-			chat = (HybridChatPanel*)chat_pos->data;
+			chat = (HybridChatWindow*)chat_pos->data;
 
-			if (chat->buddy == buddy) {
+			if (g_strcmp0(id, chat->id) == 0) {
 				goto found;
 			}
 		}
@@ -804,12 +884,28 @@ hybrid_chat_panel_create(HybridBuddy *buddy)
 		conv_list = g_slist_append(conv_list, conv);
 	}
 
-	chat = g_new0(HybridChatPanel, 1);
-	chat->parent = conv;
-	chat->buddy = buddy;
+	if (type == HYBRID_CHAT_PANEL_SYSTEM) {
+		if (!(buddy = (hybrid_blist_find_buddy(account, id)))) {
+			
+			hybrid_debug_error("conv", "FATAL, can't find buddy");
+
+			return NULL;
+		}
+	}
+
+	chat = g_new0(HybridChatWindow, 1);
+	chat->id      = g_strdup(id);
+	chat->parent  = conv;
+	chat->account = account;
+	chat->type    = type;
+
+	if (type == HYBRID_CHAT_PANEL_SYSTEM) {
+		chat->data = buddy;
+	}
+
 	conv->chat_buddies = g_slist_append(conv->chat_buddies, chat);
 
-	init_chat_panel(chat);	
+	init_chat_window(chat);	
 	return chat;
 
 found:
@@ -827,7 +923,7 @@ hybrid_conv_got_message(HybridAccount *account,
 	GSList *conv_pos;
 	GSList *chat_pos;
 	HybridConversation *conv;
-	HybridChatPanel *chat;
+	HybridChatWindow *chat;
 	HybridBuddy *temp_buddy;
 	HybridBuddy *buddy;
 	gchar *msg;
@@ -851,9 +947,9 @@ hybrid_conv_got_message(HybridAccount *account,
 
 		for (chat_pos = conv->chat_buddies; chat_pos; 
 				chat_pos = chat_pos->next) {
-			chat = (HybridChatPanel*)chat_pos->data;
+			chat = (HybridChatWindow*)chat_pos->data;
 
-			temp_buddy = chat->buddy;
+			temp_buddy = chat->data;
 
 			if (g_strcmp0(temp_buddy->id, buddy_id) == 0) {
 				goto got_chat_found;
@@ -862,11 +958,73 @@ hybrid_conv_got_message(HybridAccount *account,
 	}
 	
 	/* Well, we haven't find an existing chat panel so far, so create one. */
-	chat = hybrid_chat_panel_create(buddy);
+	chat = hybrid_chat_window_create(account, buddy->id, HYBRID_CHAT_PANEL_SYSTEM);
 
 got_chat_found:
-	hybrid_chat_textview_append(chat->textview, buddy, msg, time, FALSE);
+	hybrid_chat_textview_append(chat->textview, buddy->name, msg, time, FALSE);
 
 	g_free(msg);
 }
 
+void
+hybrid_chat_window_set_title(HybridChatWindow *window, const gchar *title)
+{
+	GtkTreeModel *model;
+	GtkListStore *store;
+
+	g_return_if_fail(window != NULL);
+
+	if (!IS_USER_DEFINED_CHAT(window)) {
+		return;
+	}
+
+	window->title = g_strdup(title);
+
+	model = gtk_cell_view_get_model(GTK_CELL_VIEW(window->tablabel));
+	store = GTK_LIST_STORE(model);
+
+	gtk_list_store_set(store, &window->tabiter, TAB_NAME_COLUMN, title, -1);
+
+	model = gtk_cell_view_get_model(GTK_CELL_VIEW(window->tiplabel));
+	store = GTK_LIST_STORE(model);
+
+	gtk_list_store_set(store, &window->tipiter, BUDDY_NAME_COLUMN, title, -1);
+}
+
+void
+hybrid_chat_window_set_icon(HybridChatWindow *window, GdkPixbuf *pixbuf)
+{
+	GtkTreeModel *model;
+	GtkListStore *store;
+
+	g_return_if_fail(window != NULL);
+
+	if (!IS_USER_DEFINED_CHAT(window)) {
+		return;
+	}
+
+	g_object_ref(pixbuf);
+	window->icon = pixbuf;
+
+	model = gtk_cell_view_get_model(GTK_CELL_VIEW(window->tablabel));
+	store = GTK_LIST_STORE(model);
+
+	gtk_list_store_set(store, &window->tabiter,
+			TAB_STATUS_ICON_COLUMN, pixbuf,
+			-1);
+
+	model = gtk_cell_view_get_model(GTK_CELL_VIEW(window->tiplabel));
+	store = GTK_LIST_STORE(model);
+
+	gtk_list_store_set(store, &window->tipiter,
+			BUDDY_ICON_COLUMN, pixbuf, -1);
+}
+
+void
+hybrid_chat_window_set_callback(HybridChatWindow *window,
+					ChatCallback callback)
+{
+	g_return_if_fail(window != NULL);
+
+	window->callback = callback;
+}
