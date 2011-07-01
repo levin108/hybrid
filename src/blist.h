@@ -22,15 +22,15 @@ struct _HybridBlist {
 
 struct _HybridGroup {
 	GtkTreeIter iter;
-	HybridAccount *account;
+	HybridAccount *account; /**< The corresponding xml node in cache context.*/
 
 	xmlnode *cache_node;
 
-	gint buddy_count;
-	gint online_count;
+	gint buddy_count; /**< count of the buddies belonging to this group. */
+	gint online_count; /**< count of the online buddies belonging to this group.*/
 	gchar *id;
 	gchar *name;
-
+	gint renamable; /**< whether this group can be renamed. */
 };
 
 struct _HybridBuddy {
@@ -182,6 +182,14 @@ void hybrid_blist_set_buddy_icon(HybridBuddy *buddy,
  * @return The checksum of the buddy's portrait.
  */
 const gchar *hybrid_blist_get_buddy_checksum(HybridBuddy *buddy);
+
+/**
+ * Set whether the group can be renamed.
+ *
+ * @param group The group.
+ * @param renamable TRUE if this group can be renamed, otherwise FALSE.
+ */
+void hybrid_blist_set_group_renamable(HybridGroup *group, gboolean renamable);
 
 /**
  * Find a group with the specified id.

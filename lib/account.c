@@ -796,6 +796,20 @@ account_found:
 		name = xmlnode_prop(group_node, "name");
 
 		group = hybrid_blist_add_group(account, id, name);
+
+		/* Set whether this group can be renamed. */
+		if (xmlnode_has_prop(group_node, "renamable")) {
+
+			value = xmlnode_prop(group_node, "renamable");
+
+			group->renamable = atoi(value);
+
+			g_free(value);
+
+		} else {
+			group->renamable = 1;
+		}
+
 		group->cache_node = group_node;
 
 		g_free(id);

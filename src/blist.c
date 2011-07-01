@@ -10,6 +10,7 @@
 
 HybridBlist *blist = NULL;
 
+static void hybrid_blist_set_group_name(HybridGroup *group, const gchar *name);
 static void hybrid_blist_buddy_icon_save(HybridBuddy *buddy);
 static void hybrid_blist_buddy_to_cache(HybridBuddy *buddy,
 							HybridBlistCacheType type);
@@ -152,7 +153,7 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 				return;
 			}
 
-			//hybrid_blist_set_buddy_name(buddy, text);
+			hybrid_blist_set_group_name(group, text);
 		}
 	}
 }
@@ -701,6 +702,7 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 	}
 
 	group = g_new0(HybridGroup, 1);
+	group->renamable = 1;
 	proto_icon  = hybrid_create_proto_icon(ac->proto->info->name, 16);
 	gtk_tree_store_append(blist->treemodel, &group->iter, NULL);
 
@@ -837,6 +839,16 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	return buddy;
 }
 
+void
+hybrid_blist_set_group_renamable(HybridGroup *group, gboolean renamable)
+{
+	g_return_if_fail(group != NULL);
+
+	group->renamable = renamable ? 1 : 0;
+
+	hybrid_blist_group_to_cache(group);
+}
+
 const gchar*
 hybrid_blist_get_buddy_checksum(HybridBuddy *buddy)
 {
@@ -860,7 +872,7 @@ hybrid_blist_buddy_destroy(HybridBuddy *buddy)
 }
 
 /**
- * Set the name field.
+ * Set the buddy's name field.
  */
 static void
 hybrid_blist_set_name_field(HybridBuddy *buddy)
@@ -902,6 +914,37 @@ hybrid_blist_set_name_field(HybridBuddy *buddy)
 	g_free(mood);
 	g_free(text);
 	g_free(tmp);
+}
+
+/**
+ * Set the group's name.
+ */
+static void
+hybrid_blist_set_group_name(HybridGroup *group, const gchar *name)
+{
+	GtkTreeView *treeview;
+	GtkTreeModel *model;
+	gchar *name_str;
+
+	g_return_if_fail(group != NULL);
+	g_return_if_fail(name != NULL);
+
+	g_free(group->name);
+	group->name = g_strdup(name);
+
+	treeview = GTK_TREE_VIEW(blist->treeview);
+	model = gtk_tree_view_get_model(treeview);
+
+	name_str = g_strdup_printf("<b>%s</b> (%d/%d)", name,
+					group->online_count, group->buddy_count);
+
+	gtk_tree_store_set(GTK_TREE_STORE(model), &group->iter,
+					HYBRID_BLIST_BUDDY_NAME, name_str,
+					-1);
+
+	g_free(name_str);
+
+	hybrid_blist_group_to_cache(group);
 }
 
 /**
@@ -1122,6 +1165,7 @@ hybrid_blist_group_to_cache(HybridGroup *group)
 	gchar *protoname;
 	gchar *id;
 	gchar *name;
+	gchar *renamable;
 
 	g_return_if_fail(group != NULL);
 
@@ -1231,6 +1275,17 @@ group_exist:
 	} else {
 		xmlnode_new_prop(node, "name", group->name);
 	}
+
+
+	renamable = g_strdup_printf("%d", group->renamable);
+	if (xmlnode_has_prop(node, "renamable")) {
+		xmlnode_set_prop(node, "renamable", renamable);
+
+	} else {
+		xmlnode_new_prop(node, "renamable", renamable);
+	}
+
+	g_free(renamable);
 
 	group->cache_node = node;
 
