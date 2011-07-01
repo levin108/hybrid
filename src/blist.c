@@ -34,7 +34,9 @@ editing_started_cb(GtkCellRenderer *renderer, GtkCellEditable *editable,
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	HybridBuddy *buddy;
+	HybridGroup *group;
 	GtkEntry *entry;
+	gint depth;
 	const gchar *text;
 
 	tree  = GTK_TREE_VIEW(blist->treeview);
@@ -42,12 +44,21 @@ editing_started_cb(GtkCellRenderer *renderer, GtkCellEditable *editable,
 	path  = gtk_tree_path_new_from_string(path_str);
 
 	gtk_tree_model_get_iter(model, &iter, path);
+	depth = gtk_tree_path_get_depth(path);
 	gtk_tree_path_free(path);
 
-	gtk_tree_model_get(model, &iter,
-			HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
+	if (depth > 1) { /* edit buddy */
+		gtk_tree_model_get(model, &iter,
+				HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
 
-	text = buddy->name;
+		text = buddy->name;
+
+	} else { /* edit group */
+		gtk_tree_model_get(model, &iter,
+				HYBRID_BLIST_OBJECT_COLUMN, &group, -1);
+
+		text = group->name;
+	}
 
 	if (GTK_IS_ENTRY(editable)) {
 		entry = GTK_ENTRY(editable);
@@ -78,39 +89,71 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	HybridBuddy *buddy;
+	HybridGroup *group;
 	HybridAccount *account;
 	HybridModule *module;
+	gchar *name;
+	gint depth;
 
 	tree  = GTK_TREE_VIEW(blist->treeview);
 	model = gtk_tree_view_get_model(tree);
 	path  = gtk_tree_path_new_from_string(path_str);
 
 	gtk_tree_model_get_iter(model, &iter, path);
+	depth = gtk_tree_path_get_depth(path);
 	gtk_tree_path_free(path);
-
-	gtk_tree_model_get(model, &iter,
-			HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
 
 	g_object_set(G_OBJECT(text_rend), "editable", FALSE, NULL);
 
+	if (depth > 1) {
+
+		gtk_tree_model_get(model, &iter,
+				HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
+
+		name = buddy->name;
+
+	} else {
+
+		gtk_tree_model_get(model, &iter,
+				HYBRID_BLIST_OBJECT_COLUMN, &group, -1);
+
+		name = group->name;
+	}
+
 	/* if the text hasn't been changed, do nothing but return. */
-	if ((*text == '\0') || g_strcmp0(text, buddy->name) == 0) {
+	if ((*text == '\0') || g_strcmp0(text, name) == 0) {
 		return;
 	}
 
 	/*
-	 * yes, we've changed the alias name of the buddy, we should
+	 * yes, we've changed the alias name of the buddy/group, we should
 	 * call the protocol-specified hook function. 
 	 */
-	account = buddy->account;
-	module  = account->proto;
 
-	if (module->info->buddy_rename) {
-		if (!module->info->buddy_rename(account, buddy, text)) {
-			return;
+	if (depth > 1) { /* rename buddy */
+		account = buddy->account;
+		module  = account->proto;
+
+		if (module->info->buddy_rename) {
+			if (!module->info->buddy_rename(account, buddy, text)) {
+				return;
+			}
+
+			hybrid_blist_set_buddy_name(buddy, text);
 		}
 
-		hybrid_blist_set_buddy_name(buddy, text);
+	} else { /* rename group */
+
+		account = group->account;
+		module  = account->proto;
+
+		if (module->info->group_rename) {
+			if (!module->info->group_rename(account, group, text)) {
+				return;
+			}
+
+			//hybrid_blist_set_buddy_name(buddy, text);
+		}
 	}
 }
 
@@ -411,6 +454,24 @@ rename_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 	gtk_tree_path_free(path);
 }
 
+static void
+rename_group_menu_cb(GtkWidget *widget, HybridGroup *group)
+{
+	GtkTreeView *tree;
+	GtkTreeModel *model;
+	GtkTreePath *path;
+
+	tree = GTK_TREE_VIEW(blist->treeview);
+	model = gtk_tree_view_get_model(tree);
+	path = gtk_tree_model_get_path(model, &group->iter);
+	g_object_set(blist->text_renderer, "editable", TRUE, NULL);
+
+	gtk_widget_grab_focus(blist->treeview);
+	gtk_tree_view_set_cursor_on_cell(GTK_TREE_VIEW(blist->treeview), path,
+			blist->text_column, blist->text_renderer, TRUE);
+	gtk_tree_path_free(path);
+}
+
 static GtkWidget*
 create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 {
@@ -463,6 +524,41 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 					G_CALLBACK(rename_buddy_menu_cb), buddy);
 	hybrid_create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
 
+	gtk_widget_show_all(menu);
+
+	return menu;
+}
+
+static GtkWidget*
+create_group_menu(GtkWidget *treeview, GtkTreePath *path)
+{
+	GtkWidget *menu;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	HybridAccount *account;
+	HybridGroup *group;
+
+	g_return_val_if_fail(treeview != NULL, NULL);
+	g_return_val_if_fail(path != NULL, NULL);
+
+	menu = gtk_menu_new();
+
+	/* Select a tree row when right click on it. */
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
+
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
+	gtk_tree_model_get(model, &iter, HYBRID_BLIST_OBJECT_COLUMN, &group, -1);
+
+	account = group->account;
+	
+	hybrid_create_menu(menu, _("Rename Group"), "rename", TRUE,
+					G_CALLBACK(rename_group_menu_cb), group);
+	hybrid_create_menu(menu, _("Remove Group"), "remove", TRUE,
+					G_CALLBACK(rename_buddy_menu_cb), group);
+	hybrid_create_menu(menu, _("Add Buddy"), "add", TRUE, NULL, NULL);
+
+	gtk_widget_show_all(menu);
+
 	return menu;
 }
 
@@ -485,12 +581,22 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 		gtk_tree_selection_select_path(selection, path);
 
+		if (!path) {
+			return TRUE;
+		}
+
 		depth = gtk_tree_path_get_depth(path);
 
 		if (depth > 1) {
 			menu = create_buddy_menu(widget, path);
 
-			gtk_widget_show_all(menu);
+			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
+					(event != NULL) ? event->button : 0,
+					gdk_event_get_time((GdkEvent*)event));
+
+		} else {
+
+			menu = create_group_menu(widget, path);
 
 			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
 					(event != NULL) ? event->button : 0,

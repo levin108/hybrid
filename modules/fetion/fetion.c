@@ -616,6 +616,7 @@ HybridModuleInfo module_info = {
 	fetion_buddy_move,            /**< buddy_move */
 	fetion_remove,                /**< buddy_remove */
 	fetion_rename,                /**< buddy_rename */
+	NULL,
 	fetion_chat_send,             /**< chat_send */
 	fetion_close,                 /**< close */
 	fetion_actions,               /**< actions */

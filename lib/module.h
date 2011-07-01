@@ -31,6 +31,7 @@ struct _HybridModuleInfo {
 	gboolean (*buddy_move)(HybridAccount *, HybridBuddy *,HybridGroup *);
 	gboolean (*buddy_remove)(HybridAccount *, HybridBuddy *);
 	gboolean (*buddy_rename)(HybridAccount *, HybridBuddy *, const gchar *);
+	gboolean (*group_rename)(HybridAccount *, HybridGroup *, const gchar *);
 	void     (*chat_send)(HybridAccount *, HybridBuddy *, const gchar *);
 	void     (*close)(HybridAccount *);
 
