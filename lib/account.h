@@ -18,12 +18,16 @@ struct _HybridAccount {
 	gint   connect_state; /**< connection status. */
 	gint   keep_alive_source; /**< source id of the keep alive. */
 
+	gint   enabled; /**< whether the account is enabled. */
+
 	guchar *icon_data; /**< binary data of the icon. */
 	gint icon_data_len; /**< size of the binary data. */
 	gchar *icon_crc; /**< checksum of the icon */
 	gchar *icon_name; /**< file name of the local file. */
 
 	GtkWidget *account_menu;
+	GtkWidget *enable_menu;
+	GtkWidget *enable_menu_id;
 
 	gpointer protocol_data;
 
@@ -162,6 +166,14 @@ void hybrid_account_set_state(HybridAccount *account, gint state);
  * @param nickname The nickname.
  */
 void hybrid_account_set_nickname(HybridAccount *account, const gchar *nickname);
+
+/**
+ * Set whether the account is enabled.
+ *
+ * @param account The account.
+ * @param enabled Whether the account is enabled.
+ */
+void hybrid_account_set_enabled(HybridAccount *account, gboolean enabled);
 
 /**
  * Get the checksum of the account's icon.

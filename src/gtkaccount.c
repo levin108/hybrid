@@ -18,10 +18,20 @@ static HybridAccountEditPanel *create_account_edit_panel(
 		HybridAccountPanel *parent, gboolean is_add);
 static void add_cb(GtkWidget *widget, gpointer user_data);
 static void delete_cb(GtkWidget *widget, gpointer user_data);
+static void disable_cb(GtkWidget *widget, HybridAccount *account);
+static void enable_cb(GtkWidget *widget, HybridAccount *account);
 
 static HybridAccountPanel *account_panel = NULL;
 
 extern GSList *account_list;
+
+static void
+enable_account(HybridAccount *account)
+{
+	hybrid_account_set_enabled(account, TRUE);
+
+	account->proto->info->login(account);
+}
 
 static void
 enable_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
@@ -72,7 +82,7 @@ enable_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 	}
 
 	if (fixed) { /**< enable the account */
-		account->proto->info->login(account);
+		enable_account(account);
 
 	} else { /**< disable the account */
 		hybrid_account_close(account);
@@ -165,7 +175,8 @@ hybrid_account_panel_init(HybridAccountPanel *panel)
 				HYBRID_ENABLE_COLUMN, TRUE,
 				HYBRID_NAME_COLUMN, account->username,
 				HYBRID_PROTO_ICON_COLUMN, pixbuf,
-				HYBRID_PROTO_NAME_COLUMN, account->proto->info->name, -1);
+				HYBRID_PROTO_NAME_COLUMN, account->proto->info->name,
+				HYBRID_ENABLE_COLUMN, account->enabled, -1);
 
 		g_object_unref(pixbuf);
 	}
@@ -342,6 +353,8 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 	}
 
 	hybrid_account_set_password(account, password);
+	hybrid_account_set_enabled(account, TRUE);
+
 	hybrid_account_update(account);
 
 	if (account_panel) {
@@ -566,6 +579,40 @@ action_cb(GtkWidget *widget, HybridAction *action)
 }
 
 static void
+enable_cb(GtkWidget *widget, HybridAccount *account)
+{
+	GtkWidget *sub_menu;
+
+	enable_account(account);
+
+	gtk_widget_destroy(account->enable_menu);
+
+	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(account->account_menu));
+
+	account->enable_menu = hybrid_create_menu(sub_menu, _("Disable Account"),
+									NULL, TRUE, G_CALLBACK(disable_cb), account);
+
+	gtk_widget_show(account->enable_menu);
+}
+
+static void
+disable_cb(GtkWidget *widget, HybridAccount *account)
+{
+	GtkWidget *sub_menu;
+
+	hybrid_account_close(account);
+
+	gtk_widget_destroy(account->enable_menu);
+
+	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(account->account_menu));
+
+	account->enable_menu = hybrid_create_menu(sub_menu, _("Enable Account"),
+									NULL, TRUE, G_CALLBACK(enable_cb), account);
+
+	gtk_widget_show(account->enable_menu);
+}
+
+static void
 create_account_child_menus(HybridAccount *account)
 {
 	GtkWidget *account_menu;
@@ -634,8 +681,15 @@ create_account_child_menus(HybridAccount *account)
 
 	hybrid_create_menu_seperator(menu_shell);
 
-	menu_item = hybrid_create_menu(menu_shell, _("Disable Account"), "close",
-						TRUE, NULL, NULL);
+	if (account->enabled) {
+		account->enable_menu = 
+			hybrid_create_menu(menu_shell, _("Disable Account"), NULL,
+							TRUE, G_CALLBACK(disable_cb), account);
+	} else {
+		account->enable_menu = 
+			hybrid_create_menu(menu_shell, _("Enable Account"), NULL,
+							TRUE, G_CALLBACK(enable_cb), account);
+	}
 }
 
 
@@ -661,6 +715,11 @@ hybrid_account_create_menu(HybridAccount *account)
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(account->account_menu),
 						presence_image);
 	g_object_unref(presence_pixbuf);
+
+	/* load the action list. */
+	if (!account->action_list && account->proto->info->actions) {
+		account->action_list = account->proto->info->actions(account);
+	}
 
 	create_account_child_menus(account);
 

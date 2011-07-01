@@ -20,7 +20,10 @@ hybrid_start_login()
 
 	for (pos = account_list; pos; pos = pos->next) {
 		account = (HybridAccount*)pos->data;
-		account->proto->info->login(account);
+
+		if (account->enabled) {
+			account->proto->info->login(account);
+		}
 	}
 }
 

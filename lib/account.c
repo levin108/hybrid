@@ -85,6 +85,18 @@ hybrid_account_init(void)
 			g_free(username);
 			g_free(protoname);
 
+			/* load ENABLED. */
+			account->enabled = 0;
+
+			if (xmlnode_has_prop(node, "enable")) {
+
+				value = xmlnode_prop(node, "enable");
+
+				if (atoi(value) == 1) {
+					account->enabled = 1;
+				}
+			}
+
 			/* load the icon data. */
 			if (xmlnode_has_prop(node, "icon")) {
 				value = xmlnode_prop(node, "icon");
@@ -184,6 +196,7 @@ hybrid_account_update(HybridAccount *account)
 	xmlnode *node;
 	gchar *username;
 	gchar *protoname;
+	gchar *temp;
 
 	config_path = hybrid_config_get_path();
 	account_file = g_strdup_printf("%s/accounts.xml", config_path);
@@ -238,6 +251,17 @@ update_node:
 	} else {
 		xmlnode_new_prop(node, "user", account->username);
 	}
+
+	temp = g_strdup_printf("%d", account->enabled);
+
+	if (xmlnode_has_prop(node, "enable")) {
+		
+		xmlnode_set_prop(node, "enable", temp);
+	} else {
+		xmlnode_new_prop(node, "enable", temp);
+	}
+
+	g_free(temp);
 
 	if (xmlnode_has_prop(node, "pass")) {
 		xmlnode_set_prop(node, "pass", account->password);
@@ -459,6 +483,14 @@ hybrid_account_set_nickname(HybridAccount *account, const gchar *nickname)
 	account->nickname = g_strdup(nickname);
 }
 
+void
+hybrid_account_set_enabled(HybridAccount *account, gboolean enabled)
+{
+	g_return_if_fail(account != NULL);
+
+	account->enabled = (enabled ? 1 : 0);
+}
+
 const gchar*
 hybrid_account_get_checksum(HybridAccount *account)
 {
@@ -503,6 +535,16 @@ hybrid_account_close(HybridAccount *account)
 	 * Set the account's state to be closed.
 	 */
 	hybrid_account_set_connection_status(account, HYBRID_CONNECTION_CLOSED);
+
+	/*
+	 * Disable the account.
+	 */
+	hybrid_account_set_enabled(account, FALSE);
+
+	/*
+	 * Update the local cache file.
+	 */
+	hybrid_account_update(account);
 
 	/*
 	 * Remove the keep alive event source.
