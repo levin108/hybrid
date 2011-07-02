@@ -124,6 +124,10 @@ account_changed_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
 		return;
 	}
 
+	if (!window->group_combo) {
+		return;
+	}
+
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
 	
 	gtk_tree_model_get(model, &iter,
@@ -135,6 +139,32 @@ account_changed_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
 	g_object_unref(model);
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(window->group_combo), 0);
+}
+
+/**
+ * Callback function of the window destroy signal.
+ */
+static void
+destroy_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
+{
+	g_free(window);
+}
+
+static void
+add_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
+{
+	printf("abc\n");
+
+	gtk_widget_destroy(window->window);
+}
+
+/**
+ * Callback function of the cancel button clicked signal.
+ */
+static void
+cancel_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
+{
+	gtk_widget_destroy(window->window);
 }
 
 /**
@@ -253,15 +283,15 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	action_area = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 5);
 
-	button = gtk_button_new_with_label(_("Save"));
+	button = gtk_button_new_with_label(_("Add"));
 	gtk_widget_set_usize(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
-	//g_signal_connect(button, "clicked", G_CALLBACK(save_cb), window);
+	g_signal_connect(button, "clicked", G_CALLBACK(add_cb), window);
 
 	button = gtk_button_new_with_label(_("Cancel"));
 	gtk_widget_set_usize(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
-	//g_signal_connect(button, "clicked", G_CALLBACK(cancel_cb), window);
+	g_signal_connect(button, "clicked", G_CALLBACK(cancel_cb), window);
 }
 
 HybridBuddyAddWindow*
@@ -275,6 +305,7 @@ hybrid_buddyadd_window_create()
 				GTK_WIN_POS_CENTER, FALSE);
 	gtk_widget_set_usize(buddy->window, 420, 300);
 	gtk_container_set_border_width(GTK_CONTAINER(buddy->window), 8);
+	g_signal_connect(buddy->window, "destroy", G_CALLBACK(destroy_cb), buddy);
 
 	hybrid_buddyadd_window_init(buddy);
 
