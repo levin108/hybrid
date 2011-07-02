@@ -9,6 +9,12 @@ enum {
 	BUDDYADD_COLUMNS
 };
 
+enum {
+	BUDDYADD_GROUP_NAME_COLUMN,
+	BUDDYADD_GROUP_GROUP_COLUMN,
+	BUDDYADD_GROUP_COLUMNS
+};
+
 extern GSList *account_list;
 
 /**
@@ -69,6 +75,69 @@ create_account_model(void)
 }
 
 /**
+ * Create the account model for the group combo box.
+ */
+static GtkTreeModel*
+create_group_model(HybridAccount *account)
+{
+	GtkListStore *store;
+	HybridGroup *group;
+	GtkTreeIter iter;
+
+	GHashTableIter hash_iter;
+	gpointer key;
+	
+	store = gtk_list_store_new(BUDDYADD_GROUP_COLUMNS,
+							G_TYPE_STRING,
+							G_TYPE_POINTER);
+
+	if (!account) {
+		return GTK_TREE_MODEL(store);
+	}
+
+	/* Bind the groups of the current account to the group combo box. */
+	g_hash_table_iter_init(&hash_iter, account->group_list);
+	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
+
+		gtk_list_store_append(store, &iter);
+
+		gtk_list_store_set(store, &iter,
+				BUDDYADD_GROUP_NAME_COLUMN, group->name,
+				BUDDYADD_GROUP_GROUP_COLUMN, group,
+				-1);
+	}
+
+	return GTK_TREE_MODEL(store);
+}
+
+/**
+ * Callback function of the account combo box changed signal.
+ */
+static void
+account_changed_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	HybridAccount *account;
+
+	if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)) {
+		return;
+	}
+
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+	
+	gtk_tree_model_get(model, &iter,
+					BUDDYADD_ACCOUNT_COLUMN, &account,
+					-1);
+
+	model = create_group_model(account);
+	gtk_combo_box_set_model(GTK_COMBO_BOX(window->group_combo), model);
+	g_object_unref(model);
+
+	gtk_combo_box_set_active(GTK_COMBO_BOX(window->group_combo), 0);
+}
+
+/**
  * Initialize the buddy-add window.
  */
 static void
@@ -82,6 +151,9 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	GtkWidget *button;
 	GtkWidget *table;
 	GtkWidget *scroll;
+
+	HybridAccount *account = NULL;
+	GtkTreeIter iter;
 
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(window->window), vbox);
@@ -97,6 +169,8 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 
 	model = create_account_model();
 	window->account_combo = gtk_combo_box_new_with_model(model);
+	g_signal_connect(window->account_combo, "changed",
+					G_CALLBACK(account_changed_cb), window);
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(window->account_combo),
 								renderer, FALSE);
@@ -110,9 +184,9 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	gtk_combo_box_set_active(GTK_COMBO_BOX(window->account_combo), 0);
 
 	gtk_widget_set_usize(window->account_combo, 270, 30);
-	g_object_unref(model);
 	gtk_table_attach_defaults(GTK_TABLE(table), window->account_combo, 1, 2, 0, 1);
 
+	/* username */
 	label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), _("<b>Username:</b>"));
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
@@ -121,6 +195,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	gtk_widget_set_usize(window->username_entry, 270, 30);
 	gtk_table_attach_defaults(GTK_TABLE(table), window->username_entry, 1, 2, 1, 2);
 
+	/* alias name */
 	label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), _("<b>Alias:</b>"));
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
@@ -129,21 +204,37 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	gtk_widget_set_usize(window->localname_entry, 270, 30);
 	gtk_table_attach_defaults(GTK_TABLE(table), window->localname_entry, 1, 2, 2, 3);
 
+	/* add-to-group combo box. */
 	label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), _("<b>Add To Group:</b>"));
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 3, 4);
 
-	model = create_account_model();
+	/* get the active account. */
+	if (gtk_combo_box_get_active_iter(
+				GTK_COMBO_BOX(window->account_combo), &iter)) {
+		gtk_tree_model_get(model, &iter,
+				BUDDYADD_ACCOUNT_COLUMN, &account,
+				-1);
+	}
+
+	/* unref the account model. */
+	g_object_unref(model);
+
+	model = create_group_model(account);
 	window->group_combo = gtk_combo_box_new_with_model(model);
 	g_object_unref(model);
+
 	renderer = gtk_cell_renderer_text_new();
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(window->group_combo),
 								renderer, FALSE);
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(window->group_combo),
-								renderer, "text", 1, NULL);
+								renderer, "text", 
+								BUDDYADD_GROUP_NAME_COLUMN, NULL);
+
 	gtk_combo_box_set_active(GTK_COMBO_BOX(window->group_combo), 0);
 	gtk_table_attach_defaults(GTK_TABLE(table), window->group_combo, 1, 2, 3, 4);
 
+	/* add-buddy request tips. */
 	label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), _("<b>Tips:</b>"));
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 4, 5);
