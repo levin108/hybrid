@@ -462,6 +462,11 @@ rename_group_menu_cb(GtkWidget *widget, HybridGroup *group)
 	GtkTreeModel *model;
 	GtkTreePath *path;
 
+	if (!hybrid_blist_get_group_renamable(group)) {
+		/* This group can't be renamed. */
+		return;
+	}
+
 	tree = GTK_TREE_VIEW(blist->treeview);
 	model = gtk_tree_view_get_model(tree);
 	path = gtk_tree_model_get_path(model, &group->iter);
@@ -552,7 +557,8 @@ create_group_menu(GtkWidget *treeview, GtkTreePath *path)
 
 	account = group->account;
 	
-	hybrid_create_menu(menu, _("Rename Group"), "rename", TRUE,
+	hybrid_create_menu(menu, _("Rename Group"), "rename", 
+					hybrid_blist_get_group_renamable(group),
 					G_CALLBACK(rename_group_menu_cb), group);
 	hybrid_create_menu(menu, _("Remove Group"), "remove", TRUE,
 					G_CALLBACK(rename_buddy_menu_cb), group);
@@ -847,6 +853,14 @@ hybrid_blist_set_group_renamable(HybridGroup *group, gboolean renamable)
 	group->renamable = renamable ? 1 : 0;
 
 	hybrid_blist_group_to_cache(group);
+}
+
+gboolean
+hybrid_blist_get_group_renamable(HybridGroup *group)
+{
+	g_return_val_if_fail(group != NULL, TRUE);
+
+	return group->renamable == 1;
 }
 
 const gchar*

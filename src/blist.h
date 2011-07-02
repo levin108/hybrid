@@ -192,6 +192,15 @@ const gchar *hybrid_blist_get_buddy_checksum(HybridBuddy *buddy);
 void hybrid_blist_set_group_renamable(HybridGroup *group, gboolean renamable);
 
 /**
+ * Get whether the group can be renamed.
+ *
+ * @param group The group.
+ * 
+ * @return TRUE if this group can be renamed, otherwise FALSE.
+ */
+gboolean hybrid_blist_get_group_renamable(HybridGroup *group);
+
+/**
  * Find a group with the specified id.
  *
  * @param account The account to which the group belongs.

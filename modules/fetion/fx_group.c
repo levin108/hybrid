@@ -30,12 +30,20 @@ void
 fetion_groups_init(fetion_account *ac)
 {
 	GSList *pos;
+	HybridGroup *hgroup;
 	fetion_group *group;
 	gchar buf[BUF_LENGTH];
 
 	for (pos = ac->groups; pos; pos = pos->next) {
+
 		group = (fetion_group*)pos->data;
+
 		g_snprintf(buf, sizeof(buf) - 1, "%d", group->group_id);
-		hybrid_blist_add_group(ac->account, buf, group->group_name);
+		hgroup = hybrid_blist_add_group(ac->account, buf, group->group_name);
+
+		/* The group named 'Ungrouped' can't be renamed. */
+		if (group->group_id == 0) {
+			hybrid_blist_set_group_renamable(hgroup, FALSE);
+		}
 	}
 }
