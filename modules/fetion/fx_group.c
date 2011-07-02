@@ -4,7 +4,8 @@
 #include "fx_trans.h"
 #include "fx_group.h"
 
-static gchar* generate_group_edit_body(const gchar *group_id, const gchar *group_name);
+static gchar *generate_group_edit_body(const gchar *group_id, const gchar *group_name);
+static gchar *generate_group_add_body(const gchar *name);
 
 fetion_group*
 fetion_group_create(gint id, const gchar *name)
@@ -82,6 +83,99 @@ fetion_group_edit(fetion_account *account, const gchar *id,
 	return HYBRID_OK;
 }
 
+static gint
+group_add_cb(fetion_account *account, const gchar *sipmsg,
+			fetion_transaction *trans)
+{
+	gint code;
+	gchar *pos;
+	xmlnode *root;
+	xmlnode *node;
+	gchar *group_name;
+	gchar *group_id;
+
+	hybrid_debug_info("fetion", "group add, recv:\n%s", sipmsg);
+
+	if ((code = fetion_sip_get_code(sipmsg)) != 200) {
+		goto group_add_error;
+	}
+
+	if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
+		goto group_add_error;
+	}
+
+	pos += 4;
+
+	if (!(root = xmlnode_root(pos, strlen(pos)))) {
+		goto group_add_error;
+	}
+
+	if (!(node = xmlnode_find(root, "buddy-list"))) {
+		goto group_add_error;
+	}
+
+	if (!xmlnode_has_prop(node, "id") || !xmlnode_has_prop(node, "name")) {
+		goto group_add_error;
+	}
+
+	group_id = xmlnode_prop(node, "id");
+	group_name = xmlnode_prop(node, "name");
+
+	hybrid_blist_add_group(account->account, group_id, group_name);
+
+	return HYBRID_OK;
+
+group_add_error:
+
+	hybrid_debug_error("fetion", "group add error: %d", code);
+
+	/* TODO popup warning box. */
+
+	return HYBRID_ERROR;
+}
+
+gint
+fetion_group_add(fetion_account *account, const gchar *name)
+{
+	fetion_sip *sip;
+	sip_header *eheader;
+	gchar *body;
+	gchar *sip_text; 
+	fetion_transaction *trans;
+
+	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(name != NULL, HYBRID_ERROR);
+
+	sip = account->sip;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+
+	eheader = sip_event_header_create(SIP_EVENT_CREATEBUDDYLIST);
+	fetion_sip_add_header(sip, eheader);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, group_add_cb);
+	transaction_add(account, trans);
+
+	body = generate_group_add_body(name);
+	sip_text = fetion_sip_to_string(sip , body);
+	g_free(body);
+
+	hybrid_debug_info("fetion", "add group, send:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+		
+		hybrid_debug_error("fetion", "add group failed");
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+
+	return HYBRID_OK;
+}
+
 void
 fetion_groups_init(fetion_account *ac)
 {
@@ -121,6 +215,26 @@ generate_group_edit_body(const gchar *group_id, const gchar *group_name)
 
 	xmlnode_new_prop(node, "id", group_id);
 	xmlnode_new_prop(node, "name", group_name);
+
+	return xmlnode_to_string(root);
+}
+
+static gchar*
+generate_group_add_body(const gchar *name)
+{
+	const gchar *body;
+	xmlnode *root;
+	xmlnode *node;
+
+	body = "<args></args>";
+
+	root = xmlnode_root(body, strlen(body));
+
+	node = xmlnode_new_child(root, "contacts");
+	node = xmlnode_new_child(node, "buddy-lists");
+	node = xmlnode_new_child(node, "buddy-list");
+
+	xmlnode_new_prop(node, "name", name);
 
 	return xmlnode_to_string(root);
 }

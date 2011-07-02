@@ -5,6 +5,9 @@
 			<separator/>
 			<menuitem action="Quit"/>
 		</menu>
+		<menu action="Tools">
+			<menuitem action="Add Group"/>
+		</menu>
 		<menu action="Help">
 			<menuitem action="About"/>
 		</menu>

@@ -32,6 +32,12 @@ struct _HybridModuleInfo {
 	gboolean (*buddy_remove)(HybridAccount *, HybridBuddy *);
 	gboolean (*buddy_rename)(HybridAccount *, HybridBuddy *, const gchar *);
 	gboolean (*group_rename)(HybridAccount *, HybridGroup *, const gchar *);
+
+	/*
+	 * Group-add hook function, note that it won't add the new group to the
+	 * buddy list automaticly, you should add it manually in the hook function.
+	 */
+	void     (*group_add)(HybridAccount *, const gchar *);
 	void     (*chat_send)(HybridAccount *, HybridBuddy *, const gchar *);
 	void     (*close)(HybridAccount *);
 

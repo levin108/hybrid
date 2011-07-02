@@ -48,9 +48,31 @@ void fetion_group_destroy(fetion_group *group);
  * @param account The fetion account.
  * @param id      The id of the group to rename.
  * @param name    The new name.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
 gint fetion_group_edit(fetion_account *account, const gchar *id,
 						const gchar *name);
+
+/**
+ * Add a new group, the message is:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 547264589
+ * I: 7
+ * Q: 2 S
+ * N: CreateBuddyList
+ * L: 108
+ *
+ * <args><contacts><buddy-lists><buddy-list name="test"/>
+ * </buddy-lists></contacts></args>
+ *
+ * @param account The fetion account.
+ * @param name    The name of the new group.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint fetion_group_add(fetion_account *account, const gchar *name);
 
 /* UI ops  */
 

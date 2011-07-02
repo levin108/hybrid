@@ -6,6 +6,7 @@
 #include "util.h"
 #include "gtkaccount.h"
 #include "gtkutils.h"
+#include "groupadd.h"
 
 extern HybridBlist *blist;
 extern GSList *account_list;
@@ -52,6 +53,14 @@ quit_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
+add_group_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridGroupAddWindow *window;
+
+	window = hybrid_groupadd_window_create();
+}
+
+static void
 create_account_menus(GtkUIManager *ui)
 {
 	GtkWidget *account_shell;
@@ -86,17 +95,41 @@ create_basic_menus(GtkBox *box)
 	GtkActionGroup *actionGroup;
 
 	GtkActionEntry entries[] = {
+		/* account menu. */
 		{ "Account", NULL, "_Account" },
-		{ "Manage Accounts", NULL, "Manage Accounts",
-		 "<control>A", "Manage Account", G_CALLBACK(manage_account_cb)},
-		{ "Quit", GTK_STOCK_QUIT, "Quit",
-		 "<control>Q", "Quit", G_CALLBACK(quit_cb)},
+		{	
+			"Manage Accounts",
+			NULL,
+			"Manage Accounts",
+			"<control>A",
+			"Manage Account", 
+			G_CALLBACK(manage_account_cb)
+		},
+		{	
+			"Quit",
+			GTK_STOCK_QUIT,
+			"Quit",
+			"<control>Q", 
+			"Quit",
+			G_CALLBACK(quit_cb)
+		},
+		/* tools menu. */
+		{ "Tools", NULL, "_Tools" },
+		{ 
+			"Add Group",
+			GTK_STOCK_ADD, 
+			"Add Group",
+			"<control>G",
+			"Add Group",
+			G_CALLBACK(add_group_cb)
+		},
+		/* help menu. */
 		{ "Help", NULL, "_Help" },
-		{ "About", GTK_STOCK_ABOUT, "About" }
+		{ "About", GTK_STOCK_ABOUT, "About" },
 	};
 
 	actionGroup = gtk_action_group_new("Actions");
-    gtk_action_group_add_actions(actionGroup, entries, 5, NULL);
+    gtk_action_group_add_actions(actionGroup, entries, 7, NULL);
 
 	menu_ui_manager = gtk_ui_manager_new();
 	gtk_ui_manager_insert_action_group(menu_ui_manager, actionGroup, 0);

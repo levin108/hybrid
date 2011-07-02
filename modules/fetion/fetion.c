@@ -332,7 +332,7 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
 }
 
 static gboolean
-fetion_login(HybridAccount *imac)
+fx_login(HybridAccount *imac)
 {
 	HybridSslConnection *conn;
 
@@ -421,7 +421,7 @@ sms_to_me_cb(HybridAction *action)
 }
 
 static gboolean
-fetion_change_state(HybridAccount *account, gint state)
+fx_change_state(HybridAccount *account, gint state)
 {
 	fetion_account *ac;
 	gint fetion_state;
@@ -454,7 +454,7 @@ fetion_change_state(HybridAccount *account, gint state)
 }
 
 static gboolean
-fetion_keep_alive(HybridAccount *account)
+fx_keep_alive(HybridAccount *account)
 {
 	fetion_account *ac;
 
@@ -468,7 +468,7 @@ fetion_keep_alive(HybridAccount *account)
 }
 
 static gboolean 
-fetion_buddy_move(HybridAccount *account, HybridBuddy *buddy,
+fx_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 		HybridGroup *new_group)
 {
 	fetion_account *ac;
@@ -480,7 +480,7 @@ fetion_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 }
 
 static void
-fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
+fx_get_info(HybridAccount *account, HybridBuddy *buddy)
 {
 	HybridInfo *info;
 	fetion_account *ac;
@@ -493,7 +493,7 @@ fetion_get_info(HybridAccount *account, HybridBuddy *buddy)
 }
 
 static gboolean
-fetion_remove(HybridAccount *account, HybridBuddy *buddy)
+fx_remove(HybridAccount *account, HybridBuddy *buddy)
 {
 	fetion_account *ac;
 
@@ -507,7 +507,7 @@ fetion_remove(HybridAccount *account, HybridBuddy *buddy)
 }
 
 static gboolean
-fetion_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
+fx_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
 	fetion_account *ac;
 
@@ -521,7 +521,7 @@ fetion_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 }
 
 static gboolean
-fetion_group_rename(HybridAccount *account, HybridGroup *group, const gchar *text)
+fx_group_rename(HybridAccount *account, HybridGroup *group, const gchar *text)
 {
 	fetion_account *ac;
 
@@ -534,8 +534,18 @@ fetion_group_rename(HybridAccount *account, HybridGroup *group, const gchar *tex
 	return TRUE;
 }
 
+static void 
+fx_group_add(HybridAccount *account, const gchar *text)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	fetion_group_add(ac, text);
+}
+
 static void
-fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
+fx_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
 	fetion_account *ac;
 	extern GSList *channel_list;
@@ -571,7 +581,7 @@ fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 }
 
 static void
-fetion_close(HybridAccount *account)
+fx_close(HybridAccount *account)
 {
 	GSList *pos;
 	fetion_account *ac;
@@ -623,16 +633,17 @@ HybridModuleInfo module_info = {
 	"0","1",                      /**< major version, minor version */
 	"fetion",                     /**< icon name */
 
-	fetion_login,                 /**< login */
-	fetion_get_info,              /**< get_info */
-	fetion_change_state,          /**< change_state */
-	fetion_keep_alive,            /**< keep_alive */
-	fetion_buddy_move,            /**< buddy_move */
-	fetion_remove,                /**< buddy_remove */
-	fetion_rename,                /**< buddy_rename */
-	fetion_group_rename,          /**< group_rename */
-	fetion_chat_send,             /**< chat_send */
-	fetion_close,                 /**< close */
+	fx_login,                 /**< login */
+	fx_get_info,              /**< get_info */
+	fx_change_state,          /**< change_state */
+	fx_keep_alive,            /**< keep_alive */
+	fx_buddy_move,            /**< buddy_move */
+	fx_remove,                /**< buddy_remove */
+	fx_rename,                /**< buddy_rename */
+	fx_group_rename,          /**< group_rename */
+	fx_group_add,             /**< group_add */
+	fx_chat_send,             /**< chat_send */
+	fx_close,                 /**< close */
 	fetion_actions,               /**< actions */
 };
 
