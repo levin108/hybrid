@@ -110,6 +110,7 @@ set(hybrid_SRC
 	src/notify.c
 	src/chat-textview.c
 	src/groupadd.c
+	src/buddyadd.c
 	src/gtkcellrendererexpander.c
 	src/core.c
 )

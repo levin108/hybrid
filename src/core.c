@@ -7,6 +7,7 @@
 #include "gtkaccount.h"
 #include "gtkutils.h"
 #include "groupadd.h"
+#include "buddyadd.h"
 
 extern HybridBlist *blist;
 extern GSList *account_list;
@@ -58,6 +59,14 @@ add_group_cb(GtkWidget *widget, gpointer user_data)
 	HybridGroupAddWindow *window;
 
 	window = hybrid_groupadd_window_create();
+}
+
+static void
+add_buddy_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridBuddyAddWindow *window;
+
+	window = hybrid_buddyadd_window_create();
 }
 
 static void
@@ -115,6 +124,14 @@ create_basic_menus(GtkBox *box)
 		},
 		/* tools menu. */
 		{ "Tools", NULL, "_Tools" },
+		{
+			"Add Buddy",
+			GTK_STOCK_ADD,
+			"Add Buddy",
+			"<control>B",
+			"Add Buddy",
+			G_CALLBACK(add_buddy_cb)
+		},
 		{ 
 			"Add Group",
 			GTK_STOCK_ADD, 
@@ -129,7 +146,7 @@ create_basic_menus(GtkBox *box)
 	};
 
 	actionGroup = gtk_action_group_new("Actions");
-    gtk_action_group_add_actions(actionGroup, entries, 7, NULL);
+    gtk_action_group_add_actions(actionGroup, entries, 8, NULL);
 
 	menu_ui_manager = gtk_ui_manager_new();
 	gtk_ui_manager_insert_action_group(menu_ui_manager, actionGroup, 0);
