@@ -520,6 +520,20 @@ fetion_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 	return TRUE;
 }
 
+static gboolean
+fetion_group_rename(HybridAccount *account, HybridGroup *group, const gchar *text)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (fetion_group_edit(ac, group->id, text) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void
 fetion_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
@@ -616,7 +630,7 @@ HybridModuleInfo module_info = {
 	fetion_buddy_move,            /**< buddy_move */
 	fetion_remove,                /**< buddy_remove */
 	fetion_rename,                /**< buddy_rename */
-	NULL,
+	fetion_group_rename,          /**< group_rename */
 	fetion_chat_send,             /**< chat_send */
 	fetion_close,                 /**< close */
 	fetion_actions,               /**< actions */

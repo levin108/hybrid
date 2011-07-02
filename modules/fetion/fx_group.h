@@ -31,6 +31,27 @@ fetion_group *fetion_group_create(gint id, const gchar *name);
  */
 void fetion_group_destroy(fetion_group *group);
 
+/**
+ * Rename the group, the message is:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 999999999
+ * I: 9
+ * Q: 2 S
+ * N: SetBuddyListInfo
+ * L: 132
+ * 
+ * <args><contacts><buddy-lists>
+ * <buddy-list id="2" name="text"/>
+ * </buddy-lists></contacts></args>
+ *
+ * @param account The fetion account.
+ * @param id      The id of the group to rename.
+ * @param name    The new name.
+ */
+gint fetion_group_edit(fetion_account *account, const gchar *id,
+						const gchar *name);
+
 /* UI ops  */
 
 /**
