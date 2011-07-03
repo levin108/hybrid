@@ -5,12 +5,24 @@
 #include <gtk/gtk.h>
 
 typedef struct _HybridConfirm HybridConfirm;
+typedef struct _HybridMessageBox HybridMessageBox;
+typedef enum _HybridMessageType HybridMessageType;
 typedef void (*confirm_cb)(gpointer user_data);
 
 struct _HybridConfirm {
 	GtkWidget *window;
 	confirm_cb btn_callback;
 	gpointer user_data;
+};
+
+enum _HybridMessageType{
+	HYBRID_MESSAGE_INFO,
+	HYBRID_MESSAGE_WARNING
+};
+
+struct _HybridMessageBox {
+	GtkWidget *window;
+	HybridMessageType type;
 };
 
 #ifdef __cplusplus
@@ -134,6 +146,16 @@ GtkWidget *hybrid_create_window(const gchar *title,	GdkPixbuf *icon,
 HybridConfirm *hybrid_confirm_show(const gchar *title, const gchar *text,
 		const gchar *btn_text, confirm_cb btn_callback, gpointer user_data);
 
+/**
+ * Create a message box window.
+ *
+ * @param type    The type of the message box.
+ * @param format  The formated message to display in the message box.
+ *
+ * @return The message box created.
+ */
+HybridMessageBox *hybrid_message_box_show(HybridMessageType type,
+										const gchar *format, ...);
 
 gchar *hybrid_sha1(const gchar *in, gint size);
 

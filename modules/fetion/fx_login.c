@@ -1160,6 +1160,16 @@ get_contact_list(fetion_account *ac, xmlnode *contact_node)
 		buddy->groups = xmlnode_prop(node, "l");
 		buddy->sid = get_sid_from_sipuri(buddy->sipuri);
 
+		if (xmlnode_has_prop(node, "r")) {
+
+			temp = xmlnode_prop(node, "r");
+			buddy->status = atoi(temp);
+			g_free(temp);
+
+		} else {
+			buddy->status = 0;
+		}
+
 		ac->buddies = g_slist_append(ac->buddies, buddy);
 
 		/* ungrouped */

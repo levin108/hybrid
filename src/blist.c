@@ -974,7 +974,19 @@ hybrid_blist_set_state_field(HybridBuddy *buddy)
 
 	g_return_if_fail(buddy != NULL);
 
-	pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
+	/*
+	 * if the buddy hasn't been authorized, then we will
+	 * not display the presence icons in the status icon slot,
+	 * but we will display the authorized icon.
+	 */
+	if (hybrid_blist_get_buddy_authorized(buddy)) {
+
+		pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
+
+	} else {
+		pixbuf = gdk_pixbuf_new_from_file_at_size(
+				PIXMAPS_DIR"status/unauthorize.png", 16, 16, NULL);
+	}
 	
 	gtk_tree_store_set(blist->treemodel, &buddy->iter,
 			HYBRID_BLIST_BUDDY_STATE, buddy->state,
@@ -1028,11 +1040,25 @@ hybrid_blist_set_buddy_name(HybridBuddy *buddy, const gchar *name)
 {
 	g_return_if_fail(buddy != NULL);
 
+	/* if the name is unchanged, we do nothing but return. */
+	if (g_strcmp0(buddy->name, name) == 0) {
+		return;
+	}
+
+	hybrid_blist_set_buddy_name_priv(buddy, name);
+
+	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_NAME);
+}
+
+void
+hybrid_blist_set_buddy_name_priv(HybridBuddy *buddy, const gchar *name)
+{
+	g_return_if_fail(buddy != NULL);
+
 	g_free(buddy->name);
 	buddy->name = g_strdup(name);
 
 	hybrid_blist_set_name_field(buddy);
-	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_NAME);
 }
 
 void
@@ -1040,11 +1066,25 @@ hybrid_blist_set_buddy_mood(HybridBuddy *buddy, const gchar *mood)
 {
 	g_return_if_fail(buddy != NULL);
 
+	/* if the mood phrase is unchanged, we do nothing but return. */
+	if (g_strcmp0(buddy->mood, mood) == 0) {
+		return;
+	}
+
+	hybrid_blist_set_buddy_mood_priv(buddy, mood);
+
+	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_MOOD);
+}
+
+void
+hybrid_blist_set_buddy_mood_priv(HybridBuddy *buddy, const gchar *mood)
+{
+	g_return_if_fail(buddy != NULL);
+
 	g_free(buddy->mood);
 	buddy->mood = g_strdup(mood);
 
 	hybrid_blist_set_name_field(buddy);
-	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_MOOD);
 }
 
 void
@@ -1112,6 +1152,64 @@ hybrid_blist_set_buddy_state(HybridBuddy *buddy, gint state)
 		buddy->state = state;
 		hybrid_blist_set_state_field(buddy);
 	}
+}
+
+void
+hybrid_blist_set_buddy_status(HybridBuddy *buddy, gboolean authorized)
+{
+	g_return_if_fail(buddy != NULL);
+
+	hybrid_blist_set_buddy_status_priv(buddy, authorized);
+
+	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_UPDATE_STATUS);
+}
+
+void
+hybrid_blist_set_buddy_status_priv(HybridBuddy *buddy, gboolean authorized)
+{
+	GdkPixbuf *pixbuf;
+	GtkTreeModel *model;
+	gint status;
+	
+	g_return_if_fail(buddy != NULL);
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
+
+	status = authorized ? 0 : 1;
+
+	/* we will do nothing if the status hasn't been changed. */
+	if (status == buddy->status) {
+		return;
+	}
+
+	buddy->status = status;
+
+	if (!authorized) {
+
+		pixbuf = gdk_pixbuf_new_from_file_at_size(
+				PIXMAPS_DIR"status/unauthorize.png", 16, 16, NULL);
+
+	} else {
+		pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
+	}
+
+	if (!pixbuf) {
+		return;
+	}
+
+	gtk_tree_store_set(GTK_TREE_STORE(model), &buddy->iter,
+					HYBRID_BLIST_STATUS_ICON, pixbuf,
+					-1);
+
+	g_object_unref(pixbuf);
+}
+
+gboolean
+hybrid_blist_get_buddy_authorized(HybridBuddy *buddy)
+{
+	g_return_val_if_fail(buddy != NULL, FALSE);
+
+	return buddy->status == 0;
 }
 
 HybridGroup*
@@ -1324,6 +1422,7 @@ hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
 	xmlnode *root;
 	xmlnode *node;
 	xmlnode *temp;
+	gchar *value;
 	gchar *id;
 
 	g_return_if_fail(buddy != NULL);
@@ -1420,6 +1519,20 @@ buddy_exist:
 		} else {
 			xmlnode_new_prop(node, "icon", buddy->icon_name);
 		}
+	}
+
+	if (type == HYBRID_BLIST_CACHE_UPDATE_STATUS) {
+		
+		value = g_strdup_printf("%d", buddy->status);
+
+		if (xmlnode_has_prop(node, "status")) {
+			xmlnode_set_prop(node, "status", value);
+
+		} else {
+			xmlnode_new_prop(node, "status", value);
+		}
+
+		g_free(value);
 	}
 
 	/* Set the buddy's xml cache node property. */

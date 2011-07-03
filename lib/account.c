@@ -845,7 +845,13 @@ account_found:
 
 			if (xmlnode_has_prop(buddy_node, "mood")) {
 				value = xmlnode_prop(buddy_node, "mood");
-				hybrid_blist_set_buddy_mood(buddy, value);
+				hybrid_blist_set_buddy_mood_priv(buddy, value);
+				g_free(value);
+			}
+
+			if (xmlnode_has_prop(buddy_node, "status")) {
+				value = xmlnode_prop(buddy_node, "status");
+				hybrid_blist_set_buddy_status_priv(buddy, atoi(value) ? FALSE : TRUE);
 				g_free(value);
 			}
 

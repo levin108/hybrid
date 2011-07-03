@@ -2,6 +2,7 @@
 #include "xmlnode.h"
 #include "eventloop.h"
 #include "util.h"
+#include "gtkutils.h"
 
 #include "fetion.h"
 #include "fx_account.h"
@@ -75,7 +76,7 @@ fetion_buddy_get_info(fetion_account *ac, const gchar *userid,
 	sip = ac->sip;
 
 	fetion_sip_set_type(sip , SIP_SERVICE);
-	eheader = sip_event_header_create(SIP_EVENT_ADDBUDDY);
+	eheader = sip_event_header_create(SIP_EVENT_GETCONTACTINFO);
 
 	trans = transaction_create();
 	transaction_set_callid(trans, sip->callid);
@@ -384,9 +385,135 @@ static gint
 buddy_add_cb(fetion_account *account, const gchar *sipmsg,
 			fetion_transaction *trans)
 {
+	gint code;
+	gchar *pos;
+	gchar *value;
+	gchar *name;
+	fetion_buddy *buddy;
+	HybridGroup *group;
+	HybridBuddy *bd;
+	xmlnode *root;
+	xmlnode *node;
 
 	hybrid_debug_info("fetion", "add buddy, recv:\n%s", sipmsg);
+
+	if ((code = fetion_sip_get_code(sipmsg)) != 200) {
+
+		hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
+				"Add buddy error. Server response with %d", code);
+
+		return HYBRID_ERROR;
+	}
+
+	if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
+		goto add_buddy_unknown_err;
+	}
+
+	pos += 4;
+
+	if (!(root = xmlnode_root(pos, strlen(pos)))) {
+		goto add_buddy_unknown_err;
+	}
+
+	if (!(node = xmlnode_find(root, "buddy"))) {
+
+		xmlnode_free(root);
+
+		goto add_buddy_unknown_err;
+	}
+
+	if (xmlnode_has_prop(node, "status-code")) {
+		
+		value = xmlnode_prop(node, "status-code");
+
+		code = atoi(value);
+
+		g_free(value);
+
+		if (code == 200) {
+			goto add_buddy_ok;
+		}
+
+		xmlnode_free(node);
+
+		if (code == 521) {
+
+			hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
+					"The buddy has already been in your buddy list,\n"
+					"Please don't add it duplicately.");
+
+			return HYBRID_ERROR;
+		}
+
+		if (code == 404) {
+
+			hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
+					"The buddy you try to add doesn't exist.");
+
+			return HYBRID_ERROR;
+		}
+
+		if (code == 486) {
+			
+			hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
+					"You have reached the daily limit of adding buddies,\n"
+					"please try another day.");
+
+			return HYBRID_ERROR;
+		}
+
+		goto add_buddy_unknown_err;
+	}
+
+add_buddy_ok:
+
+	if (!xmlnode_has_prop(node, "user-id") ||
+		!xmlnode_has_prop(node, "local-name") ||
+		!xmlnode_has_prop(node, "uri") ||
+		!xmlnode_has_prop(node, "buddy-lists")) {
+
+		xmlnode_free(root);
+
+		goto add_buddy_unknown_err;
+	}
+
+	buddy = fetion_buddy_create();
+
+	buddy->userid    = xmlnode_prop(node, "user-id");
+	buddy->localname = xmlnode_prop(node, "local-name");
+	buddy->sipuri    = xmlnode_prop(node, "uri");
+	buddy->groups    = xmlnode_prop(node, "buddy-lists");
+
+	xmlnode_free(root);
+
+	account->buddies = g_slist_append(account->buddies, buddy);
+
+	if (!(group = hybrid_blist_find_group(account->account, buddy->groups))) {
+		fetion_buddy_destroy(buddy);
+
+		goto add_buddy_unknown_err;
+	}
+
+	if (*(buddy->localname) == '\0') {
+		name = get_sid_from_sipuri(buddy->sipuri);
+
+	} else {
+		name = g_strdup(buddy->localname);
+	}
+
+	bd = hybrid_blist_add_buddy(account->account, group, buddy->userid, name);
+
+	hybrid_blist_set_buddy_status(bd, FALSE);
+
+	g_free(name);
+
 	return HYBRID_OK;
+
+add_buddy_unknown_err:
+	hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
+			"Add buddy error. Unknown reason.");
+	
+	return HYBRID_ERROR;
 }
 
 gint
@@ -459,6 +586,8 @@ fetion_buddies_init(fetion_account *ac)
 			if (*(imbuddy->name) == '\0') {
 				hybrid_blist_set_buddy_name(imbuddy, buddy->sid);
 			}
+
+			hybrid_blist_set_buddy_status(imbuddy, buddy->status == 1 ? TRUE : FALSE);
 
 			g_free(id);
 

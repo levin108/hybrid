@@ -22,6 +22,7 @@ struct _fetion_buddy {
 	gchar *country;
 	gchar *province;
 	gchar *city;
+	gint status;
 	gint state;
 };
 

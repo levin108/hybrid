@@ -7,6 +7,7 @@
 #include "notify.h"
 #include "action.h"
 #include "conv.h"
+#include "gtkutils.h"
 
 #include "fetion.h"
 #include "fx_trans.h"

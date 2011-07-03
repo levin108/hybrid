@@ -44,6 +44,7 @@ struct _HybridBuddy {
 	gchar *name; /**< The name string. */
 	gchar *mood; /**< The mood phrase. */
 	gint   state; /**< The presence status. */
+	gint status; /**< 0 if this buddy is normal, 1 if it's unathorized. */
 	gchar *icon_name; /**< The portrait file name.  */
 	guchar *icon_data; /**< The portrait raw data. */
 	gsize icon_data_length; /**< The size of the portrait raw data */
@@ -67,10 +68,11 @@ enum {
 };
 
 enum _HybridBlistCacheType {
-	HYBRID_BLIST_CACHE_ADD, /**< Add a new item to the blist cache. */
-	HYBRID_BLIST_CACHE_UPDATE_NAME, /**< Update the name of an existing item. */
-	HYBRID_BLIST_CACHE_UPDATE_MOOD, /**< Update the mood of an existing item. */
-	HYBRID_BLIST_CACHE_UPDATE_ICON  /**< Update the icon of an existing item. */
+	HYBRID_BLIST_CACHE_ADD,           /**< Add a new item to the blist cache. */
+	HYBRID_BLIST_CACHE_UPDATE_NAME,   /**< Update the name of an existing item. */
+	HYBRID_BLIST_CACHE_UPDATE_MOOD,   /**< Update the mood of an existing item. */
+	HYBRID_BLIST_CACHE_UPDATE_ICON,   /**< Update the icon of an existing item. */
+	HYBRID_BLIST_CACHE_UPDATE_STATUS  /**< Update the status of an existing item. */
 };
 
 /**
@@ -137,6 +139,7 @@ HybridBuddy *hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent,
  * @param buddy The buddy context to destroy.
  */
 void hybrid_blist_buddy_destroy(HybridBuddy *buddy);
+
 /**
  * Set the buddy's display name.
  *
@@ -144,6 +147,11 @@ void hybrid_blist_buddy_destroy(HybridBuddy *buddy);
  * @param name The buddy name to set
  */
 void hybrid_blist_set_buddy_name(HybridBuddy *buddy, const gchar *name);
+
+/**
+ * Private version of the hybrid_blist_set_buddy_name()
+ */
+void hybrid_blist_set_buddy_name_priv(HybridBuddy *buddy, const gchar *name);
 
 /**
  * Set the buddy's mood phrase.
@@ -154,12 +162,44 @@ void hybrid_blist_set_buddy_name(HybridBuddy *buddy, const gchar *name);
 void hybrid_blist_set_buddy_mood(HybridBuddy *buddy, const gchar *name);
 
 /**
+ * Private version of the hybrid_blist_set_buddy_mood().
+ */
+void hybrid_blist_set_buddy_mood_priv(HybridBuddy *buddy, const gchar *name);
+
+/**
  * Set the buddy's state.
  *
  * @param buddy The buddy to be set.
  * @param The state number to set.
  */
 void hybrid_blist_set_buddy_state(HybridBuddy *buddy, gint state);
+
+/**
+ * Set the buddy's status, note that 'status' is not 'state' which presents
+ * the buddy's presence state, whereas 'status' presents that whether this
+ * buddy has been authorized.
+ *
+ * @param buddy      The buddy to be set.
+ * @param authorized TRUE if the buddy has been authorized, in other word, it's
+ *                   a normal buddy, FALSE if the buddy has not been authorized,
+ *                   which in most protocols means that you can not manipulate
+ *                   this buddy.
+ */
+void hybrid_blist_set_buddy_status(HybridBuddy *buddy, gboolean authorized);
+
+/**
+ * Private version of the hybrid_blist_set_buddy_status()
+ */
+void hybrid_blist_set_buddy_status_priv(HybridBuddy *buddy, gboolean authorized);
+
+/**
+ * Get whether a buddy has been authorized.
+ *
+ * @param buddy The buddy.
+ * 
+ * @return TRUE if the buddy if authorized, FALSE if not.
+ */
+gboolean hybrid_blist_get_buddy_authorized(HybridBuddy *buddy);
 
 /**
  * Set the buddy's portrait icon. If you want to set portrait icon

@@ -444,6 +444,100 @@ hybrid_confirm_show(const gchar *title, const gchar *text,
 
 /* ================== Message Box Start ===================== */
 
+/**
+ * Callback function of the message box destroy signal.
+ */
+static void
+message_destroy(GtkWidget *widget, HybridMessageBox *box)
+{
+	g_free(box);
+}
+
+static void
+message_ok_btn_cb(GtkWidget *widget, HybridMessageBox *box)
+{
+	gtk_widget_destroy(box->window);
+}
+
+HybridMessageBox*
+hybrid_message_box_show(HybridMessageType type,
+						const gchar *format, ...)
+{
+	GtkWidget *window;
+	GtkWidget *vbox;
+	GtkWidget *hbox;
+	GtkWidget *action_area;
+	GdkPixbuf *pixbuf;
+	GtkWidget *image;
+	GtkWidget *label;
+	GtkWidget *button;
+	HybridMessageBox *msg_box;
+	va_list vlist;
+	gchar *message;
+	const gchar *title_str;
+
+	g_return_val_if_fail(format != NULL, NULL);
+
+	msg_box = g_new0(HybridMessageBox, 1);
+
+	if (type == HYBRID_MESSAGE_WARNING) {
+		title_str = _("Warning");
+
+	} else if (type == HYBRID_MESSAGE_INFO) {
+		title_str = _("Information");
+
+	} else {
+		title_str = _("Message");
+	}
+
+	window = hybrid_create_window(title_str, NULL, GTK_WIN_POS_CENTER, TRUE);
+	gtk_container_set_border_width(GTK_CONTAINER(window), 8);
+	g_signal_connect(window, "destroy", G_CALLBACK(message_destroy), msg_box);
+
+	msg_box->window = window;
+
+	vbox = gtk_vbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(window), vbox);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+
+	if (type == HYBRID_MESSAGE_WARNING) {
+		pixbuf = gdk_pixbuf_new_from_file_at_size(
+				PIXMAPS_DIR"icons/warning.png", 64, 64, NULL);
+
+	} else {
+		pixbuf = gdk_pixbuf_new_from_file_at_size(
+				PIXMAPS_DIR"icons/info.png", 64, 64, NULL);
+	}
+	image = gtk_image_new_from_pixbuf(pixbuf);
+	g_object_unref(pixbuf);
+
+	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
+
+	label = gtk_label_new(NULL);
+	va_start(vlist, format);
+	message = g_strdup_vprintf(format, vlist);
+	gtk_label_set_markup(GTK_LABEL(label), message);
+	g_free(message);
+	va_end(vlist);
+
+	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 5);
+
+	action_area = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 0);
+
+	button = gtk_button_new_with_label(_("OK"));
+	gtk_widget_set_usize(button, 100, 30);
+	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
+	g_signal_connect(button, "clicked",
+			G_CALLBACK(message_ok_btn_cb), msg_box);
+
+	gtk_widget_show_all(msg_box->window);
+
+	return msg_box;
+}
+
 /* ================== Message Box End ======================= */
 
 
