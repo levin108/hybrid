@@ -153,7 +153,58 @@ destroy_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
 static void
 add_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
 {
-	printf("abc\n");
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GtkComboBox *combo;
+	GtkTextBuffer *buffer;
+	GtkTextIter start_iter;
+	GtkTextIter end_iter;
+	HybridAccount *account;
+	HybridModule *proto;
+	HybridGroup *group;
+	const gchar *name;
+	const gchar *alias;
+	const gchar *tips;
+
+	combo = GTK_COMBO_BOX(window->account_combo);
+
+	model = gtk_combo_box_get_model(combo);
+
+	if (!gtk_combo_box_get_active_iter(combo, &iter)) {
+		return;
+	}
+
+	gtk_tree_model_get(model, &iter, BUDDYADD_ACCOUNT_COLUMN, &account, -1);
+
+	name = gtk_entry_get_text(GTK_ENTRY(window->username_entry));
+
+	if (!name || *name == '\0') {
+		return;
+	}
+
+	alias = gtk_entry_get_text(GTK_ENTRY(window->localname_entry));
+
+	combo = GTK_COMBO_BOX(window->group_combo);
+
+	model = gtk_combo_box_get_model(combo);
+
+	if (!gtk_combo_box_get_active_iter(combo, &iter)) {
+		return;
+	}
+
+	gtk_tree_model_get(model, &iter, BUDDYADD_GROUP_GROUP_COLUMN, &group, -1);
+
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(window->tips_textview));
+	gtk_text_buffer_get_start_iter(buffer, &start_iter);
+	gtk_text_buffer_get_end_iter(buffer, &end_iter);
+
+	tips = gtk_text_buffer_get_text(buffer, &start_iter, &end_iter, TRUE);
+
+	proto = account->proto;
+
+	if (proto->info->buddy_add) {
+		proto->info->buddy_add(account, group, name, alias, tips);
+	}
 
 	gtk_widget_destroy(window->window);
 }
@@ -227,7 +278,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 
 	/* alias name */
 	label = gtk_label_new(NULL);
-	gtk_label_set_markup(GTK_LABEL(label), _("<b>Alias:</b>"));
+	gtk_label_set_markup(GTK_LABEL(label), _("<b>Alias(Optional):</b>"));
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
 
 	window->localname_entry = gtk_entry_new();
@@ -266,7 +317,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 
 	/* add-buddy request tips. */
 	label = gtk_label_new(NULL);
-	gtk_label_set_markup(GTK_LABEL(label), _("<b>Tips:</b>"));
+	gtk_label_set_markup(GTK_LABEL(label), _("<b>Tips(Optional):</b>"));
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 4, 5);
 
 	scroll = gtk_scrolled_window_new(NULL, NULL);

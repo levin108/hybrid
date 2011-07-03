@@ -212,6 +212,30 @@ fetion_buddy *fetion_buddy_find_by_sid(fetion_account *ac, const gchar *userid);
  */
 void fetion_buddy_destroy(fetion_buddy *buddy);
 
+/**
+ * Add a fetion buddy, the message is:
+ *
+ * S fetion.com.cn SIP-C/4.0
+ * F: 999999999
+ * I: 4
+ * Q: 2 S
+ * N: AddBuddyV4
+ * L: 211
+ * 
+ * <args><contacts><buddies><buddy uri="sip:777777777" local-name="test"
+ * buddy-lists="4" desc="naruto" expose-mobile-no="1" expose-name="1"
+ * addbuddy-phrase-id="0"/></buddies></contacts></args>
+ *
+ * @param account The fetion account.
+ * @param groupid The id of the group to which the new account will be added.
+ * @parma no      The fetion number or the mobile number of the new buddy.
+ * @param alias   The local name of the new buddy.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+ gint fetion_buddy_add(fetion_account *account, const gchar *groupid,
+					const gchar *no, const gchar *alias);
+
 /* UI ops */
 
 /**

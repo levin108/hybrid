@@ -442,6 +442,10 @@ hybrid_confirm_show(const gchar *title, const gchar *text,
 }
 /* ================== Confirm Box End ======================= */
 
+/* ================== Message Box Start ===================== */
+
+/* ================== Message Box End ======================= */
+
 
 gchar*
 hybrid_sha1(const gchar *in, gint size)

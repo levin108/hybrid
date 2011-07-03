@@ -521,6 +521,21 @@ fx_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 }
 
 static gboolean
+fx_buddy_add(HybridAccount *account, HybridGroup *group, const gchar *name,
+			const gchar *alias, const gchar *tips)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (fetion_buddy_add(ac, group->id, name, alias) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static gboolean
 fx_group_rename(HybridAccount *account, HybridGroup *group, const gchar *text)
 {
 	fetion_account *ac;
@@ -640,6 +655,7 @@ HybridModuleInfo module_info = {
 	fx_buddy_move,            /**< buddy_move */
 	fx_remove,                /**< buddy_remove */
 	fx_rename,                /**< buddy_rename */
+	fx_buddy_add,             /**< buddy_add */
 	fx_group_rename,          /**< group_rename */
 	fx_group_add,             /**< group_add */
 	fx_chat_send,             /**< chat_send */

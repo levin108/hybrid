@@ -14,6 +14,8 @@ static gchar *generate_buddy_move_body(const gchar *userid,
 static gchar *generate_remove_buddy_body(const gchar *userid);
 static gchar *generate_rename_buddy_body(const gchar *userid,
 				const gchar *name);
+static gchar *generate_buddy_add_body(const gchar *no, const gchar *groupid,
+				const gchar *localname, const gchar *desc);
 
 fetion_buddy*
 fetion_buddy_create(void)
@@ -72,8 +74,8 @@ fetion_buddy_get_info(fetion_account *ac, const gchar *userid,
 
 	sip = ac->sip;
 
-	fetion_sip_set_type(sip, SIP_SERVICE);
-	eheader = sip_event_header_create(SIP_EVENT_GETCONTACTINFO);
+	fetion_sip_set_type(sip , SIP_SERVICE);
+	eheader = sip_event_header_create(SIP_EVENT_ADDBUDDY);
 
 	trans = transaction_create();
 	transaction_set_callid(trans, sip->callid);
@@ -378,6 +380,58 @@ fetion_buddy_destroy(fetion_buddy *buddy)
 	}
 }
 
+static gint
+buddy_add_cb(fetion_account *account, const gchar *sipmsg,
+			fetion_transaction *trans)
+{
+
+	hybrid_debug_info("fetion", "add buddy, recv:\n%s", sipmsg);
+	return HYBRID_OK;
+}
+
+gint
+fetion_buddy_add(fetion_account *account, const gchar *groupid,
+					const gchar *no, const gchar *alias)
+{
+	fetion_sip *sip;
+	sip_header *eheader;
+	fetion_transaction *trans;
+	gchar *body;
+	gchar *sip_text;
+
+	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(groupid != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(no != NULL, HYBRID_ERROR);
+
+	sip = account->sip;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+	eheader = sip_event_header_create(SIP_EVENT_ADDBUDDY);
+	fetion_sip_add_header(sip, eheader);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, buddy_add_cb);
+	transaction_add(account, trans);
+
+	body = generate_buddy_add_body(no, groupid, alias, account->nickname);
+	sip_text = fetion_sip_to_string(sip, body);
+	g_free(body);
+
+	hybrid_debug_info("fetion", "add buddy,send:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+
+		hybrid_debug_error("fetion", "add buddy failed");
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+
+	return HYBRID_OK;
+}
+
 void
 fetion_buddies_init(fetion_account *ac)
 {
@@ -661,6 +715,43 @@ generate_rename_buddy_body(const gchar *userid, const gchar *name)
 	node = xmlnode_new_child(node, "contact");
 	xmlnode_new_prop(node, "user-id", userid);
 	xmlnode_new_prop(node, "local-name", name);
+
+	return xmlnode_to_string(root);
+}
+
+static gchar*
+generate_buddy_add_body(const gchar *no, const gchar *groupid,
+		const gchar *localname, const gchar *desc)
+{
+	const gchar *body;
+	gchar *sipuri;
+	xmlnode *root;
+	xmlnode *node;
+
+	body = "<args></args>";
+
+	root = xmlnode_root(body, strlen(body));
+
+	node = xmlnode_new_child(root, "contacts");
+	node = xmlnode_new_child(node, "buddies");
+	node = xmlnode_new_child(node, "buddy");
+
+	if (strlen(no) < 11) {
+		sipuri = g_strdup_printf("sip:%s", no);
+
+	} else {
+		sipuri = g_strdup_printf("tel:%s", no);
+	}
+
+	xmlnode_new_prop(node, "uri", sipuri);
+	xmlnode_new_prop(node, "local-name", localname);
+	xmlnode_new_prop(node, "buddy-lists", groupid);
+	xmlnode_new_prop(node, "desc", desc);
+	xmlnode_new_prop(node, "expose-mobile-no", "1");
+	xmlnode_new_prop(node, "expose-name", "1");
+	xmlnode_new_prop(node, "addbuddy-phrase-id", "0");
+
+	g_free(sipuri);
 
 	return xmlnode_to_string(root);
 }
