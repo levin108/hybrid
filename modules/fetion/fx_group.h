@@ -32,7 +32,7 @@ fetion_group *fetion_group_create(gint id, const gchar *name);
 void fetion_group_destroy(fetion_group *group);
 
 /**
- * Rename the group, the message is:
+ * Rename an group, the message is:
  *
  * S fetion.com.cn SIP-C/4.0
  * F: 999999999
@@ -53,6 +53,25 @@ void fetion_group_destroy(fetion_group *group);
  */
 gint fetion_group_edit(fetion_account *account, const gchar *id,
 						const gchar *name);
+
+/**
+ * Remove an gruop, the message is:
+ * S fetion.com.cn SIP-C/4.0
+ * F: 999999999
+ * I: 4
+ * Q: 2 S
+ * N: DeleteBuddyList
+ * L: 83
+ *
+ * <args><contacts><buddy-lists><buddy-list id="2"/>
+ * </buddy-lists></contacts></args>
+ *
+ * @param account The fetion account.
+ * @param groupid The id of the group to remove.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint fetion_group_remove(fetion_account *account, const gchar *groupid);
 
 /**
  * Add a new group, the message is:

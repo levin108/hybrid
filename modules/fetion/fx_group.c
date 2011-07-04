@@ -6,6 +6,7 @@
 
 static gchar *generate_group_edit_body(const gchar *group_id, const gchar *group_name);
 static gchar *generate_group_add_body(const gchar *name);
+static gchar *generate_group_remove_body(const gchar *groupid);
 
 fetion_group*
 fetion_group_create(gint id, const gchar *name)
@@ -80,6 +81,57 @@ fetion_group_edit(fetion_account *account, const gchar *id,
 
 	g_free(sip_text);
 
+	return HYBRID_OK;
+}
+
+static gint
+group_remove_cb(fetion_account *ac, const gchar *sipmsg,
+				fetion_transaction *trans)
+{
+	hybrid_debug_info("fetion", "remove buddy, recv:\n%s", sipmsg);
+
+	return HYBRID_OK;
+}
+
+gint
+fetion_group_remove(fetion_account *account, const gchar *groupid)
+{
+	fetion_sip *sip;
+	sip_header *eheader;
+	gchar *body;
+	gchar *sip_text;
+	fetion_transaction *trans;
+
+	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(groupid != NULL, HYBRID_ERROR);
+
+	sip = account->sip;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+
+	eheader = sip_event_header_create(SIP_EVENT_DELETEBUDDYLIST);
+	fetion_sip_add_header(sip, eheader);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, group_remove_cb);
+	transaction_add(account, trans);
+
+	body = generate_group_remove_body(groupid);
+	sip_text = fetion_sip_to_string(sip, body);
+	g_free(body);
+
+	hybrid_debug_info("fetion", "remove group, send:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+
+		hybrid_debug_info("fetion", "remove group error");
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+	
 	return HYBRID_OK;
 }
 
@@ -235,6 +287,26 @@ generate_group_add_body(const gchar *name)
 	node = xmlnode_new_child(node, "buddy-list");
 
 	xmlnode_new_prop(node, "name", name);
+
+	return xmlnode_to_string(root);
+}
+
+static gchar*
+generate_group_remove_body(const gchar *groupid)
+{
+	const gchar *body;
+	xmlnode *root;
+	xmlnode *node;
+
+	body = "<args></args>";
+
+	root = xmlnode_root(body, strlen(body));
+
+	node = xmlnode_new_child(root, "contacts");
+	node = xmlnode_new_child(node, "buddy-lists");
+	node = xmlnode_new_child(node, "buddy-list");
+
+	xmlnode_new_prop(node, "id", groupid);
 
 	return xmlnode_to_string(root);
 }

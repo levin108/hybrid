@@ -411,6 +411,109 @@ hybrid_account_destroy(HybridAccount *account)
 	}
 }
 
+void
+hybrid_account_clear_buddy(HybridAccount *account)
+{
+	GtkTreeView *treeview;
+	GtkTreeModel *model;
+	HybridGroup *group;
+	HybridBuddy *buddy;
+	HybridConfig *config;
+	HybridBlistCache *cache;
+	GHashTableIter hash_iter;
+	gpointer key;
+
+	gchar *username;
+	gchar *proto;
+
+	xmlnode *root;
+	xmlnode *node;
+
+	g_return_if_fail(account != NULL);
+
+	/*
+	 * remove the buddies from the treeview, we just need to remove
+	 * the group from the treestore, and it will destroy its child
+	 * buddies automaticly.
+	 */
+	treeview = GTK_TREE_VIEW(blist->treeview);
+	model = gtk_tree_view_get_model(treeview);
+
+	g_hash_table_iter_init(&hash_iter, account->group_list);
+	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
+
+		gtk_tree_store_remove(GTK_TREE_STORE(model), &group->iter);
+
+		hybrid_blist_group_destroy(group);
+	}
+
+	g_hash_table_remove_all(account->group_list);
+
+	g_hash_table_iter_init(&hash_iter, account->buddy_list);
+	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&buddy)) {
+
+		hybrid_blist_buddy_destroy(buddy);
+	}
+
+	g_hash_table_remove_all(account->buddy_list);
+
+	/*
+	 * Remove the buddies from the local cache files.
+	 */
+	config = account->config;
+	cache = config->blist_cache;
+
+	if (!(root = cache->root)) {
+		goto rm_blist_err;
+	}
+
+
+	if (!(node = xmlnode_find(root, "accounts"))) {
+		goto rm_blist_err;
+	}
+
+	if (!(node = xmlnode_child(node))) {
+		goto rm_blist_err;
+	}
+
+	for (; node; node = node->next) {
+
+		if (!xmlnode_has_prop(node, "username") ||
+			!xmlnode_has_prop(node, "proto")) {
+			continue;
+		}
+
+		username = xmlnode_prop(node, "username");
+		proto = xmlnode_prop(node, "proto");
+
+		if (g_strcmp0(username, account->username) == 0 &&
+			g_strcmp0(proto, account->proto->info->name) == 0) {
+
+			g_free(username);
+			g_free(proto);
+
+			if (!(node = xmlnode_find(node, "buddies"))) {
+				goto rm_blist_err;
+			}
+
+			xmlnode_remove_node(node);
+
+			hybrid_blist_cache_flush();
+
+			return;
+		}
+
+		g_free(username);
+		g_free(proto);
+	}
+
+rm_blist_err:
+
+	hybrid_debug_error("account", "remove buddies of account error,"
+								" maybe xml in bad format.");
+
+}
+
 gpointer
 hybrid_account_get_protocol_data(HybridAccount *account)
 {
@@ -764,9 +867,13 @@ load_blist_from_disk(HybridAccount *account)
 
 		if (g_strcmp0(name, account->username) == 0 &&
 			g_strcmp0(value, account->proto->info->name) == 0) {
-			node = xmlnode_find(account_node, "buddies");
+
 			g_free(name);
 			g_free(value);
+			
+			if (!(node = xmlnode_find(account_node, "buddies"))) {
+				return;
+			}
 			goto account_found;
 		}
 		

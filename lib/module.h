@@ -34,6 +34,7 @@ struct _HybridModuleInfo {
 	gboolean (*buddy_add)(HybridAccount *, HybridGroup *, const gchar *,
 						const gchar*, const gchar *);
 	gboolean (*group_rename)(HybridAccount *, HybridGroup *, const gchar *);
+	gboolean (*group_remove)(HybridAccount *, HybridGroup *);
 
 	/*
 	 * Group-add hook function, note that it won't add the new group to the

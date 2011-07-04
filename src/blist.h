@@ -114,6 +114,13 @@ void hybrid_blist_init();
 HybridGroup *hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name);
 
 /**
+ * Remove a group.
+ *
+ * @param group The group to remove.
+ */
+void hybrid_blist_remove_group(HybridGroup *group);
+
+/**
  * Destroy a group context and free the memory allocated.
  *
  * @param group The group context to destroy.
@@ -132,6 +139,13 @@ void hybrid_blist_group_destroy(HybridGroup *group);
  */
 HybridBuddy *hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, 
 		const gchar *id, const gchar *name);
+
+/**
+ * Remove a buddy.
+ *
+ * @param buddy The buddy to remove.
+ */
+void hybrid_blist_remove_buddy(HybridBuddy *buddy);
 
 /**
  * Destroy a buddy context and free the memory allocated.

@@ -505,6 +505,7 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 
 		length = fetion_sip_get_length(sipmsg);
 		pos = strstr(ac->buffer, "\r\n\r\n") + 4;
+
 		parse_sipc_resp(ac, pos, length);
 
 		/* set the nickname of the hybrid account. */
@@ -1311,6 +1312,10 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 		xmlnode_free(contact_root);
 
 	} else {
+
+		/* the cache is out-of-data, drop it. */
+		hybrid_account_clear_buddy(ac->account);
+
 		/* update the version */
 		g_free(ac->contact_list_version);
 		ac->contact_list_version = version;

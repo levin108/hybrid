@@ -11,12 +11,14 @@
 HybridBlist *blist = NULL;
 
 static void hybrid_blist_set_group_name(HybridGroup *group, const gchar *name);
+static void hybrid_blist_update_group(HybridGroup *group);
 static void hybrid_blist_buddy_icon_save(HybridBuddy *buddy);
 static void hybrid_blist_buddy_to_cache(HybridBuddy *buddy,
 							HybridBlistCacheType type);
 static void hybrid_blist_group_to_cache(HybridGroup *group);
 static HybridGroup *hybrid_blist_find_group_by_name(
 							HybridAccount *account, const gchar *name);
+static void hybrid_group_remove(HybridGroup *group);
 
 HybridBlist*
 hybrid_blist_create()
@@ -261,7 +263,6 @@ buddy_information_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 static void
 buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
-	gchar *group_name;
 	const gchar *new_group_name;
 	HybridGroup *group;
 	HybridGroup *orig_group;
@@ -341,23 +342,8 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 			orig_group->online_count --;
 		}
 
-
-		group_name = g_strdup_printf("<b>%s</b> (%d/%d)",
-				group->name, group->online_count, group->buddy_count);
-
-		gtk_tree_store_set(GTK_TREE_STORE(model), &group->iter,
-				HYBRID_BLIST_BUDDY_NAME, group_name, -1);
-
-		g_free(group_name);
-
-		group_name = g_strdup_printf("<b>%s</b> (%d/%d)",
-				orig_group->name, orig_group->online_count,
-				orig_group->buddy_count);
-
-		gtk_tree_store_set(GTK_TREE_STORE(model), &orig_group->iter,
-				HYBRID_BLIST_BUDDY_NAME, group_name, -1);
-
-		g_free(group_name);
+		hybrid_blist_update_group(group);
+		hybrid_blist_update_group(orig_group);
 
 		/*
 		 * Now we need to process the local cache file blist.xml,
@@ -384,18 +370,17 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 	}
 }
 
+/**
+ * Callback function of the delete button in buddy-remove confirm window.
+ */
 static void
 hybrid_buddy_remove(HybridBuddy *buddy)
 {
 	HybridAccount *account;
 	HybridModule *module;
-	GtkTreeView *tree;
-	GtkTreeModel *model;
 
 	g_return_if_fail(buddy != NULL);
 
-	tree    = GTK_TREE_VIEW(blist->treeview);
-	model   = gtk_tree_view_get_model(tree);
 	account = buddy->account;
 	module  = account->proto;
 
@@ -409,19 +394,32 @@ hybrid_buddy_remove(HybridBuddy *buddy)
 		return;
 	}
 
-	/* Remove the buddy from account's buddy_list hashtable. */
-	g_hash_table_remove(account->buddy_list, buddy);
+	hybrid_blist_remove_buddy(buddy);
+}
 
-	/* Remove the buddy from the blist's TreeView. */
-	gtk_tree_store_remove(GTK_TREE_STORE(model), &buddy->iter);
+/**
+ * Callback function of the delete button in group-remove confirm window.
+ */
+static void
+hybrid_group_remove(HybridGroup *group)
+{
+	HybridAccount *account;
+	HybridModule *proto;
 
-	/* Remove the buddy from the xml cache context. */
-	xmlnode_remove_node(buddy->cache_node);
+	g_return_if_fail(group != NULL);
 
-	/* Synchronize the xml cache with the local xml file. */
-	hybrid_blist_cache_flush();
+	/* Call the hook function to remove it in the protocol layer. */
+	account = group->account;
+	proto = account->proto;
 
-	hybrid_blist_buddy_destroy(buddy);
+	if (proto->info->group_remove) {
+
+		if (!(proto->info->group_remove(account, group))) {
+			return;
+		}
+	}
+
+	hybrid_blist_remove_group(group);
 }
 
 static void
@@ -430,9 +428,10 @@ remove_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 	gchar *confirm_text;
 
 	confirm_text = g_strdup_printf(_("Are you sure to delete"
-				" the buddy <b>%s</b> (%s)"), buddy->name, buddy->id);
+				" the buddy <b>%s</b> (%s)"), buddy->name ? buddy->name : "",
+				buddy->id);
 	hybrid_confirm_show(_("Confirm"), confirm_text, _("Delete"),
-			(confirm_cb)hybrid_buddy_remove, buddy);
+				(confirm_cb)hybrid_buddy_remove, buddy);
 	g_free(confirm_text);
 
 }
@@ -476,6 +475,18 @@ rename_group_menu_cb(GtkWidget *widget, HybridGroup *group)
 	gtk_tree_view_set_cursor_on_cell(GTK_TREE_VIEW(blist->treeview), path,
 			blist->text_column, blist->text_renderer, TRUE);
 	gtk_tree_path_free(path);
+}
+
+static void
+remove_group_menu_cb(GtkWidget *widget, HybridGroup *group)
+{
+	gchar *confirm_text;
+
+	confirm_text = g_strdup_printf(_("Are you sure to delete"
+				" the group <b>%s</b>"), group->name);
+	hybrid_confirm_show(_("Confirm"), confirm_text, _("Delete"),
+				(confirm_cb)hybrid_group_remove, group);
+	g_free(confirm_text);
 }
 
 static GtkWidget*
@@ -560,8 +571,12 @@ create_group_menu(GtkWidget *treeview, GtkTreePath *path)
 	hybrid_create_menu(menu, _("Rename Group"), "rename", 
 					hybrid_blist_get_group_renamable(group),
 					G_CALLBACK(rename_group_menu_cb), group);
-	hybrid_create_menu(menu, _("Remove Group"), "remove", TRUE,
-					G_CALLBACK(rename_buddy_menu_cb), group);
+
+	/* we won't let users to remove group which is not empty. */
+	hybrid_create_menu(menu, _("Remove Group"), "remove",
+					group->buddy_count ? FALSE :TRUE,
+					G_CALLBACK(remove_group_menu_cb), group);
+
 	hybrid_create_menu(menu, _("Add Buddy"), "add", TRUE, NULL, NULL);
 
 	gtk_widget_show_all(menu);
@@ -741,6 +756,35 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 }
 
 void
+hybrid_blist_remove_group(HybridGroup *group)
+{
+	GtkTreeView *treeview;
+	GtkTreeModel *model;
+	HybridAccount *account;
+
+	g_return_if_fail(group != NULL);
+
+	account = group->account;
+
+	/* remove from the account's group hashtable. */
+	g_hash_table_remove(account->group_list, group);
+
+	/* remove from the treeview. */
+	treeview = GTK_TREE_VIEW(blist->treeview);
+	model = gtk_tree_view_get_model(treeview);
+
+	gtk_tree_store_remove(GTK_TREE_STORE(model), &group->iter);
+
+	/* remove from the cache file. */
+	xmlnode_remove_node(group->cache_node);
+
+	hybrid_blist_cache_flush();
+
+	/* destroy the group object. */
+	hybrid_blist_group_destroy(group);
+}
+
+void
 hybrid_blist_group_destroy(HybridGroup *group)
 {
 	if (group) {
@@ -760,7 +804,6 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	GdkPixbuf *buddy_icon;
 	HybridBuddy *buddy;
 	GtkTreeModel *treemodel;
-	gchar *group_name;
 
 	g_return_val_if_fail(blist != NULL, NULL);
 	g_return_val_if_fail(parent != NULL, NULL);
@@ -832,17 +875,48 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	 * We did add a new buddy, so we show add the buddy_count by one.
 	 */
 	parent->buddy_count ++;
-	group_name = g_strdup_printf("<b>%s</b> (%d/%d)",
-			parent->name, parent->online_count, parent->buddy_count);
 
-	gtk_tree_store_set(GTK_TREE_STORE(treemodel), &parent->iter,
-			HYBRID_BLIST_BUDDY_NAME, group_name, -1);
-
-	g_free(group_name);
+	hybrid_blist_update_group(parent);
 
 	hybrid_blist_buddy_to_cache(buddy, HYBRID_BLIST_CACHE_ADD);
 
 	return buddy;
+}
+
+void
+hybrid_blist_remove_buddy(HybridBuddy *buddy)
+{
+	HybridAccount *account;
+	HybridGroup *group;
+	GtkTreeModel *model;
+
+	g_return_if_fail(buddy != NULL);
+
+	account = buddy->account;
+	model  = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
+
+	/* Remove the buddy from account's buddy_list hashtable. */
+	g_hash_table_remove(account->buddy_list, buddy);
+
+	/* Remove the buddy from the blist's TreeView. */
+	gtk_tree_store_remove(GTK_TREE_STORE(model), &buddy->iter);
+
+	/* Remove the buddy from the xml cache context. */
+	xmlnode_remove_node(buddy->cache_node);
+
+	group = buddy->parent;
+	group->buddy_count --;
+
+	if (!BUDDY_IS_OFFLINE(buddy) && !BUDDY_IS_INVISIBLE(buddy)) {
+		group->online_count --;
+	}
+
+	hybrid_blist_update_group(group);
+
+	/* Synchronize the xml cache with the local xml file. */
+	hybrid_blist_cache_flush();
+
+	hybrid_blist_buddy_destroy(buddy);
 }
 
 void
@@ -931,25 +1005,22 @@ hybrid_blist_set_name_field(HybridBuddy *buddy)
 }
 
 /**
- * Set the group's name.
+ * Update the group's display name, used when name or the number of account
+ * changed, it won't synchronize with the local cache file.
  */
 static void
-hybrid_blist_set_group_name(HybridGroup *group, const gchar *name)
+hybrid_blist_update_group(HybridGroup *group)
 {
 	GtkTreeView *treeview;
 	GtkTreeModel *model;
 	gchar *name_str;
 
 	g_return_if_fail(group != NULL);
-	g_return_if_fail(name != NULL);
-
-	g_free(group->name);
-	group->name = g_strdup(name);
 
 	treeview = GTK_TREE_VIEW(blist->treeview);
 	model = gtk_tree_view_get_model(treeview);
 
-	name_str = g_strdup_printf("<b>%s</b> (%d/%d)", name,
+	name_str = g_strdup_printf("<b>%s</b> (%d/%d)", group->name,
 					group->online_count, group->buddy_count);
 
 	gtk_tree_store_set(GTK_TREE_STORE(model), &group->iter,
@@ -957,6 +1028,22 @@ hybrid_blist_set_group_name(HybridGroup *group, const gchar *name)
 					-1);
 
 	g_free(name_str);
+}
+
+/**
+ * Set the group's name.
+ */
+static void
+hybrid_blist_set_group_name(HybridGroup *group, const gchar *name)
+{
+
+	g_return_if_fail(group != NULL);
+	g_return_if_fail(name != NULL);
+
+	g_free(group->name);
+	group->name = g_strdup(name);
+
+	hybrid_blist_update_group(group);
 
 	hybrid_blist_group_to_cache(group);
 }

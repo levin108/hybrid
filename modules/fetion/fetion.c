@@ -202,8 +202,6 @@ process_sync_info(fetion_account *ac, const gchar *sipmsg)
 				buddy->localname && *(buddy->localname) != '\0' ?
 				buddy->localname : sid,
 				buddy->status == 1 ? _("accepted") : _("declined"));
-
-
 	}
 
 }
@@ -610,6 +608,20 @@ fx_group_rename(HybridAccount *account, HybridGroup *group, const gchar *text)
 	return TRUE;
 }
 
+static gboolean
+fx_group_remove(HybridAccount *account, HybridGroup *group)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (fetion_group_remove(ac, group->id) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void 
 fx_group_add(HybridAccount *account, const gchar *text)
 {
@@ -737,6 +749,7 @@ HybridModuleInfo module_info = {
 	fx_rename,                /**< buddy_rename */
 	fx_buddy_add,             /**< buddy_add */
 	fx_group_rename,          /**< group_rename */
+	fx_group_remove,          /**< group_remove */
 	fx_group_add,             /**< group_add */
 	fx_chat_start,            /**< chat_start */
 	fx_chat_send,             /**< chat_send */

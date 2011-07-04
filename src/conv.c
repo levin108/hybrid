@@ -864,6 +864,8 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	GSList *conv_pos;
 	GSList *chat_pos;
 
+	g_return_val_if_fail(account != NULL, NULL);
+	g_return_val_if_fail(id != NULL, NULL);
 
 	if (type == HYBRID_CHAT_PANEL_SYSTEM) {
 		if (!(buddy = (hybrid_blist_find_buddy(account, id)))) {
@@ -883,10 +885,6 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 			}
 		}
 	}
-
-
-	g_return_val_if_fail(account != NULL, NULL);
-	g_return_val_if_fail(id != NULL, NULL);
 
 	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
 		conv = (HybridConversation*)conv_pos->data;

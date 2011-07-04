@@ -118,6 +118,14 @@ HybridAccount *hybrid_account_create(HybridModule *proto);
 void hybrid_account_destroy(HybridAccount *account);
 
 /**
+ * Clear the buddies belong to this account,
+ * both in the local cache file and in the buddy treeview
+ *
+ * @param account The account.
+ */
+void hybrid_account_clear_buddy(HybridAccount *account);
+
+/**
  * Get the account's protocol specified data.
  *
  * @param account The account.
