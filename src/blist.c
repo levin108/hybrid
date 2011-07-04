@@ -655,6 +655,106 @@ row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 	}
 }
 
+static gboolean
+select_row_cb(GtkWidget *widget, GtkMovementStep arg1, gint arg2, gpointer user_data)
+{
+	GtkTreeSelection *selection;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	HybridBuddy *buddy;
+	HybridGroup *group;
+	gboolean group_up = FALSE;
+
+	gint depth;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+
+	if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
+		return TRUE;
+	}
+
+	if (!(path = gtk_tree_model_get_path(model, &iter))) {
+		return TRUE;
+	}
+
+	depth = gtk_tree_path_get_depth(path);
+
+	if (arg2 > 0) {
+		if (depth > 1) {
+			gtk_tree_path_next(path);
+
+
+		} else {
+			if (gtk_tree_view_row_expanded(GTK_TREE_VIEW(widget), path)) {
+				gtk_tree_path_down(path);
+			} else {
+				gtk_tree_path_next(path);
+			}
+		}
+
+	} else {
+
+		if (depth > 1) {
+			if (!gtk_tree_path_prev(path)) {
+				gtk_tree_path_up(path);
+			}
+
+		} else {
+
+			if (!gtk_tree_path_prev(path)) {
+				return;
+			}
+
+			if (gtk_tree_view_row_expanded(GTK_TREE_VIEW(widget), path)) {
+				gtk_tree_path_down(path);
+				gtk_tree_model_get_iter(model, &iter, path);
+
+				/* TODO */
+
+			}
+		}
+	}
+
+	printf("%s\n", gtk_tree_path_to_string(path));
+
+	depth = gtk_tree_path_get_depth(path);
+
+	if (!(gtk_tree_model_get_iter(model, &iter, path))) {
+
+		if (depth > 1) {
+			gtk_tree_path_up(path);
+			gtk_tree_path_next(path);
+
+			if (!gtk_tree_model_get_iter(model, &iter, path)) {
+				return TRUE;
+			}
+
+		} else {
+			return TRUE;
+		}
+	}
+
+	depth = gtk_tree_path_get_depth(path);
+
+	gtk_tree_path_free(path);
+
+
+	if (depth > 1) {
+		gtk_tree_model_get(model, &iter,
+				HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
+
+		printf("%s\n", buddy->name ? buddy->name : buddy->id);
+
+	} else {
+		gtk_tree_model_get(model, &iter,
+				HYBRID_BLIST_OBJECT_COLUMN, &group, -1);
+		printf("%s\n", group->name);
+	}
+
+	return TRUE;
+}
+
 void 
 hybrid_blist_init()
 {
@@ -690,6 +790,9 @@ hybrid_blist_init()
 
 	g_signal_connect(blist->treeview, "row-activated",
 			G_CALLBACK(row_activated_cb), NULL);
+
+	g_signal_connect(blist->treeview, "move-cursor",
+			G_CALLBACK(select_row_cb), NULL);
 
 }
 
