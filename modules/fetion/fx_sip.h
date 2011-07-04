@@ -297,6 +297,17 @@ void sip_header_destroy(sip_header *header);
 void sip_parse_notify(const gchar *sipmsg, gint *notify_type, gint *event_type);
 
 /**
+ * Parse the synchronization sip message,
+ * Note that we only concern with the UPDATE message.
+ *
+ * @param account The fetion account.
+ * @param sipmsg  The synchronization message.
+ *
+ * @return The list of the buddies whose info should be synchronized.
+ */
+GSList *sip_parse_sync(fetion_account *account, const gchar *sipmsg);
+
+/**
  * Parse the presence message.
  *
  * @param ac The fetion account context.

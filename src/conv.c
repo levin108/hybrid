@@ -123,6 +123,7 @@ message_send(HybridConversation *conv)
 	HybridAccount *account;
 	HybridModule  *module;
 
+
 	/* find the current chat panel. */
 	current_page = gtk_notebook_current_page(GTK_NOTEBOOK(conv->notebook));
 	for (pos = conv->chat_buddies; pos; pos = pos->next) {
@@ -859,8 +860,30 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	HybridChatWindow *chat = NULL;
 	HybridConversation *conv = NULL;
 	HybridBuddy *buddy;
+	HybridModule *proto;
 	GSList *conv_pos;
 	GSList *chat_pos;
+
+
+	if (type == HYBRID_CHAT_PANEL_SYSTEM) {
+		if (!(buddy = (hybrid_blist_find_buddy(account, id)))) {
+			
+			hybrid_debug_error("conv", "FATAL, can't find buddy");
+
+			return NULL;
+		}
+
+		proto = account->proto;
+
+		/* we will check whether the protocol allows this buddy to be activated. */
+		if (proto->info->chat_start) {
+			
+			if (!proto->info->chat_start(account, buddy)) {
+				return NULL;
+			}
+		}
+	}
+
 
 	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(id != NULL, NULL);
@@ -882,15 +905,6 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	if (!conv) {
 		conv = hybrid_conv_create();
 		conv_list = g_slist_append(conv_list, conv);
-	}
-
-	if (type == HYBRID_CHAT_PANEL_SYSTEM) {
-		if (!(buddy = (hybrid_blist_find_buddy(account, id)))) {
-			
-			hybrid_debug_error("conv", "FATAL, can't find buddy");
-
-			return NULL;
-		}
 	}
 
 	chat = g_new0(HybridChatWindow, 1);

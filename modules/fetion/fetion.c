@@ -155,6 +155,66 @@ process_enter_cb(fetion_account *ac, const gchar *sipmsg)
 }
 
 /**
+ * Process the synchronization message, when the contact list or the personal info
+ * changed, the server will push this message to tell the client to update its
+ * local cache file, well, we will not update the local cache file, we keep the 
+ * old version numbers, and reload it after the next logining.
+ */
+static void
+process_sync_info(fetion_account *ac, const gchar *sipmsg)
+{
+	GSList *list;
+	gchar *sid;
+	fetion_buddy *buddy;
+	HybridBuddy *hb;
+
+	hybrid_debug_info("fetion", "sync info,recv:\n%s", sipmsg);
+
+	if (!(list = sip_parse_sync(ac, sipmsg))) {
+		return;
+	}
+
+	while (list) {
+		buddy = (fetion_buddy*)list->data;
+
+		list = g_slist_remove(list, buddy);
+
+		if (buddy->status == 0) {
+			continue;
+		}
+
+		if (!(hb = hybrid_blist_find_buddy(ac->account, buddy->userid))) {
+			continue;
+		}
+
+		if (buddy->status == 1) {
+
+			hybrid_blist_set_buddy_status(hb, TRUE);
+
+		} else {
+			hybrid_blist_set_buddy_status(hb, FALSE);
+		}
+
+		sid = get_sid_from_sipuri(buddy->sipuri);
+
+		hybrid_message_box_show(HYBRID_MESSAGE_INFO,
+				_("Buddy <b>%s</b> has %s your add-buddy request."),
+				buddy->localname && *(buddy->localname) != '\0' ?
+				buddy->localname : sid,
+				buddy->status == 1 ? _("accepted") : _("declined"));
+
+
+	}
+
+}
+
+static void
+process_add_buddy(fetion_account *ac, const gchar *sipmsg)
+{
+	printf("%s\n", sipmsg);
+}
+
+/**
  * Process notification routine.
  */
 static void
@@ -199,13 +259,13 @@ process_notify_cb(fetion_account *ac, const gchar *sipmsg)
 
 		case NOTIFICATION_TYPE_SYNCUSERINFO :
 			if (event_type == NOTIFICATION_EVENT_SYNCUSERINFO) {
-			//	process_sync_info(ac, sipmsg);
+				process_sync_info(ac, sipmsg);
 			}
 			break;
 
 		case NOTIFICATION_TYPE_CONTACT :
 			if (event_type == NOTIFICATION_EVENT_ADDBUDDYAPPLICATION) {
-			//	process_add_buddy(ac, sipmsg);
+				process_add_buddy(ac, sipmsg);
 			}
 			break;
 #if 0
@@ -560,6 +620,25 @@ fx_group_add(HybridAccount *account, const gchar *text)
 	fetion_group_add(ac, text);
 }
 
+static gboolean
+fx_chat_start(HybridAccount *account, HybridBuddy *buddy)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (!hybrid_blist_get_buddy_authorized(buddy)) {
+
+		hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
+				"This buddy hasn't been authorized, you can't\n"
+				"start a chat with him.");
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void
 fx_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
@@ -659,6 +738,7 @@ HybridModuleInfo module_info = {
 	fx_buddy_add,             /**< buddy_add */
 	fx_group_rename,          /**< group_rename */
 	fx_group_add,             /**< group_add */
+	fx_chat_start,            /**< chat_start */
 	fx_chat_send,             /**< chat_send */
 	fx_close,                 /**< close */
 	fetion_actions,               /**< actions */

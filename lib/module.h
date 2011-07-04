@@ -40,6 +40,7 @@ struct _HybridModuleInfo {
 	 * buddy list automaticly, you should add it manually in the hook function.
 	 */
 	void     (*group_add)(HybridAccount *, const gchar *);
+	gboolean (*chat_start)(HybridAccount *, HybridBuddy *);
 	void     (*chat_send)(HybridAccount *, HybridBuddy *, const gchar *);
 	void     (*close)(HybridAccount *);
 

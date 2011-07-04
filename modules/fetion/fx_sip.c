@@ -625,7 +625,87 @@ notify_err:
 	xmlnode_free(root);
 	*event_type = NOTIFICATION_EVENT_UNKNOWN;
 	return;
+}
 
+GSList*
+sip_parse_sync(fetion_account *account, const gchar *sipmsg)
+{
+	gchar *pos;
+	gchar *action;
+	gchar *userid;
+	gchar *status;
+	xmlnode *root;
+	xmlnode *node;
+	fetion_buddy *buddy;
+	GSList *list = NULL;
+
+	if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
+		goto sync_info_err;
+	}
+
+	pos += 4;
+
+	if (!(root = xmlnode_root(pos, strlen(pos)))) {
+		goto sync_info_err;
+	}
+
+	if (!(node = xmlnode_find(root, "buddies"))) {
+
+		xmlnode_free(root);
+
+		return list;
+	}
+
+	node = xmlnode_child(node);
+
+	while (node) {
+		if (!xmlnode_has_prop(node, "action")) {
+			goto next;
+		}
+
+		action = xmlnode_prop(node, "action");
+
+		if (g_strcmp0(action, "update") == 0) {
+			
+			if (!xmlnode_has_prop(node, "user-id") ||
+				!xmlnode_has_prop(node, "relation-status")) {
+
+				g_free(action);
+
+				goto next;
+			}
+
+			userid = xmlnode_prop(node, "user-id");
+			status = xmlnode_prop(node, "relation-status");
+
+			if (!(buddy = fetion_buddy_find_by_userid(account, userid))) {
+
+				g_free(action);
+				g_free(userid);
+				g_free(status);
+
+				goto next;
+			}
+
+			buddy->status = atoi(status);
+
+			list = g_slist_append(list, buddy);
+
+			g_free(status);
+			g_free(userid);
+		}
+
+		g_free(action);
+next:
+		node = xmlnode_next(node);
+	}
+
+	return list;
+
+sync_info_err:
+	hybrid_debug_error("fetion", "invalid sync info");
+
+	return list;
 }
 
 GSList*
