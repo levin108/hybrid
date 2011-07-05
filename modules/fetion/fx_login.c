@@ -511,6 +511,9 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 		/* set the nickname of the hybrid account. */
 		hybrid_account_set_nickname(ac->account, ac->nickname);
 
+		/* set the mood phrase of the hybrid account. */
+		hybrid_account_set_status_text(ac->account, ac->mood_phrase);
+
 		hybrid_account_set_state(ac->account, HYBRID_STATE_INVISIBLE);
 
 		/* set the connection status. */

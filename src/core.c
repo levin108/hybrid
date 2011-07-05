@@ -2,6 +2,7 @@
 #include <gtk/gtk.h>
 #include "config.h"
 #include "module.h"
+#include "head.h"
 #include "blist.h"
 #include "util.h"
 #include "gtkaccount.h"
@@ -10,6 +11,7 @@
 #include "buddyadd.h"
 
 extern HybridBlist *blist;
+extern HybridHead *hybrid_head;
 extern GSList *account_list;
 
 GtkUIManager *menu_ui_manager;
@@ -175,18 +177,24 @@ ui_init(void)
 
 	g_signal_connect(window, "destroy", G_CALLBACK(window_destroy), NULL);
 
-	/* menu bar */
-	create_basic_menus(GTK_BOX(vbox));
+	/* head area */
+	hybrid_head_init();
+	gtk_box_pack_start(GTK_BOX(vbox), hybrid_head->cellview, FALSE, FALSE, 10);
 
 	/* scroll area (TreeView) */
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
 								 GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
+			GTK_SHADOW_ETCHED_IN);
 	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
 
 	hybrid_blist_init();
 
 	gtk_container_add(GTK_CONTAINER(scroll), blist->treeview);
+
+	/* menu bar */
+	create_basic_menus(GTK_BOX(vbox));
 
 	gtk_widget_show_all(window);
 }

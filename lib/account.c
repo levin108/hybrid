@@ -5,6 +5,7 @@
 #include "gtkutils.h"
 #include "notify.h"
 #include "blist.h"
+#include "head.h"
 #include "action.h"
 
 GSList *account_list = NULL;
@@ -548,6 +549,16 @@ hybrid_account_set_password(HybridAccount *account, const gchar *password)
 }
 
 void
+hybrid_account_set_status_text(HybridAccount *account, const gchar *text)
+{
+	g_return_if_fail(account != NULL);
+
+	g_free(account->status_text);
+
+	account->status_text = g_strdup(text);
+}
+
+void
 hybrid_account_set_state(HybridAccount *account, gint state)
 {
 	gchar *menu_name;
@@ -742,6 +753,9 @@ hybrid_account_set_connection_status(HybridAccount *account,
 
 		/* here we load the blist from the local cache file. */
 		load_blist_from_disk(account);
+
+		/* Update the head panel. */
+		hybrid_head_bind_to_account(account);
 
 		/*
 		 * Now we start keep alive thread, the keep alive hook function

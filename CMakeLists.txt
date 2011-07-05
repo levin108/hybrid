@@ -106,6 +106,7 @@ set(hybrid_SRC
 	src/blist.c
 	src/conv.c
 	src/info.c
+	src/head.c
 	src/action.c
 	src/notify.c
 	src/chat-textview.c

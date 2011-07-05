@@ -4,6 +4,7 @@
 #include "util.h"
 #include "blist.h"
 #include "conv.h"
+#include "head.h"
 #include "info.h"
 #include "gtkutils.h"
 #include "gtkcellrendererexpander.h"
@@ -596,7 +597,7 @@ create_group_menu(GtkWidget *treeview, GtkTreePath *path)
 static void
 account_changed(HybridAccount *account)
 {
-	printf("account: %s\n", account->username);
+	hybrid_head_bind_to_account(account);
 }
 
 static gboolean
@@ -621,6 +622,10 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 		gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
 				(gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
+
+		if (!path) {
+			return FALSE;
+		}
 
 		/* we check whether the selected path has changed. */
 		if (!current_choose_path) {
@@ -688,6 +693,10 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 		gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
 				(gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
+
+		if (!path) {
+			return FALSE;
+		}
 
 		/* Select a tree row when right click on it. */
 		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));

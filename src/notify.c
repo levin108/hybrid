@@ -83,7 +83,7 @@ hybrid_notify_create(HybridAccount *account, const gchar *title)
 	gchar *account_text;
 
 	pixbuf = hybrid_create_round_pixbuf(notify->account->icon_data,
-			notify->account->icon_data_len, 32);
+			notify->account->icon_data_len, 48);
 
 	if (notify->account->nickname) {
 		account_text = g_strdup_printf("<b>%s</b> (%s):",

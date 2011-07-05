@@ -14,6 +14,7 @@ struct _HybridAccount {
 	gchar *username;
 	gchar *password;
 	gchar *nickname;
+	gchar *status_text;
 	gint   state;    /**< online status. */
 	gint   connect_state; /**< connection status. */
 	gint   keep_alive_source; /**< source id of the keep alive. */
@@ -160,6 +161,14 @@ void hybrid_account_set_username(HybridAccount *account, const gchar *username);
 void hybrid_account_set_password(HybridAccount *account, const gchar *password);
 
 /**
+ * Set the account's status text.
+ *
+ * @param account The account.
+ * @param text    The status text.
+ */
+void hybrid_account_set_status_text(HybridAccount *account, const gchar *text);
+
+/**
  * Set the account's state.
  *
  * @param account The account.
@@ -225,6 +234,9 @@ void hybrid_account_error_reason(HybridAccount *account, const gchar *reason);
  * then the local buddy list stored on the disk would be loaded. Make sure
  * to set the status to CONNECTED after logining successfully, orelse you can
  * not add buddies using hybrid_blist_add_buddy().
+ * 
+ * Note that before calling this function, you should make sure that you have
+ * set nickname,mood phrase, and state for the account.
  *
  * @param The account.
  * @param status The new connection status.

@@ -206,7 +206,7 @@ hybrid_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 	orig_width = gdk_pixbuf_get_width(pixbuf);
 	orig_height = gdk_pixbuf_get_height(pixbuf);
 
-	newpixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8,	32, 32);
+	newpixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8,	scale_size, scale_size);
 	gdk_pixbuf_fill(newpixbuf, 0x00000000);
 
 	gdk_pixbuf_scale(pixbuf, newpixbuf, 0, 0, scale_size, scale_size, 0, 0,
