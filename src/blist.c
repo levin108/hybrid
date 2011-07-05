@@ -20,6 +20,9 @@ static HybridGroup *hybrid_blist_find_group_by_name(
 							HybridAccount *account, const gchar *name);
 static void hybrid_group_remove(HybridGroup *group);
 
+static GtkTreePath *current_choose_path = NULL;
+static HybridAccount *current_choose_account = NULL;
+
 HybridBlist*
 hybrid_blist_create()
 {
@@ -584,6 +587,18 @@ create_group_menu(GtkWidget *treeview, GtkTreePath *path)
 	return menu;
 }
 
+/**
+ * Function to be called when the current choosen account has changed.
+ * for example, we selected an item belongs to account A at first, later,
+ * we selected another item that belongs to account B, then the function
+ * was called, the parameter is the new account.
+ */
+static void
+account_changed(HybridAccount *account)
+{
+	printf("account: %s\n", account->username);
+}
+
 static gboolean
 button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
@@ -593,9 +608,84 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	GtkTreeSelection *selection;
 	gint depth;
 
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+
+	/* left button clicked, change selection signaled. */
+	if (event->button == 1) {
+
+		GtkTreeIter iter;
+		HybridBuddy *buddy;
+		HybridGroup *group;
+		HybridAccount *account;
+		gboolean changed = FALSE;
+
+		gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
+				(gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
+
+		/* we check whether the selected path has changed. */
+		if (!current_choose_path) {
+			current_choose_path = path;
+			changed = TRUE;
+
+		} else {
+
+			if (gtk_tree_path_compare(current_choose_path, path) == 0) {
+
+				changed = FALSE;
+				gtk_tree_path_free(path);
+
+				return FALSE;
+
+			} else {
+
+				changed = TRUE;
+				gtk_tree_path_free(current_choose_path);
+				current_choose_path = path;
+			}
+		}
+
+		/*
+		 * now the selected path has changed, we will check whether the 
+		 * selected account has changed.
+		 */
+		if (changed) {
+
+			if (!gtk_tree_model_get_iter(model, &iter, current_choose_path)) {
+				return FALSE;
+			}
+
+			depth = gtk_tree_path_get_depth(current_choose_path);
+
+			if (depth > 1) {
+				gtk_tree_model_get(model, &iter,
+						HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
+				account = buddy->account;
+
+			} else {
+				gtk_tree_model_get(model, &iter,
+						HYBRID_BLIST_OBJECT_COLUMN, &group, -1);
+				account = group->account;
+			}
+
+			if (!current_choose_account) {
+
+				current_choose_account = account;
+				account_changed(current_choose_account);
+
+			} else {
+				if (current_choose_account != account) {
+					current_choose_account = account;
+					account_changed(current_choose_account);
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
+	/* right button clicked, popup menus. */
 	if (event->button == 3) {
 
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
 				(gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
 
@@ -655,20 +745,34 @@ row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 	}
 }
 
+/**
+ * Callback function of the 'move-cursor' signal, when arg2 equals 1, then the cursor
+ * moved next, when arg2 equals -1, the cursor moved previous, in this function the 
+ * selected row we got with gtk_tree_view_get_selection() is the row we selected before
+ * the move action triggered, so in order to get to selected row after move, we need to
+ * calculate the right position.
+ */
 static gboolean
 select_row_cb(GtkWidget *widget, GtkMovementStep arg1, gint arg2, gpointer user_data)
 {
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	GtkTreeIter parent;
 	GtkTreePath *path;
 	HybridBuddy *buddy;
 	HybridGroup *group;
-	gboolean group_up = FALSE;
+	HybridAccount *account;
 
 	gint depth;
+	gint n;
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+
+	if (current_choose_path) {
+		gtk_tree_path_free(current_choose_path);
+		current_choose_path = NULL;
+	}
 
 	if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
 		return TRUE;
@@ -681,13 +785,14 @@ select_row_cb(GtkWidget *widget, GtkMovementStep arg1, gint arg2, gpointer user_
 	depth = gtk_tree_path_get_depth(path);
 
 	if (arg2 > 0) {
+
 		if (depth > 1) {
 			gtk_tree_path_next(path);
-
 
 		} else {
 			if (gtk_tree_view_row_expanded(GTK_TREE_VIEW(widget), path)) {
 				gtk_tree_path_down(path);
+
 			} else {
 				gtk_tree_path_next(path);
 			}
@@ -697,26 +802,42 @@ select_row_cb(GtkWidget *widget, GtkMovementStep arg1, gint arg2, gpointer user_
 
 		if (depth > 1) {
 			if (!gtk_tree_path_prev(path)) {
+
 				gtk_tree_path_up(path);
 			}
 
 		} else {
 
 			if (!gtk_tree_path_prev(path)) {
-				return;
+
+				gtk_tree_path_free(path);
+
+				return TRUE;
 			}
 
 			if (gtk_tree_view_row_expanded(GTK_TREE_VIEW(widget), path)) {
-				gtk_tree_path_down(path);
-				gtk_tree_model_get_iter(model, &iter, path);
 
-				/* TODO */
+				gtk_tree_model_get_iter(model, &parent, path);
+				n = gtk_tree_model_iter_n_children(model, &parent);
+
+				if (!gtk_tree_model_iter_nth_child(model, &iter, &parent, n - 1)) {
+
+					gtk_tree_path_free(path);
+
+					return TRUE;
+				}
+
+				gtk_tree_path_free(path);
+
+				path = gtk_tree_model_get_path(model, &iter);
+
+				depth = gtk_tree_path_get_depth(path);
+				
+				goto path_found;
 
 			}
 		}
 	}
-
-	printf("%s\n", gtk_tree_path_to_string(path));
 
 	depth = gtk_tree_path_get_depth(path);
 
@@ -727,30 +848,52 @@ select_row_cb(GtkWidget *widget, GtkMovementStep arg1, gint arg2, gpointer user_
 			gtk_tree_path_next(path);
 
 			if (!gtk_tree_model_get_iter(model, &iter, path)) {
+
+				gtk_tree_path_free(path);
+
 				return TRUE;
 			}
 
 		} else {
+
+			gtk_tree_path_free(path);
+
 			return TRUE;
 		}
 	}
 
 	depth = gtk_tree_path_get_depth(path);
 
-	gtk_tree_path_free(path);
+path_found:
+	current_choose_path = path;
 
 
 	if (depth > 1) {
 		gtk_tree_model_get(model, &iter,
 				HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
 
-		printf("%s\n", buddy->name ? buddy->name : buddy->id);
+		account = buddy->account;
 
 	} else {
 		gtk_tree_model_get(model, &iter,
 				HYBRID_BLIST_OBJECT_COLUMN, &group, -1);
-		printf("%s\n", group->name);
+
+		account = group->account;
 	}
+
+	if (!current_choose_account) {
+
+		current_choose_account = account;
+		account_changed(current_choose_account);
+
+	} else {
+
+		if (current_choose_account != account) {
+			current_choose_account = account;
+			account_changed(current_choose_account);
+		}
+	}
+
 
 	return TRUE;
 }
