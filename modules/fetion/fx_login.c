@@ -1048,7 +1048,7 @@ generate_response(const gchar *nouce, const gchar *userid,
 	BN_hex2bn(&bne, exponent);
 	r->n = bnn;	r->e = bne;	r->d = NULL;
 
-//	RSA_print_fp(stdout, r, 5);
+	RSA_print_fp(stdout, r, 5);
 	flen = RSA_size(r);
 	out =  (guchar*)g_malloc0(flen);
 	hybrid_debug_info("fetion", "start encrypting response");
