@@ -10,6 +10,8 @@ GSList *conv_list = NULL;
 
 static GtkWidget *create_note_label(HybridChatWindow *chat);
 static void chat_window_destroy(HybridChatWindow *chat);
+static gboolean key_press_func(GtkWidget *widget, GdkEventKey *event,
+							HybridConversation *conv);
 
 /**
  * Callback function to handle the close button click event.
@@ -251,6 +253,8 @@ hybrid_conv_create()
 	gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 3);
 	g_signal_connect(imconv->window, "destroy", G_CALLBACK(conv_destroy_cb),
 			imconv);
+	g_signal_connect(imconv->window, "key-press-event",
+			G_CALLBACK(key_press_func), imconv);
 
 	/* create vbox */
 	vbox = gtk_vbox_new(FALSE, 2);
@@ -290,14 +294,16 @@ hybrid_conv_create()
 }
 
 static void
-menu_switch_page_cb(GtkWidget *widget, gpointer user_data)
+menu_switch_page_cb(GtkWidget *widget, HybridChatWindow *chat)
 {
-	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 	HybridConversation *conv = chat->parent;
 	GtkNotebook *notebook = GTK_NOTEBOOK(conv->notebook);
 	gint page_index = gtk_notebook_page_num(notebook, chat->vbox);
 
 	gtk_notebook_set_current_page(notebook, page_index);
+
+	/* focus the send textview */
+	gtk_widget_grab_focus(chat->sendtext);
 }
 
 /**
@@ -343,10 +349,8 @@ close_tab(HybridChatWindow *chat)
 }
 
 static void
-menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
+menu_close_current_page_cb(GtkWidget *widget, HybridChatWindow *chat)
 {
-	HybridChatWindow *chat = (HybridChatWindow*)user_data;
-
 	close_tab(chat);
 }
 
@@ -398,9 +402,8 @@ menu_popup_current_page_cb(GtkWidget *widget, HybridChatWindow *chat)
 }
 
 static void
-menu_close_other_pages_cb(GtkWidget *widget, gpointer user_data)
+menu_close_other_pages_cb(GtkWidget *widget, HybridChatWindow *chat)
 {
-	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 	HybridConversation *conv;
 	GSList *pos;
 
@@ -423,16 +426,21 @@ menu_close_other_pages_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
-menu_close_all_pages_cb(GtkWidget *widget, gpointer user_data)
+menu_close_all_pages_cb(GtkWidget *widget, HybridChatWindow *chat)
 {
-	HybridChatWindow *chat = (HybridChatWindow*)user_data;
-
 	gtk_widget_destroy(chat->parent->window);
 }
 
 static gboolean
 tab_press_cb(GtkWidget *widget, GdkEventButton *e, HybridChatWindow *chat)
 {
+	if (e->button == 1) {
+
+		gtk_widget_grab_focus(chat->sendtext);
+
+		return FALSE;
+	}
+
 	if (e->button == 3) { /**< right button clicked */
 
 		HybridChatWindow *temp_chat;
@@ -530,6 +538,81 @@ tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 	}
 
 	return TRUE;
+}
+
+
+/**
+ * Callback function of the conversation window's key-press event.
+ */
+static gboolean 
+key_press_func(GtkWidget *widget, GdkEventKey *event, HybridConversation *conv)
+{
+	gint current_page;
+	gint pages;
+	GSList *pos;
+	HybridChatWindow *chat;
+
+	if (event->state & GDK_CONTROL_MASK) {
+
+		/* CTRL+W close the chat tab. */
+		if (event->keyval == GDK_w) {
+
+			/* find the current chat panel. */
+			current_page = gtk_notebook_current_page(
+					GTK_NOTEBOOK(conv->notebook));
+
+			for (pos = conv->chat_buddies; pos; pos = pos->next) {
+				chat = (HybridChatWindow*)pos->data;
+
+				if (current_page == gtk_notebook_page_num(
+							GTK_NOTEBOOK(conv->notebook), chat->vbox)) {
+
+					close_tab(chat);
+
+					return TRUE;
+				}
+			}
+
+			hybrid_debug_error("conv", "FATAL, can't find chat panel");
+
+			return FALSE;
+		}
+
+		/* CTRL+Q close the window. */
+		if (event->keyval == GDK_q) {
+
+			gtk_widget_destroy(conv->window);
+
+			return TRUE;
+		}
+
+		/* CTRL+TAB move to next page. */
+		if (event->keyval == GDK_Tab) {
+
+			pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(conv->notebook));
+
+			if (pages == 1) {
+
+				return TRUE;
+
+			} else {
+				current_page = gtk_notebook_current_page(
+						GTK_NOTEBOOK(conv->notebook));
+
+				if (pages - 1 == current_page) {
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook), 0);
+
+				} else {
+					gtk_notebook_next_page(GTK_NOTEBOOK(conv->notebook));
+				}
+			}
+
+			return TRUE;
+		}
+
+	}
+
+	return FALSE;
 }
 
 /**
@@ -803,8 +886,10 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat->sendtext),
 			GTK_WRAP_WORD_CHAR);
 	gtk_container_add(GTK_CONTAINER(scroll), chat->sendtext);
-	g_signal_connect(chat->sendtext, "key-press-event",
+	g_signal_connect(chat->sendtext, "key_press_event",
 			G_CALLBACK(key_pressed_cb), chat->parent);
+
+	gtk_window_present(GTK_WINDOW(chat->parent->window));
 
 	/* focus the send textview */
 	GTK_WIDGET_SET_FLAGS(chat->sendtext, GTK_CAN_FOCUS);
@@ -857,6 +942,9 @@ init_chat_window(HybridChatWindow *chat)
 	 *                                ---- GtkNotebook
 	 */
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook), page_index);
+
+	/* focus the send textview */
+	gtk_widget_grab_focus(chat->sendtext);
 }
 
 HybridChatWindow*
@@ -929,6 +1017,9 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 found:
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(conv->notebook),
 		gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook), chat->vbox));
+
+	/* focus the send textview */
+	gtk_widget_grab_focus(chat->sendtext);
 
 	return chat;
 }
