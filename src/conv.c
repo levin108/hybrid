@@ -351,15 +351,15 @@ menu_close_current_page_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static void
-menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
+menu_popup_current_page_cb(GtkWidget *widget, HybridChatWindow *chat)
 {
-	HybridChatWindow *chat = (HybridChatWindow*)user_data;
 	HybridChatWindow *newchat;
 	GtkWidget *vbox;
 	gint page_index;
 
 	HybridConversation *newconv;
 	HybridConversation *parent;
+	HybridBuddy *buddy;
 
 	vbox = chat->vbox;
 	/* 
@@ -367,6 +367,12 @@ menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 	 * prevent it from being destroyed by gtk_notebook_remove_page().
 	 */
 	g_object_ref(vbox);
+
+	/*
+	 * When closing the chat panel, the chat object will be destroyed,
+	 * so we must store the buddy first before closing the tab. 
+	 */
+	buddy = chat->data;
 
 	close_tab(chat);
 
@@ -378,7 +384,7 @@ menu_popup_current_page_cb(GtkWidget *widget, gpointer user_data)
 
 	newchat = g_new0(HybridChatWindow, 1);
 	newchat->parent = newconv;
-	newchat->data = chat->data;
+	newchat->data = buddy;
 	newchat->vbox = vbox;
 	newconv->chat_buddies = g_slist_append(newconv->chat_buddies, newchat);
 
@@ -425,10 +431,10 @@ menu_close_all_pages_cb(GtkWidget *widget, gpointer user_data)
 }
 
 static gboolean
-tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
+tab_press_cb(GtkWidget *widget, GdkEventButton *e, HybridChatWindow *chat)
 {
 	if (e->button == 3) { /**< right button clicked */
-		HybridChatWindow *chat = (HybridChatWindow*)user_data;
+
 		HybridChatWindow *temp_chat;
 		HybridBuddy *temp_buddy;
 		GdkPixbuf *pixbuf;
@@ -479,28 +485,28 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 
 		g_signal_connect(submenu, "activate",
-				G_CALLBACK(menu_close_current_page_cb), temp_chat);
+				G_CALLBACK(menu_close_current_page_cb), chat);
 
 		submenu = gtk_menu_item_new_with_label(_("Popup Current Page"));
 
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 
 		g_signal_connect(submenu, "activate",
-				G_CALLBACK(menu_popup_current_page_cb), temp_chat);
+				G_CALLBACK(menu_popup_current_page_cb), chat);
 
 		submenu = gtk_menu_item_new_with_label(_("Close Other Pages"));
 
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 
 		g_signal_connect(submenu, "activate",
-				G_CALLBACK(menu_close_other_pages_cb), temp_chat);
+				G_CALLBACK(menu_close_other_pages_cb), chat);
 
 		submenu = gtk_menu_item_new_with_label(_("Close All Pages"));
 
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), submenu);
 
 		g_signal_connect(submenu, "activate",
-				G_CALLBACK(menu_close_all_pages_cb), temp_chat);
+				G_CALLBACK(menu_close_all_pages_cb), chat);
 
 		gtk_widget_show_all(menu);
 
