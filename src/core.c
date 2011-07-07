@@ -5,6 +5,7 @@
 #include "head.h"
 #include "blist.h"
 #include "util.h"
+#include "statusicon.h"
 #include "gtkaccount.h"
 #include "gtkutils.h"
 #include "groupadd.h"
@@ -14,6 +15,7 @@ extern HybridBlist *blist;
 extern HybridHead *hybrid_head;
 extern GSList *account_list;
 
+GtkWidget *hybrid_window;
 GtkUIManager *menu_ui_manager;
 
 void
@@ -168,9 +170,14 @@ ui_init(void)
 	GtkWidget *window;
 	GtkWidget *scroll;
 	GtkWidget *vbox;
+
+	/* initialize the status icon. */
+	hybrid_status_icon_init();
 	
 	window = hybrid_create_window(_("Hybrid"), NULL, GTK_WIN_POS_CENTER, TRUE);
 	gtk_window_set_default_size(GTK_WINDOW(window), 250, 500);
+
+	hybrid_window = window;
 
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);

@@ -112,6 +112,7 @@ set(hybrid_SRC
 	src/chat-textview.c
 	src/groupadd.c
 	src/buddyadd.c
+	src/statusicon.c
 	src/gtkcellrendererexpander.c
 	src/core.c
 )

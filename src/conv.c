@@ -1037,6 +1037,9 @@ hybrid_conv_got_message(HybridAccount *account,
 	HybridBuddy *buddy;
 	gchar *msg;
 
+	gint current_page;
+	gint chat_page;
+
 	msg = hybrid_strip_html(message);
 
 	g_return_if_fail(account != NULL);
@@ -1070,6 +1073,24 @@ hybrid_conv_got_message(HybridAccount *account,
 	chat = hybrid_chat_window_create(account, buddy->id, HYBRID_CHAT_PANEL_SYSTEM);
 
 got_chat_found:
+
+	/* check whether the chat window is active. */
+	conv = chat->parent;
+	if (gtk_window_is_active(GTK_WINDOW(conv->window))) {
+		
+		current_page = gtk_notebook_current_page(GTK_NOTEBOOK(conv->notebook));
+		chat_page = gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook), chat->vbox);
+
+		if (current_page == chat_page) {
+			goto just_show_msg;
+		}
+	}
+
+	/* change the callback function of the status icon's activate signal. */
+	hybrid_status_icon_blinking(buddy);
+
+just_show_msg:
+
 	hybrid_chat_textview_append(chat->textview, buddy->name, msg, time, FALSE);
 
 	g_free(msg);
