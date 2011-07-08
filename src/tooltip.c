@@ -1,8 +1,9 @@
 #include "tooltip.h"
+#include "gtkutils.h"
 
 HybridTooltip hybrid_tooltip;
 
-static gboolean hybrid_tooltip_show(GtkWidget *widget);
+static gboolean hybrid_tooltip_show(HybridTooltipData *data);
 static void hybrid_tooltip_destroy();
 
 static gboolean
@@ -10,7 +11,7 @@ widget_motion_cb(GtkWidget *widget, GdkEvent *event, HybridTooltipData *data)
 {
 	hybrid_tooltip_destroy();
 
-	hybrid_tooltip.source = g_timeout_add(400, (GSourceFunc)hybrid_tooltip_show, widget);
+	hybrid_tooltip.source = g_timeout_add(400, (GSourceFunc)hybrid_tooltip_show, data);
 
 	return FALSE;
 }
@@ -19,6 +20,45 @@ static gboolean
 widget_leave_cb(GtkWidget *widget, GdkEvent *event, HybridTooltipData *data)
 {
 	hybrid_tooltip_destroy();
+
+	return FALSE;
+}
+
+static gboolean
+expose_event_cb(GtkWidget *widget, GdkEventExpose *event,
+		HybridTooltipData *data)
+{
+	/* paint. */
+	GtkStyle *style;
+	GdkPixbuf *pixbuf;
+	GtkWidget *tipwindow;
+	gint window_width;
+	gint window_height;
+
+	tipwindow = hybrid_tooltip.window;
+
+	gtk_window_get_size(GTK_WINDOW(tipwindow), &window_width, &window_height);
+
+	style = tipwindow->style;
+
+	/* paint tooltip border */
+	gtk_paint_flat_box(style, tipwindow->window, GTK_STATE_NORMAL, GTK_SHADOW_OUT,
+	                   NULL, tipwindow, "tooltip", 0, 0, 
+					   window_width, window_height);
+
+	/* paint portrait border */
+	gtk_paint_flat_box(style, tipwindow->window, GTK_STATE_NORMAL, GTK_SHADOW_OUT,
+	                   NULL, tipwindow, "tooltip", TOOLTIP_BORDER, TOOLTIP_BORDER, 
+					   PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2, 
+					   PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2);
+
+	pixbuf = hybrid_create_round_pixbuf(NULL, 0, PORTRAIT_WIDTH);
+
+	gdk_draw_pixbuf(GDK_DRAWABLE(tipwindow->window), NULL, pixbuf, 0, 0,
+	                  TOOLTIP_BORDER + PORTRAIT_MARGIN, TOOLTIP_BORDER + PORTRAIT_MARGIN,
+					  PORTRAIT_WIDTH, PORTRAIT_WIDTH, GDK_RGB_DITHER_NONE, 0, 0);
+
+	g_object_unref(pixbuf);
 
 	return FALSE;
 }
@@ -86,10 +126,13 @@ setup_tooltip_window_position(gpointer data, int w, int h)
 	g_signal_connect_swapped(G_OBJECT(tipwindow), "destroy",
 	                         G_CALLBACK(g_source_remove),
 							 GINT_TO_POINTER(sig));
+
+	g_signal_connect(G_OBJECT(tipwindow), "expose-event",
+	                 G_CALLBACK(expose_event_cb), data);
 }
 
 static gboolean
-hybrid_tooltip_show(GtkWidget *widget)
+hybrid_tooltip_show(HybridTooltipData *data)
 {
 
 	GtkWidget *window;
@@ -100,10 +143,11 @@ hybrid_tooltip_show(GtkWidget *widget)
 	gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
 	gtk_widget_ensure_style(window);
 	gtk_widget_realize(window);
-	gtk_widget_show(window);
+	gtk_widget_set_name(window, "gtk-tooltips");
 
-	hybrid_tooltip.widget = widget;
+	hybrid_tooltip.widget = data->widget;
 	hybrid_tooltip.window = window;
+	
 
 	setup_tooltip_window_position(NULL, 300, 200);
 

@@ -16,6 +16,10 @@ struct _HybridTooltipData {
 	gpointer user_data;
 };
 
+#define TOOLTIP_BORDER 10
+#define PORTRAIT_WIDTH 96
+#define PORTRAIT_MARGIN 4
+
 #ifdef __cplusplus
 extern "C" {
 #endif
