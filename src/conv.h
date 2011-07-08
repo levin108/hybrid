@@ -43,6 +43,8 @@ struct _HybridChatWindow {
 	gchar *title;   /**< only be used when it's user-defined window. */
 	GdkPixbuf *icon;/**< only be used when it's user-defined window. */
 
+	gint unread; /* count of the unread message. */
+
 	gpointer data;
 	GtkWidget *pagelabel;
 
@@ -140,6 +142,12 @@ void hybrid_chat_window_set_callback(HybridChatWindow *window,
 void hybrid_conv_got_message(HybridAccount *account,
 				const gchar *buddy_id, const gchar *message,
 				time_t time);
+
+/**
+ * Update the tips title of the chat window, usually used when
+ * a new message is received, or messages are being read.
+ */
+void hybrid_chat_window_update_tips(HybridChatWindow *window);
 
 #ifdef __cplusplus
 }

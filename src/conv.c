@@ -1,5 +1,6 @@
 #include <gdk/gdkkeysyms.h>
 
+#include "statusicon.h"
 #include "gtkutils.h"
 #include "chat-textview.h"
 #include "conv.h"
@@ -540,6 +541,40 @@ tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
 	return TRUE;
 }
 
+static gboolean 
+focus_in_cb(GtkWidget *widget, GdkEventFocus *event, HybridChatWindow *chat)
+{
+	GSList *conv_pos;
+	GSList *chat_pos;
+	HybridConversation *conv;
+	HybridChatWindow *temp_chat;
+
+	if (chat->unread == 0) {
+		return FALSE;
+	}
+
+	chat->unread = 0;
+
+	hybrid_chat_window_update_tips(chat);
+
+	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
+
+		conv = (HybridConversation*)conv_pos->data;
+
+		for (chat_pos = conv->chat_buddies; chat_pos; chat_pos = chat_pos->next) {
+
+			temp_chat = (HybridChatWindow*)chat_pos->data;
+
+			if (temp_chat->unread != 0) {
+				return FALSE;
+			}
+		}
+	}
+
+	hybrid_status_icon_blinking(NULL);
+
+	return FALSE;
+}
 
 /**
  * Callback function of the conversation window's key-press event.
@@ -850,6 +885,8 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 			GTK_SHADOW_ETCHED_IN);
 
 	chat->textview = hybrid_chat_textview_create();
+	g_signal_connect(chat->textview, "focus-in-event",
+					GTK_SIGNAL_FUNC(focus_in_cb), chat);
 	gtk_container_add(GTK_CONTAINER(scroll), chat->textview);
 
 	/* create toolbar */
@@ -888,6 +925,8 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 	gtk_container_add(GTK_CONTAINER(scroll), chat->sendtext);
 	g_signal_connect(chat->sendtext, "key_press_event",
 			G_CALLBACK(key_pressed_cb), chat->parent);
+	g_signal_connect(chat->sendtext, "focus-in-event",
+					GTK_SIGNAL_FUNC(focus_in_cb), chat);
 
 	gtk_window_present(GTK_WINDOW(chat->parent->window));
 
@@ -1089,6 +1128,10 @@ got_chat_found:
 	/* change the callback function of the status icon's activate signal. */
 	hybrid_status_icon_blinking(buddy);
 
+	chat->unread ++;
+
+	hybrid_chat_window_update_tips(chat);
+
 just_show_msg:
 
 	hybrid_chat_textview_append(chat->textview, buddy->name, msg, time, FALSE);
@@ -1157,4 +1200,44 @@ hybrid_chat_window_set_callback(HybridChatWindow *window,
 	g_return_if_fail(window != NULL);
 
 	window->callback = callback;
+}
+
+void
+hybrid_chat_window_update_tips(HybridChatWindow *window)
+{
+	GtkTreeModel *model;
+	GtkTreePath *path;
+	HybridConversation *conv;
+	HybridBuddy *buddy;
+	gchar *markup;
+
+	g_return_if_fail(window != NULL);
+
+	if (!IS_SYSTEM_CHAT(window)) {
+		return;
+	}
+
+	conv = window->parent;
+	buddy = window->data;
+
+	model = gtk_cell_view_get_model(GTK_CELL_VIEW(window->tablabel));
+
+	if (window->unread) {
+		markup = g_strdup_printf("<span color=\"blue\"><b>%s (%d)</b></span>",
+								buddy->name, window->unread);
+
+	} else {
+		markup = g_strdup(buddy->name);
+	}
+
+	gtk_list_store_set(GTK_LIST_STORE(model), &window->tabiter,
+		               TAB_NAME_COLUMN, markup,
+					   -1);
+
+	g_free(markup);
+
+	path = gtk_tree_path_new_from_string("0");
+	gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(window->tablabel), path);
+	gtk_tree_path_free(path);
+
 }
