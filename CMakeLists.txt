@@ -109,6 +109,7 @@ set(hybrid_SRC
 	src/head.c
 	src/action.c
 	src/notify.c
+	src/tooltip.c
 	src/chat-textview.c
 	src/groupadd.c
 	src/buddyadd.c

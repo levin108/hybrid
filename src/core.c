@@ -186,7 +186,7 @@ ui_init(void)
 
 	/* head area */
 	hybrid_head_init();
-	gtk_box_pack_start(GTK_BOX(vbox), hybrid_head->cellview, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(vbox), hybrid_head->eventbox, FALSE, FALSE, 10);
 
 	/* scroll area (TreeView) */
 	scroll = gtk_scrolled_window_new(NULL, NULL);

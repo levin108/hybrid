@@ -1,5 +1,6 @@
 #include "head.h"
 #include "gtkutils.h"
+#include "tooltip.h"
 
 HybridHead *hybrid_head;
 
@@ -135,6 +136,11 @@ void hybrid_head_init()
 {
 	hybrid_head = g_new0(HybridHead, 1);
 	hybrid_head->cellview = gtk_cell_view_new();
+	hybrid_head->eventbox = gtk_event_box_new();
+	gtk_container_add(GTK_CONTAINER(hybrid_head->eventbox), 
+	                  hybrid_head->cellview);
+
+	hybrid_tooltip_setup(hybrid_head->eventbox, NULL);
 
 	cell_view_init(hybrid_head);
 

@@ -8,6 +8,7 @@ typedef struct _HybridHead HybridHead;
 
 struct _HybridHead {
 	GtkWidget *cellview;
+	GtkWidget *eventbox;
 	GtkTreeIter iter;
 };
 
