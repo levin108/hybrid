@@ -557,6 +557,10 @@ focus_in_cb(GtkWidget *widget, GdkEventFocus *event, HybridChatWindow *chat)
 
 	hybrid_chat_window_update_tips(chat);
 
+	/*
+	 * Check whether there's still chat window which has unread messages.
+	 * if not, set the status icon not blinking.
+	 */
 	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
 
 		conv = (HybridConversation*)conv_pos->data;

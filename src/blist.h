@@ -274,6 +274,16 @@ HybridGroup *hybrid_blist_find_group(HybridAccount *account, const gchar *id);
  */
 HybridBuddy *hybrid_blist_find_buddy(HybridAccount *account, const gchar *id);
 
+/**
+ * Select the first item of the account, it's used when an new
+ * account was enabled, in this time, if there was no account whose
+ * account was selected, then we do nothing, but if there was, we
+ * show make it select the items of the current account.
+ *
+ * @param account The account.
+ */
+void hybrid_blist_select_first_item(HybridAccount *account);
+
 #ifdef _cplusplus
 }
 #endif

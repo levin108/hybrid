@@ -631,11 +631,13 @@ void
 hybrid_account_close(HybridAccount *account)
 {
 	GHashTableIter hash_iter;
+	HybridAccount *enabled_account;
 	HybridGroup *group;
 	HybridBuddy *buddy;
 	HybridModule *module;
 	gpointer key;
 	GtkTreeModel *model;
+	GSList *pos;
 
 	g_return_if_fail(account != NULL);
 
@@ -692,6 +694,22 @@ hybrid_account_close(HybridAccount *account)
 	}
 	
 	g_hash_table_remove_all(account->buddy_list);
+
+	/*
+	 * Bind the first enabled account to the head panel.
+	 */
+	for (pos = account_list; pos; pos = pos->next) {
+		enabled_account = (HybridAccount*)pos->data;
+
+		if (enabled_account->enabled) {
+
+			hybrid_head_bind_to_account(enabled_account);
+
+			hybrid_blist_select_first_item(enabled_account);
+
+			break;
+		}
+	}
 
 	/*
 	 * There's NO need to destroy the account here, we need it
@@ -753,6 +771,9 @@ hybrid_account_set_connection_status(HybridAccount *account,
 
 		/* here we load the blist from the local cache file. */
 		load_blist_from_disk(account);
+
+		/* select the first item of the account. */
+		hybrid_blist_select_first_item(account);
 
 		/* Update the head panel. */
 		hybrid_head_bind_to_account(account);
