@@ -27,10 +27,12 @@ struct _HybridAccount {
 	gchar *icon_name; /**< file name of the local file. */
 
 	GtkWidget *account_menu;
-	GtkWidget *login_panel;
-	GtkWidget *login_tips;
 	GtkWidget *enable_menu;
 	GtkWidget *enable_menu_id;
+
+	GtkWidget *login_panel;
+	GtkWidget *login_tips;
+	GtkTreeIter login_iter;
 
 	gpointer protocol_data;
 
@@ -248,11 +250,21 @@ void hybrid_account_error_reason(HybridAccount *account, const gchar *reason);
  * Note that before calling this function, you should make sure that you have
  * set nickname,mood phrase, and state for the account.
  *
- * @param The account.
- * @param status The new connection status.
+ * @param account The account.
+ * @param status  The new connection status.
  */
 void hybrid_account_set_connection_status(HybridAccount *account,
 		HybridConnectionStatusType status);
+
+/**
+ * Set the status string of the current connection, it will be displayed in
+ * the login panel in the bottom of the buddy list.
+ *
+ * @param account The account.
+ * @param string  The status string.
+ */
+void hybrid_account_set_connection_string(HybridAccount *account,
+		const gchar *string);
 
 /**
  * Get the human readable name of the given presence state.

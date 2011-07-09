@@ -30,7 +30,7 @@ enable_account(HybridAccount *account)
 {
 	hybrid_account_set_enabled(account, TRUE);
 
-	account->proto->info->login(account);
+	hybrid_account_enable(account);
 }
 
 static void
@@ -376,7 +376,7 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 	hybrid_account_create_menu(account);
 
 	/* enable the account */
-	account->proto->info->login(account);
+	hybrid_account_enable(account);
 
 	g_free(protoname);
 

@@ -18,6 +18,13 @@ static void account_set_icon(HybridAccount *account, const guchar *icon_data,
 
 static void load_blist_from_disk(HybridAccount *account);
 
+enum {
+	ACCOUNT_PROTO_ICON_COL,
+	ACCOUNT_NAME_COL,
+	ACCOUNT_STATUS_COL,
+	ACCOUNT_COLUMNS
+};
+
 void
 hybrid_account_init(void)
 {
@@ -631,6 +638,14 @@ void
 hybrid_account_enable(HybridAccount *account)
 {
 	extern GtkWidget *hybrid_vbox;
+	GtkWidget *cellview;
+	GtkListStore *store;
+	GtkTreePath *path;
+	GtkWidget *vbox;
+	GtkCellRenderer *renderer;
+	GdkPixbuf *pixbuf;
+	GtkWidget *align;
+	gchar *text;
 
 	g_return_if_fail(account != NULL);
 
@@ -639,12 +654,70 @@ hybrid_account_enable(HybridAccount *account)
 	}
 
 	account->login_panel = gtk_frame_new(NULL);
-	account->login_tips = gtk_label_new(NULL);
 
-	gtk_label_set_markup(GTK_LABEL(account->login_tips), "logining...");
+	cellview = gtk_cell_view_new();
 
-	gtk_container_add(GTK_CONTAINER(account->login_panel), account->login_tips);
-	gtk_box_pack_start(GTK_BOX(hybrid_vbox), account->login_panel, FALSE, FALSE, 0);
+	store = gtk_list_store_new(ACCOUNT_COLUMNS,
+	                           GDK_TYPE_PIXBUF,
+							   G_TYPE_STRING,
+							   G_TYPE_STRING);
+
+	/* proto icon renderer */
+	renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_cell_layout_pack_start(
+			GTK_CELL_LAYOUT(cellview), renderer, FALSE);
+	gtk_cell_layout_set_attributes(
+			GTK_CELL_LAYOUT(cellview), renderer,
+			"pixbuf", ACCOUNT_PROTO_ICON_COL, NULL);
+	g_object_set(renderer, "yalign", 0.5, "xpad", 3, "ypad", 3, NULL);
+
+	/* account name renderer */
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(
+			GTK_CELL_LAYOUT(cellview), renderer, FALSE);
+	gtk_cell_layout_set_attributes(
+			GTK_CELL_LAYOUT(cellview), renderer,
+			"markup", ACCOUNT_NAME_COL, NULL);
+	g_object_set(renderer, "wrap-mode", PANGO_WRAP_CHAR, NULL);
+	g_object_set(renderer, "wrap-width", 220, NULL);
+
+	gtk_cell_view_set_model(GTK_CELL_VIEW(cellview),
+	                        GTK_TREE_MODEL(store));
+
+	/* add a new row. */
+	gtk_list_store_append(store, &account->login_iter);
+	path = gtk_tree_path_new_from_string("0");
+	gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(cellview), path);
+	gtk_tree_path_free(path);
+
+	pixbuf = hybrid_create_proto_icon(account->proto->info->name, 16);
+
+	text = g_strdup_printf("<b>%s</b>", account->username);
+
+	gtk_list_store_set(store, &account->login_iter,
+	                   ACCOUNT_PROTO_ICON_COL, pixbuf,
+	                   ACCOUNT_NAME_COL, text,
+					   -1);
+
+	g_free(text);
+	g_object_unref(pixbuf);
+	g_object_unref(store);
+
+	vbox = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), cellview, FALSE, FALSE,0);
+
+	account->login_tips = gtk_label_new("Authenticating...");
+	align = gtk_alignment_new(0, 0, 0, 0);
+	gtk_container_add(GTK_CONTAINER(align), account->login_tips);
+	gtk_box_pack_start(GTK_BOX(vbox), align, FALSE, FALSE,0);
+
+	gtk_container_add(GTK_CONTAINER(account->login_panel), vbox);
+	gtk_container_set_border_width(GTK_CONTAINER(align), 2);
+
+	gtk_box_pack_start(GTK_BOX(hybrid_vbox), 
+	                   account->login_panel, FALSE, FALSE, 0);
+
+	gtk_widget_show_all(account->login_panel);
 
 	account->proto->info->login(account);
 }
@@ -678,6 +751,15 @@ hybrid_account_close(HybridAccount *account)
 	 * Disable the account.
 	 */
 	hybrid_account_set_enabled(account, FALSE);
+
+	/*
+	 * Remove the login panel.
+	 */
+	if (account->login_panel) {
+		gtk_widget_destroy(account->login_panel);
+		account->login_panel = NULL;
+		account->login_tips = NULL;
+	}
 
 	/*
 	 * Update the local cache file.
@@ -776,6 +858,21 @@ keep_alive_cb(HybridAccount *account)
 	return TRUE;
 }
 
+static gboolean
+remove_login_cb(HybridAccount *account)
+{
+	g_return_val_if_fail(account != NULL, FALSE);
+
+	/* Remove the login panel. */
+	if (account->login_panel) {
+		gtk_widget_destroy(account->login_panel);
+		account->login_panel = NULL;
+		account->login_tips = NULL;
+	}
+
+	return FALSE;
+}
+
 void
 hybrid_account_set_connection_status(HybridAccount *account,
 		HybridConnectionStatusType status)
@@ -800,6 +897,11 @@ hybrid_account_set_connection_status(HybridAccount *account,
 		/* Update the head panel. */
 		hybrid_head_bind_to_account(account);
 
+		hybrid_account_set_connection_string(account, _("login success!"));
+
+		/* remove the login panel. */
+		g_timeout_add_seconds(1, (GSourceFunc)remove_login_cb, account);
+
 		/*
 		 * Now we start keep alive thread, the keep alive hook function
 		 * was called every 20s.
@@ -811,6 +913,14 @@ hybrid_account_set_connection_status(HybridAccount *account,
 	account->connect_state = status;
 }
 
+void
+hybrid_account_set_connection_string(HybridAccount *account,
+		const gchar *string)
+{
+	g_return_if_fail(account != NULL);
+
+	gtk_label_set_markup(GTK_LABEL(account->login_tips), string);
+}
 
 const gchar*
 hybrid_get_presence_name(gint presence_state)

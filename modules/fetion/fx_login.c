@@ -165,6 +165,8 @@ cfg_connect_cb(gint sk, gpointer user_data)
 	gchar *body;
 	fetion_account *ac = (fetion_account*)user_data;
 
+	hybrid_account_set_connection_string(ac->account, _("Downloading configure file..."));
+
 	body = generate_configuration_body(ac);
 	http = g_strdup_printf("POST /nav/getsystemconfig.aspx HTTP/1.1\r\n"
 				   "User-Agent: IIC2.0/PC "PROTO_VERSION"\r\n"
@@ -270,6 +272,8 @@ ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
 	gchar ssl_buf[BUF_LENGTH];
 	gint pass_type;
 	fetion_account *ac = (fetion_account*)user_data;
+
+	hybrid_account_set_connection_string(ac->account, "Start SSI authenticating...");
 	
 	hybrid_debug_info("fetion", "ssi authencating");
 	password = hash_password_v4(ac->userid, ac->password);
@@ -375,6 +379,9 @@ sipc_reg_action(gint sk, gpointer user_data)
 	fetion_sip *sip = ac->sip;
 
 	hybrid_debug_info("fetion", "sipc registeration action");
+
+	hybrid_account_set_connection_string(ac->account,
+			_("start registering to the sipc server."));
 
 	/* Now we start to register to the sipc server. */
 	fetion_sip_set_type(sip, SIP_REGISTER);
@@ -559,6 +566,9 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 	ac->sk = sk;
 
 	hybrid_debug_info("fetion", "sipc authencation action");
+
+	hybrid_account_set_connection_string(ac->account,
+			_("start sipc authenticating..."));
 
 	body = generate_auth_body(ac);
 

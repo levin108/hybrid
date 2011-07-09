@@ -16,7 +16,10 @@ extern HybridHead *hybrid_head;
 extern GSList *account_list;
 
 GtkWidget *hybrid_window;
+
+/* Vbox for logining panels. */
 GtkWidget *hybrid_vbox;
+
 GtkUIManager *menu_ui_manager;
 
 void
@@ -179,7 +182,6 @@ ui_init(void)
 	hybrid_window = window;
 
 	vbox = gtk_vbox_new(FALSE, 0);
-	hybrid_vbox = vbox;
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 
 	g_signal_connect(window, "destroy", G_CALLBACK(window_destroy), NULL);
@@ -195,6 +197,9 @@ ui_init(void)
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 			GTK_SHADOW_ETCHED_IN);
 	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
+
+	hybrid_vbox = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hybrid_vbox, FALSE, FALSE, 5);
 
 	hybrid_blist_init();
 
