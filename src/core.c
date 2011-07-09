@@ -16,6 +16,7 @@ extern HybridHead *hybrid_head;
 extern GSList *account_list;
 
 GtkWidget *hybrid_window;
+GtkWidget *hybrid_vbox;
 GtkUIManager *menu_ui_manager;
 
 void
@@ -27,9 +28,7 @@ hybrid_start_login()
 	for (pos = account_list; pos; pos = pos->next) {
 		account = (HybridAccount*)pos->data;
 
-		if (account->enabled) {
-			account->proto->info->login(account);
-		}
+		hybrid_account_enable(account);
 	}
 }
 
@@ -180,6 +179,7 @@ ui_init(void)
 	hybrid_window = window;
 
 	vbox = gtk_vbox_new(FALSE, 0);
+	hybrid_vbox = vbox;
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 
 	g_signal_connect(window, "destroy", G_CALLBACK(window_destroy), NULL);

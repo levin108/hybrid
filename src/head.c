@@ -131,7 +131,7 @@ hybrid_head_bind_to_account(HybridAccount *account)
 
 	if (!account) {
 		pixbuf = hybrid_create_default_icon(32);
-		text = g_strdup(_("<b>Idle</b>\nNo account was enabled."));
+		text = g_strdup(_("No account was enabled."));
 		status_icon = NULL;
 
 	} else {

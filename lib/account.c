@@ -628,6 +628,28 @@ hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 }
 
 void
+hybrid_account_enable(HybridAccount *account)
+{
+	extern GtkWidget *hybrid_vbox;
+
+	g_return_if_fail(account != NULL);
+
+	if (!account->enabled) {
+		return;
+	}
+
+	account->login_panel = gtk_frame_new(NULL);
+	account->login_tips = gtk_label_new(NULL);
+
+	gtk_label_set_markup(GTK_LABEL(account->login_tips), "logining...");
+
+	gtk_container_add(GTK_CONTAINER(account->login_panel), account->login_tips);
+	gtk_box_pack_start(GTK_BOX(hybrid_vbox), account->login_panel, FALSE, FALSE, 0);
+
+	account->proto->info->login(account);
+}
+
+void
 hybrid_account_close(HybridAccount *account)
 {
 	GHashTableIter hash_iter;

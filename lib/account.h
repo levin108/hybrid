@@ -27,6 +27,8 @@ struct _HybridAccount {
 	gchar *icon_name; /**< file name of the local file. */
 
 	GtkWidget *account_menu;
+	GtkWidget *login_panel;
+	GtkWidget *login_tips;
 	GtkWidget *enable_menu;
 	GtkWidget *enable_menu_id;
 
@@ -211,6 +213,14 @@ const gchar* hybrid_account_get_checksum(HybridAccount *account);
  */
 void hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 		gint icon_data_len, const gchar *icon_crc);
+
+/**
+ * Enable an account, it will create a login tips panel in the 
+ * bottom of the buddy list, and then call the protocol login function.
+ *
+ * @param account The account.
+ */
+void hybrid_account_enable(HybridAccount *account);
 
 /**
  * Close an account. Remove it from the blist panel. Free the 
