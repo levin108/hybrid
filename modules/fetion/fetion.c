@@ -8,6 +8,7 @@
 #include "action.h"
 #include "conv.h"
 #include "gtkutils.h"
+#include "tooltip.h"
 
 #include "fetion.h"
 #include "fx_trans.h"
@@ -526,6 +527,44 @@ fx_keep_alive(HybridAccount *account)
 	return TRUE;
 }
 
+static gboolean
+fx_account_tooltip(HybridAccount *account, HybridTooltipData *tip_data)
+{
+	fetion_account *ac;
+
+	ac = hybrid_account_get_protocol_data(account);
+	hybrid_tooltip_data_add_pair(tip_data, "Name", ac->nickname);
+	hybrid_tooltip_data_add_pair(tip_data, "Status",
+	                             hybrid_get_presence_name(account->state));
+	hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", ac->sid);
+	hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", ac->mobileno);
+	hybrid_tooltip_data_add_pair(tip_data, "Mood", ac->mood_phrase);
+
+	return TRUE;
+}
+
+static gboolean
+fx_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy, HybridTooltipData *tip_data)
+{
+	fetion_account *ac;
+	fetion_buddy *bd;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (!(bd = fetion_buddy_find_by_userid(ac, buddy->id))) {
+		return FALSE;
+	}
+
+	hybrid_tooltip_data_add_pair(tip_data, "Name", bd->nickname);
+	hybrid_tooltip_data_add_pair(tip_data, "Status",
+	                             hybrid_get_presence_name(buddy->state));
+	hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", bd->sid);
+	hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", bd->mobileno);
+	hybrid_tooltip_data_add_pair(tip_data, "Mood", bd->mood_phrase);
+	
+	return TRUE;
+}
+
 static gboolean 
 fx_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 		HybridGroup *new_group)
@@ -744,6 +783,8 @@ HybridModuleInfo module_info = {
 	fx_get_info,              /**< get_info */
 	fx_change_state,          /**< change_state */
 	fx_keep_alive,            /**< keep_alive */
+	fx_account_tooltip,       /**< account_tooltip */
+	fx_buddy_tooltip,         /**< buddy_tooltip */
 	fx_buddy_move,            /**< buddy_move */
 	fx_remove,                /**< buddy_remove */
 	fx_rename,                /**< buddy_rename */

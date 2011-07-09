@@ -110,6 +110,36 @@ page_found:
 	}
 }
 
+static gboolean
+init_tooltip(HybridTooltipData *data)
+{
+	HybridBuddy *buddy;
+	HybridAccount *account;
+	HybridModule *module;
+
+	buddy = (HybridBuddy*)data->user_data;
+
+	account = buddy->account;
+	module = account->proto;
+
+	if (module->info->buddy_tooltip) {
+		
+		if (!module->info->buddy_tooltip(account, buddy, data)) {
+			return FALSE;
+		}
+	}
+
+	if (data->icon) {
+		g_object_unref(data->icon);
+	}
+
+	data->icon = hybrid_create_pixbuf_at_size(buddy->icon_data,
+	                    buddy->icon_data_length,
+						PORTRAIT_WIDTH, PORTRAIT_WIDTH);
+
+	return TRUE;
+}
+
 static void
 message_send(HybridConversation *conv)
 {
@@ -776,6 +806,7 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 	GdkPixbuf *icon_pixbuf;
 	GdkPixbuf *proto_pixbuf;
 	GdkPixbuf *presence_pixbuf;
+	GtkWidget *eventbox;
 
 	g_return_if_fail(vbox != NULL);
 
@@ -789,6 +820,13 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 			GDK_TYPE_PIXBUF);
 
 	gtk_cell_view_set_model(GTK_CELL_VIEW(cellview), GTK_TREE_MODEL(store));
+
+	/*
+	 * GtkCellView doesn't have a GdkWindow, we wrap it with an EventBox,
+	 * and then setup tooltip on the EventBox.
+	 */
+	eventbox = gtk_event_box_new();
+	gtk_container_add(GTK_CONTAINER(eventbox), cellview);
 
 	/* buddy icon renderer */
 	renderer = gtk_cell_renderer_pixbuf_new();
@@ -829,6 +867,7 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 	if (IS_SYSTEM_CHAT(chat)) {
 
 		buddy = chat->data;
+		hybrid_tooltip_setup(eventbox, NULL, NULL, init_tooltip, buddy);
 
 		icon_pixbuf = hybrid_create_round_pixbuf(buddy->icon_data,
 						buddy->icon_data_length, 32);
@@ -864,7 +903,7 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 
 	g_object_unref(proto_pixbuf);
 
-	gtk_box_pack_start(GTK_BOX(vbox), cellview, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), eventbox, FALSE, FALSE, 5);
 }
 
 static void

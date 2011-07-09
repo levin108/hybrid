@@ -11,6 +11,8 @@
 
 HybridBlist *blist = NULL;
 
+extern HybridTooltip hybrid_tooltip;
+
 static void hybrid_blist_set_group_name(HybridGroup *group, const gchar *name);
 static void hybrid_blist_update_group(HybridGroup *group);
 static void hybrid_blist_buddy_icon_save(HybridBuddy *buddy);
@@ -907,6 +909,66 @@ path_found:
 	return TRUE;
 }
 
+static gboolean
+init_tooltip(HybridTooltipData *data)
+{
+	GtkTreePath *path;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	HybridAccount *account;
+	HybridModule *module;
+	HybridBuddy *buddy;
+	gint depth;
+
+	if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(data->widget),
+	     hybrid_tooltip.rect.x, hybrid_tooltip.rect.y,
+		 &path, NULL, NULL, NULL)) {
+
+		return FALSE;
+	}
+
+	depth = gtk_tree_path_get_depth(path);
+
+	if (depth <= 1) {
+
+		gtk_tree_path_free(path);
+
+		return FALSE;
+	}
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(data->widget));
+
+	if (!gtk_tree_model_get_iter(model, &iter, path)) {
+
+		gtk_tree_path_free(path);
+
+		return FALSE;
+	}
+
+	gtk_tree_path_free(path);
+
+	gtk_tree_model_get(model, &iter, HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
+
+	account = buddy->account;
+	module  = account->proto;
+
+	if (module->info->buddy_tooltip) {
+
+		if (!module->info->buddy_tooltip(account, buddy, data)) {
+			return FALSE;
+		}
+	}
+
+	if (data->icon) {
+		g_object_unref(data->icon);
+	}
+
+	data->icon = hybrid_create_pixbuf_at_size(buddy->icon_data,
+	                    buddy->icon_data_length, PORTRAIT_WIDTH, PORTRAIT_WIDTH);
+
+	return TRUE;
+}
+
 void 
 hybrid_blist_init()
 {
@@ -945,6 +1007,8 @@ hybrid_blist_init()
 
 	g_signal_connect(blist->treeview, "move-cursor",
 			G_CALLBACK(select_row_cb), NULL);
+
+	hybrid_tooltip_setup(blist->treeview, NULL, NULL, init_tooltip, NULL);
 
 }
 
@@ -1198,6 +1262,12 @@ hybrid_blist_get_buddy_checksum(HybridBuddy *buddy)
 	g_return_val_if_fail(buddy != NULL, NULL);
 
 	return buddy->icon_crc;
+}
+
+HybridAccount*
+hybrid_blist_get_current_account()
+{
+	return current_choose_account;
 }
 
 void
@@ -1611,7 +1681,7 @@ hybrid_blist_select_first_item(HybridAccount *account)
 {
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
-	GtkTreeIter iter;
+//	GtkTreeIter iter;
 	GHashTableIter hash_iter;
 	HybridGroup *group;
 	gpointer key;
@@ -1622,9 +1692,11 @@ hybrid_blist_select_first_item(HybridAccount *account)
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(blist->treeview));
 
+#if 0
 	if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
 		return;
 	}
+#endif
 
 	g_hash_table_iter_init(&hash_iter, account->group_list);
 

@@ -1,5 +1,7 @@
 #include "tooltip.h"
 #include "gtkutils.h"
+#include "blist.h"
+#include "account.h"
 
 HybridTooltip hybrid_tooltip;
 
@@ -11,7 +13,42 @@ widget_motion_cb(GtkWidget *widget, GdkEvent *event, HybridTooltipData *data)
 {
 	hybrid_tooltip_destroy();
 
-	hybrid_tooltip.source = g_timeout_add(400, (GSourceFunc)hybrid_tooltip_show, data);
+	hybrid_tooltip.source = g_timeout_add(500, 
+	                        (GSourceFunc)hybrid_tooltip_show, data);
+
+	return FALSE;
+}
+
+static gboolean
+tree_motion_cb(GtkWidget *widget, GdkEventMotion *event, HybridTooltipData *data)
+{
+	GtkTreePath *path;
+
+	if (hybrid_tooltip.source > 0) {
+		if ((event->y >= hybrid_tooltip.rect.y) && 
+		   ((event->y - hybrid_tooltip.rect.height) <= hybrid_tooltip.rect.y)) {
+
+			return FALSE;
+		}
+	}
+
+	gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
+	                              event->x, event->y, &path, NULL, NULL, NULL);
+
+	if (!path) {
+
+		hybrid_tooltip_destroy();
+
+		return FALSE;
+	}
+
+	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(widget), path, NULL, &hybrid_tooltip.rect);
+	gtk_tree_path_free(path);
+
+	hybrid_tooltip_destroy();
+
+	hybrid_tooltip.source = g_timeout_add(500, 
+	                        (GSourceFunc)hybrid_tooltip_show, data);
 
 	return FALSE;
 }
@@ -28,12 +65,86 @@ static gboolean
 expose_event_cb(GtkWidget *widget, GdkEventExpose *event,
 		HybridTooltipData *data)
 {
+	if (data->tooltip_paint) {
+		data->tooltip_paint(data);
+	}
+
+	return FALSE;
+}
+
+static void
+destroy_cb(HybridTooltipData *data)
+{
+	g_free(data);
+}
+
+/**
+ * The default hook function of creating the tooltip window.
+ */
+static gboolean
+create_tooltip_default(HybridTooltipData *tip_data, gint *width, gint *height)
+{
+	gint w;
+	gint h;
+	gint layout_width;
+	gint layout_height;
+	PangoLayout *layout;
+	gint text_width = 0;
+	gint text_height = TOOLTIP_BORDER * 2;
+	GSList *pos;
+
+	w = TOOLTIP_BORDER * 2 + PORTRAIT_WIDTH +
+		 PORTRAIT_MARGIN * 2 + SPACE_IMG_AND_WORD;
+
+	h = TOOLTIP_BORDER * 2 + PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2;
+
+	if (tip_data->tooltip_init) {
+		if (!tip_data->tooltip_init(tip_data)) {
+			return FALSE;
+		}
+	}
+
+	for (pos = tip_data->layouts; pos; pos = pos->next) {
+
+		layout = (PangoLayout*)pos->data;
+
+		pango_layout_get_size(layout, &layout_width, &layout_height);
+
+		layout_width = PANGO_PIXELS(layout_width);
+		layout_height = PANGO_PIXELS(layout_height);
+
+		text_width = MAX(text_width, layout_width);
+		text_height += layout_height;
+	}
+
+	w += text_width;
+	h = MAX(h, text_height);
+
+	if (width) {
+		*width = w;
+	}
+
+	if (height) {
+		*height = h;
+	}
+
+	return TRUE;
+}
+
+/**
+ * The default hook function of painting the tooltip window.
+ */
+static void
+paint_tooltip_default(HybridTooltipData *user_data)
+{
 	/* paint. */
 	GtkStyle *style;
 	GdkPixbuf *pixbuf;
 	GtkWidget *tipwindow;
 	gint window_width;
 	gint window_height;
+	PangoLayout *layout;
+	GSList *pos;
 
 	tipwindow = hybrid_tooltip.window;
 
@@ -54,19 +165,35 @@ expose_event_cb(GtkWidget *widget, GdkEventExpose *event,
 
 	pixbuf = hybrid_create_round_pixbuf(NULL, 0, PORTRAIT_WIDTH);
 
-	gdk_draw_pixbuf(GDK_DRAWABLE(tipwindow->window), NULL, pixbuf, 0, 0,
+	/* paint portrait */
+	gdk_draw_pixbuf(GDK_DRAWABLE(tipwindow->window), NULL, user_data->icon, 0, 0,
 	                  TOOLTIP_BORDER + PORTRAIT_MARGIN, TOOLTIP_BORDER + PORTRAIT_MARGIN,
 					  PORTRAIT_WIDTH, PORTRAIT_WIDTH, GDK_RGB_DITHER_NONE, 0, 0);
 
 	g_object_unref(pixbuf);
 
-	return FALSE;
-}
+	gint width, height;
 
-static void
-destroy_cb(HybridTooltipData *data)
-{
-	g_free(data);
+	gint h = TOOLTIP_BORDER;
+
+	/* paint markups */
+	for (pos = user_data->layouts; pos; pos = pos->next) {
+
+		layout = (PangoLayout*)pos->data;
+		gtk_paint_layout(style, tipwindow->window, GTK_STATE_NORMAL, FALSE,
+		                 NULL, tipwindow, "tooltip", 
+						 TOOLTIP_BORDER + PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2 + SPACE_IMG_AND_WORD,
+						 h, layout);
+
+		pango_layout_get_size(layout, &width, &height);
+
+		h += PANGO_PIXELS(height);
+
+		g_object_unref(layout);
+	}
+
+	g_slist_free(user_data->layouts);
+	user_data->layouts = NULL;
 }
 
 
@@ -136,6 +263,8 @@ hybrid_tooltip_show(HybridTooltipData *data)
 {
 
 	GtkWidget *window;
+	gint width;
+	gint height;
 
 	window = gtk_window_new(GTK_WINDOW_POPUP);
 	gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_TOOLTIP);
@@ -148,8 +277,21 @@ hybrid_tooltip_show(HybridTooltipData *data)
 	hybrid_tooltip.widget = data->widget;
 	hybrid_tooltip.window = window;
 	
+	if (!data->tooltip_create) {
 
-	setup_tooltip_window_position(NULL, 300, 200);
+		hybrid_tooltip_destroy();
+
+		return FALSE;
+	}
+
+	if (!data->tooltip_create(data, &width, &height)) {
+
+		hybrid_tooltip_destroy();
+
+		return FALSE;
+	}
+
+	setup_tooltip_window_position(data, width, height);
 
 	return FALSE;
 }
@@ -169,7 +311,11 @@ hybrid_tooltip_destroy()
 }
 
 void
-hybrid_tooltip_setup(GtkWidget *widget, gpointer user_data)
+hybrid_tooltip_setup(GtkWidget *widget,
+                     HybridTooltipCreate create_tooltip,
+                     HybridTooltipPaint paint_tooltip,
+					 HybridTooltipInit init_tooltip,
+                     gpointer user_data)
 {
 	HybridTooltipData *data;
 
@@ -179,15 +325,96 @@ hybrid_tooltip_setup(GtkWidget *widget, gpointer user_data)
 	data->widget = widget;
 	data->user_data = user_data;
 
+	if (paint_tooltip) {
+		data->tooltip_paint = paint_tooltip;
+
+	} else {
+		data->tooltip_paint = paint_tooltip_default;
+	}
+
+	if (create_tooltip) {
+		data->tooltip_create = create_tooltip;
+
+	} else {
+		data->tooltip_create = create_tooltip_default;
+	}
+
+	data->tooltip_init = init_tooltip;
+
 	gtk_widget_add_events(widget,
 	                      GDK_POINTER_MOTION_MASK | GDK_LEAVE_NOTIFY_MASK);
 
-	g_signal_connect(G_OBJECT(widget), "motion-notify-event",
-	                 G_CALLBACK(widget_motion_cb), data);
+	if (GTK_IS_TREE_VIEW(widget)) {
+		g_signal_connect(G_OBJECT(widget), "motion-notify-event",
+						 G_CALLBACK(tree_motion_cb), data);
+
+	} else {
+		g_signal_connect(G_OBJECT(widget), "motion-notify-event",
+						 G_CALLBACK(widget_motion_cb), data);
+	}
+
 	g_signal_connect(G_OBJECT(widget), "leave-notify-event",
 	                 G_CALLBACK(widget_leave_cb), data);
 	g_signal_connect(G_OBJECT(widget), "scroll-event",
 	                 G_CALLBACK(widget_leave_cb), data);
 	g_signal_connect_swapped(G_OBJECT(widget), "destroy",
 	                 G_CALLBACK(destroy_cb), data);
+}
+
+
+PangoLayout*
+create_pango_layout(const gchar *markup, gint *width, gint *height)
+{
+	PangoLayout *layout;
+	gint w, h;
+
+	g_return_val_if_fail(markup != NULL, NULL);
+
+	layout = gtk_widget_create_pango_layout(hybrid_tooltip.window, NULL);
+	pango_layout_set_markup(layout, markup, -1);
+	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
+	pango_layout_set_width(layout, 300000);
+
+	pango_layout_get_size(layout, &w, &h);
+
+	if (width) {
+		*width = PANGO_PIXELS(w);
+	}
+
+	if (height) {
+		*height = PANGO_PIXELS(h);
+	}
+
+	return layout;
+}
+
+void
+hybrid_tooltip_data_add_pair(HybridTooltipData *data, const gchar *name,
+                                  const gchar *value)
+{
+	PangoLayout *layout;
+	gchar *markup;
+	gchar *escaped_name;
+	gchar *escaped_value = NULL;
+
+	g_return_if_fail(data != NULL);
+	g_return_if_fail(name != NULL);
+
+	escaped_name  = g_markup_escape_text(name, -1);
+
+	if (value) {
+		escaped_value = g_markup_escape_text(value, -1);
+
+	} else {
+		escaped_value = g_strdup("");
+	}
+
+	markup = g_strdup_printf("<b>%s:</b> %s", escaped_name, escaped_value);
+
+	g_free(escaped_name);
+	g_free(escaped_value);
+
+	layout = create_pango_layout(markup, NULL, NULL);
+
+	data->layouts = g_slist_append(data->layouts, layout);
 }

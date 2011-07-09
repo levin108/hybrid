@@ -238,6 +238,13 @@ void hybrid_blist_set_buddy_icon(HybridBuddy *buddy,
 const gchar *hybrid_blist_get_buddy_checksum(HybridBuddy *buddy);
 
 /**
+ * Get the currented choosed account in the buddy list.
+ *
+ * @return The account choosed.
+ */
+HybridAccount *hybrid_blist_get_current_account();
+
+/**
  * Set whether the group can be renamed.
  *
  * @param group The group.

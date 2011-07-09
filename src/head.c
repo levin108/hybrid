@@ -4,6 +4,8 @@
 
 HybridHead *hybrid_head;
 
+extern HybridTooltip hybrid_tooltip;
+
 static void
 editing_started_cb(GtkCellRenderer *renderer, GtkCellEditable *editable,
 		gchar *path_str, gpointer user_data)
@@ -25,11 +27,39 @@ editing_started_cb(GtkCellRenderer *renderer, GtkCellEditable *editable,
 	}
 }
 
-static void
-edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
-		gpointer user_data)
+/**
+ * Callback funtion for initializing the data in the tooltip window.
+ */
+static gboolean
+tooltip_init(HybridTooltipData *tip_data)
 {
+	HybridAccount *account;
+	HybridModule *module;
 
+	
+	if ((account = hybrid_blist_get_current_account())) {
+
+		module = account->proto;
+
+		if (tip_data->icon) {
+			g_object_unref(tip_data->icon);
+		}
+
+		tip_data->icon = hybrid_create_round_pixbuf(
+							account->icon_data,
+							account->icon_data_len, PORTRAIT_WIDTH);
+
+		if (module->info->account_tooltip) {
+			if (!module->info->account_tooltip(account, tip_data)){
+
+				return FALSE;
+			}
+
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 /**
@@ -70,7 +100,7 @@ cell_view_init(HybridHead *head)
 
 	g_signal_connect(G_OBJECT(renderer), "editing-started",
 						G_CALLBACK(editing_started_cb), NULL);
-	g_signal_connect(G_OBJECT(renderer), "edited", G_CALLBACK(edited_cb), NULL);
+	//g_signal_connect(G_OBJECT(renderer), "edited", G_CALLBACK(edited_cb), NULL);
 
 	g_object_set(renderer, "xalign", 0.0, "yalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -140,7 +170,7 @@ void hybrid_head_init()
 	gtk_container_add(GTK_CONTAINER(hybrid_head->eventbox), 
 	                  hybrid_head->cellview);
 
-	hybrid_tooltip_setup(hybrid_head->eventbox, NULL);
+	hybrid_tooltip_setup(hybrid_head->eventbox, NULL, NULL, tooltip_init, NULL);
 
 	cell_view_init(hybrid_head);
 

@@ -8,6 +8,7 @@ typedef struct _HybridModule HybridModule;
 typedef struct _HybridModuleInfo HybridModuleInfo;
 
 #include "account.h"
+#include "tooltip.h"
 #include "blist.h"
 
 struct _HybridModuleInfo {
@@ -28,6 +29,8 @@ struct _HybridModuleInfo {
 	void     (*get_info)(HybridAccount *, HybridBuddy *);
 	gboolean (*change_state)(HybridAccount *, gint);
 	gboolean (*keep_alive)(HybridAccount *);
+	gboolean (*account_tooltip)(HybridAccount *, HybridTooltipData *data);
+	gboolean (*buddy_tooltip)(HybridAccount *, HybridBuddy *buddy, HybridTooltipData *data);
 	gboolean (*buddy_move)(HybridAccount *, HybridBuddy *,HybridGroup *);
 	gboolean (*buddy_remove)(HybridAccount *, HybridBuddy *);
 	gboolean (*buddy_rename)(HybridAccount *, HybridBuddy *, const gchar *);
