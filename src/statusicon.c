@@ -1,12 +1,18 @@
 #include "statusicon.h"
 #include "gtkutils.h"
+#include "gtkaccount.h"
+#include "buddyadd.h"
 #include "conv.h"
 
 extern GtkWidget *hybrid_window;
+extern GSList *account_list;
 extern GSList *conv_list;
 
 HybridStatusIcon *status_icon;
 
+/**
+ * Callback function of the status icon's activate event.
+ */
 static void
 status_icon_activate_cb(GtkWidget *widget, gpointer user_data)
 {
@@ -28,6 +34,155 @@ status_icon_activate_cb(GtkWidget *widget, gpointer user_data)
 
 		gtk_widget_show(hybrid_window);
 	}
+}
+
+/**
+ * Callback function for the show-buddy-list menu's toggled event.
+ */
+static void
+show_buddy_list_cb(GtkCheckMenuItem *item, gpointer user_data)
+{
+	gboolean toggled;
+
+	toggled = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item));
+
+	if (toggled) {
+
+		gtk_widget_show(hybrid_window);
+
+	} else {
+
+		gtk_widget_hide(hybrid_window);
+	}
+}
+
+/**
+ * Callback function for the account menu's activate event.
+ */
+static void
+account_cb(GtkWidget *widget, gpointer user_data)
+{
+	hybrid_account_panel_create();
+}
+
+/**
+ * Callback function for the add-buddy menu's activate event.
+ */
+static void
+add_buddy_cb(GtkWidget *widget, gpointer user_data)
+{
+	hybrid_buddyadd_window_create();
+}
+
+/**
+ * Callback function for the preference menu's activate event.
+ */
+static void
+preference_cb(GtkWidget *widget, gpointer user_data)
+{
+
+}
+
+/**
+ * Callback function for the mute menu's activate event.
+ */
+static void
+mute_cb(GtkWidget *widget, gpointer user_data)
+{
+
+}
+
+/**
+ * Callback function for the quit menu's activate event.
+ */
+static void
+quit_cb(GtkWidget *widget, gpointer user_data)
+{
+	gtk_widget_destroy(hybrid_window);
+}
+
+/**
+ * Callback function of the status icon's popup menu event.
+ */
+static void
+status_icon_popup_cb(GtkWidget *widget, guint button, guint activate_time,
+		gpointer user_data)
+{
+	GtkWidget *menu;
+	GtkWidget *menu_item;
+	GSList *pos;
+	gboolean has_enabled_account = FALSE;
+
+	menu = gtk_menu_new();
+
+	/* show buddy list buddy. */
+	menu_item = gtk_check_menu_item_new_with_label(_("Show buddy list"));
+
+	if (GTK_WIDGET_VISIBLE(hybrid_window)) {
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), TRUE);
+	}
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	
+	g_signal_connect(menu_item, "toggled",
+	                 G_CALLBACK(show_buddy_list_cb), NULL);
+
+	hybrid_create_menu_seperator(menu);
+
+	/* account menu. */
+	hybrid_create_menu(menu, _("Manage Accounts"), NULL, TRUE,
+	                   G_CALLBACK(account_cb), NULL);
+
+	/* add-buddy menu. */
+	menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_ADD, NULL);
+
+	for (pos = account_list; pos; pos = pos->next) {
+
+		if (((HybridAccount*)pos->data)->enabled) {
+			has_enabled_account = TRUE;
+		}
+	}
+
+	gtk_widget_set_sensitive(menu_item, has_enabled_account);
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+
+	g_signal_connect(menu_item, "activate",
+	                 G_CALLBACK(add_buddy_cb), NULL);
+	
+	hybrid_create_menu_seperator(menu);
+
+	/* preference menu. */
+	menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES, NULL);
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	
+	g_signal_connect(menu_item, "activate",
+	                 G_CALLBACK(preference_cb), NULL);
+
+	/* mute menu. */
+	menu_item = gtk_check_menu_item_new_with_label(_("Mute"));
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	
+	g_signal_connect(menu_item, "toggled",
+	                 G_CALLBACK(mute_cb), NULL);
+
+	hybrid_create_menu_seperator(menu);
+
+	/* quit menu. */
+	menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_QUIT, NULL);
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+	
+	g_signal_connect(menu_item, "activate",
+	                 G_CALLBACK(quit_cb), NULL);
+
+
+	gtk_widget_show_all(menu);
+
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
+			button, activate_time);
 }
 
 static void
@@ -105,6 +260,9 @@ hybrid_status_icon_init(void)
 	status_icon->conn_id = 
 		g_signal_connect(G_OBJECT(status_icon->icon), "activate",
 		                 G_CALLBACK(status_icon_activate_cb), NULL);
+
+	g_signal_connect(G_OBJECT(status_icon->icon), "popup-menu",
+	                 G_CALLBACK(status_icon_popup_cb), NULL);
 }
 
 void

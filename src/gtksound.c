@@ -49,8 +49,7 @@ hybrid_sound_play_file(const gchar *filename)
 	g_object_set(G_OBJECT(source), "location",
 			filename , NULL);
 
-	gst_bin_add_many(GST_BIN(pipeline), source,
-			parser , sink , NULL);
+	gst_bin_add_many(GST_BIN(pipeline), source, parser , sink , NULL);
 
 	g_signal_connect(parser, "pad-added",
 			G_CALLBACK(add_pad) , sink);
