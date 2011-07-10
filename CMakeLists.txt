@@ -46,6 +46,15 @@ add_definitions(-DRESOURCE_DIR="${RESOURCE_INSTALL_DIR}")
 add_definitions(-DDESKTOP_DIR="${DESKTOP_INSTALL_DIR}")
 add_definitions(-DDATA_DIR="${DATA_INSTALL_DIR}")
 add_definitions(-DPIXMAPS_DIR="${DATA_INSTALL_DIR}/pixmaps/")
+add_definitions(-DSOUND_DIR="${DATA_INSTALL_DIR}/sound/")
+
+# compile option switch
+option(NLS "Native language support" ON)
+option(WITH_LIBNOTIFY "Libnotify support" ON)
+option(WITH_GSTREAMER "GStreamer support" ON)
+option(WITH_LIBXSS "LibXScrnSaver support" ON)
+option(WITH_NETWORKMANAGER "NetworkManager support" ON)
+option(WITH_INDICATE "Ubuntu Indicator support" ON)
 
 # im build requirements
 find_package(PkgConfig REQUIRED)
@@ -61,7 +70,78 @@ pkg_check_modules(GMODULE2 REQUIRED gmodule-2.0)
 pkg_check_modules(OPENSSL REQUIRED openssl)
 pkg_check_modules(LIBXML2 REQUIRED libxml-2.0)
 
+if(WITH_LIBNOTIFY)
+    pkg_check_modules(LIBNOTIFY libnotify)
+endif(WITH_LIBNOTIFY)
+
+if(WITH_GSTREAMER)
+    pkg_check_modules(GSTREAMER gstreamer-0.10)
+endif(WITH_GSTREAMER)
+
+if(WITH_LIBXSS)
+    pkg_check_modules(LIBXSS xscrnsaver)
+endif(WITH_LIBXSS)
+
+if(WITH_NETWORKMANAGER)
+    pkg_check_modules(NETWORKMANAGER NetworkManager)
+    pkg_check_modules(DBUSGLIB dbus-glib-1)
+endif(WITH_NETWORKMANAGER)
+
+if(WITH_INDICATE)
+	pkg_check_modules(INDICATE indicate)
+	pkg_check_modules(INDICATE_GTK indicate-gtk)
+	pkg_check_modules(INDICATE_GTK_NEW indicate-gtk-0.5)
+endif(WITH_INDICATE)
+
+if(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
+    set(USE_LIBNOTIFY 1)
+    if(LIBNOTIFY_VERSION LESS 0.7)
+    	set(LIBNOTIFY_OLD 1)
+    	message(STATUS "Libnotify support:        OLD" )
+    else(LIBNOTIFY_VERSION LESS 0.7)
+    	message(STATUS "Libnotify support:        NEW" )
+    endif(LIBNOTIFY_VERSION LESS 0.7)
+else(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
+    message(STATUS "Libnotify support:        NO" )
+endif(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
+
+if(WITH_GSTREAMER AND GSTREAMER_FOUND)
+    set(USE_GSTREAMER 1)
+    message(STATUS "GStreamer support:        YES" )
+else(WITH_GSTREAMER AND GSTREAMER_FOUND)
+    message(STATUS "GStreamer support:        NO" )
+endif(WITH_GSTREAMER AND GSTREAMER_FOUND)
+
+if(WITH_LIBXSS AND LIBXSS_FOUND)
+    set(USE_LIBXSS 1)
+    message(STATUS "Xscreensaver support:     YES" )
+else(WITH_LIBXSS AND LIBXSS_FOUND)
+    message(STATUS "Xscreensaver support:     NO" )
+endif(WITH_LIBXSS AND LIBXSS_FOUND)
+
+if(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
+    set(USE_NETWORKMANAGER 1)
+    message(STATUS "NetworkManager support:   YES" )
+else(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
+    message(STATUS "NetworkManager support:   NO" )
+endif(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
+
+if(WITH_INDICATE AND INDICATE_FOUND)
+	if(INDICATE_GTK_FOUND OR INDICATE_GTK_NEW_FOUND)
+		set(USE_INDICATE 1)
+		message(STATUS "Ubuntu Indicator support: YES" )
+	else(INDICATE_GTK_FOUND OR INDICATE_GTK_NEW_FOUND)
+		message(STATUS "Ubuntu Indicator support: NO" )
+	endif(INDICATE_GTK_FOUND OR INDICATE_GTK_NEW_FOUND)
+else(WITH_INDICATE AND INDICATE_FOUND)
+    message(STATUS "Ubuntu Indicator support: NO" )
+endif(WITH_INDICATE AND INDICATE_FOUND)
+
+configure_file(config-hybrid.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
 ##########################################################################
+
+
 add_definitions(-g -Wall)
 if(NLS AND GETTEXT_FOUND)
 	add_definitions(-DGETTEXT_PACKAGE="${PACKAGE_TARNAME}")
@@ -74,7 +154,6 @@ add_definitions(-DLOCALE_DIR="${LOCALE_INSTALL_DIR}")
 #add_definitions(-DMODULE_DIR="${MODULE_INSTALL_DIR}")
 add_definitions(-DMODULE_DIR=".")
 add_definitions(-DUI_DIR="../src/ui/")
-
 
 ##########################################################################
 
@@ -91,6 +170,24 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
 )
 
+if(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
+    include_directories(${LIBNOTIFY_INCLUDE_DIRS})
+endif(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
+
+if(WITH_GSTREAMER AND GSTREAMER_FOUND)
+    include_directories(${GSTREAMER_INCLUDE_DIRS})
+endif(WITH_GSTREAMER AND GSTREAMER_FOUND)
+
+if(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND)
+    include_directories(${NETWORKMANAGER_INCLUDE_DIRS})
+    include_directories(${DBUSGLIB_INCLUDE_DIRS})
+endif(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND)
+
+if(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
+    include_directories(${INDICATE_INCLUDE_DIRS})
+    include_directories(${INDICATE_GTK_INCLUDE_DIRS})
+endif(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
+
 set(hybrid_SRC
 	lib/connect.c
 	lib/network.c
@@ -101,6 +198,8 @@ set(hybrid_SRC
 	lib/xmlnode.c
 	lib/config.c
 	lib/util.c
+	src/gtkconn.c
+	src/gtksound.c
 	src/gtkutils.c
 	src/gtkaccount.c
 	src/blist.c
@@ -117,6 +216,37 @@ set(hybrid_SRC
 	src/gtkcellrendererexpander.c
 	src/core.c
 )
+
+add_executable(hybrid ${hybrid_SRC})
+target_link_libraries(hybrid 
+	${GTK2_LIBRARIES}
+	${GDKPIXBUF_LIBRARIES}
+	${GTHREAD2_LIBRARIES}
+	${GMODULE2_LIBRARIES}
+	${OPENSSL_LIBRARIES}
+	${LIBXML2_LIBRARIES})
+
+if(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
+    target_link_libraries(hybrid ${LIBNOTIFY_LIBRARIES})
+endif(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
+
+if(WITH_GSTREAMER AND GSTREAMER_FOUND)
+    target_link_libraries(hybrid ${GSTREAMER_LIBRARIES})
+endif(WITH_GSTREAMER AND GSTREAMER_FOUND)
+
+if(WITH_LIBXSS AND LIBXSS_FOUND)
+    target_link_libraries(hybrid ${LIBXSS_LIBRARIES})
+endif(WITH_LIBXSS AND LIBXSS_FOUND)
+
+if(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
+    target_link_libraries(hybrid ${INDICATE_LIBRARIES})
+    target_link_libraries(hybrid ${INDICATE_GTK_LIBRARIES})
+endif(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
+
+if(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
+    target_link_libraries(hybrid ${NETWORKMANAGER_LIBRARIES})
+    target_link_libraries(hybrid ${DBUSGLIB_LIBRARIES})
+endif(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
 
 # install include files
 file(GLOB HYBRID_INCLUDES "src/*.h" "lib/*.h")
@@ -138,8 +268,9 @@ install(FILES ${HYBRID_STATUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/
 file(GLOB HYBRID_ICONS_PIXMAPS "share/pixmaps/icons/*.png")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/icons/")
 
-add_executable(hybrid ${hybrid_SRC})
-target_link_libraries(hybrid ${GTK2_LIBRARIES} ${GDKPIXBUF_LIBRARIES} ${GTHREAD2_LIBRARIES} ${GMODULE2_LIBRARIES} ${OPENSSL_LIBRARIES} ${LIBXML2_LIBRARIES})
+# install sound files 
+file(GLOB HYBRID_ICONS_PIXMAPS "share/sound/*.wav")
+install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/sound/")
 
 # source list of fetion module
 set(fetion_SRC

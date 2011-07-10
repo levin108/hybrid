@@ -2,6 +2,7 @@
 
 #include "statusicon.h"
 #include "gtkutils.h"
+#include "gtksound.h"
 #include "chat-textview.h"
 #include "conv.h"
 #include "util.h"
@@ -1176,6 +1177,8 @@ got_chat_found:
 	hybrid_chat_window_update_tips(chat);
 
 just_show_msg:
+
+	hybrid_sound_play_file(SOUND_DIR"newmessage.wav");
 
 	hybrid_chat_textview_append(chat->textview, buddy->name, msg, time, FALSE);
 

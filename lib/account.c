@@ -736,6 +736,10 @@ hybrid_account_close(HybridAccount *account)
 
 	g_return_if_fail(account != NULL);
 
+	if (!account->enabled) {
+		return;
+	}
+
 	/*
 	 * Set the account' state to be offline, it'll also
 	 * change the appearance of the account menus 
@@ -823,6 +827,35 @@ hybrid_account_close(HybridAccount *account)
 
 	if (module->info->close) {
 		module->info->close(account);
+	}
+}
+
+void
+hybrid_account_close_all()
+{
+	GSList *pos;
+	HybridAccount *account;
+
+	for (pos = account_list; pos; pos = pos->next) {
+
+		account = (HybridAccount*)pos->data;
+
+		hybrid_account_close(account);
+		
+	}
+}
+
+void
+hybrid_account_enable_all()
+{
+	GSList *pos;
+	HybridAccount *account;
+
+	for (pos = account_list; pos; pos = pos->next) {
+
+		account = (HybridAccount*)pos->data;
+
+		hybrid_account_enable(account);
 	}
 }
 

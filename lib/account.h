@@ -234,6 +234,16 @@ void hybrid_account_enable(HybridAccount *account);
 void hybrid_account_close(HybridAccount *account);
 
 /**
+ * Close all the accounts enabled.
+ */
+void hybrid_account_close_all();
+
+/**
+ * Enable all the accounts.
+ */
+void hybrid_account_enable_all();
+
+/**
  * Close an account and give an error notification.
  * 
  * @param account The account to close.

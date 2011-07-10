@@ -8,6 +8,8 @@
 #include "statusicon.h"
 #include "gtkaccount.h"
 #include "gtkutils.h"
+#include "gtkconn.h"
+#include "gtksound.h"
 #include "groupadd.h"
 #include "buddyadd.h"
 
@@ -21,19 +23,6 @@ GtkWidget *hybrid_window;
 GtkWidget *hybrid_vbox;
 
 GtkUIManager *menu_ui_manager;
-
-void
-hybrid_start_login()
-{
-	GSList *pos;
-	HybridAccount *account;
-
-	for (pos = account_list; pos; pos = pos->next) {
-		account = (HybridAccount*)pos->data;
-
-		hybrid_account_enable(account);
-	}
-}
 
 static void
 window_destroy(GtkWidget *widget, gpointer user_data)
@@ -226,10 +215,14 @@ main(gint argc, gchar **argv)
 	hybrid_module_init();
 
 	hybrid_account_init();
+
+	hybrid_conn_init();
+
+	hybrid_sound_init(argc, argv);
 	
 	ui_init();
 
-	hybrid_start_login();
+	hybrid_account_enable_all();
 
 	gtk_main();
 
