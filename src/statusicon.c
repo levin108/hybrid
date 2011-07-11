@@ -1,6 +1,7 @@
 #include "statusicon.h"
 #include "gtkutils.h"
 #include "gtkaccount.h"
+#include "preference.h"
 #include "buddyadd.h"
 #include "conv.h"
 
@@ -80,7 +81,7 @@ add_buddy_cb(GtkWidget *widget, gpointer user_data)
 static void
 preference_cb(GtkWidget *widget, gpointer user_data)
 {
-
+	hybrid_pref_create();
 }
 
 /**
