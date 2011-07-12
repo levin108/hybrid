@@ -6,6 +6,7 @@
 			<menuitem action="Quit"/>
 		</menu>
 		<menu action="Tools">
+			<menuitem action="Preference"/>
 			<menuitem action="Add Buddy"/>
 			<menuitem action="Add Group"/>
 		</menu>

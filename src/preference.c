@@ -1,5 +1,7 @@
-#include "preference.h"
+#include "pref.h"
 #include "util.h"
+
+#include "preference.h"
 #include "gtkutils.h"
 
 static HybridPreference *pref_window = NULL;
@@ -10,7 +12,81 @@ static HybridPreference *pref_window = NULL;
 void
 pref_basic_init(GtkFixed *fixed)
 {
-	
+	GtkWidget *label;
+
+	label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label), _("<b>Appearance</b>"));
+
+	gtk_fixed_put(fixed, label, 20, 10);
+
+	pref_window->mute_check = gtk_check_button_new_with_label(_("Mute"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->mute_check),
+			hybrid_pref_get_boolean("mute"));
+	gtk_fixed_put(fixed, pref_window->mute_check, 20, 35);
+
+	pref_window->hcb_check = 
+		gtk_check_button_new_with_label(_("Hide Send Buttons"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->hcb_check),
+			hybrid_pref_get_boolean("hide_chat_buttons"));
+	gtk_fixed_put(fixed, pref_window->hcb_check, 220, 35);
+
+	pref_window->single_cw_check =
+		gtk_check_button_new_with_label(_("Show Messages In A Single Window With Tabs"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->single_cw_check),
+			hybrid_pref_get_boolean("single_chat_window"));
+	gtk_fixed_put(fixed, pref_window->single_cw_check, 20, 65);
+
+}
+
+/**
+ * Callback function for the cancel button.
+ */
+static void
+cancel_cb(GtkWidget *widget, gpointer user_data)
+{
+	g_return_if_fail(pref_window != NULL);
+
+	gtk_widget_destroy(pref_window->window);
+}
+
+/**
+ * Callback function for the save button.
+ */
+static void
+save_cb(GtkWidget *widget, gpointer user_data)
+{
+	g_return_if_fail(pref_window != NULL);
+
+	if (gtk_toggle_button_get_active(
+				GTK_TOGGLE_BUTTON(pref_window->mute_check))) {
+
+		hybrid_pref_set_boolean("mute", TRUE);
+
+	} else {
+		hybrid_pref_set_boolean("mute", FALSE);
+	}
+
+	if (gtk_toggle_button_get_active(
+				GTK_TOGGLE_BUTTON(pref_window->hcb_check))) {
+
+		hybrid_pref_set_boolean("hide_chat_buttons", TRUE);
+
+	} else {
+		hybrid_pref_set_boolean("hide_chat_buttons", FALSE);
+	}
+
+	if (gtk_toggle_button_get_active(
+				GTK_TOGGLE_BUTTON(pref_window->single_cw_check))) {
+
+		hybrid_pref_set_boolean("single_chat_window", TRUE);
+
+	} else {
+		hybrid_pref_set_boolean("single_chat_window", FALSE);
+	}
+
+	hybrid_pref_save();
+
+	gtk_widget_destroy(pref_window->window);
 }
 
 /**
@@ -21,13 +97,19 @@ pref_window_init(void)
 {
 	GtkWidget *fixed;
 	GtkWidget *label;
+	GtkWidget *vbox;
+	GtkWidget *action_area;
+	GtkWidget *button;
 
 	g_return_if_fail(pref_window != NULL);
 
 	pref_window->notebook = gtk_notebook_new();
 
-	gtk_container_add(GTK_CONTAINER(pref_window->window),
-			pref_window->notebook);
+	vbox = gtk_vbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(pref_window->window), vbox);
+
+	gtk_box_pack_start(GTK_BOX(vbox), pref_window->notebook, TRUE, TRUE, 0);
+
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(pref_window->notebook), GTK_POS_TOP);
 	gtk_notebook_set_scrollable(GTK_NOTEBOOK(pref_window->notebook), TRUE);
 	gtk_notebook_set_show_border(GTK_NOTEBOOK(pref_window->notebook), TRUE);
@@ -38,6 +120,19 @@ pref_window_init(void)
 	                         fixed, label);
 
 	pref_basic_init(GTK_FIXED(fixed));
+
+	action_area = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 5);
+
+	button = gtk_button_new_with_label(_("Cancel"));
+	gtk_widget_set_usize(button, 100, 30);
+	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
+	g_signal_connect(button, "clicked", G_CALLBACK(cancel_cb), NULL);
+
+	button = gtk_button_new_with_label(_("Save"));
+	gtk_widget_set_usize(button, 100, 30);
+	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 0);
+	g_signal_connect(button, "clicked", G_CALLBACK(save_cb), NULL);
 }
 
 /**
@@ -70,7 +165,7 @@ hybrid_pref_create(void)
 	g_signal_connect(pref_window->window, "destroy",
 	                 G_CALLBACK(destroy_cb), NULL);
 
-	gtk_widget_set_usize(pref_window->window, 500, 400);
+	gtk_widget_set_usize(pref_window->window, 450, 300);
 	gtk_container_set_border_width(GTK_CONTAINER(pref_window->window), 8);
 
 	pref_window_init();

@@ -1,4 +1,5 @@
 #include "util.h"
+#include "pref.h"
 #include "gtksound.h"
 
 #ifdef USE_GSTREAMER
@@ -22,6 +23,10 @@ hybrid_sound_play_file(const gchar *filename)
 
 	GstElement *pipeline;
 	GstElement *source, *parser, *sink;
+
+	if (hybrid_pref_get_boolean("mute")) {
+		return;
+	}
 
 	pipeline = gst_pipeline_new("audio-player");
 

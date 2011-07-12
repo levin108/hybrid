@@ -1,10 +1,12 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include "config.h"
+#include "pref.h"
 #include "module.h"
 #include "head.h"
 #include "blist.h"
 #include "util.h"
+#include "preference.h"
 #include "statusicon.h"
 #include "gtkaccount.h"
 #include "gtkutils.h"
@@ -46,6 +48,12 @@ static void
 quit_cb(GtkWidget *widget, gpointer user_data)
 {
 	gtk_main_quit();
+}
+
+static void
+preference_cb(GtkWidget *widget, gpointer user_data)
+{
+	hybrid_pref_create();
 }
 
 static void
@@ -119,6 +127,14 @@ create_basic_menus(GtkBox *box)
 		},
 		/* tools menu. */
 		{ "Tools", NULL, "_Tools" },
+		{
+			"Preference",
+			GTK_STOCK_PREFERENCES,
+			"Preference",
+			"<control>P",
+			"Preference",
+			G_CALLBACK(preference_cb)
+		},
 		{
 			"Add Buddy",
 			GTK_STOCK_ADD,
@@ -211,6 +227,8 @@ main(gint argc, gchar **argv)
 	gtk_init(&argc, &argv);
 
 	hybrid_config_init();
+
+	hybrid_pref_init();
 
 	hybrid_module_init();
 

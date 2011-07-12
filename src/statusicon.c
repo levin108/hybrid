@@ -4,6 +4,7 @@
 #include "preference.h"
 #include "buddyadd.h"
 #include "conv.h"
+#include "pref.h"
 
 extern GtkWidget *hybrid_window;
 extern GSList *account_list;
@@ -90,7 +91,20 @@ preference_cb(GtkWidget *widget, gpointer user_data)
 static void
 mute_cb(GtkWidget *widget, gpointer user_data)
 {
+	gboolean toggled;
 
+	toggled = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+
+	if (toggled) {
+
+		hybrid_pref_set_boolean("mute", TRUE);
+
+	} else {
+
+		hybrid_pref_set_boolean("mute", FALSE);
+	}
+
+	hybrid_pref_save();
 }
 
 /**
@@ -165,6 +179,10 @@ status_icon_popup_cb(GtkWidget *widget, guint button, guint activate_time,
 	menu_item = gtk_check_menu_item_new_with_label(_("Mute"));
 
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+
+	if (hybrid_pref_get_boolean("mute")) {
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), TRUE);
+	}
 	
 	g_signal_connect(menu_item, "toggled",
 	                 G_CALLBACK(mute_cb), NULL);

@@ -198,6 +198,7 @@ set(hybrid_SRC
 	lib/xmlnode.c
 	lib/config.c
 	lib/util.c
+	lib/pref.c
 	src/gtkconn.c
 	src/gtksound.c
 	src/gtkutils.c
