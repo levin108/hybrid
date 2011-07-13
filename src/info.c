@@ -135,7 +135,7 @@ hybrid_info_create(HybridBuddy *buddy)
 	gtk_window_set_icon(GTK_WINDOW(info->window), pixbuf);
 	gtk_window_set_position(GTK_WINDOW(info->window), GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(info->window), title);
-	gtk_widget_set_usize(info->window, 400, 350);
+	gtk_widget_set_size_request(info->window, 400, 350);
 	gtk_window_set_resizable(GTK_WINDOW(info->window), FALSE);
 	g_signal_connect(info->window, "destroy", G_CALLBACK(window_destroy_cb),
 							info);
@@ -180,7 +180,7 @@ hybrid_info_create(HybridBuddy *buddy)
 	gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 5);
 
 	close_button = gtk_button_new_with_label(_("Close"));
-	gtk_widget_set_usize(close_button, 100, 30);
+	gtk_widget_set_size_request(close_button, 100, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), close_button, FALSE, TRUE, 0);
 	g_signal_connect(close_button, "clicked", G_CALLBACK(close_click_cb), info);
 

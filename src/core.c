@@ -157,7 +157,7 @@ create_basic_menus(GtkBox *box)
 	};
 
 	actionGroup = gtk_action_group_new("Actions");
-    gtk_action_group_add_actions(actionGroup, entries, 8, NULL);
+    gtk_action_group_add_actions(actionGroup, entries, 9, NULL);
 
 	menu_ui_manager = gtk_ui_manager_new();
 	gtk_ui_manager_insert_action_group(menu_ui_manager, actionGroup, 0);

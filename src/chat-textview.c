@@ -9,6 +9,8 @@ hybrid_chat_textview_create()
 
 	textview = gtk_text_view_new();
 
+	gtk_widget_set_size_request(textview, 0, 100);
+
 	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textview), FALSE);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(textview), GTK_WRAP_CHAR);
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(textview), FALSE);
@@ -19,6 +21,7 @@ hybrid_chat_textview_create()
 	gtk_text_buffer_create_tag(buffer, "green", "foreground", "#0088bf", NULL);
 	gtk_text_buffer_create_tag(buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
 	gtk_text_buffer_create_tag(buffer, "lm10", "left_margin", 10, NULL);
+	gtk_text_buffer_create_tag(buffer, "wrap", "wrap-mode", GTK_WRAP_WORD_CHAR, NULL);
 	gtk_text_buffer_create_tag(buffer, "small", "left_margin", 5, NULL);
 	gtk_text_buffer_get_end_iter(buffer, &end_iter);
 	gtk_text_buffer_create_mark(buffer, "scroll", &end_iter, FALSE);
@@ -52,11 +55,11 @@ hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 	if (sendout) {
 
 		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
-							names, strlen(names), "blue", "bold", NULL);
+						names, strlen(names), "blue", "bold", "wrap", NULL);
 
 	} else {
 		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
-							names, strlen(names), "green", "bold", NULL);
+						names, strlen(names), "green", "bold", "wrap", NULL);
 	}
 
 	g_free(names);
@@ -64,10 +67,11 @@ hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 	gtk_text_buffer_insert(recv_tb, &end_iter, "\n", -1);
 	
 	gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
-						message, strlen(message), "lm10", NULL);
+					message, strlen(message), "lm10", "wrap", NULL);
 
 	gtk_text_buffer_insert(recv_tb, &end_iter, "\n", -1);
 	gtk_text_iter_set_line_offset(&end_iter, 0);
+
 	mark = gtk_text_buffer_get_mark(recv_tb, "scroll");
 	gtk_text_buffer_move_mark(recv_tb, mark, &end_iter);
 	gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(textview), mark);

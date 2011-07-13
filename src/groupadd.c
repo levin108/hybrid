@@ -175,7 +175,7 @@ groupadd_window_init(HybridGroupAddWindow *window)
 								renderer, "text", 1, NULL);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(window->account_combo), 0);
 
-	gtk_widget_set_usize(window->account_combo, 270, 30);
+	gtk_widget_set_size_request(window->account_combo, 270, 30);
 	g_object_unref(model);
 	gtk_fixed_put(GTK_FIXED(fixed), window->account_combo, 110, 45);
 
@@ -184,19 +184,19 @@ groupadd_window_init(HybridGroupAddWindow *window)
 	gtk_fixed_put(GTK_FIXED(fixed), label, 110, 80);
 
 	window->name_entry = gtk_entry_new();
-	gtk_widget_set_usize(window->name_entry, 270, 30);
+	gtk_widget_set_size_request(window->name_entry, 270, 30);
 	gtk_fixed_put(GTK_FIXED(fixed), window->name_entry, 110, 105);
 
 	action_area = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 0);
 
 	button = gtk_button_new_with_label(_("Save"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked", G_CALLBACK(save_cb), window);
 
 	button = gtk_button_new_with_label(_("Cancel"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked", G_CALLBACK(cancel_cb), window);
 }
@@ -210,7 +210,7 @@ hybrid_groupadd_window_create()
 
 	group->window = hybrid_create_window(_("Add Group"), NULL, 
 						GTK_WIN_POS_CENTER, FALSE);
-	gtk_widget_set_usize(group->window, 420, 200);
+	gtk_widget_set_size_request(group->window, 420, 200);
 	gtk_container_set_border_width(GTK_CONTAINER(group->window), 5);
 	g_signal_connect(group->window, "destroy", G_CALLBACK(destroy_cb), group);
 

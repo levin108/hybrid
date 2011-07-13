@@ -44,6 +44,11 @@ struct _HybridModuleInfo {
 	 * buddy list automaticly, you should add it manually in the hook function.
 	 */
 	void     (*group_add)(HybridAccount *, const gchar *);
+
+	/*
+	 * To get the word limit in a chat window, return zero for no limit.
+	 */
+	gint     (*chat_word_limit)(HybridAccount *);
 	gboolean (*chat_start)(HybridAccount *, HybridBuddy *);
 	void     (*chat_send)(HybridAccount *, HybridBuddy *, const gchar *);
 	void     (*close)(HybridAccount *);

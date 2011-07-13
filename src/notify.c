@@ -32,7 +32,7 @@ hybrid_notify_create(HybridAccount *account, const gchar *title)
 
 	notify->window = hybrid_create_window(title ? title : _("Notification"),
 						NULL, GTK_WIN_POS_CENTER, FALSE);
-	gtk_widget_set_usize(notify->window, 400, 250);
+	gtk_widget_set_size_request(notify->window, 400, 250);
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
@@ -119,9 +119,13 @@ hybrid_notify_create(HybridAccount *account, const gchar *title)
 	gtk_box_pack_start(GTK_BOX(vbox), notify->action_area, FALSE, FALSE, 5);
 
 	button = gtk_button_new_with_label(_("Close"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(notify->action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked", G_CALLBACK(close_cb), notify);
+
+	/* focus the send textview */
+	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_FOCUS);
+	gtk_widget_grab_focus(button);
 
 	gtk_container_add(GTK_CONTAINER(notify->window), vbox);
 

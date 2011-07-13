@@ -5,6 +5,7 @@
 #include "gtksound.h"
 #include "chat-textview.h"
 #include "conv.h"
+#include "pref.h"
 #include "util.h"
 
 /* The list of the currently opened conversation dialogs. */
@@ -280,9 +281,8 @@ hybrid_conv_create()
 
 	/* create window */
 	imconv->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_default_size(GTK_WINDOW(imconv->window), 550, 500);
-	gtk_widget_set_size_request(imconv->window, 550, 550);
-	gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 3);
+	gtk_window_set_default_size(GTK_WINDOW(imconv->window), 485, 500);
+	gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 1);
 	g_signal_connect(imconv->window, "destroy", G_CALLBACK(conv_destroy_cb),
 			imconv);
 	g_signal_connect(imconv->window, "key-press-event",
@@ -303,22 +303,25 @@ hybrid_conv_create()
 	g_signal_connect(imconv->notebook, "switch-page",
 			G_CALLBACK(switch_page_cb), imconv);
 
-	/* create action area, "Close" button and "Send" button */
-	action_area = gtk_hbox_new(FALSE, 0);
+	if (!hybrid_pref_get_boolean("hide_chat_buttons")) {
+		/* create action area, "Close" button and "Send" button */
+		action_area = gtk_hbox_new(FALSE, 0);
 
-	halign = gtk_alignment_new(1, 0, 0, 0);
-	gtk_container_add(GTK_CONTAINER(halign), action_area);
-	gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 5);
+		halign = gtk_alignment_new(1, 0, 0, 0);
+		gtk_container_add(GTK_CONTAINER(halign), action_area);
+		gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 1);
 
-	button = gtk_button_new_with_label(_("Close"));
-	gtk_widget_set_usize(button, 100, 30);
-	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 2);
-	g_signal_connect(button, "clicked",	G_CALLBACK(conv_close_cb), imconv);
+		button = gtk_button_new_with_label(_("Close"));
+		gtk_widget_set_size_request(button, 100, 30);
+		gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 2);
+		g_signal_connect(button, "clicked",	G_CALLBACK(conv_close_cb), imconv);
 
-	button = gtk_button_new_with_label(_("Send"));
-	gtk_widget_set_usize(button, 100, 30);
-	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 2);
-	g_signal_connect(button, "clicked", G_CALLBACK(conv_send_cb), imconv);
+		button = gtk_button_new_with_label(_("Send"));
+		gtk_widget_set_size_request(button, 100, 30);
+		gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 1);
+		g_signal_connect(button, "clicked", G_CALLBACK(conv_send_cb), imconv);
+
+	}
 
 	gtk_widget_show_all(imconv->window);
 
@@ -686,6 +689,56 @@ key_press_func(GtkWidget *widget, GdkEventKey *event, HybridConversation *conv)
 }
 
 /**
+ * Callback function of the text buffer changed event, to cal the number of words
+ * left that can be input into the send textview.
+ */
+static gboolean
+sendtext_buffer_changed(GtkTextBuffer *buffer, HybridChatWindow *chat)
+{
+	GtkTextIter  startIter;
+	GtkTextIter  endIter;
+	gint count;
+	gint totel_count;
+	HybridAccount *account;
+	HybridModule *module;
+	gchar *text;
+	gchar *res;
+
+	if (!chat->words_left_label) {
+		return FALSE;
+	}
+
+	account = chat->account;
+	module = account->proto;
+
+	if (!module->info->chat_word_limit ||
+		(totel_count = module->info->chat_word_limit(account)) <= 0) {
+
+		return FALSE;
+	}
+
+	count = gtk_text_buffer_get_char_count(buffer);
+
+	if (count <= totel_count){
+
+		text = g_strdup_printf(_("[<span color='#0099ff'>%d</span>] character"),
+				               totel_count - count);
+		gtk_label_set_markup(GTK_LABEL(chat->words_left_label), text);
+		g_free(text);
+
+	} else {
+
+		gtk_text_buffer_get_start_iter(buffer, &startIter);
+		gtk_text_buffer_get_iter_at_offset(buffer, &endIter, totel_count);
+		res = gtk_text_buffer_get_text(buffer, &startIter, &endIter, totel_count);
+		gtk_text_buffer_set_text(buffer, res, strlen(res));
+		g_free(res);
+	}
+
+	return FALSE;
+}
+
+/**
  * Create the tab label widget for the GtkNotebook.
  * The layout is:
  *
@@ -913,6 +966,12 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 	GtkWidget *scroll;
 	GtkWidget *button;
 	GtkWidget *image_icon;
+	GtkWidget *limit_label;
+	GtkTextBuffer *send_buffer;
+	gchar *word_limit_string;
+	gint word_limit;
+	HybridAccount *account;
+	HybridModule *module;
 
 	g_return_if_fail(vbox != NULL);
 	g_return_if_fail(chat != NULL);
@@ -950,6 +1009,31 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 				_("Screen jitter"), _("Send a screen jitter"), NULL,
 				image_icon, NULL, NULL);
 		gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
+
+		account = chat->account;
+		module = account->proto;
+
+		if (module->info->chat_word_limit &&
+			(word_limit = module->info->chat_word_limit(account)) > 0) {
+
+			word_limit_string =
+				g_strdup_printf(_("Total %d character, left "), word_limit);
+
+			limit_label = gtk_label_new(word_limit_string);
+
+			g_free(word_limit_string);
+
+			word_limit_string = 
+				g_strdup_printf(_("[<span color='#0099ff'>%d</span>] characters"),
+						word_limit);
+
+			chat->words_left_label = gtk_label_new(NULL);
+			gtk_label_set_markup(GTK_LABEL(chat->words_left_label), word_limit_string);
+			g_free(word_limit_string);
+
+			gtk_container_add(GTK_CONTAINER(chat->toolbar), limit_label);
+			gtk_container_add(GTK_CONTAINER(chat->toolbar), chat->words_left_label);
+		}
 	}
 
 	gtk_widget_show_all(chat->toolbar);
@@ -963,7 +1047,7 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 			GTK_SHADOW_ETCHED_IN);
 
 	chat->sendtext = gtk_text_view_new();
-	gtk_widget_set_usize(chat->sendtext, 0, 80);
+	gtk_widget_set_size_request(chat->sendtext, 0, 80);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chat->sendtext),
 			GTK_WRAP_WORD_CHAR);
 	gtk_container_add(GTK_CONTAINER(scroll), chat->sendtext);
@@ -971,6 +1055,11 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 			G_CALLBACK(key_pressed_cb), chat->parent);
 	g_signal_connect(chat->sendtext, "focus-in-event",
 					GTK_SIGNAL_FUNC(focus_in_cb), chat);
+
+	send_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(chat->sendtext));
+
+	g_signal_connect(send_buffer, "changed",
+			G_CALLBACK(sendtext_buffer_changed), chat);
 
 	gtk_window_present(GTK_WINDOW(chat->parent->window));
 
@@ -1077,7 +1166,18 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 		}
 	}
 
-	if (!conv) {
+	/*
+	 * Whether to show the chat dialog in a single window.
+	 */
+	if (hybrid_pref_get_boolean("single_chat_window")) {
+
+		if (!conv) {
+			conv = hybrid_conv_create();
+			conv_list = g_slist_append(conv_list, conv);
+		}
+
+	} else {
+
 		conv = hybrid_conv_create();
 		conv_list = g_slist_append(conv_list, conv);
 	}
@@ -1103,6 +1203,7 @@ found:
 
 	/* focus the send textview */
 	gtk_widget_grab_focus(chat->sendtext);
+	gtk_window_present(GTK_WINDOW(chat->parent->window));
 
 	return chat;
 }

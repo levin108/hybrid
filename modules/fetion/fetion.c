@@ -671,6 +671,12 @@ fx_group_add(HybridAccount *account, const gchar *text)
 	fetion_group_add(ac, text);
 }
 
+static gint
+fx_chat_word_limit(HybridAccount *account)
+{
+	return 180;	
+}
+
 static gboolean
 fx_chat_start(HybridAccount *account, HybridBuddy *buddy)
 {
@@ -792,6 +798,7 @@ HybridModuleInfo module_info = {
 	fx_group_rename,          /**< group_rename */
 	fx_group_remove,          /**< group_remove */
 	fx_group_add,             /**< group_add */
+	fx_chat_word_limit,       /**< chat_word_limit */
 	fx_chat_start,            /**< chat_start */
 	fx_chat_send,             /**< chat_send */
 	fx_close,                 /**< close */

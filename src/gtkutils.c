@@ -425,13 +425,13 @@ hybrid_confirm_show(const gchar *title, const gchar *text,
 	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 0);
 
 	button = gtk_button_new_with_label(btn_text);
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked",
 			G_CALLBACK(confirm_user_btn_cb), confirm);
 
 	button = gtk_button_new_with_label(_("Cancel"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked",
 			G_CALLBACK(confirm_cancel_btn_cb), confirm);
@@ -528,7 +528,7 @@ hybrid_message_box_show(HybridMessageType type,
 	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 0);
 
 	button = gtk_button_new_with_label(_("OK"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked",
 			G_CALLBACK(message_ok_btn_cb), msg_box);

@@ -124,15 +124,16 @@ pref_window_init(void)
 	action_area = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 5);
 
+	button = gtk_button_new_with_label(_("Save"));
+	gtk_widget_set_size_request(button, 100, 30);
+	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 0);
+	g_signal_connect(button, "clicked", G_CALLBACK(save_cb), NULL);
+
 	button = gtk_button_new_with_label(_("Cancel"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked", G_CALLBACK(cancel_cb), NULL);
 
-	button = gtk_button_new_with_label(_("Save"));
-	gtk_widget_set_usize(button, 100, 30);
-	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 0);
-	g_signal_connect(button, "clicked", G_CALLBACK(save_cb), NULL);
 }
 
 /**
@@ -165,7 +166,7 @@ hybrid_pref_create(void)
 	g_signal_connect(pref_window->window, "destroy",
 	                 G_CALLBACK(destroy_cb), NULL);
 
-	gtk_widget_set_usize(pref_window->window, 450, 300);
+	gtk_widget_set_size_request(pref_window->window, 450, 300);
 	gtk_container_set_border_width(GTK_CONTAINER(pref_window->window), 8);
 
 	pref_window_init();

@@ -53,6 +53,9 @@ struct _HybridChatWindow {
 	GtkWidget *sendtext;
 	GtkWidget *vbox; /**< The Notebook child widget */
 
+	/* label to show how many words left that can be input. */
+	GtkWidget *words_left_label;
+
 	/* tab label */
 	GtkWidget *tablabel;
 	GtkTreeIter tabiter;

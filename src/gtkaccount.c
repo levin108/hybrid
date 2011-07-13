@@ -216,13 +216,13 @@ hybrid_account_panel_create()
 
 	panel->window = hybrid_create_window(_("Manage Account"), NULL,
 					GTK_WIN_POS_CENTER, FALSE);
-	gtk_widget_set_usize(panel->window, 500, 300);
+	gtk_widget_set_size_request(panel->window, 500, 300);
 	g_object_set(panel->window, "border-width", 8, NULL);
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
 	scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_set_usize(scroll, 200, 0);
+	gtk_widget_set_size_request(scroll, 200, 0);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 								GTK_SHADOW_ETCHED_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
@@ -248,21 +248,21 @@ hybrid_account_panel_create()
 	gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 5);
 
 	button = gtk_button_new_with_label(_("Add"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 4);
 	g_signal_connect(button, "clicked", G_CALLBACK(add_cb), panel);
 
 	button = gtk_button_new_with_label(_("Delete"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 4);
 	g_signal_connect(button, "clicked", G_CALLBACK(delete_cb), panel);
 
 	button = gtk_button_new_with_label(_("Modify"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 4);
 
 	button = gtk_button_new_with_label(_("Close"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 4);
 	g_signal_connect(button, "clicked", G_CALLBACK(close_cb), panel);
 
@@ -406,7 +406,7 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 				is_add ? _("Add a new account") : _("Edit the account"),
 				NULL, GTK_WIN_POS_CENTER, FALSE);
 	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 8);
-	gtk_widget_set_usize(panel->window, 300, 400);
+	gtk_widget_set_size_request(panel->window, 300, 400);
 
 	/* Global VBox */
 	vbox = gtk_vbox_new(FALSE, 0);
@@ -444,14 +444,14 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(panel->proto_combo),
 			renderer, "text", PROTOCOL_NAME_COLUMN, NULL);
 
-	gtk_widget_set_usize(panel->proto_combo, 150, 30);
+	gtk_widget_set_size_request(panel->proto_combo, 150, 30);
 	gtk_fixed_put(GTK_FIXED(fixed), panel->proto_combo, 100, 55);
 
 	label = gtk_label_new(_("Username:"));
 	gtk_fixed_put(GTK_FIXED(fixed), label, 20, 95);
 
 	panel->username_entry = gtk_entry_new();
-	gtk_widget_set_usize(panel->username_entry, 150, 25);
+	gtk_widget_set_size_request(panel->username_entry, 150, 25);
 	gtk_fixed_put(GTK_FIXED(fixed), panel->username_entry, 100, 95);
 
 	label = gtk_label_new(_("Password:"));
@@ -459,7 +459,7 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 
 	panel->password_entry = gtk_entry_new();
 	gtk_entry_set_visibility(GTK_ENTRY(panel->password_entry) , FALSE);
-	gtk_widget_set_usize(panel->password_entry, 150, 25);
+	gtk_widget_set_size_request(panel->password_entry, 150, 25);
 	gtk_fixed_put(GTK_FIXED(fixed), panel->password_entry, 100, 130);
 
 	/* Action Area */
@@ -469,13 +469,13 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 	gtk_container_add(GTK_CONTAINER(halign), action_area);
 
 	button = gtk_button_new_with_label(_("Cancel"));
-	gtk_widget_set_usize(button, 80, 30);
+	gtk_widget_set_size_request(button, 80, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 0);
 	g_signal_connect(button, "clicked",
 			G_CALLBACK(edit_account_cancel_cb), panel);
 
 	button = gtk_button_new_with_label(_("Save"));
-	gtk_widget_set_usize(button, 80, 30);
+	gtk_widget_set_size_request(button, 80, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 0);
 	g_signal_connect(button, "clicked",
 			G_CALLBACK(edit_account_save_cb), panel);

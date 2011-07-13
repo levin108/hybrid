@@ -264,7 +264,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 								renderer, "text", 1, NULL);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(window->account_combo), 0);
 
-	gtk_widget_set_usize(window->account_combo, 270, 30);
+	gtk_widget_set_size_request(window->account_combo, 270, 30);
 	gtk_table_attach_defaults(GTK_TABLE(table), window->account_combo, 1, 2, 0, 1);
 
 	/* username */
@@ -273,7 +273,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
 
 	window->username_entry = gtk_entry_new();
-	gtk_widget_set_usize(window->username_entry, 270, 30);
+	gtk_widget_set_size_request(window->username_entry, 270, 30);
 	gtk_table_attach_defaults(GTK_TABLE(table), window->username_entry, 1, 2, 1, 2);
 
 	/* alias name */
@@ -282,7 +282,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
 
 	window->localname_entry = gtk_entry_new();
-	gtk_widget_set_usize(window->localname_entry, 270, 30);
+	gtk_widget_set_size_request(window->localname_entry, 270, 30);
 	gtk_table_attach_defaults(GTK_TABLE(table), window->localname_entry, 1, 2, 2, 3);
 
 	/* add-to-group combo box. */
@@ -326,7 +326,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 			GTK_SHADOW_ETCHED_IN);
 	window->tips_textview = gtk_text_view_new();
-	gtk_widget_set_usize(window->tips_textview, 270, 0);
+	gtk_widget_set_size_request(window->tips_textview, 270, 0);
 	gtk_container_add(GTK_CONTAINER(scroll), window->tips_textview);
 	gtk_table_attach_defaults(GTK_TABLE(table), scroll, 1, 2, 4, 5);
 
@@ -335,12 +335,12 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
 	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 5);
 
 	button = gtk_button_new_with_label(_("Add"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked", G_CALLBACK(add_cb), window);
 
 	button = gtk_button_new_with_label(_("Cancel"));
-	gtk_widget_set_usize(button, 100, 30);
+	gtk_widget_set_size_request(button, 100, 30);
 	gtk_box_pack_end(GTK_BOX(action_area), button, FALSE, FALSE, 5);
 	g_signal_connect(button, "clicked", G_CALLBACK(cancel_cb), window);
 }
@@ -354,7 +354,7 @@ hybrid_buddyadd_window_create()
 
 	buddy->window = hybrid_create_window(_("Add Buddy"), NULL,
 				GTK_WIN_POS_CENTER, FALSE);
-	gtk_widget_set_usize(buddy->window, 420, 300);
+	gtk_widget_set_size_request(buddy->window, 420, 300);
 	gtk_container_set_border_width(GTK_CONTAINER(buddy->window), 8);
 	g_signal_connect(buddy->window, "destroy", G_CALLBACK(destroy_cb), buddy);
 
