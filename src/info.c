@@ -70,29 +70,17 @@ hybrid_info_item_destroy(HybridInfoItem *item)
 }
 
 static void
-close_click_cb(GtkWidget *widget, gpointer user_data)
+close_click_cb(GtkWidget *widget, HybridInfo *info)
 {
-	HybridInfo *info = (HybridInfo*)user_data;
-
 	gtk_widget_destroy(info->window);
 }
 
 static void
-window_destroy_cb(GtkWidget *widget, gpointer user_data)
+window_destroy_cb(GtkWidget *widget, HybridInfo *info)
 {
-	HybridInfo *info = (HybridInfo*)user_data;
-	HybridInfoItem *item;
-	GSList *pos;
-
-	while (info->item_list) {
-		pos = info->item_list;
-		item = (HybridInfoItem*)pos->data;
-
-		info->item_list = g_slist_remove(info->item_list, item);
-		hybrid_info_item_destroy(item);
-	}
-
+	/* remove the info panel from the global list. */
 	info_list = g_slist_remove(info_list, info);
+
 	g_free(info);
 }
 
@@ -107,6 +95,7 @@ hybrid_info_create(HybridBuddy *buddy)
 	GtkWidget *halign;
 	GtkWidget *action_area;
 	GtkWidget *close_button;
+	GtkListStore *store;
 	gchar *title;
 
 	GSList *pos;
@@ -165,12 +154,13 @@ hybrid_info_create(HybridBuddy *buddy)
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 			GTK_SHADOW_ETCHED_IN);
 
-	info->store = gtk_list_store_new(HYBRID_INFO_COLUMNS,
+	store = gtk_list_store_new(HYBRID_INFO_COLUMNS,
 					G_TYPE_STRING,
 					G_TYPE_STRING);
 
-	info->treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(info->store));
+	info->treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(info->treeview), FALSE);
+	g_object_unref(store);
 	gtk_container_add(GTK_CONTAINER(scroll), info->treeview);
 
 	/* close button */
@@ -191,37 +181,111 @@ hybrid_info_create(HybridBuddy *buddy)
 	return info;
 }
 
+HybridNotifyInfo*
+hybrid_notify_info_create()
+{
+	HybridNotifyInfo *info;
+
+	info = g_new0(HybridNotifyInfo, 1);
+
+	return info;
+}
+
 void
-hybrid_info_add_pair(HybridInfo *info, const gchar *name, const gchar *value)
+hybrid_notify_info_destroy(HybridNotifyInfo *info)
 {
 	HybridInfoItem *item;
-	GtkTreeIter iter;
-	gchar *name_markup;
-	gchar *name_escaped;
-	gchar *value_escaped;
+	GSList *pos;
+
+	while (info->item_list) {
+		pos = info->item_list;
+		item = (HybridInfoItem*)pos->data;
+
+		info->item_list = g_slist_remove(info->item_list, item);
+		hybrid_info_item_destroy(item);
+	}
+
+	info_list = g_slist_remove(info_list, info);
+
+	g_free(info);
+}
+
+void
+hybrid_info_add_pair(HybridNotifyInfo *info, const gchar *name, const gchar *value)
+{
+	HybridInfoItem *item;
 
 	g_return_if_fail(info != NULL);
 	g_return_if_fail(name != NULL);
 
 	item = hybrid_info_item_create(name, value);
 	info->item_list = g_slist_append(info->item_list, item);
+}
 
-	name_escaped = g_markup_escape_text(name, -1);
+void
+hybrid_info_notify(HybridAccount *account, HybridNotifyInfo *info,
+		const gchar *buddy_id)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	HybridBuddy *buddy;
+	HybridInfo *info_panel;
+	HybridInfoItem *item;
+	GSList *info_pos;
+	GSList *pos;
+	gchar *name_markup;
+	gchar *name_escaped;
+	gchar *value_escaped;
 
-	if (value) {
-		value_escaped = g_markup_escape_text(value, -1);
-	} else {
-		value_escaped = NULL;
+	g_return_if_fail(info != NULL);
+
+	for (info_pos = info_list; info_pos; info_pos = info_pos->next) {
+
+		info_panel = (HybridInfo*)info_pos->data;
+
+		if (g_strcmp0(info_panel->buddy->id, buddy_id) == 0) {
+			goto buddy_ok;
+		}
+
 	}
 
-	name_markup = g_strdup_printf("<b>%s:</b>", name_escaped);	
+	if (!(buddy = hybrid_blist_find_buddy(account, buddy_id))) {
 
-	gtk_list_store_append(info->store, &iter);
-	gtk_list_store_set(info->store, &iter,
-			HYBRID_INFO_NAME_COLUMN, name_markup,
-			HYBRID_INFO_VALUE_COLUMN, value_escaped, -1);
+		hybrid_debug_error("info", "can not find buddy with id :\'%s\'",
+				buddy_id);
+		
+		return;
+	}
 
-	g_free(name_markup);
-	g_free(name_escaped);
-	g_free(value_escaped);
+	info_panel = hybrid_info_create(buddy);
+
+buddy_ok:
+
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(info_panel->treeview));
+
+	for (pos = info->item_list; pos; pos = pos->next) {
+
+		item = (HybridInfoItem*)pos->data;
+
+		name_escaped = g_markup_escape_text(item->name, -1);
+
+		if (item->value) {
+			value_escaped = g_markup_escape_text(item->value, -1);
+
+		} else {
+			value_escaped = NULL;
+		}
+
+		name_markup = g_strdup_printf("<b>%s:</b>", name_escaped);	
+
+		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+		gtk_list_store_set(GTK_LIST_STORE(model), &iter,
+				HYBRID_INFO_NAME_COLUMN, name_markup,
+				HYBRID_INFO_VALUE_COLUMN, value_escaped, -1);
+
+		g_free(name_markup);
+		g_free(name_escaped);
+		g_free(value_escaped);
+
+	}
 }

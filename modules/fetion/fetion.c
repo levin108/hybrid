@@ -413,12 +413,12 @@ fx_login(HybridAccount *imac)
 static gint 
 get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 {
-	HybridInfo *info;
+	HybridNotifyInfo *info;
 	fetion_buddy *buddy;
 	gchar *province;
 	gchar *city;
 
-	info = (HybridInfo*)trans->data;
+	//info = (HybridInfo*)trans->data;
 
 	if (!(buddy = fetion_buddy_parse_info(ac, trans->userid, sipmsg))) {
 		/* TODO show an error msg in the get-info box. */
@@ -431,6 +431,8 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 	city = buddy->city && *(buddy->city) != '\0' ?
 				get_city_name(buddy->province, buddy->city) :
 				g_strdup(_("Unknown"));
+
+	info = hybrid_notify_info_create();
 
 	hybrid_info_add_pair(info, _("Nickname"), buddy->nickname);
 	hybrid_info_add_pair(info, _("Localname"), buddy->localname);
@@ -448,6 +450,10 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 
 	g_free(province);
 	g_free(city);
+
+	hybrid_info_notify(ac->account, info, buddy->userid);
+
+	hybrid_notify_info_destroy(info);
 
 	return HYBRID_OK;
 }
