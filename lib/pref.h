@@ -56,6 +56,21 @@ void hybrid_pref_set_boolean(const gchar *name, const gboolean value);
  */
 gboolean hybrid_pref_get_boolean(const gchar *name);
 
+/**
+ * Set the integer value for a property.
+ *
+ * @param name  The name of the property.
+ * @param value The integer value of the property.
+ */
+void hybrid_pref_set_int(const gchar *name, gint value);
+
+/**
+ * Get the integer value of a given property.
+ *
+ * @return The value of the property.
+ */
+gint hybrid_pref_get_int(const gchar *name);
+
 #ifdef __cplusplus
 }
 #endif

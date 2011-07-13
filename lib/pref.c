@@ -112,6 +112,74 @@ hybrid_pref_get_boolean(const gchar *name)
 }
 
 void
+hybrid_pref_set_int(const gchar *name, gint value)
+{
+	xmlnode *node;
+	gchar *value_string;
+
+	g_return_if_fail(hybrid_pref != NULL);
+	g_return_if_fail(hybrid_pref->root != NULL);
+
+	if (!(node = xmlnode_find(hybrid_pref->root, name))) {
+
+		node = xmlnode_new_child(hybrid_pref->root, name);
+
+	}
+
+	if (xmlnode_has_prop(node, "type")) {
+		xmlnode_set_prop(node, "type", "int");
+
+	} else {
+		xmlnode_new_prop(node, "type", "int");
+	}
+
+	value_string = g_strdup_printf("%d", value);
+
+	xmlnode_set_content(node, value_string);
+
+	g_free(value_string);
+}
+
+gint
+hybrid_pref_get_int(const gchar *name)
+{
+	xmlnode *node;
+	gchar *type;
+	gchar *value;
+	gint value_int;
+
+	g_return_val_if_fail(hybrid_pref != NULL, FALSE);
+	g_return_val_if_fail(hybrid_pref->root != NULL, FALSE);
+
+	if (!(node = xmlnode_find(hybrid_pref->root, name))) {
+		return -1;
+	}
+
+	if (!xmlnode_has_prop(node, "type")) {
+
+		hybrid_debug_info("pref", "invalid pref node.");
+		
+		return -1;
+	}
+
+	type = xmlnode_prop(node, "type");
+
+	if (g_strcmp0(type, "int") != 0) {
+
+		hybrid_debug_error("pref",
+				"integer pref node with a type which is not int.");
+
+		return -1;
+	}
+
+	value = xmlnode_content(node);
+	value_int = atoi(value);
+	g_free(value);
+
+	return value_int;
+}
+
+void
 hybrid_pref_save(void)
 {
 	g_return_if_fail(hybrid_pref != NULL);

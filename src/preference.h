@@ -26,7 +26,7 @@ struct _HybridPreference {
 	/*
 	 * Combo box for choosing the position of the tabs;
 	 */
-	GtkWidget *position_of_tabs;
+	GtkWidget *tab_pos_combo;
 };
 
 #ifdef __cplusplus

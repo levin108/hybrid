@@ -274,6 +274,7 @@ hybrid_conv_create()
 	GtkWidget *action_area;
 	GtkWidget *halign;
 	GtkWidget *button;
+	gint tab_pos;
 
 	HybridConversation *imconv;
 
@@ -294,7 +295,13 @@ hybrid_conv_create()
 
 	/* create notebook */
 	imconv->notebook = gtk_notebook_new();
-	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(imconv->notebook), GTK_POS_TOP);
+	
+	if ((tab_pos = hybrid_pref_get_int("tab_pos")) != -1) {
+		gtk_notebook_set_tab_pos(GTK_NOTEBOOK(imconv->notebook), tab_pos);
+
+	} else {
+		gtk_notebook_set_tab_pos(GTK_NOTEBOOK(imconv->notebook), GTK_POS_TOP);
+	}
 	gtk_notebook_set_scrollable(GTK_NOTEBOOK(imconv->notebook), TRUE);
 	gtk_notebook_popup_enable(GTK_NOTEBOOK(imconv->notebook));
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(imconv->notebook), TRUE);

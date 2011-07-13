@@ -6,6 +6,99 @@
 
 static HybridPreference *pref_window = NULL;
 
+enum {
+	TAB_POS_NAME_COL,
+	TAB_POS_VALUE_COL,
+	TAB_POS_COLS
+};
+
+static GtkTreeModel*
+create_tab_pos_model(void)
+{
+	GtkTreeStore *store;
+	GtkTreeIter iter;
+
+	store = gtk_tree_store_new(TAB_POS_COLS,
+				G_TYPE_STRING,
+				G_TYPE_INT);
+
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter,
+			TAB_POS_NAME_COL, _("Top"),
+			TAB_POS_VALUE_COL, GTK_POS_TOP,
+			-1);
+
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter,
+			TAB_POS_NAME_COL, _("Right"),
+			TAB_POS_VALUE_COL, GTK_POS_RIGHT,
+			-1);
+
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter,
+			TAB_POS_NAME_COL, _("Bottom"),
+			TAB_POS_VALUE_COL, GTK_POS_BOTTOM,
+			-1);
+
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter,
+			TAB_POS_NAME_COL, _("Left"),
+			TAB_POS_VALUE_COL, GTK_POS_LEFT,
+			-1);
+
+	return GTK_TREE_MODEL(store);
+}
+
+/**
+ * Create the combo box for choosing the tab positons.
+ */
+static GtkWidget*
+tab_pos_combo_create()
+{
+	GtkWidget *combo;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GtkCellRenderer *renderer;
+	gint value;
+	gint tab_pos;
+
+	model = create_tab_pos_model();
+	combo = gtk_combo_box_new_with_model(model);
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(
+			GTK_CELL_LAYOUT(combo), renderer, FALSE);
+	gtk_cell_layout_set_attributes(
+			GTK_CELL_LAYOUT(combo), renderer,
+		    "text", TAB_POS_NAME_COL, NULL);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+
+	/*
+	 * Set the active item with the local data.
+	 */
+	if ((tab_pos = hybrid_pref_get_int("tab_pos")) != -1) {
+		
+		if(gtk_tree_model_get_iter_root(model, &iter)) {
+
+			do {
+				gtk_tree_model_get(model, &iter, TAB_POS_VALUE_COL, &value, -1);
+
+				if (value == tab_pos) {
+
+					gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo), &iter);
+
+					break;
+				}
+
+			} while (gtk_tree_model_iter_next(model, &iter));
+		}
+	}
+
+	g_object_unref(model);
+	
+	return combo;
+}
+
 /**
  * Initialize the basic settings page.
  */
@@ -15,27 +108,46 @@ pref_basic_init(GtkFixed *fixed)
 	GtkWidget *label;
 
 	label = gtk_label_new(NULL);
-	gtk_label_set_markup(GTK_LABEL(label), _("<b>Appearance</b>"));
+	gtk_label_set_markup(GTK_LABEL(label), _("<b>Chat Window：</b>"));
 
 	gtk_fixed_put(fixed, label, 20, 10);
 
-	pref_window->mute_check = gtk_check_button_new_with_label(_("Mute"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->mute_check),
-			hybrid_pref_get_boolean("mute"));
-	gtk_fixed_put(fixed, pref_window->mute_check, 20, 35);
-
 	pref_window->hcb_check = 
-		gtk_check_button_new_with_label(_("Hide Send Buttons"));
+		gtk_check_button_new_with_label(_("Hide Action Buttons"));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->hcb_check),
 			hybrid_pref_get_boolean("hide_chat_buttons"));
-	gtk_fixed_put(fixed, pref_window->hcb_check, 220, 35);
+	gtk_fixed_put(fixed, pref_window->hcb_check, 20, 35);
+
+	label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label),
+			_("<b>Tabs:</b>"));
+	gtk_fixed_put(fixed, label, 20, 65);
 
 	pref_window->single_cw_check =
 		gtk_check_button_new_with_label(_("Show Messages In A Single Window With Tabs"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->single_cw_check),
-			hybrid_pref_get_boolean("single_chat_window"));
-	gtk_fixed_put(fixed, pref_window->single_cw_check, 20, 65);
 
+	gtk_toggle_button_set_active(
+			GTK_TOGGLE_BUTTON(pref_window->single_cw_check),
+			hybrid_pref_get_boolean("single_chat_window"));
+	gtk_fixed_put(fixed, pref_window->single_cw_check, 20, 95);
+
+	label = gtk_label_new(_("Tab Position:"));
+	gtk_fixed_put(fixed, label, 20, 135);
+
+	pref_window->tab_pos_combo = tab_pos_combo_create();
+	gtk_fixed_put(fixed, pref_window->tab_pos_combo, 120, 130);
+}
+
+/**
+ * Initialize the sound settings panel.
+ */
+static void
+pref_sound_init(GtkFixed *fixed)
+{
+	pref_window->mute_check = gtk_check_button_new_with_label(_("Mute"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->mute_check),
+			hybrid_pref_get_boolean("mute"));
+	gtk_fixed_put(fixed, pref_window->mute_check, 20, 15);
 }
 
 /**
@@ -84,6 +196,22 @@ save_cb(GtkWidget *widget, gpointer user_data)
 		hybrid_pref_set_boolean("single_chat_window", FALSE);
 	}
 
+	/*
+	 * Tab position settings.
+	 */
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gint tab_pos;
+
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(pref_window->tab_pos_combo));
+
+	gtk_combo_box_get_active_iter(
+			GTK_COMBO_BOX(pref_window->tab_pos_combo), &iter);
+
+	gtk_tree_model_get(model, &iter, TAB_POS_VALUE_COL, &tab_pos, -1);
+
+	hybrid_pref_set_int("tab_pos", tab_pos);
+
 	hybrid_pref_save();
 
 	gtk_widget_destroy(pref_window->window);
@@ -120,6 +248,13 @@ pref_window_init(void)
 	                         fixed, label);
 
 	pref_basic_init(GTK_FIXED(fixed));
+
+	fixed = gtk_fixed_new();
+	label = gtk_label_new(_("Sound"));
+	gtk_notebook_append_page(GTK_NOTEBOOK(pref_window->notebook),
+							fixed, label);
+
+	pref_sound_init(GTK_FIXED(fixed));
 
 	action_area = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), action_area, FALSE, FALSE, 5);
