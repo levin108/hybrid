@@ -3,6 +3,7 @@
 
 #include <gtk/gtk.h>
 #include "blist.h"
+#include "logs.h"
 
 typedef struct _HybridConversation HybridConversation;
 typedef struct _HybridChatWindow HybridChatWindow;
@@ -44,6 +45,8 @@ struct _HybridChatWindow {
 	GdkPixbuf *icon;/**< only be used when it's user-defined window. */
 
 	gint unread; /* count of the unread message. */
+
+	HybridLogs *logs; /* log context. */
 
 	gpointer data;
 	GtkWidget *pagelabel;

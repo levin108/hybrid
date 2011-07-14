@@ -5,6 +5,7 @@
 #include "module.h"
 #include "head.h"
 #include "blist.h"
+#include "logs.h"
 #include "util.h"
 #include "preference.h"
 #include "statusicon.h"
@@ -229,6 +230,8 @@ main(gint argc, gchar **argv)
 	hybrid_config_init();
 
 	hybrid_pref_init();
+
+	hybrid_logs_init();
 
 	hybrid_module_init();
 

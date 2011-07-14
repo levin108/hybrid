@@ -65,6 +65,10 @@ chat_window_destroy(HybridChatWindow *chat)
 			g_object_unref(chat->icon);
 		}
 
+		if (chat->logs) {
+			hybrid_logs_destroy(chat->logs);
+		}
+
 		g_free(chat);
 	}
 }
@@ -197,6 +201,7 @@ chat_found:
 	hybrid_chat_textview_append(chat->textview,
 								account->nickname,
 								text, time(NULL), TRUE);
+	hybrid_logs_write(chat->logs, account->nickname, text, TRUE);
 
 	/* Call the protocol hook function. */
 	if (IS_SYSTEM_CHAT(chat)) {
@@ -1194,6 +1199,7 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	chat->parent  = conv;
 	chat->account = account;
 	chat->type    = type;
+	chat->logs    = hybrid_logs_create(account, id);
 
 	if (type == HYBRID_CHAT_PANEL_SYSTEM) {
 		chat->data = buddy;
@@ -1289,6 +1295,7 @@ just_show_msg:
 	hybrid_sound_play_file(SOUND_DIR"newmessage.wav");
 
 	hybrid_chat_textview_append(chat->textview, buddy->name, msg, time, FALSE);
+	hybrid_logs_write(chat->logs, buddy->name, msg, FALSE);
 
 	g_free(msg);
 }

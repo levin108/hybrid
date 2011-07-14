@@ -10,6 +10,8 @@
 #include <locale.h>
 #include <config.h>
 
+#include <sys/stat.h>
+
 /* network headers */
 #include <sys/types.h>
 #include <sys/socket.h>
