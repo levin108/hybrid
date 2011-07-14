@@ -301,3 +301,16 @@ install(TARGETS fetion
 	LIBRARY DESTINATION ${MODULE_INSTALL_DIR}
 	ARCHIVE DESTINATION ${MODULE_INSTALL_DIR}
 )
+
+# source list of xmpp module
+set(xmpp_SRC
+	modules/xmpp/xmpp.c
+)
+
+add_library(xmpp SHARED ${xmpp_SRC})
+
+# install fetion module
+install(TARGETS xmpp
+	LIBRARY DESTINATION ${MODULE_INSTALL_DIR}
+	ARCHIVE DESTINATION ${MODULE_INSTALL_DIR}
+)
