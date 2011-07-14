@@ -318,36 +318,23 @@ xmlnode_remove_node(xmlnode *node)
 gchar*
 xmlnode_to_string(xmlnode *root)
 {
-	xmlDoc *doc;
-	xmlChar *dump;
-	gchar *temp;
-	gchar *pos;
 	gchar *res;
+	xmlBuffer *buffer;
 
 	g_return_val_if_fail(root != NULL, NULL);
-	g_return_val_if_fail(root->is_root == 1, NULL);
 
-	doc = root->doc;
-	xmlDocDumpMemory(doc, &dump, NULL);
+	buffer = xmlBufferCreate();
 
-	temp = g_strdup((gchar*)dump);
-	xmlFree(dump);
-	xmlnode_free(root);
+	if (xmlNodeDump(buffer, NULL, root->node, 0, 0) == -1) {
 
-	/* now strip the head */
-	pos = temp;
+		hybrid_debug_error("xml", "dump node error.");
 
-	while (*pos) {
-		if (*pos == '?' && *(pos + 1) == '>') {
-			pos += 2;
-			break;
-		} 
-
-		pos ++;
+		return NULL;
 	}
 
-	res = g_strdup(pos);
-	g_free(temp);
+	res = g_strdup((gchar*)xmlBufferContent(buffer));
+
+	xmlBufferFree(buffer);
 
 	return res;
 }
