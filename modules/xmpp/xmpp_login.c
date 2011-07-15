@@ -44,11 +44,10 @@ init_stream_cb(gint sk, XmppStream *stream)
 	buf[n] = '\0';
 
 	if (n > 0) {
-		printf("%s\n", buf);
-
+		//printf("%s", buf);
+		//fflush(stdout);
 		xmpp_process_pushed(stream, buf, n);
-	}
-
+	} 
 	return TRUE;
 }
 
@@ -108,6 +107,7 @@ create_initiate_stream(XmppStream *xs)
 	version = g_strdup_printf("%d.%d", xs->major_version, xs->miner_version);
 
 	xmlnode_new_prop(node, "version", version);
+	xmlnode_new_prop(node, "to", "gmail.com");
 
 	g_free(version);
 
