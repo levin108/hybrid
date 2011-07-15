@@ -801,6 +801,7 @@ generate_configuration_body(fetion_account *ac)
 	xmlnode *root;
 	xmlnode *node;
 	gchar root_node[] = "<config></config>";
+	gchar *res;
 
 	g_return_val_if_fail(ac != NULL, NULL);
 
@@ -829,7 +830,11 @@ generate_configuration_body(fetion_account *ac)
 	node = xmlnode_new_child(root, "hints");
 	xmlnode_new_prop(node, "version", ac->cfg_hint_version);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 /**
@@ -1093,6 +1098,7 @@ generate_auth_body(fetion_account *ac)
 	gchar root_raw[] = "<args></args>";
 	xmlnode *node;
 	xmlnode *subnode;
+	gchar *res;
 	xmlnode *root = xmlnode_root(root_raw, strlen(root_raw));
 
 	node = xmlnode_new_child(root, "device");
@@ -1124,7 +1130,11 @@ generate_auth_body(fetion_account *ac)
 	xmlnode_new_prop(subnode, "value", "0");
 	xmlnode_new_prop(subnode, "desc", "");
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 /**

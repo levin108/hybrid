@@ -2,6 +2,25 @@
 #include "util.h"
 
 xmlnode*
+xmlnode_create(const gchar *name)
+{
+	xmlnode *node;
+
+	g_return_val_if_fail(name != NULL, NULL);
+
+	node = g_new0(xmlnode, 1);
+	node->node = xmlNewNode(NULL, (xmlChar *)name);
+	node->doc = NULL;
+	node->is_root = 0;
+	node->next = NULL;
+	node->parent = NULL;
+	node->child = NULL;
+	node->name = g_strdup(name);
+
+	return node;
+}
+
+xmlnode*
 xmlnode_root(const gchar *xml_buf, gint size)
 {
 	xmlDoc *doc;
@@ -318,36 +337,23 @@ xmlnode_remove_node(xmlnode *node)
 gchar*
 xmlnode_to_string(xmlnode *root)
 {
-	xmlDoc *doc;
-	xmlChar *dump;
-	gchar *temp;
-	gchar *pos;
 	gchar *res;
+	xmlBuffer *buffer;
 
 	g_return_val_if_fail(root != NULL, NULL);
-	g_return_val_if_fail(root->is_root == 1, NULL);
 
-	doc = root->doc;
-	xmlDocDumpMemory(doc, &dump, NULL);
+	buffer = xmlBufferCreate();
 
-	temp = g_strdup((gchar*)dump);
-	xmlFree(dump);
-	xmlnode_free(root);
+	if (xmlNodeDump(buffer, NULL, root->node, 0, 0) == -1) {
 
-	/* now strip the head */
-	pos = temp;
+		hybrid_debug_error("xml", "dump node error.");
 
-	while (*pos) {
-		if (*pos == '?' && *(pos + 1) == '>') {
-			pos += 2;
-			break;
-		} 
-
-		pos ++;
+		return NULL;
 	}
 
-	res = g_strdup(pos);
-	g_free(temp);
+	res = g_strdup((gchar*)xmlBufferContent(buffer));
+
+	xmlBufferFree(buffer);
 
 	return res;
 }
