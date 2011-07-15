@@ -30,6 +30,16 @@ extern "C" {
 xmlnode *xmlnode_create(const gchar *name);
 
 /**
+ * Create a new namespace for a given xml node.
+ *
+ * @param node   The xml node.
+ * @param prefix The prefix of the namespace.
+ * @param url    The url of the namespace.
+ */
+void xmlnode_new_namespace(xmlnode *node, const gchar *prefix,
+		const gchar *url);
+
+/**
  * Get the root element of the xml context.
  *
  * @param xml_buf XML data buffer.

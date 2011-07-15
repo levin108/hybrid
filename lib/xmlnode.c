@@ -20,6 +20,13 @@ xmlnode_create(const gchar *name)
 	return node;
 }
 
+void
+xmlnode_new_namespace(xmlnode *node, const gchar *prefix,
+		const gchar *url)
+{
+	xmlNewNs(node->node, (xmlChar *)url, (xmlChar *)prefix);
+}
+
 xmlnode*
 xmlnode_root(const gchar *xml_buf, gint size)
 {
