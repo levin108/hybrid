@@ -307,6 +307,7 @@ set(xmpp_SRC
 	modules/xmpp/xmpp.c
 	modules/xmpp/xmpp_stream.c
 	modules/xmpp/xmpp_login.c
+	modules/xmpp/xmpp_parser.c
 )
 
 add_library(xmpp SHARED ${xmpp_SRC})

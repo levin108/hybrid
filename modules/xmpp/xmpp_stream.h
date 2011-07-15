@@ -1,6 +1,7 @@
 #ifndef HYBRID_XMPP_STREAM_H
 #define HYBRID_XMPP_STREAM_H
 #include <glib.h>
+#include <libxml/parser.h>
 
 typedef struct _XmppStream XmppStream;
 
@@ -10,6 +11,7 @@ struct _XmppStream {
 	gint major_version; /* default 1 */
 	gint miner_version; /* default 0 */
 
+	xmlParserCtxt *xml_ctxt;
 };
 
 #ifdef __cplusplus

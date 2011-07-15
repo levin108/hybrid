@@ -4,6 +4,7 @@
 #include "xmlnode.h"
 
 #include "xmpp_login.h"
+#include "xmpp_parser.h"
 
 static gchar *create_initiate_stream(XmppStream *xs);
 
@@ -28,7 +29,7 @@ strip_end_label(gchar *xml_string)
 }
 
 static gboolean
-init_stream_cb(gint sk, gpointer user_data)
+init_stream_cb(gint sk, XmppStream *stream)
 {
 	gchar buf[BUF_LENGTH];
 	gint n;
@@ -42,7 +43,11 @@ init_stream_cb(gint sk, gpointer user_data)
 
 	buf[n] = '\0';
 
-	g_print("%s", buf);
+	if (n > 0) {
+		printf("%s\n", buf);
+
+		xmpp_process_pushed(stream, buf, n);
+	}
 
 	return TRUE;
 }
@@ -80,7 +85,7 @@ init_connect(gint sk, XmppStream *xs)
 
 	g_free(msg);
 
-	hybrid_event_add(sk, HYBRID_EVENT_READ, init_stream_cb, xs);
+	hybrid_event_add(sk, HYBRID_EVENT_READ, (input_func)init_stream_cb, xs);
 
 	return FALSE;
 }
