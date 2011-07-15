@@ -2,6 +2,25 @@
 #include "util.h"
 
 xmlnode*
+xmlnode_create(const gchar *name)
+{
+	xmlnode *node;
+
+	g_return_val_if_fail(name != NULL, NULL);
+
+	node = g_new0(xmlnode, 1);
+	node->node = xmlNewNode(NULL, (xmlChar *)name);
+	node->doc = NULL;
+	node->is_root = 0;
+	node->next = NULL;
+	node->parent = NULL;
+	node->child = NULL;
+	node->name = g_strdup(name);
+
+	return node;
+}
+
+xmlnode*
 xmlnode_root(const gchar *xml_buf, gint size)
 {
 	xmlDoc *doc;

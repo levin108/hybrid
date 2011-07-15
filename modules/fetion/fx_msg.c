@@ -686,6 +686,7 @@ generate_invite_buddy_body(const gchar *sipuri)
 	const gchar *body;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 
 	g_return_val_if_fail(sipuri != NULL, NULL);
 
@@ -697,5 +698,9 @@ generate_invite_buddy_body(const gchar *sipuri)
 	node = xmlnode_new_child(node, "contact");
 	xmlnode_new_prop(node, "uri", sipuri);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+	
+	return res;
 }

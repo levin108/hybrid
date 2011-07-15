@@ -349,6 +349,7 @@ generate_subscribe_body(void)
 {
 	xmlnode *root;
 	xmlnode *node;
+	gchar *body;
 	gchar xml_raw[] = "<args></args>";
 
 	root = xmlnode_root(xml_raw, strlen(xml_raw));
@@ -358,7 +359,11 @@ generate_subscribe_body(void)
 	xmlnode_new_prop(node, "buddy", "v4default");
 	xmlnode_new_prop(node, "version", "0");
 
-	return xmlnode_to_string(root);
+	body = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return body;
 }
 
 void
@@ -779,6 +784,7 @@ generate_get_info_body(const gchar *userid)
 {
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 
 	gchar body[] = "<args></args>";
 
@@ -786,7 +792,11 @@ generate_get_info_body(const gchar *userid)
 	node = xmlnode_new_child(root, "contact");
 	xmlnode_new_prop(node, "user-id", userid);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 static gchar*
@@ -795,6 +805,7 @@ generate_buddy_move_body(const gchar *userid, const gchar *groupid)
 	const gchar *body;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 	
 	body = "<args></args>";
 
@@ -806,7 +817,11 @@ generate_buddy_move_body(const gchar *userid, const gchar *groupid)
 	xmlnode_new_prop(node, "user-id", userid);
 	xmlnode_new_prop(node, "buddy-lists", groupid);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 static gchar*
@@ -815,6 +830,7 @@ generate_remove_buddy_body(const gchar *userid)
 	const gchar *body;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 	
 	body = "<args></args>";
 
@@ -825,7 +841,11 @@ generate_remove_buddy_body(const gchar *userid)
 	node = xmlnode_new_child(node, "buddy");
 	xmlnode_new_prop(node, "user-id", userid);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 
@@ -835,6 +855,7 @@ generate_rename_buddy_body(const gchar *userid, const gchar *name)
 	const gchar *body;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 
 	body = "<args></args>";
 
@@ -845,7 +866,11 @@ generate_rename_buddy_body(const gchar *userid, const gchar *name)
 	xmlnode_new_prop(node, "user-id", userid);
 	xmlnode_new_prop(node, "local-name", name);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 static gchar*
@@ -856,6 +881,7 @@ generate_buddy_add_body(const gchar *no, const gchar *groupid,
 	gchar *sipuri;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 
 	body = "<args></args>";
 
@@ -882,5 +908,9 @@ generate_buddy_add_body(const gchar *no, const gchar *groupid,
 
 	g_free(sipuri);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }

@@ -256,6 +256,7 @@ generate_group_edit_body(const gchar *group_id, const gchar *group_name)
 	const gchar *body;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 
 	body = "<args></args>";
 
@@ -268,7 +269,11 @@ generate_group_edit_body(const gchar *group_id, const gchar *group_name)
 	xmlnode_new_prop(node, "id", group_id);
 	xmlnode_new_prop(node, "name", group_name);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 static gchar*
@@ -277,6 +282,7 @@ generate_group_add_body(const gchar *name)
 	const gchar *body;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 
 	body = "<args></args>";
 
@@ -288,7 +294,11 @@ generate_group_add_body(const gchar *name)
 
 	xmlnode_new_prop(node, "name", name);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }
 
 static gchar*
@@ -297,6 +307,7 @@ generate_group_remove_body(const gchar *groupid)
 	const gchar *body;
 	xmlnode *root;
 	xmlnode *node;
+	gchar *res;
 
 	body = "<args></args>";
 
@@ -308,5 +319,9 @@ generate_group_remove_body(const gchar *groupid)
 
 	xmlnode_new_prop(node, "id", groupid);
 
-	return xmlnode_to_string(root);
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
 }

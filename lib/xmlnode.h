@@ -20,6 +20,16 @@ extern "C" {
 #endif
 
 /**
+ * Create a new xml node.
+ *
+ * @param name The name of the new node.
+ * @param ns   The namespace of the new node[allow-none].
+ *
+ * @return The new node created.
+ */
+xmlnode *xmlnode_create(const gchar *name);
+
+/**
  * Get the root element of the xml context.
  *
  * @param xml_buf XML data buffer.

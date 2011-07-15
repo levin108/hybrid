@@ -237,7 +237,11 @@ generate_set_state_body(gint state)
 	xmlnode_new_prop(node, "value", s);
 	g_free(s);
 
-	return xmlnode_to_string(root);
+	s = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return s;
 }
 
 
@@ -246,11 +250,16 @@ generate_keep_alive_body()
 {
 	xmlnode *root;
 	xmlnode *node;
+	gchar *body;
 	gchar data[] = "<args></args>";
 
 	root = xmlnode_root(data, strlen(data));
 	node = xmlnode_new_child(root, "credentials");
 	xmlnode_new_prop(node, "domains", "fetion.com.cn");
 
-	return xmlnode_to_string(root);
+	body = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return body;
 }
