@@ -305,6 +305,8 @@ install(TARGETS fetion
 # source list of xmpp module
 set(xmpp_SRC
 	modules/xmpp/xmpp.c
+	modules/xmpp/xmpp_stream.c
+	modules/xmpp/xmpp_login.c
 )
 
 add_library(xmpp SHARED ${xmpp_SRC})

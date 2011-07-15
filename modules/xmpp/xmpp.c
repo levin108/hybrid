@@ -11,63 +11,20 @@
 #include "gtkutils.h"
 #include "tooltip.h"
 
+#include "xmpp_stream.h"
+#include "xmpp_login.h"
+
 const gchar *jabber_server = "talk.l.google.com";
-
-static gboolean
-init_stream_cb(gint sk, gpointer user_data)
-{
-	gchar buf[BUF_LENGTH];
-	gint n;
-
-	if ((n = recv(sk, buf, strlen(buf), 0)) == -1) {
-		
-		hybrid_debug_error("xmpp", "init stream error.");
-
-		return FALSE;
-	}
-
-	buf[n] = '\0';
-
-	g_print("%s", buf);
-
-	return TRUE;
-}
-
-static gboolean
-init_connect_cb(gint sk, gpointer user_data)
-{
-	const gchar *msg;
-
-	/* send version. */
-	msg = "<?xml version='1.0' ?>";
-
-	if (send(sk, msg, strlen(msg), 0) == -1) {
-
-		hybrid_debug_error("xmpp", "send initial jabber request failed");
-
-		return FALSE;
-	}
-
-	/* send stream request. */
-	msg = "<stream:stream to='gmail.com' xmlns='jabber:client'"
-		" xmlns:stream='http://etherx.jabber.org/streams' version='1.0'>";
-
-	if (send(sk, msg, strlen(msg), 0) == -1) {
-
-		hybrid_debug_error("xmpp", "send initial jabber request failed");
-
-		return FALSE;
-	}
-
-	hybrid_event_add(sk, HYBRID_EVENT_READ, init_stream_cb, NULL);
-
-	return FALSE;
-}
 
 static gboolean
 xmpp_login(HybridAccount *account)
 {
-	hybrid_proxy_connect(jabber_server, 5222, init_connect_cb, NULL);
+	XmppStream *xs = xmpp_stream_create();
+
+	hybrid_account_set_protocol_data(account, xs);
+
+	hybrid_proxy_connect(jabber_server, 5222,
+			(connect_callback)init_connect, xs);
 
 	return FALSE;
 }
