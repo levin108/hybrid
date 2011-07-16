@@ -1,9 +1,9 @@
 #ifndef HYBRID_XMPP_STREAM_H
 #define HYBRID_XMPP_STREAM_H
 #include <glib.h>
-#include <libxml/parser.h>
 #include "xmlnode.h"
 #include "connect.h"
+#include "account.h"
 
 typedef struct _XmppStream XmppStream;
 
@@ -16,7 +16,9 @@ struct _XmppStream {
 
 	xmlnode *node;
 
-	SSL *ssl;
+	HybridAccount *account;
+	HybridConnection *conn;
+	HybridSslConnection *ssl;
 
 	xmlParserCtxt *xml_ctxt;
 };

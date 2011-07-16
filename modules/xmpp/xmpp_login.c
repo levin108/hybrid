@@ -36,14 +36,14 @@ init_stream_cb(gint sk, XmppStream *stream)
 
 	if (!stream->ssl) {
 
-		if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
+		if ((n = recv(sk, buf, sizeof(buf) - 1, 0)) == -1) {
 			
 			hybrid_debug_error("xmpp", "init stream error.");
 
 			return FALSE;
 		}
 	} else {
-		if ((n = SSL_read(stream->ssl, buf, sizeof(buf))) == -1) {
+		if ((n = hybrid_ssl_read(stream->ssl, buf, sizeof(buf) - 1)) == -1) {
 			
 			hybrid_debug_error("xmpp", "init stream error.");
 
@@ -63,11 +63,11 @@ init_stream_cb(gint sk, XmppStream *stream)
 }
 
 gboolean
-init_connect(gint sk, XmppStream *xs)
+init_connect(gint sk, XmppStream *stream)
 {
 	gchar *msg;
 
-	xs->sk = sk;
+	stream->sk = sk;
 
 	/* send version. */
 	msg = "<?xml version='1.0' ?>";
@@ -80,7 +80,7 @@ init_connect(gint sk, XmppStream *xs)
 	}
 
 	/* send initiate stream request. */
-	msg = create_initiate_stream(xs);
+	msg = create_initiate_stream(stream);
 
 	strip_end_label(msg);
 
@@ -97,7 +97,7 @@ init_connect(gint sk, XmppStream *xs)
 
 	g_free(msg);
 
-	hybrid_event_add(sk, HYBRID_EVENT_READ, (input_func)init_stream_cb, xs);
+	hybrid_event_add(sk, HYBRID_EVENT_READ, (input_func)init_stream_cb, stream);
 
 	return FALSE;
 }

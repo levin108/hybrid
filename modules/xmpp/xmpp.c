@@ -19,12 +19,14 @@ const gchar *jabber_server = "talk.l.google.com";
 static gboolean
 xmpp_login(HybridAccount *account)
 {
-	XmppStream *xs = xmpp_stream_create();
+	XmppStream *stream = xmpp_stream_create();
 
-	hybrid_account_set_protocol_data(account, xs);
+	stream->account = account;
+
+	hybrid_account_set_protocol_data(account, stream);
 
 	hybrid_proxy_connect(jabber_server, 5222,
-			(connect_callback)init_connect, xs);
+			(connect_callback)init_connect, stream);
 
 	return FALSE;
 }

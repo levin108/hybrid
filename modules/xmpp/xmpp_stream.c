@@ -50,21 +50,10 @@ xmpp_stream_starttls(XmppStream *stream)
 	g_free(body);
 }
 
-static void
-xmpp_stream_performtls(XmppStream *stream)
+static gboolean
+tls_conn_cb(HybridSslConnection *ssl, XmppStream *stream)
 {
-	const gchar *msg;
-	SSL *ssl;
-
-	g_return_if_fail(stream != NULL);
-
-	if (!(ssl = hybrid_ssl_shakehand(stream->sk))) {
-
-		hybrid_debug_error("stream", "TLS shake hand error.");
-
-		return;
-	}
-
+	gchar *msg;
 	/* send version. */
 	msg = create_initiate_stream(stream);
 
@@ -72,9 +61,27 @@ xmpp_stream_performtls(XmppStream *stream)
 
 	hybrid_debug_info("stream", "send version:\n%s", msg);
 
-	if (SSL_write(ssl, msg, strlen(msg)) == -1) {
+	if (hybrid_ssl_write(ssl, msg, strlen(msg)) == -1) {
 
 		hybrid_debug_error("stream", "send initial jabber request failed");
+
+		return FALSE;
+	}
+
+	return FALSE;
+}
+
+static void
+xmpp_stream_performtls(XmppStream *stream)
+{
+
+	g_return_if_fail(stream != NULL);
+
+	if (!(stream->ssl = hybrid_ssl_connect_with_fd(stream->sk,
+					(ssl_callback)tls_conn_cb, stream))) {
+
+		hybrid_account_error_reason(stream->account, 
+				_("TLS hand-shake failed."));
 
 		return;
 	}
