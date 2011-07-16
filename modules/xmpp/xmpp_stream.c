@@ -1,4 +1,10 @@
+#include "util.h"
+#include "connect.h"
+
 #include "xmpp_stream.h"
+
+static gchar *generate_starttls_body(XmppStream *stream);
+static gchar *create_initiate_stream(XmppStream *xs);
 
 XmppStream*
 xmpp_stream_create(void)
@@ -19,4 +25,111 @@ xmpp_stream_destroy(XmppStream *stream)
 	if (stream) {
 		g_free(stream);
 	}
+}
+
+/**
+ * Send the starttls request:
+ * <starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>
+ */
+static void
+xmpp_stream_starttls(XmppStream *stream)
+{
+	gchar *body;
+
+	g_return_if_fail(stream != NULL);
+
+	body = generate_starttls_body(stream);
+
+	if (send(stream->sk, body, strlen(body), 0) == -1) {
+
+		hybrid_debug_error("stream", "start tls error.");
+
+		return;
+	}
+
+	g_free(body);
+}
+
+static void
+xmpp_stream_performtls(XmppStream *stream)
+{
+	const gchar *msg;
+	SSL *ssl;
+
+	g_return_if_fail(stream != NULL);
+
+	if (!(ssl = hybrid_ssl_shakehand(stream->sk))) {
+
+		hybrid_debug_error("stream", "TLS shake hand error.");
+
+		return;
+	}
+
+	/* send version. */
+	msg = create_initiate_stream(stream);
+
+	stream->ssl = ssl;
+
+	hybrid_debug_info("stream", "send version:\n%s", msg);
+
+	if (SSL_write(ssl, msg, strlen(msg)) == -1) {
+
+		hybrid_debug_error("stream", "send initial jabber request failed");
+
+		return;
+	}
+}
+
+void
+xmpp_stream_process(XmppStream *stream, xmlnode *node)
+{
+	printf("### %s\n", node->name);
+
+	if (g_strcmp0(node->name, "features") == 0) {
+		xmpp_stream_starttls(stream);
+	} else if (g_strcmp0(node->name, "proceed") == 0) {
+		xmpp_stream_performtls(stream);
+	}
+}
+
+static gchar*
+generate_starttls_body(XmppStream *stream)
+{
+	xmlnode *node;
+	gchar *body;
+
+	node = xmlnode_create("starttls");
+	xmlnode_new_namespace(node, NULL, "urn:ietf:params:xml:ns:xmpp-tls");
+
+	body = xmlnode_to_string(node);
+
+	xmlnode_free(node);
+
+	return body;
+}
+
+static gchar*
+create_initiate_stream(XmppStream *xs)
+{
+	xmlnode *node;
+	gchar *version;
+	gchar *res;
+
+	node = xmlnode_create("stream:stream");
+
+	xmlnode_new_namespace(node, NULL, "jabber:client");
+	xmlnode_new_namespace(node, "stream", "http://etherx.jabber.org/streams");
+
+	version = g_strdup_printf("%d.%d", xs->major_version, xs->miner_version);
+
+	xmlnode_new_prop(node, "version", version);
+	xmlnode_new_prop(node, "to", "gmail.com");
+
+	g_free(version);
+
+	res = xmlnode_to_string(node);
+
+	xmlnode_free(node);
+
+	return res;
 }

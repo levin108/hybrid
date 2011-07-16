@@ -3,6 +3,7 @@
 #include <glib.h>
 #include <libxml/parser.h>
 #include "xmlnode.h"
+#include "connect.h"
 
 typedef struct _XmppStream XmppStream;
 
@@ -13,8 +14,9 @@ struct _XmppStream {
 	gint major_version; /* default 1 */
 	gint miner_version; /* default 0 */
 
-
 	xmlnode *node;
+
+	SSL *ssl;
 
 	xmlParserCtxt *xml_ctxt;
 };
@@ -36,6 +38,14 @@ XmppStream *xmpp_stream_create(void);
  * @param steam The stream to destroy.
  */
 void xmpp_stream_destroy(XmppStream *stream);
+
+/**
+ * Process a xml packet.
+ *
+ * @param stream The xmpp stream context.
+ * @param node   The root node of the xml packet.
+ */
+void xmpp_stream_process(XmppStream *stream, xmlnode *node);
 
 #ifdef __cplusplus
 }
