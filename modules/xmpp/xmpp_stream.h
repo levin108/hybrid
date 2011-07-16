@@ -2,14 +2,19 @@
 #define HYBRID_XMPP_STREAM_H
 #include <glib.h>
 #include <libxml/parser.h>
+#include "xmlnode.h"
 
 typedef struct _XmppStream XmppStream;
 
 struct _XmppStream {
 	gint sk;  /**< the socket descriptor. */
 
+	gchar *stream_id;
 	gint major_version; /* default 1 */
 	gint miner_version; /* default 0 */
+
+
+	xmlnode *node;
 
 	xmlParserCtxt *xml_ctxt;
 };
