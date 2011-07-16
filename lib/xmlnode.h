@@ -10,6 +10,7 @@ struct _xmlnode {
 	xmlDoc  *doc;
 	gint is_root;
 	gchar *name;
+	gchar *prefix;
 	xmlnode *parent;
 	xmlnode *child;
 	xmlnode *next;
