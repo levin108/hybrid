@@ -218,6 +218,38 @@ xmlnode_set_content(xmlnode *node, const gchar *content)
 	xmlNodeSetContent(node->node, BAD_CAST content);
 }
 
+void
+xmlnode_set_name(xmlnode *node, const gchar *name)
+{
+	g_return_if_fail(node != NULL);
+
+	if (node->name) {
+		g_free(node->name);
+	}
+
+	node->name = g_strdup(name);
+
+	xmlNodeSetName(node->node, (xmlChar *)name);
+}
+
+void
+xmlnode_set_prefix(xmlnode *node, const gchar *prefix)
+{
+	gchar *value;
+
+	g_return_if_fail(node != NULL);
+
+	if (!prefix) {
+		return;
+	}
+
+	value = g_strdup_printf("%s:%s", prefix, node->name);
+	
+	xmlnode_set_name(node, value);
+
+	g_free(value);
+}
+
 xmlnode*
 xmlnode_new_child(xmlnode *node, const gchar *childname)
 {
