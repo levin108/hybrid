@@ -58,6 +58,8 @@ parse_element_start(void *user_data,
 		stream->node = xmlnode_new_child(stream->node, (gchar *)element_name);
 	}
 
+	xmlnode_set_prefix(stream->node, (gchar *)prefix);
+
 	for (i = 0; i < nb_attributes * 5; i += 5) {
 
 		gint value_size;
@@ -97,7 +99,9 @@ parse_element_end(void *user_data, const xmlChar *element_name,
 	}
 
 	if (g_strcmp0(stream->node->name, (gchar *)element_name)) {
+
 		hybrid_debug_error("xmpp", "invalid end element.");
+
 		return;
 	}
 
@@ -106,10 +110,13 @@ parse_element_end(void *user_data, const xmlChar *element_name,
 
 	} else {
 		xml_string = xmlnode_to_string(stream->node);
+		g_print("%s\n", xml_string);
+
+		//xmpp_process_packet(stream, stream->node);
+
 		xmlnode_free(stream->node);
 		stream->node = NULL;
 
-		g_print("%s\n", xml_string);
 
 		g_free(xml_string);
 	}
