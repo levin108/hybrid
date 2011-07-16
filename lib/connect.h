@@ -29,8 +29,8 @@ struct _HybridSslConnection {
 	ssl_callback recv_cb;
 	gpointer recv_data;
 
-	SSL* ssl;
-	SSL_CTX* ssl_ctx;
+	SSL *ssl;
+	SSL_CTX *ssl_ctx;
 };
 
 #ifdef __cplusplus
@@ -56,10 +56,10 @@ HybridConnection* hybrid_proxy_connect(const gchar *hostname, gint port,
 /**
  * Make a SSL connection to the specified host and port.
  *
- * @param hostname Hostname of the destination host.
- * @param port Port of the destination host.
- * @param func Callback function to call when connection 
- *        is established.
+ * @param hostname  Hostname of the destination host.
+ * @param port      Port of the destination host.
+ * @param func      Callback function to call when connection 
+ *                  is established.
  * @param user_data User-specified data.
  *
  * @return HybridSslConncetion if success, which can be used to cancel
@@ -67,6 +67,21 @@ HybridConnection* hybrid_proxy_connect(const gchar *hostname, gint port,
  *         NULL if there was an error.
  */
 HybridSslConnection* hybrid_ssl_connect(const gchar *hostname, gint port,
+		ssl_callback func, gpointer user_data);
+
+/**
+ * Make a SSL hand-shake on the established tcp connection.
+ *
+ * @param sk        Socket file discriptor of the established tcp connection.
+ * @param func      Callback function to call when connection 
+ *                  is established.
+ * @param user_data User-specified data.
+ *
+ * @return HybridSslConncetion if success, which can be used to cancel
+ *         the pending connection, destroy it if don't use or after use.
+ *         NULL if there was an error.
+ */
+HybridSslConnection* hybrid_ssl_connect_with_fd(gint sk,
 		ssl_callback func, gpointer user_data);
 
 /**
