@@ -1,6 +1,7 @@
 #include "util.h"
 #include "connect.h"
 
+#include "xmpp_util.h"
 #include "xmpp_stream.h"
 
 static gchar *generate_starttls_body(XmppStream *stream);
@@ -50,27 +51,46 @@ xmpp_stream_starttls(XmppStream *stream)
 	g_free(body);
 }
 
+/**
+ * Ok, TLS handshake success, we will continue the authtication
+ * through the established TLS channel.
+ */
 static gboolean
 tls_conn_cb(HybridSslConnection *ssl, XmppStream *stream)
 {
 	gchar *msg;
-	/* send version. */
+
 	msg = create_initiate_stream(stream);
 
-	stream->ssl = ssl;
+	/*
+	 * Reset the stream id, we will start a new stream through 
+	 * the TLS channel, whether stream id is NULL is the flag 
+	 * of a new stream.
+	 */
+	g_free(stream->stream_id);
+	stream->stream_id = NULL;
 
-	hybrid_debug_info("stream", "send version:\n%s", msg);
+	hybrid_debug_info("stream", "send start stream request:\n%s", msg);
 
 	if (hybrid_ssl_write(ssl, msg, strlen(msg)) == -1) {
 
-		hybrid_debug_error("stream", "send initial jabber request failed");
+		hybrid_account_error_reason(stream->account,
+				"send initial jabber request failed");
+		g_free(msg);
 
 		return FALSE;
 	}
 
+	g_free(msg);
+
 	return FALSE;
 }
 
+/**
+ * Start the TLS handshake, if success, jump to the 
+ * tls_conn_cb() callback function to send the 
+ * stream start request through the TLS channel.
+ */
 static void
 xmpp_stream_performtls(XmppStream *stream)
 {
@@ -90,10 +110,9 @@ xmpp_stream_performtls(XmppStream *stream)
 void
 xmpp_stream_process(XmppStream *stream, xmlnode *node)
 {
-	printf("### %s\n", node->name);
-
 	if (g_strcmp0(node->name, "features") == 0) {
 		xmpp_stream_starttls(stream);
+
 	} else if (g_strcmp0(node->name, "proceed") == 0) {
 		xmpp_stream_performtls(stream);
 	}
@@ -115,8 +134,15 @@ generate_starttls_body(XmppStream *stream)
 	return body;
 }
 
+/**
+ * Create the initiate stream string, we'll get:
+ *
+ * <stream:stream xmlns="jabber:client"
+ * xmlns:stream="http://etherx.jabber.org/streams"
+ * version="1.0" to="gmail.com">
+ */
 static gchar*
-create_initiate_stream(XmppStream *xs)
+create_initiate_stream(XmppStream *stream)
 {
 	xmlnode *node;
 	gchar *version;
@@ -124,18 +150,21 @@ create_initiate_stream(XmppStream *xs)
 
 	node = xmlnode_create("stream:stream");
 
+	xmlnode_new_prop(node, "to", stream->to);
+
 	xmlnode_new_namespace(node, NULL, "jabber:client");
 	xmlnode_new_namespace(node, "stream", "http://etherx.jabber.org/streams");
 
-	version = g_strdup_printf("%d.%d", xs->major_version, xs->miner_version);
+	version = g_strdup_printf("%d.%d",
+				stream->major_version,
+				stream->miner_version);
 
 	xmlnode_new_prop(node, "version", version);
-	xmlnode_new_prop(node, "to", "gmail.com");
 
 	g_free(version);
 
 	res = xmlnode_to_string(node);
-
+	xmpp_strip_end_label(res);
 	xmlnode_free(node);
 
 	return res;

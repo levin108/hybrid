@@ -22,11 +22,12 @@ xmpp_login(HybridAccount *account)
 	XmppStream *stream = xmpp_stream_create();
 
 	stream->account = account;
+	stream->to = g_strdup("gmail.com");
 
 	hybrid_account_set_protocol_data(account, stream);
 
 	hybrid_proxy_connect(jabber_server, 5222,
-			(connect_callback)init_connect, stream);
+			(connect_callback)stream_init, stream);
 
 	return FALSE;
 }

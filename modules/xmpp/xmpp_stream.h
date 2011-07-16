@@ -10,9 +10,10 @@ typedef struct _XmppStream XmppStream;
 struct _XmppStream {
 	gint sk;  /**< the socket descriptor. */
 
+	gchar *to;          /**< server's domain name. */
 	gchar *stream_id;
-	gint major_version; /* default 1 */
-	gint miner_version; /* default 0 */
+	gint major_version; /**< default 1 */
+	gint miner_version; /**< default 0 */
 
 	xmlnode *node;
 

@@ -3,33 +3,14 @@
 #include "eventloop.h"
 #include "xmlnode.h"
 
+#include "xmpp_util.h"
 #include "xmpp_login.h"
 #include "xmpp_parser.h"
 
 static gchar *create_initiate_stream(XmppStream *xs);
 
-/**
- * Strip the '/' from a label,make it an unclosed xml label.
- */
-static void
-strip_end_label(gchar *xml_string)
-{
-	gint length;
-
-	g_return_if_fail(xml_string != NULL);
-
-	if ((length = strlen(xml_string)) < 2) {
-		return;
-	}
-
-	if (xml_string[length - 1] == '>' && xml_string[length - 2] == '/') {
-		xml_string[length - 2] = '>';
-		xml_string[length - 1] = '\0';
-	}
-}
-
 static gboolean
-init_stream_cb(gint sk, XmppStream *stream)
+stream_recv_cb(gint sk, XmppStream *stream)
 {
 	gchar buf[BUF_LENGTH];
 	gint n;
@@ -42,6 +23,7 @@ init_stream_cb(gint sk, XmppStream *stream)
 
 			return FALSE;
 		}
+
 	} else {
 		if ((n = hybrid_ssl_read(stream->ssl, buf, sizeof(buf) - 1)) == -1) {
 			
@@ -54,16 +36,14 @@ init_stream_cb(gint sk, XmppStream *stream)
 	buf[n] = '\0';
 
 	if (n > 0) {
-		//printf("%s", buf);
-		//fflush(stdout);
-		printf("%s\n", buf);
 		xmpp_process_pushed(stream, buf, n);
 	} 
+
 	return TRUE;
 }
 
 gboolean
-init_connect(gint sk, XmppStream *stream)
+stream_init(gint sk, XmppStream *stream)
 {
 	gchar *msg;
 
@@ -74,7 +54,8 @@ init_connect(gint sk, XmppStream *stream)
 
 	if (send(sk, msg, strlen(msg), 0) == -1) {
 
-		hybrid_debug_error("xmpp", "send initial jabber request failed");
+		hybrid_account_error_reason(stream->account,
+				"send initial jabber request failed");
 
 		return FALSE;
 	}
@@ -82,14 +63,12 @@ init_connect(gint sk, XmppStream *stream)
 	/* send initiate stream request. */
 	msg = create_initiate_stream(stream);
 
-	strip_end_label(msg);
-
 	hybrid_debug_info("xmpp", "send initite jabber stream:\n%s", msg);
 
 	if (send(sk, msg, strlen(msg), 0) == -1) {
 
-		hybrid_debug_error("xmpp", "send initial jabber request failed");
-
+		hybrid_account_error_reason(stream->account,
+				"send initial jabber request failed");
 		g_free(msg);
 
 		return FALSE;
@@ -97,16 +76,21 @@ init_connect(gint sk, XmppStream *stream)
 
 	g_free(msg);
 
-	hybrid_event_add(sk, HYBRID_EVENT_READ, (input_func)init_stream_cb, stream);
+	hybrid_event_add(sk, HYBRID_EVENT_READ,
+			(input_func)stream_recv_cb, stream);
 
 	return FALSE;
 }
 
 /**
- * Create the initiate stream string.
+ * Create the initiate stream string, we'll get:
+ *
+ * <stream:stream xmlns="jabber:client"
+ * xmlns:stream="http://etherx.jabber.org/streams"
+ * version="1.0" to="gmail.com">
  */
 static gchar*
-create_initiate_stream(XmppStream *xs)
+create_initiate_stream(XmppStream *stream)
 {
 	xmlnode *node;
 	gchar *version;
@@ -117,7 +101,9 @@ create_initiate_stream(XmppStream *xs)
 	xmlnode_new_namespace(node, NULL, "jabber:client");
 	xmlnode_new_namespace(node, "stream", "http://etherx.jabber.org/streams");
 
-	version = g_strdup_printf("%d.%d", xs->major_version, xs->miner_version);
+	version = g_strdup_printf("%d.%d",
+				stream->major_version,
+				stream->miner_version);
 
 	xmlnode_new_prop(node, "version", version);
 	xmlnode_new_prop(node, "to", "gmail.com");
@@ -125,7 +111,7 @@ create_initiate_stream(XmppStream *xs)
 	g_free(version);
 
 	res = xmlnode_to_string(node);
-
+	xmpp_strip_end_label(res);
 	xmlnode_free(node);
 
 	return res;

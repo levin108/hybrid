@@ -7,12 +7,12 @@ extern "C" {
 #endif
 
 /**
- * Callback function of the connect event.
+ * Initialize the jabber stream.
  *
- * @param sk The socket destriptor.
- * @param xs The xmpp stream.
+ * @param sk     The socket destriptor.
+ * @param stream The xmpp stream.
  */
-gboolean init_connect(gint sk, XmppStream *xs);
+gboolean stream_init(gint sk, XmppStream *stream);
 
 #ifdef __cplusplus
 }
