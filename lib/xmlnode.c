@@ -243,9 +243,15 @@ xmlnode_set_prefix(xmlnode *node, const gchar *prefix)
 		return;
 	}
 
+	if (node->prefix) {
+		g_free(node->prefix);
+	}
+
+	node->prefix = g_strdup(prefix);
+
 	value = g_strdup_printf("%s:%s", prefix, node->name);
 	
-	xmlnode_set_name(node, value);
+	xmlNodeSetName(node->node, (xmlChar *)value);
 
 	g_free(value);
 }
