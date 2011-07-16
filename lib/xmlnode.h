@@ -122,6 +122,22 @@ gchar *xmlnode_content(xmlnode *node);
 void xmlnode_set_content(xmlnode *node, const gchar *content);
 
 /**
+ * Set the name of a node.
+ *
+ * @param node The node.
+ * @param name The name of the node.
+ */
+void xmlnode_set_name(xmlnode *node, const gchar *name);
+
+/**
+ * Set the prefix name of the node.
+ *
+ * @param node   The node.
+ * @param prefix The prefix name of the node.
+ */
+void xmlnode_set_prefix(xmlnode *node, const gchar *prefix);
+
+/**
  * Create a new child node for the current node.
  *
  * @param node. The parent node of the node to be created.
