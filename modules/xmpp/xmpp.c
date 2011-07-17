@@ -12,22 +12,24 @@
 #include "tooltip.h"
 
 #include "xmpp_stream.h"
-#include "xmpp_login.h"
 
 const gchar *jabber_server = "talk.l.google.com";
 
 static gboolean
 xmpp_login(HybridAccount *account)
 {
-	XmppStream *stream = xmpp_stream_create();
+	XmppAccount *ac;
+	XmppStream *stream;
 
-	stream->account = account;
-	stream->to = g_strdup("gmail.com");
+	ac = xmpp_account_create(account, account->username,
+						account->password, "gmail.com");
+	
+	stream = xmpp_stream_create(ac);
 
 	hybrid_account_set_protocol_data(account, stream);
 
 	hybrid_proxy_connect(jabber_server, 5222,
-			(connect_callback)stream_init, stream);
+			(connect_callback)xmpp_stream_init, stream);
 
 	return FALSE;
 }
