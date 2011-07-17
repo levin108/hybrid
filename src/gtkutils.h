@@ -157,8 +157,6 @@ HybridConfirm *hybrid_confirm_show(const gchar *title, const gchar *text,
 HybridMessageBox *hybrid_message_box_show(HybridMessageType type,
 										const gchar *format, ...);
 
-gchar *hybrid_sha1(const gchar *in, gint size);
-
 #ifdef __cplusplus
 }
 #endif

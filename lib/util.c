@@ -1,4 +1,9 @@
 #include "util.h"
+#include <openssl/sha.h>
+#include <openssl/hmac.h>
+#include <openssl/evp.h>
+#include <openssl/bio.h>
+#include <openssl/buffer.h>
 
 HybridStack*
 hybrid_stack_create()
@@ -268,4 +273,48 @@ strip_finish:
 	g_free(stack);
 
 	return temp;
+}
+
+gchar*
+hybrid_sha1(const gchar *in, gint size)
+{
+	SHA_CTX s;
+	guchar hash[20];
+	gchar *res;
+	gint i;
+  
+	SHA1_Init(&s);
+	SHA1_Update(&s, in, size);
+	SHA1_Final(hash, &s);
+
+	res = g_malloc0(41);
+  
+	for (i=0; i < 20; i++) {
+		g_snprintf(res + i * 2, 41, "%.2x", (gint)hash[i]);
+	}
+
+	return res;
+}
+
+gchar*
+hybrid_base64(const guchar *input, gint size)
+{
+  BIO *bmem;
+  BIO *b64;
+  BUF_MEM *bptr;
+  gchar *buff;
+
+  b64 = BIO_new(BIO_f_base64());
+  bmem = BIO_new(BIO_s_mem());
+  b64 = BIO_push(b64, bmem);
+  BIO_write(b64, input, size);
+  BIO_flush(b64);
+  BIO_get_mem_ptr(b64, &bptr);
+
+  buff = (gchar *)g_malloc0(bptr->length);
+  memcpy(buff, bptr->data, bptr->length - 1);
+
+  BIO_free_all(b64);
+
+  return buff;
 }

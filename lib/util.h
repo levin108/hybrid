@@ -91,6 +91,27 @@ gboolean hybrid_stack_empty(HybridStack *stack);
  *         with g_free() when no longer needed.
  */
 gchar *hybrid_strip_html(const gchar *html);
+
+/**
+ * Calculate SHA1 for the input string.
+ *
+ * @param in   The input string.
+ * @param size Size of the input string.
+ *
+ * @param The SHA1 result.
+ */
+gchar *hybrid_sha1(const gchar *in, gint size);
+
+/**
+ * Base64 encode the input string.
+ *
+ * @param input The input string.
+ * @param size  Size of the input string.
+ *
+ * @param Base64 encode result.
+ */
+gchar *hybrid_base64(const guchar *input, gint size);
+
 #ifdef __cplusplus
 }
 #endif

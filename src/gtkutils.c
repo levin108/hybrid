@@ -1,4 +1,3 @@
-#include <openssl/sha.h>
 #include "gtkutils.h"
 #include "account.h"
 #include "debug.h"
@@ -540,24 +539,3 @@ hybrid_message_box_show(HybridMessageType type,
 
 /* ================== Message Box End ======================= */
 
-
-gchar*
-hybrid_sha1(const gchar *in, gint size)
-{
-	SHA_CTX s;
-	guchar hash[20];
-	gchar *res;
-	gint i;
-  
-	SHA1_Init(&s);
-	SHA1_Update(&s, in, size);
-	SHA1_Final(hash, &s);
-
-	res = g_malloc0(41);
-  
-	for (i=0; i < 20; i++) {
-		g_snprintf(res + i * 2, 41, "%.2x", (gint)hash[i]);
-	}
-
-	return res;
-}
