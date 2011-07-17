@@ -55,10 +55,74 @@ xmpp_stream_starttls(XmppStream *stream)
 	g_free(body);
 }
 
+/**
+ * Start sasl authentication.
+ */
 static void
 xmpp_stream_startsasl(XmppStream *stream)
 {
+	guchar *auth;
+	gchar *auth_encoded;
+	gchar *xml_string;
+	gint username_len;
+	gint password_len;
+
+	xmlnode *node;
+
+	g_return_if_fail(stream != NULL);
+
 	hybrid_debug_info("xmpp", "start sasl authentication.");
+
+	/*
+	 * construct the authentication string to be base64 encoded,
+	 * which is in form of '\0 + username + \0 + password '
+	 */
+	username_len = strlen(stream->account->username);
+	password_len = strlen(stream->account->password);
+
+	auth = g_malloc0(username_len + password_len + 2);
+
+	auth[0] = '\0';
+	memcpy(auth + 1, stream->account->username, username_len);
+
+	auth[username_len + 1] = '\0';
+	memcpy(auth + 2 + username_len, stream->account->password,
+			password_len);
+
+
+	auth_encoded = hybrid_base64(auth, username_len + password_len + 2);
+
+	g_free(auth);
+
+	/* construct the xml string, which is in form of:
+	 *
+	 * <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" 
+	 * mechanism="PLAIN">encoded sasl string</auth> 
+	 */
+	node = xmlnode_create("auth");
+
+	xmlnode_new_namespace(node, NULL, SASL_NAMESPACE);
+	xmlnode_new_prop(node, "mechanism", "PLAIN");
+	xmlnode_set_content(node, auth_encoded);
+
+	g_free(auth_encoded);
+	
+	xml_string = xmlnode_to_string(node);
+	xmlnode_free(node);
+
+	hybrid_debug_info("xmpp", "sasl send:\n%s", xml_string);
+
+	if (hybrid_ssl_write(stream->ssl, xml_string,
+				strlen(xml_string)) == -1) {
+
+		hybrid_account_error_reason(stream->account->account,
+				"SASL authentication error.");
+
+		return;
+	}
+
+	g_free(xml_string);
+
 }
 
 static gboolean
