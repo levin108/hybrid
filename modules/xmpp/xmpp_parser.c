@@ -110,9 +110,10 @@ parse_element_end(void *user_data, const xmlChar *element_name,
 
 	} else {
 		xml_string = xmlnode_to_string(stream->node);
-		g_print("%s\n", xml_string);
 
-		//xmpp_process_packet(stream, stream->node);
+		hybrid_debug_info("xmpp", "recv:\n%s", xml_string);
+
+		xmpp_stream_process(stream, stream->node);
 
 		xmlnode_free(stream->node);
 		stream->node = NULL;

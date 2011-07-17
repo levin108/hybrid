@@ -223,6 +223,86 @@ hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 	return conn;
 }
 
+HybridSslConnection*
+hybrid_ssl_connect_with_fd(gint sk,	ssl_callback func, gpointer user_data)
+{
+	gint l;
+	SSL *ssl;
+	SSL_CTX *ssl_ctx;
+	HybridSslConnection *ssl_conn;
+
+	SSL_load_error_strings();
+	SSL_library_init();
+
+	if (!(ssl_ctx = SSL_CTX_new(SSLv3_client_method()))) {
+
+		hybrid_debug_error("ssl", "initialize SSL CTX: %s",
+				ERR_reason_error_string(ERR_get_error()));
+
+		return NULL;
+	}
+
+	if (!(ssl = SSL_new(ssl_ctx))) {
+
+		hybrid_debug_error("ssl", "create SSl:%s",
+				ERR_reason_error_string(ERR_get_error()));
+
+		return NULL;
+	}
+
+	if (!SSL_set_fd(ssl, sk)) {
+
+		hybrid_debug_error("ssl", "add ssl to tcp socket:%s", 
+				ERR_reason_error_string(ERR_get_error()));
+		return NULL;
+	}
+
+	SSL_set_connect_state(ssl);
+
+	RAND_poll();
+
+	while (RAND_status() == 0) {
+		unsigned short rand_ret = rand() % 65536;
+		RAND_seed(&rand_ret, sizeof(rand_ret));
+	} 
+
+	for ( ;; ) {
+		l = SSL_connect(ssl);
+
+		switch (SSL_get_error(ssl, l)) { 
+			case SSL_ERROR_NONE:
+				goto ssl_conn_sk_ok;
+			case SSL_ERROR_WANT_WRITE:
+			case SSL_ERROR_WANT_READ:
+				continue;
+			case SSL_ERROR_SYSCALL:
+			case SSL_ERROR_WANT_X509_LOOKUP:
+			case SSL_ERROR_ZERO_RETURN:
+			case SSL_ERROR_SSL:
+			default:
+				hybrid_debug_error("ssl", "ssl hand-shake error:%s",
+					ERR_reason_error_string(ERR_get_error()));
+				return NULL;
+		}
+	}
+
+ssl_conn_sk_ok:
+
+	ssl_conn = g_new0(HybridSslConnection, 1);
+
+	ssl_conn->sk = sk;
+	ssl_conn->ssl = ssl;
+	ssl_conn->ssl_ctx = ssl_ctx;
+	ssl_conn->conn_cb = func;
+	ssl_conn->conn_data = user_data;
+
+	if (func) {
+		func(ssl_conn, user_data);
+	}
+
+	return ssl_conn;
+}
+
 gint
 hybrid_ssl_write(HybridSslConnection *ssl, const gchar *buf, gint len)
 {
