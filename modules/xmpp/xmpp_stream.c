@@ -7,6 +7,7 @@
 
 static gchar *generate_starttls_body(XmppStream *stream);
 static gchar *create_initiate_stream(XmppStream *xs);
+static void xmpp_stream_get_roster(XmppStream *stream);
 
 XmppStream*
 xmpp_stream_create(XmppAccount *account)
@@ -22,6 +23,54 @@ xmpp_stream_create(XmppAccount *account)
 	stream->miner_version = 0;
 
 	return stream;
+}
+
+void
+xmpp_stream_set_id(XmppStream *stream, const gchar *id)
+{
+	g_return_if_fail(stream != NULL);
+
+	g_free(stream->stream_id);
+
+	stream->stream_id = g_strdup(id);
+}
+
+void
+xmpp_stream_set_jid(XmppStream *stream, const gchar *jid)
+{
+	g_return_if_fail(stream != NULL);
+
+	g_free(stream->jid);
+
+	stream->jid = g_strdup(jid);
+}
+
+void
+xmpp_stream_iqid_increase(XmppStream *stream)
+{
+	g_return_if_fail(stream != NULL);
+
+	stream->current_iq_id ++;
+}
+
+gchar*
+xmpp_stream_get_iqid(XmppStream *stream)
+{
+	gchar *id;
+
+	g_return_val_if_fail(stream != NULL, NULL);
+	
+	id = g_strdup_printf("%d", stream->current_iq_id);
+
+	return id;
+}
+
+void
+xmpp_stream_set_state(XmppStream *stream, gint state)
+{
+	g_return_if_fail(stream != NULL);
+
+	stream->state = state;
 }
 
 void
@@ -42,6 +91,8 @@ xmpp_stream_starttls(XmppStream *stream)
 	gchar *body;
 
 	g_return_if_fail(stream != NULL);
+
+	xmpp_stream_set_state(stream, XMPP_STATE_TLS_AUTHENTICATING);
 
 	body = generate_starttls_body(stream);
 
@@ -73,6 +124,7 @@ xmpp_stream_startsasl(XmppStream *stream)
 
 	hybrid_debug_info("xmpp", "start sasl authentication.");
 
+	xmpp_stream_set_state(stream, XMPP_STATE_SASL_AUTHENTICATING);
 	/*
 	 * construct the authentication string to be base64 encoded,
 	 * which is in form of '\0 + username + \0 + password '
@@ -143,9 +195,9 @@ stream_recv_cb(gint sk, XmppStream *stream)
 	} else {
 		if ((n = hybrid_ssl_read(stream->ssl, buf, sizeof(buf) - 1)) == -1) {
 			
-			hybrid_debug_error("xmpp", "init stream error.");
+			hybrid_debug_error("xmpp", "init stream error, %s", strerror(errno));
 
-			return FALSE;
+			return TRUE;
 		}
 	}
 
@@ -214,8 +266,8 @@ tls_conn_cb(HybridSslConnection *ssl, XmppStream *stream)
 	 * the TLS channel, whether stream id is NULL is the flag 
 	 * of a new stream.
 	 */
-	g_free(stream->stream_id);
-	stream->stream_id = NULL;
+	xmpp_stream_set_id(stream, NULL);
+	xmpp_stream_set_state(stream, XMPP_STATE_TLS_STREAM_STARTING);
 
 	hybrid_debug_info("stream", "send start stream request:\n%s", msg);
 
@@ -255,6 +307,175 @@ xmpp_stream_performtls(XmppStream *stream)
 }
 
 /**
+ * Callback function for the start session request to process the response.
+ */
+static gboolean
+start_session_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	xmpp_stream_get_roster(stream);
+	
+	return TRUE;
+}
+
+/**
+ * Callback function for the resource bind request to process the response.
+ */
+static gboolean
+resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	gchar *type;
+	gchar *jid;
+	xmlnode *node;
+
+	type = xmlnode_prop(root, "type");
+
+	if (g_strcmp0(type, "result")) {
+		hybrid_account_error_reason(stream->account->account,
+				_("resource bind error."));
+		return FALSE;
+	}
+
+	if (!(node = xmlnode_find(root, "jid"))) {
+		hybrid_account_error_reason(stream->account->account,
+				_("resource bind error: no jabber id returned."));
+		return FALSE;
+	}
+
+	jid = xmlnode_content(node);
+	xmpp_stream_set_jid(stream, jid);
+	g_free(jid);
+
+	/* request to start a session. */
+	IqTransaction *trans;
+	gchar *iqid;
+	gchar *xml_string;
+
+	xmpp_stream_iqid_increase(stream);
+
+	trans = iq_transaction_create(stream->current_iq_id);
+	iq_transaction_set_callback(trans, start_session_cb, NULL);
+	iq_transaction_add(stream, trans);
+
+	root = xmlnode_create("iq");
+
+	iqid = xmpp_stream_get_iqid(stream);
+	xmlnode_new_prop(root, "type", "set");
+	xmlnode_new_prop(root, "id", iqid);
+	g_free(iqid);
+
+	node = xmlnode_new_child(root, "session");
+	xmlnode_new_namespace(node, NULL, SESSION_NAMESPACE);
+
+	xml_string = xmlnode_to_string(root);
+
+	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
+		hybrid_account_error_reason(stream->account->account,
+				_("start session error."));
+
+		return TRUE;
+	}
+
+	return TRUE;
+}
+
+/**
+ * Client binds a resource.
+ */
+static void
+xmpp_stream_bind(XmppStream *stream)
+{
+	xmlnode *root;
+	xmlnode *node;
+	IqTransaction *trans;
+	gchar *iq_id;
+	gchar *xml_string;
+
+	g_return_if_fail(stream != NULL);
+
+	xmpp_stream_iqid_increase(stream);
+
+	root = xmlnode_create("iq");
+
+	xmlnode_new_prop(root, "type", "set");
+
+	iq_id = xmpp_stream_get_iqid(stream);
+	xmlnode_new_prop(root, "id", iq_id);
+	g_free(iq_id);
+
+	trans = iq_transaction_create(stream->current_iq_id);
+	iq_transaction_set_callback(trans, resource_bind_cb, NULL);
+	iq_transaction_add(stream, trans);
+
+	node = xmlnode_new_child(root, "bind");
+	xmlnode_new_namespace(node, NULL, BIND_NAMESPACE);
+
+	xml_string = xmlnode_to_string(root);
+	xmlnode_free(root);
+
+	hybrid_debug_info("xmpp", "binds a resource,send:\n%s", xml_string);
+
+	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
+
+		hybrid_account_error_reason(stream->account->account,
+				"binds a resource error.");
+
+		g_free(xml_string);
+
+		return;
+	}
+	
+	g_free(xml_string);
+}
+
+/**
+ * Request the roster from the server.
+ */
+static void
+xmpp_stream_get_roster(XmppStream *stream)
+{
+	xmlnode *root;
+	xmlnode *node;
+	gchar *iqid;
+	gchar *xml_string;
+
+	g_return_if_fail(stream != NULL);
+
+	xmpp_stream_iqid_increase(stream);
+
+	iqid = xmpp_stream_get_iqid(stream);
+
+	root = xmlnode_create("iq");
+
+	xmlnode_new_prop(root, "from", stream->jid);
+	xmlnode_new_prop(root, "id", iqid);
+	xmlnode_new_prop(root, "type", "get");
+
+	g_free(iqid);
+
+	node = xmlnode_new_child(root, "query");
+	xmlnode_new_namespace(node, NULL, ROSTER_NAMESPACE);
+	//xmlnode_new_namespace(node, "gr", NS_GOOGLE_ROSTER);
+	//xmlnode_new_prop(node, "gr:ext", "2");
+
+	xml_string = xmlnode_to_string(root);
+	xmlnode_free(root);
+
+	hybrid_debug_info("xmpp", "binds a resource,send:\n%s", xml_string);
+
+	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
+
+		hybrid_account_error_reason(stream->account->account,
+				"binds a resource error.");
+
+		g_free(xml_string);
+
+		return;
+	}
+
+	g_free(xml_string);
+}
+
+/**
  * Process the <steam:features> messages.
  */
 static void
@@ -269,10 +490,91 @@ xmpp_process_feature(XmppStream *stream, xmlnode *root)
 		xmpp_stream_starttls(stream);
 
 	} else {
-		xmpp_stream_startsasl(stream);
+
+		if (stream->state == XMPP_STATE_SASL_STREAM_STARTING) {
+			/*
+			 * After starting a new stream on the sasl layer, server request
+			 * client to bind resource and start a new session.
+			 */
+			if ((node = xmlnode_find(root, "bind"))) {
+				xmpp_stream_bind(stream);
+			}
+
+			if ((node = xmlnode_find(root, "session"))) {
+
+			}
+
+
+		} else {
+			xmpp_stream_startsasl(stream);
+		}
+	}
+}
+
+/**
+ * Start a new stream on the sasl layer.
+ */
+static void
+xmpp_stream_new_on_sasl(XmppStream *stream)
+{
+	gchar *msg;
+
+	g_return_if_fail(stream != NULL);
+
+	msg = create_initiate_stream(stream);
+
+	xmpp_stream_set_id(stream, NULL);
+	xmpp_stream_set_state(stream, XMPP_STATE_SASL_STREAM_STARTING);
+
+	hybrid_debug_info("xmpp", "new stream on sasl,send:\n%s", msg);
+
+	if (hybrid_ssl_write(stream->ssl, msg, strlen(msg)) == -1) {
+		
+		hybrid_account_error_reason(stream->account->account,
+				"start new stream on sasl layer error.");
+		return;
 	}
 
+	g_free(msg);
+}
 
+/**
+ * Process the iq response.
+ */
+static void
+xmpp_stream_process_iq(XmppStream *stream, xmlnode *node)
+{
+	gchar *id;
+	gint id_int;
+	GSList *pos;
+	IqTransaction *trans;
+
+	g_return_if_fail(stream != NULL);
+	g_return_if_fail(node != NULL);
+
+	if (!xmlnode_has_prop(node, "type") ||
+		!xmlnode_has_prop(node, "id")) {
+		hybrid_debug_error("xmpp", "invalid iq response.");
+
+		return;
+	}
+
+	id = xmlnode_prop(node, "id");
+	id_int = atoi(id);
+	g_free(id);
+
+	for (pos = stream->pending_trans; pos; pos = pos->next) {
+		trans = (IqTransaction*)pos->data;
+
+		if (trans->iq_id == id_int) {
+
+			if (trans->callback) {
+				trans->callback(stream, node, trans->user_data);
+			}
+
+			iq_transaction_remove(stream, trans);
+		}
+	}
 }
 
 void
@@ -286,7 +588,21 @@ xmpp_stream_process(XmppStream *stream, xmlnode *node)
 
 	} else if (g_strcmp0(node->name, "proceed") == 0) {
 
-		xmpp_stream_performtls(stream);
+		if (stream->state == XMPP_STATE_TLS_AUTHENTICATING) {
+			xmpp_stream_performtls(stream);
+
+		}
+
+	} else if (g_strcmp0(node->name, "success") == 0) {
+		
+		if (stream->state == XMPP_STATE_SASL_AUTHENTICATING) {
+
+			xmpp_stream_new_on_sasl(stream);
+		}
+
+	} else if (g_strcmp0(node->name, "iq") == 0) {
+
+		xmpp_stream_process_iq(stream, node);
 	}
 }
 
@@ -341,4 +657,48 @@ create_initiate_stream(XmppStream *stream)
 	xmlnode_free(node);
 
 	return res;
+}
+
+IqTransaction*
+iq_transaction_create(gint iq_id)
+{
+	IqTransaction *trans;
+
+	trans = g_new0(IqTransaction, 1);
+
+	trans->iq_id = iq_id;
+
+	return trans;
+}
+
+void
+iq_transaction_set_callback(IqTransaction *trans, trans_callback callback,
+						gpointer user_data)
+{
+	g_return_if_fail(trans != NULL);
+
+	trans->callback = callback;
+	trans->user_data = user_data;
+}
+
+void
+iq_transaction_add(XmppStream *stream, IqTransaction *trans)
+{
+	g_return_if_fail(stream != NULL);
+
+	stream->pending_trans = g_slist_append(stream->pending_trans, trans);
+}
+
+void
+iq_transaction_remove(XmppStream *stream, IqTransaction *trans)
+{
+	g_return_if_fail(stream != NULL);
+
+	stream->pending_trans = g_slist_remove(stream->pending_trans, trans);
+}
+
+void
+iq_transaction_destroy(IqTransaction *trans)
+{
+	g_free(trans);
 }
