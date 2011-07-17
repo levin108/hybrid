@@ -55,6 +55,12 @@ xmpp_stream_starttls(XmppStream *stream)
 	g_free(body);
 }
 
+static void
+xmpp_stream_startsasl(XmppStream *stream)
+{
+	hybrid_debug_info("xmpp", "start sasl authentication.");
+}
+
 static gboolean
 stream_recv_cb(gint sk, XmppStream *stream)
 {
@@ -184,13 +190,38 @@ xmpp_stream_performtls(XmppStream *stream)
 	}
 }
 
+/**
+ * Process the <steam:features> messages.
+ */
+static void
+xmpp_process_feature(XmppStream *stream, xmlnode *root)
+{
+	xmlnode *node;
+
+	g_return_if_fail(stream != NULL);
+	g_return_if_fail(root != NULL);
+
+	if ((node = xmlnode_find(root, "starttls"))) {
+		xmpp_stream_starttls(stream);
+
+	} else {
+		xmpp_stream_startsasl(stream);
+	}
+
+
+}
+
 void
 xmpp_stream_process(XmppStream *stream, xmlnode *node)
 {
+	g_return_if_fail(stream != NULL);
+	g_return_if_fail(node != NULL);
+
 	if (g_strcmp0(node->name, "features") == 0) {
-		xmpp_stream_starttls(stream);
+		xmpp_process_feature(stream, node);
 
 	} else if (g_strcmp0(node->name, "proceed") == 0) {
+
 		xmpp_stream_performtls(stream);
 	}
 }
@@ -202,7 +233,7 @@ generate_starttls_body(XmppStream *stream)
 	gchar *body;
 
 	node = xmlnode_create("starttls");
-	xmlnode_new_namespace(node, NULL, "urn:ietf:params:xml:ns:xmpp-tls");
+	xmlnode_new_namespace(node, NULL, TLS_NAMESPACE);
 
 	body = xmlnode_to_string(node);
 

@@ -7,6 +7,8 @@
 
 #include "xmpp_account.h"
 
+#define TLS_NAMESPACE "urn:ietf:params:xml:ns:xmpp-tls"
+
 typedef struct _XmppStream XmppStream;
 
 struct _XmppStream {
