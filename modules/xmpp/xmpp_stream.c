@@ -4,6 +4,7 @@
 #include "xmpp_util.h"
 #include "xmpp_stream.h"
 #include "xmpp_parser.h"
+#include "xmpp_buddy.h"
 
 static gchar *generate_starttls_body(XmppStream *stream);
 static gchar *create_initiate_stream(XmppStream *xs);
@@ -428,6 +429,16 @@ xmpp_stream_bind(XmppStream *stream)
 }
 
 /**
+ * Callback function to handle the roster response.
+ */
+static gboolean
+request_roster_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	xmpp_buddy_process_roster(stream, root);
+	return TRUE;
+}
+
+/**
  * Request the roster from the server.
  */
 static void
@@ -437,6 +448,7 @@ xmpp_stream_get_roster(XmppStream *stream)
 	xmlnode *node;
 	gchar *iqid;
 	gchar *xml_string;
+	IqTransaction *trans;
 
 	g_return_if_fail(stream != NULL);
 
@@ -452,10 +464,17 @@ xmpp_stream_get_roster(XmppStream *stream)
 
 	g_free(iqid);
 
+	trans = iq_transaction_create(stream->current_iq_id);
+	iq_transaction_set_callback(trans, request_roster_cb, NULL);
+	iq_transaction_add(stream, trans);
+
+
 	node = xmlnode_new_child(root, "query");
 	xmlnode_new_namespace(node, NULL, ROSTER_NAMESPACE);
-	//xmlnode_new_namespace(node, "gr", NS_GOOGLE_ROSTER);
-	//xmlnode_new_prop(node, "gr:ext", "2");
+#if 0
+	xmlnode_new_namespace(node, "gr", NS_GOOGLE_ROSTER);
+	xmlnode_new_prop(node, "gr:ext", "2");
+#endif
 
 	xml_string = xmlnode_to_string(root);
 	xmlnode_free(root);
