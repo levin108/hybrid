@@ -297,7 +297,7 @@ hybrid_sha1(const gchar *in, gint size)
 }
 
 gchar*
-hybrid_base64(const guchar *input, gint size)
+hybrid_base64_encode(const guchar *input, gint size)
 {
   BIO *bmem;
   BIO *b64;
@@ -317,4 +317,42 @@ hybrid_base64(const guchar *input, gint size)
   BIO_free_all(b64);
 
   return buff;
+}
+
+guchar*
+hybrid_base64_decode(const gchar *input, gint *size)
+{
+ 	guint n , t = 0 , c = 0;
+	guchar* res;
+	guchar out[3];
+	guchar inp[4];
+
+	n = strlen(input);
+
+	if(n % 4 != 0) {
+		return NULL;
+	}
+
+	n = n / 4 * 3;
+	if(size != NULL) {
+		*size = n;
+	}
+
+	res = (guchar*)g_malloc0(n);
+
+	while (1) {
+		memset(inp, 0, 4);
+		memset(out, 0, 3);
+		memcpy(inp, input + c, 4);
+		c += 4;
+		n = EVP_DecodeBlock(out, inp, 4);
+		memcpy(res + t, out, n);
+		t += n;
+
+		if(c >= strlen(input)) {
+			break;
+		}
+	}
+
+	return res;
 }
