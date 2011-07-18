@@ -110,7 +110,17 @@ gchar *hybrid_sha1(const gchar *in, gint size);
  *
  * @param Base64 encode result.
  */
-gchar *hybrid_base64(const guchar *input, gint size);
+gchar *hybrid_base64_encode(const guchar *input, gint size);
+
+/**
+ * Base64 decode the input string.
+ *
+ * @param input The input string to decode.
+ * @param size  The size of the output string.
+ *
+ * @param Base64 decode result.
+ */
+guchar *hybrid_base64_decode(const gchar *input, gint *size);
 
 #ifdef __cplusplus
 }
