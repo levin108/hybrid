@@ -1,7 +1,13 @@
 #include "xmpp_buddy.h"
 
+static GHashTable *xmpp_buddies = NULL;
+
+/**
+ * Scribe the presence information of the roster by
+ * sending a <presence/> label to the server.
+ */
 static void
-xmpp_buddy_subscribe(XmppStream *stream, const gchar *jid)
+xmpp_buddy_presence(XmppStream *stream)
 {
 	xmlnode *node;
 	gchar *xml_string;
@@ -12,16 +18,12 @@ xmpp_buddy_subscribe(XmppStream *stream, const gchar *jid)
 
 	xml_string = xmlnode_to_string(node);
 	
-	hybrid_debug_info("xmpp", "subscribe %s,send:\n%s",
-			jid, xml_string);
+	hybrid_debug_info("xmpp", "subscribe presence,send:\n%s", xml_string);
 
 	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
 
-	//	hybrid_account_error_reason(stream->account->account,
-	//			"subscribe buddy failed");
-		g_print("subscribe error\n");
-		g_usleep(1000);
-
+		hybrid_account_error_reason(stream->account->account,
+				"subscribe presence failed");
 		g_free(xml_string);
 
 		return;
@@ -42,6 +44,8 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 	xmlnode *item_nodes;
 	HybridGroup *group;
 	HybridAccount *account;
+	HybridBuddy *hd;
+	XmppBuddy *buddy;
 
 	g_return_if_fail(stream != NULL);
 	g_return_if_fail(root != NULL);
@@ -68,6 +72,7 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 	item_nodes = xmlnode_child(node);
 
 	for (node = item_nodes; node; node = node->next) {
+
 		jid = xmlnode_prop(node, "jid");
 		name = xmlnode_prop(node, "name");
 
@@ -78,23 +83,136 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 			group_name = xmlnode_content(group_node);
 		}
 
-		group = hybrid_blist_add_group(stream->account->account,
-					group_name, group_name);
+		/* add this buddy's group to the buddy list. */
+		group = hybrid_blist_add_group(account, group_name, group_name);
 
-		hybrid_blist_add_buddy(stream->account->account,
-					group, jid, name);
+		/* add this buddy to the buddy list. */
+		hd = hybrid_blist_add_buddy(account, group, jid, name);
+
+		buddy = xmpp_buddy_create(hd);
+		xmpp_buddy_set_name(buddy, name);
+		xmpp_buddy_set_group(buddy, group_name);
 
 		g_free(group_name);
-
 		g_free(jid);
 		g_free(name);
 	}
 
-	xmpp_buddy_subscribe(stream, NULL);
+	/* subsribe the presence of the roster. */
+	xmpp_buddy_presence(stream);
 
 	return;
 
 roster_err:
 	hybrid_account_error_reason(stream->account->account,
 			_("request roster failed."));
+}
+
+XmppBuddy*
+xmpp_buddy_create(HybridBuddy *hybrid_buddy)
+{
+	XmppBuddy *buddy;
+
+	g_return_val_if_fail(hybrid_buddy != NULL, NULL);
+
+	if (!xmpp_buddies) {
+		xmpp_buddies = g_hash_table_new(g_str_hash, g_str_equal);
+	}
+
+	if ((buddy = g_hash_table_lookup(xmpp_buddies, hybrid_buddy->id))) {
+		return buddy;
+	}
+
+	buddy = g_new0(XmppBuddy, 1);
+	buddy->jid = g_strdup(hybrid_buddy->id);
+	buddy->buddy = hybrid_buddy;
+
+	g_hash_table_insert(xmpp_buddies, buddy->jid, buddy);
+
+	return buddy;
+}
+
+void
+xmpp_buddy_set_name(XmppBuddy *buddy, const gchar *name)
+{
+	g_return_if_fail(buddy != NULL);
+
+	g_free(buddy->name);
+	buddy->name = g_strdup(name);
+}
+
+void
+xmpp_buddy_set_status(XmppBuddy *buddy, const gchar *status)
+{
+	g_return_if_fail(buddy != NULL);
+	
+	g_free(buddy->status);
+	buddy->status = g_strdup(status);
+
+	hybrid_blist_set_buddy_mood(buddy->buddy, status);
+}
+
+void
+xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *show)
+{
+	gint state = 0;
+
+	g_return_if_fail(buddy != NULL);
+	g_return_if_fail(show != NULL);
+
+	if (g_ascii_strcasecmp(show, "away") == 0) {
+		state = HYBRID_STATE_AWAY;
+
+	} else if (g_ascii_strcasecmp(show, "avaiable") == 0) {
+		state = HYBRID_STATE_ONLINE;
+	}
+
+	hybrid_blist_set_buddy_state(buddy->buddy, state);
+}
+
+void
+xmpp_buddy_set_group(XmppBuddy *buddy, const gchar *group)
+{
+	g_return_if_fail(buddy != NULL);
+
+	g_free(buddy->group);
+	buddy->group = g_strdup(group);
+}
+
+void
+xmpp_buddy_get_info(XmppStream *stream, XmppBuddy *buddy)
+{
+	
+}
+
+XmppBuddy*
+xmpp_buddy_find(const gchar *jid)
+{
+	g_return_val_if_fail(jid != NULL, NULL);
+
+	if (!xmpp_buddies) {
+		return NULL;
+	}
+
+	return g_hash_table_lookup(xmpp_buddies, jid);
+}
+
+void
+xmpp_buddy_destroy(XmppBuddy *buddy)
+{
+	if (buddy) {
+		g_hash_table_remove(xmpp_buddies, buddy);
+
+		if (g_hash_table_size(xmpp_buddies) == 0) {
+			g_hash_table_destroy(xmpp_buddies);
+			xmpp_buddies = NULL;
+		}
+
+		g_free(buddy->jid);
+		g_free(buddy->name);
+		g_free(buddy->status);
+		g_free(buddy->group);
+
+		g_free(buddy);
+	}
 }

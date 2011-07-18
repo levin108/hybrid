@@ -8,7 +8,7 @@ parse_text(void *user_data, const xmlChar *text, gint text_len)
 	XmppStream *stream = (XmppStream *)user_data;
 
 	if (!stream->node) {
-		hybrid_debug_error("xmpp", "invalid node");
+		//hybrid_debug_error("xmpp", "invalid node: %s, %d\n", (gchar*)text, text_len);
 		return;
 	}
 
@@ -111,13 +111,12 @@ parse_element_end(void *user_data, const xmlChar *element_name,
 	} else {
 		xml_string = xmlnode_to_string(stream->node);
 
-		hybrid_debug_info("xmpp", "recv:\n%s", xml_string);
+		//hybrid_debug_info("xmpp", "recv:\n%s", xml_string);
 
 		xmpp_stream_process(stream, stream->node);
 
 		xmlnode_free(stream->node);
 		stream->node = NULL;
-
 
 		g_free(xml_string);
 	}

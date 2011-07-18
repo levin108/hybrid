@@ -15,7 +15,6 @@
 #define NS_GOOGLE_ROSTER "google:roster"
 
 typedef struct _XmppStream XmppStream;
-typedef struct _IqTransaction IqTransaction;
 
 typedef gboolean (*trans_callback)(XmppStream *stream, xmlnode *node,
 									gpointer user_data);
@@ -42,13 +41,6 @@ struct _XmppStream {
 	HybridSslConnection *ssl;
 
 	xmlParserCtxt *xml_ctxt;
-};
-
-struct _IqTransaction {
-	gint iq_id;
-
-	trans_callback callback;
-	gpointer user_data;
 };
 
 enum {
@@ -134,51 +126,5 @@ void xmpp_stream_destroy(XmppStream *stream);
  * @param node   The root node of the xml packet.
  */
 void xmpp_stream_process(XmppStream *stream, xmlnode *node);
-
-/**
- * Create an iq transaction.
- *
- * @param iq_id Id of current transaction.
- *
- * @return The transaction created.
- */
-IqTransaction *iq_transaction_create(gint iq_id);
-
-/**
- * Set callback function for a transaction.
- *
- * @param trans     The iq transaction.
- * @param callback  The callback function.
- * @param user_data User-specified data for the callback function.
- */
-void iq_transaction_set_callback(IqTransaction *trans, trans_callback callback,
-						gpointer user_data);
-
-/**
- * Add a transaction to the stream's pending list.
- *
- * @param stream The xmpp stream.
- * @param trans  The transaction pending to be processed.
- */
-void iq_transaction_add(XmppStream *stream, IqTransaction *trans);
-
-/**
- * Remove a transaction from the stream's pending list.
- *
- * @param stream The xmpp stream.
- * @param trans  The transaction processed.
- */
-void iq_transaction_remove(XmppStream *stream, IqTransaction *trans);
-
-/**
- * Destroy an transaction.
- *
- * @param trans The transaction to destroy.
- */
-void iq_transaction_destroy(IqTransaction *trans);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* HYBRID_XMPP_STREAM_H */

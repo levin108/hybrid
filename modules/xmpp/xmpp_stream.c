@@ -5,10 +5,21 @@
 #include "xmpp_stream.h"
 #include "xmpp_parser.h"
 #include "xmpp_buddy.h"
+#include "xmpp_iq.h"
 
 static gchar *generate_starttls_body(XmppStream *stream);
 static gchar *create_initiate_stream(XmppStream *xs);
 static void xmpp_stream_get_roster(XmppStream *stream);
+
+static gchar*
+get_bare_jid(const gchar *full_jid)
+{
+	gchar *pos;
+
+	for (pos = (gchar *)full_jid; *pos && *pos != '/'; pos ++);
+
+	return g_strndup(full_jid, pos - full_jid);
+}
 
 XmppStream*
 xmpp_stream_create(XmppAccount *account)
@@ -196,8 +207,6 @@ stream_recv_cb(gint sk, XmppStream *stream)
 	} else {
 		if ((n = hybrid_ssl_read(stream->ssl, buf, sizeof(buf) - 1)) == -1) {
 			
-			hybrid_debug_error("xmpp", "init stream error, %s", strerror(errno));
-
 			return TRUE;
 		}
 	}
@@ -347,29 +356,17 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 	g_free(jid);
 
 	/* request to start a session. */
-	IqTransaction *trans;
-	gchar *iqid;
-	gchar *xml_string;
+	IqRequest *iq;
 
-	xmpp_stream_iqid_increase(stream);
+	iq = iq_request_create(stream, IQ_TYPE_SET);
 
-	trans = iq_transaction_create(stream->current_iq_id);
-	iq_transaction_set_callback(trans, start_session_cb, NULL);
-	iq_transaction_add(stream, trans);
-
-	root = xmlnode_create("iq");
-
-	iqid = xmpp_stream_get_iqid(stream);
-	xmlnode_new_prop(root, "type", "set");
-	xmlnode_new_prop(root, "id", iqid);
-	g_free(iqid);
-
-	node = xmlnode_new_child(root, "session");
+	node = xmlnode_new_child(iq->node, "session");
 	xmlnode_new_namespace(node, NULL, SESSION_NAMESPACE);
 
-	xml_string = xmlnode_to_string(root);
+	iq_request_set_callback(iq, start_session_cb, NULL);
 
-	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
+	if (iq_request_send(iq) != HYBRID_OK) {
+
 		hybrid_account_error_reason(stream->account->account,
 				_("start session error."));
 
@@ -596,6 +593,49 @@ xmpp_stream_process_iq(XmppStream *stream, xmlnode *node)
 	}
 }
 
+static void
+xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
+{
+	xmlnode *node;
+	XmppBuddy *buddy;
+	gchar *jid;
+	gchar *bare_jid;
+	gchar *show;
+	gchar *status;
+
+	if (!xmlnode_has_prop(root, "from")) {
+		hybrid_debug_error("xmpp", "invalid presence.");
+		return;
+	}
+
+	jid = xmlnode_prop(root, "from");
+	bare_jid = get_bare_jid(jid);
+	g_free(jid);
+
+	if (!(buddy = xmpp_buddy_find(bare_jid))) {
+		return;
+	}
+
+	g_print("%s, %s\n", root->name, xmlnode_to_string(root));
+
+	if ((node = xmlnode_find(root, "show"))) {
+
+		show = xmlnode_content(node);
+		xmpp_buddy_set_show(buddy, show);
+		g_free(show);
+
+	} else {
+		xmpp_buddy_set_show(buddy, "avaiable");
+	}
+
+	if ((node = xmlnode_find(root, "status"))) {
+
+		status = xmlnode_content(node);
+		xmpp_buddy_set_status(buddy, status);
+		g_free(status);
+	}
+}
+
 void
 xmpp_stream_process(XmppStream *stream, xmlnode *node)
 {
@@ -622,6 +662,10 @@ xmpp_stream_process(XmppStream *stream, xmlnode *node)
 	} else if (g_strcmp0(node->name, "iq") == 0) {
 
 		xmpp_stream_process_iq(stream, node);
+
+	} else if (g_strcmp0(node->name, "presence") == 0) {
+
+		xmpp_stream_process_presence(stream, node);
 	}
 }
 
@@ -678,46 +722,3 @@ create_initiate_stream(XmppStream *stream)
 	return res;
 }
 
-IqTransaction*
-iq_transaction_create(gint iq_id)
-{
-	IqTransaction *trans;
-
-	trans = g_new0(IqTransaction, 1);
-
-	trans->iq_id = iq_id;
-
-	return trans;
-}
-
-void
-iq_transaction_set_callback(IqTransaction *trans, trans_callback callback,
-						gpointer user_data)
-{
-	g_return_if_fail(trans != NULL);
-
-	trans->callback = callback;
-	trans->user_data = user_data;
-}
-
-void
-iq_transaction_add(XmppStream *stream, IqTransaction *trans)
-{
-	g_return_if_fail(stream != NULL);
-
-	stream->pending_trans = g_slist_append(stream->pending_trans, trans);
-}
-
-void
-iq_transaction_remove(XmppStream *stream, IqTransaction *trans)
-{
-	g_return_if_fail(stream != NULL);
-
-	stream->pending_trans = g_slist_remove(stream->pending_trans, trans);
-}
-
-void
-iq_transaction_destroy(IqTransaction *trans)
-{
-	g_free(trans);
-}
