@@ -134,7 +134,7 @@ hybrid_account_init(void)
 			}
 
 			/* load the nickname */
-			if (xmlnode_has_prop(node, "nam")) {
+			if (xmlnode_has_prop(node, "name")) {
 				value = xmlnode_prop(node, "name");
 				if (*value != '\0') {
 					hybrid_account_set_nickname(account, value);
