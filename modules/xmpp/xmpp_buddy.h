@@ -83,8 +83,10 @@ void xmpp_buddy_set_group(XmppBuddy *buddy, const gchar *group);
  *
  * @param stream The xmpp stream.
  * @param buddy  The xmpp buddy.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
-void xmpp_buddy_get_info(XmppStream *stream, XmppBuddy *buddy);
+gint xmpp_buddy_get_info(XmppStream *stream, XmppBuddy *buddy);
 
 /**
  * Destroy a buddy.

@@ -337,8 +337,6 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 	gchar *jid;
 	xmlnode *node;
 
-	printf("callback\n");
-
 	type = xmlnode_prop(root, "type");
 
 	if (g_strcmp0(type, "result")) {

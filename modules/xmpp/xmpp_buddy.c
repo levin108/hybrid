@@ -1,4 +1,5 @@
 #include "xmpp_buddy.h"
+#include "xmpp_iq.h"
 
 static GHashTable *xmpp_buddies = NULL;
 
@@ -93,6 +94,10 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 		xmpp_buddy_set_name(buddy, name);
 		xmpp_buddy_set_group(buddy, group_name);
 
+		if (!hybrid_blist_get_buddy_checksum(hd)) {
+			xmpp_buddy_get_info(stream, buddy);
+		}
+
 		g_free(group_name);
 		g_free(jid);
 		g_free(name);
@@ -181,10 +186,29 @@ xmpp_buddy_set_group(XmppBuddy *buddy, const gchar *group)
 	buddy->group = g_strdup(group);
 }
 
-void
+gint
 xmpp_buddy_get_info(XmppStream *stream, XmppBuddy *buddy)
 {
-	
+	IqRequest *iq;
+	xmlnode *node;
+
+	g_return_val_if_fail(stream != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(buddy != NULL, HYBRID_ERROR);
+
+	iq = iq_request_create(stream, IQ_TYPE_GET);
+
+	xmlnode_new_prop(iq->node, "to", buddy->jid);
+	node = xmlnode_new_child(iq->node, "vCard");
+	xmlnode_new_namespace(node, NULL, "vcard-temp");
+
+
+	if (iq_request_send(iq) != HYBRID_OK) {
+
+		printf("abc\n");
+	}
+
+
+	return HYBRID_OK;
 }
 
 XmppBuddy*
