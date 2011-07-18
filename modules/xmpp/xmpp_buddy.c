@@ -165,6 +165,8 @@ xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *show)
 
 	} else if (g_ascii_strcasecmp(show, "avaiable") == 0) {
 		state = HYBRID_STATE_ONLINE;
+	} else if (g_ascii_strcasecmp(show, "dnd") == 0) {
+		state = HYBRID_STATE_BUSY;
 	}
 
 	hybrid_blist_set_buddy_state(buddy->buddy, state);

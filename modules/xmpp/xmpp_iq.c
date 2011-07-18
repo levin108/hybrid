@@ -28,7 +28,7 @@ iq_request_create(XmppStream *stream, gint type)
 			return NULL;
 	}
 
-	id_str = g_strdup_printf("%d", type);
+	id_str = g_strdup_printf("%d", iq->id);
 	xmlnode_new_prop(iq->node, "id", id_str);
 	g_free(id_str);
 
@@ -79,7 +79,6 @@ void
 iq_request_destroy(IqRequest *iq)
 {
 	if (iq) {
-		iq_transaction_destroy(iq->trans);
 		xmlnode_free(iq->node);
 		g_free(iq);
 	}

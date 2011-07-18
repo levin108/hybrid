@@ -337,6 +337,8 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 	gchar *jid;
 	xmlnode *node;
 
+	printf("callback\n");
+
 	type = xmlnode_prop(root, "type");
 
 	if (g_strcmp0(type, "result")) {
@@ -370,8 +372,12 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 		hybrid_account_error_reason(stream->account->account,
 				_("start session error."));
 
+		iq_request_destroy(iq);
+
 		return TRUE;
 	}
+
+	iq_request_destroy(iq);
 
 	return TRUE;
 }
@@ -382,47 +388,30 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 static void
 xmpp_stream_bind(XmppStream *stream)
 {
-	xmlnode *root;
 	xmlnode *node;
-	IqTransaction *trans;
-	gchar *iq_id;
-	gchar *xml_string;
+	IqRequest *iq;
 
 	g_return_if_fail(stream != NULL);
 
-	xmpp_stream_iqid_increase(stream);
+	iq = iq_request_create(stream, IQ_TYPE_SET);
 
-	root = xmlnode_create("iq");
-
-	xmlnode_new_prop(root, "type", "set");
-
-	iq_id = xmpp_stream_get_iqid(stream);
-	xmlnode_new_prop(root, "id", iq_id);
-	g_free(iq_id);
-
-	trans = iq_transaction_create(stream->current_iq_id);
-	iq_transaction_set_callback(trans, resource_bind_cb, NULL);
-	iq_transaction_add(stream, trans);
-
-	node = xmlnode_new_child(root, "bind");
+	node = xmlnode_new_child(iq->node, "bind");
 	xmlnode_new_namespace(node, NULL, BIND_NAMESPACE);
 
-	xml_string = xmlnode_to_string(root);
-	xmlnode_free(root);
+	iq_request_set_callback(iq, resource_bind_cb, NULL);
 
-	hybrid_debug_info("xmpp", "binds a resource,send:\n%s", xml_string);
+	if (iq_request_send(iq) != HYBRID_OK) {
 
-	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
-
-		hybrid_account_error_reason(stream->account->account,
+		hybrid_account_error_reason(
+				stream->account->account,
 				"binds a resource error.");
 
-		g_free(xml_string);
+		iq_request_destroy(iq);
 
 		return;
 	}
 	
-	g_free(xml_string);
+	iq_request_destroy(iq);
 }
 
 /**
@@ -441,54 +430,34 @@ request_roster_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 static void
 xmpp_stream_get_roster(XmppStream *stream)
 {
-	xmlnode *root;
 	xmlnode *node;
-	gchar *iqid;
-	gchar *xml_string;
-	IqTransaction *trans;
+	IqRequest *iq;
 
 	g_return_if_fail(stream != NULL);
 
 	xmpp_stream_iqid_increase(stream);
 
-	iqid = xmpp_stream_get_iqid(stream);
+	iq = iq_request_create(stream, IQ_TYPE_GET);
+	iq_request_set_callback(iq, request_roster_cb, NULL);
 
-	root = xmlnode_create("iq");
-
-	xmlnode_new_prop(root, "from", stream->jid);
-	xmlnode_new_prop(root, "id", iqid);
-	xmlnode_new_prop(root, "type", "get");
-
-	g_free(iqid);
-
-	trans = iq_transaction_create(stream->current_iq_id);
-	iq_transaction_set_callback(trans, request_roster_cb, NULL);
-	iq_transaction_add(stream, trans);
-
-
-	node = xmlnode_new_child(root, "query");
+	node = xmlnode_new_child(iq->node, "query");
 	xmlnode_new_namespace(node, NULL, ROSTER_NAMESPACE);
+
 #if 0
 	xmlnode_new_namespace(node, "gr", NS_GOOGLE_ROSTER);
 	xmlnode_new_prop(node, "gr:ext", "2");
 #endif
 
-	xml_string = xmlnode_to_string(root);
-	xmlnode_free(root);
+	if (iq_request_send(iq) != HYBRID_OK) {
 
-	hybrid_debug_info("xmpp", "binds a resource,send:\n%s", xml_string);
-
-	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
-
-		hybrid_account_error_reason(stream->account->account,
+		hybrid_account_error_reason(
+				stream->account->account,
 				"binds a resource error.");
-
-		g_free(xml_string);
+		iq_request_destroy(iq);
 
 		return;
 	}
-
-	g_free(xml_string);
+	iq_request_destroy(iq);
 }
 
 /**
@@ -616,8 +585,6 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 		return;
 	}
 
-	g_print("%s, %s\n", root->name, xmlnode_to_string(root));
-
 	if ((node = xmlnode_find(root, "show"))) {
 
 		show = xmlnode_content(node);
@@ -633,6 +600,10 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 		status = xmlnode_content(node);
 		xmpp_buddy_set_status(buddy, status);
 		g_free(status);
+	}
+
+	if ((node = xmlnode_find(root, "photo"))) {
+
 	}
 }
 

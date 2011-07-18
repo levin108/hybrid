@@ -14,7 +14,7 @@ parse_text(void *user_data, const xmlChar *text, gint text_len)
 
 	value = g_strndup((gchar *)text, text_len);
 
-	xmlnode_set_content(stream->node, value);
+	xmlnode_new_text_child(stream->node, value);
 
 	g_free(value);
 }
@@ -111,7 +111,7 @@ parse_element_end(void *user_data, const xmlChar *element_name,
 	} else {
 		xml_string = xmlnode_to_string(stream->node);
 
-		//hybrid_debug_info("xmpp", "recv:\n%s", xml_string);
+		hybrid_debug_info("xmpp", "recv:\n%s", xml_string);
 
 		xmpp_stream_process(stream, stream->node);
 
