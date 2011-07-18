@@ -1,4 +1,9 @@
 #include "util.h"
+#include <openssl/sha.h>
+#include <openssl/hmac.h>
+#include <openssl/evp.h>
+#include <openssl/bio.h>
+#include <openssl/buffer.h>
 
 HybridStack*
 hybrid_stack_create()
@@ -268,4 +273,86 @@ strip_finish:
 	g_free(stack);
 
 	return temp;
+}
+
+gchar*
+hybrid_sha1(const gchar *in, gint size)
+{
+	SHA_CTX s;
+	guchar hash[20];
+	gchar *res;
+	gint i;
+  
+	SHA1_Init(&s);
+	SHA1_Update(&s, in, size);
+	SHA1_Final(hash, &s);
+
+	res = g_malloc0(41);
+  
+	for (i=0; i < 20; i++) {
+		g_snprintf(res + i * 2, 41, "%.2x", (gint)hash[i]);
+	}
+
+	return res;
+}
+
+gchar*
+hybrid_base64_encode(const guchar *input, gint size)
+{
+  BIO *bmem;
+  BIO *b64;
+  BUF_MEM *bptr;
+  gchar *buff;
+
+  b64 = BIO_new(BIO_f_base64());
+  bmem = BIO_new(BIO_s_mem());
+  b64 = BIO_push(b64, bmem);
+  BIO_write(b64, input, size);
+  BIO_flush(b64);
+  BIO_get_mem_ptr(b64, &bptr);
+
+  buff = (gchar *)g_malloc0(bptr->length);
+  memcpy(buff, bptr->data, bptr->length - 1);
+
+  BIO_free_all(b64);
+
+  return buff;
+}
+
+guchar*
+hybrid_base64_decode(const gchar *input, gint *size)
+{
+ 	guint n , t = 0 , c = 0;
+	guchar* res;
+	guchar out[3];
+	guchar inp[4];
+
+	n = strlen(input);
+
+	if(n % 4 != 0) {
+		return NULL;
+	}
+
+	n = n / 4 * 3;
+	if(size != NULL) {
+		*size = n;
+	}
+
+	res = (guchar*)g_malloc0(n);
+
+	while (1) {
+		memset(inp, 0, 4);
+		memset(out, 0, 3);
+		memcpy(inp, input + c, 4);
+		c += 4;
+		n = EVP_DecodeBlock(out, inp, 4);
+		memcpy(res + t, out, n);
+		t += n;
+
+		if(c >= strlen(input)) {
+			break;
+		}
+	}
+
+	return res;
 }
