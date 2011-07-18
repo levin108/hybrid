@@ -266,6 +266,8 @@ xmlnode_new_child(xmlnode *node, const gchar *childname)
 	g_return_val_if_fail(node != NULL, NULL);
 	g_return_val_if_fail(childname != NULL, NULL);
 
+	child = xmlnode_child(node);
+
 	new = g_new0(xmlnode, 1);
 	new->node = xmlNewChild(node->node, NULL, BAD_CAST childname, NULL);
 	new->doc = node->doc;
@@ -274,8 +276,6 @@ xmlnode_new_child(xmlnode *node, const gchar *childname)
 	new->child = NULL;
 	new->parent = node;
 	new->name = g_strdup(childname);
-
-	child = xmlnode_child(node);
 
 	if (child) {
 		pos = child;
