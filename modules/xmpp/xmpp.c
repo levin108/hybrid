@@ -12,6 +12,7 @@
 #include "tooltip.h"
 
 #include "xmpp_stream.h"
+#include "xmpp_buddy.h"
 
 const gchar *jabber_server = "talk.l.google.com";
 
@@ -34,6 +35,56 @@ xmpp_login(HybridAccount *account)
 	return FALSE;
 }
 
+static gboolean
+xmpp_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy,
+		HybridTooltipData *tip_data)
+{
+	XmppBuddy *bd;
+
+	if (!(bd = xmpp_buddy_find(buddy->id))) {
+		return FALSE;
+	}
+
+	hybrid_tooltip_data_add_pair(tip_data, "ID", bd->jid);
+	hybrid_tooltip_data_add_pair(tip_data, "Name", bd->name);
+	hybrid_tooltip_data_add_pair(tip_data, "Mood", bd->status);
+	hybrid_tooltip_data_add_pair(tip_data, "Status",
+	                             hybrid_get_presence_name(buddy->state));
+	hybrid_tooltip_data_add_pair(tip_data, "Subscription", bd->subscription);
+	hybrid_tooltip_data_add_pair(tip_data, "Resource", bd->resource);
+
+	return TRUE;
+}
+
+static gboolean
+xmpp_buddy_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
+{
+	XmppBuddy *xbuddy;
+
+	if (!(xbuddy = xmpp_buddy_find(buddy->id))) {
+		return FALSE;
+	}
+
+	if (xmpp_buddy_alias(xbuddy, text) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static void 
+xmpp_group_add(HybridAccount *account, const gchar *text)
+{
+	hybrid_blist_add_group(account, text, text);
+}
+
+static gboolean 
+xmpp_buddy_move(HybridAccount *account, HybridBuddy *buddy,
+		HybridGroup *new_group)
+{
+	return FALSE;
+}
+
 HybridModuleInfo module_info = {
 	"xmpp",                     /**< name */
 	"levin108",                   /**< author */
@@ -49,14 +100,14 @@ HybridModuleInfo module_info = {
 	NULL,          /**< change_state */
 	NULL,            /**< keep_alive */
 	NULL,       /**< account_tooltip */
-	NULL,         /**< buddy_tooltip */
-	NULL,            /**< buddy_move */
+	xmpp_buddy_tooltip,         /**< buddy_tooltip */
+	xmpp_buddy_move,            /**< buddy_move */
 	NULL,                /**< buddy_remove */
-	NULL,                /**< buddy_rename */
+	xmpp_buddy_rename,                /**< buddy_rename */
 	NULL,             /**< buddy_add */
 	NULL,          /**< group_rename */
 	NULL,          /**< group_remove */
-	NULL,             /**< group_add */
+	xmpp_group_add,             /**< group_add */
 	NULL,       /**< chat_word_limit */
 	NULL,            /**< chat_start */
 	NULL,             /**< chat_send */

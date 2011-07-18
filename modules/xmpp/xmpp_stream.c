@@ -21,6 +21,18 @@ get_bare_jid(const gchar *full_jid)
 	return g_strndup(full_jid, pos - full_jid);
 }
 
+static gchar*
+get_resource(const gchar *full_jid)
+{
+	gchar *pos;
+
+	for (pos = (gchar *)full_jid; *pos && *pos != '/'; pos ++);
+
+	pos ++;
+
+	return g_strndup(pos, full_jid + strlen(full_jid) - pos);
+}
+
 XmppStream*
 xmpp_stream_create(XmppAccount *account)
 {
@@ -154,7 +166,7 @@ xmpp_stream_startsasl(XmppStream *stream)
 			password_len);
 
 
-	auth_encoded = hybrid_base64(auth, username_len + password_len + 2);
+	auth_encoded = hybrid_base64_encode(auth, username_len + password_len + 2);
 
 	g_free(auth);
 
@@ -316,13 +328,101 @@ xmpp_stream_performtls(XmppStream *stream)
 	}
 }
 
+static gboolean
+account_get_info_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	xmlnode *node;
+	gchar *value;
+	guchar *photo;
+	gint photo_len;
+
+	HybridAccount *account;
+
+	account = stream->account->account;
+
+	if (xmlnode_has_prop(root, "type")) {
+		value = xmlnode_prop(root, "type");
+
+		if (g_strcmp0(value, "result") != 0) {
+
+			hybrid_account_error_reason(account, _("Login failed."));
+			g_free(value);
+
+			return FALSE;
+		}
+
+		g_free(value);
+	}
+
+	if ((node = xmlnode_find(root, "FN"))) {
+
+		value = xmlnode_content(node);
+		hybrid_account_set_nickname(account, value);
+		g_free(value);
+	}
+
+	if ((node = xmlnode_find(root, "PHOTO"))) {
+
+		if ((node = xmlnode_find(root, "BINVAL"))) {
+
+			value = xmlnode_content(node);
+
+			/* decode the base64-encoded photo string. */
+			photo = hybrid_base64_decode(value, &photo_len);
+
+			/* set icon for the buddy. */
+			hybrid_account_set_icon(account, photo,	photo_len, "");
+
+			g_free(value);
+			g_free(photo);
+		}
+	}
+
+	/*
+	 * Remember to do this before adding any buddies to the blist,
+	 * we should set the account to be connected first.
+	 */
+	hybrid_account_set_connection_status(account,
+			HYBRID_CONNECTION_CONNECTED);
+
+	/* OK, we request the roster from the server. */
+	xmpp_stream_get_roster(stream);
+
+	return FALSE;
+}
+
 /**
  * Callback function for the start session request to process the response.
  */
 static gboolean
 start_session_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 {
-	xmpp_stream_get_roster(stream);
+	HybridAccount *account;
+
+	account = stream->account->account;
+	
+	if (!account->nickname && !account->icon_crc) {
+		/*
+		 * Both the nickname and the icon checksum of the account
+		 * is NULL, it means that this is the first time this account
+		 * was enabled, so we need to fetch the account's information
+		 * first before we finished logining.
+		 */
+		xmpp_buddy_get_info(stream, stream->account->username,
+				(trans_callback)account_get_info_cb, NULL);
+
+	} else {
+
+		/*
+		 * Remember to do this before adding any buddies to the blist,
+		 * we should set the account to be connected first.
+		 */
+		hybrid_account_set_connection_status(account,
+				HYBRID_CONNECTION_CONNECTED);
+
+		/* OK, we request the roster from the server. */
+		xmpp_stream_get_roster(stream);
+	}
 	
 	return TRUE;
 }
@@ -487,7 +587,6 @@ xmpp_process_feature(XmppStream *stream, xmlnode *root)
 
 			}
 
-
 		} else {
 			xmpp_stream_startsasl(stream);
 		}
@@ -560,29 +659,91 @@ xmpp_stream_process_iq(XmppStream *stream, xmlnode *node)
 	}
 }
 
+/**
+ * Callback function to process the buddy's get-info response.
+ */
+static gboolean
+buddy_get_info_cb(XmppStream *stream, xmlnode *root, XmppBuddy *buddy)
+{
+	xmlnode *node;
+	gchar *type;
+	gchar *photo_bin;
+	guchar *photo;
+	gint photo_len;
+
+	if (xmlnode_has_prop(root, "type")) {
+		type = xmlnode_prop(root, "type");
+
+		if (g_strcmp0(type, "result") != 0) {
+
+			hybrid_debug_error("xmpp", "get buddy info error.");
+			g_free(type);
+
+			return FALSE;
+		}
+
+		g_free(type);
+	}
+
+	if ((node = xmlnode_find(root, "PHOTO"))) {
+
+		if ((node = xmlnode_find(root, "BINVAL"))) {
+
+			photo_bin = xmlnode_content(node);
+
+			/* decode the base64-encoded photo string. */
+			photo = hybrid_base64_decode(photo_bin, &photo_len);
+
+			/* set icon for the buddy. */
+			hybrid_blist_set_buddy_icon(buddy->buddy, photo,
+									photo_len, buddy->photo);
+			g_free(photo_bin);
+			g_free(photo);
+		}
+	}
+
+	return TRUE;
+}
+
 static void
 xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 {
 	xmlnode *node;
 	XmppBuddy *buddy;
-	gchar *jid;
+	gchar *value;
+	gchar *resource;
 	gchar *bare_jid;
 	gchar *show;
 	gchar *status;
+	gchar *photo;
 
 	if (!xmlnode_has_prop(root, "from")) {
 		hybrid_debug_error("xmpp", "invalid presence.");
 		return;
 	}
 
-	jid = xmlnode_prop(root, "from");
-	bare_jid = get_bare_jid(jid);
-	g_free(jid);
+	value = xmlnode_prop(root, "from");
+	bare_jid = get_bare_jid(value);
+	resource = get_resource(value);
+	g_free(value);
 
 	if (!(buddy = xmpp_buddy_find(bare_jid))) {
+
+		g_free(bare_jid);
+		g_free(resource);
+
 		return;
 	}
 
+	xmpp_buddy_set_resource(buddy, resource);
+
+	g_free(resource);
+	g_free(bare_jid);
+
+	/*
+	 * If the presence message doesn't have a <show> label,
+	 * then it means the current status of the buddy is 'avaiable'.
+	 */
 	if ((node = xmlnode_find(root, "show"))) {
 
 		show = xmlnode_content(node);
@@ -600,8 +761,22 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 		g_free(status);
 	}
 
+	/*
+	 * Check whether it has a photo label, then we can
+	 * determine whether to fetch the buddy's photo.
+	 */
 	if ((node = xmlnode_find(root, "photo"))) {
 
+		photo = xmlnode_content(node);
+
+		if (g_strcmp0(photo, buddy->photo) != 0) {
+
+			xmpp_buddy_set_photo(buddy, photo);
+			xmpp_buddy_get_info(stream, buddy->jid,
+					(trans_callback)buddy_get_info_cb, buddy);
+		}
+
+		g_free(photo);
 	}
 }
 
@@ -691,3 +866,8 @@ create_initiate_stream(XmppStream *stream)
 	return res;
 }
 
+void
+xmpp_stream_get_account_info(XmppStream *stream)
+{
+
+}

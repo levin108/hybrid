@@ -140,7 +140,7 @@ hybrid_head_bind_to_account(HybridAccount *account)
 		text = g_strdup_printf(_("<b>%s</b> [%s]\n%s"), 
 							account->nickname,
 							hybrid_get_presence_name(account->state),
-							account->status_text);
+							account->status_text ? account->status_text : "");
 		status_icon = hybrid_create_presence_pixbuf(account->state, 16);
 	}
 

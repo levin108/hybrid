@@ -127,4 +127,11 @@ void xmpp_stream_destroy(XmppStream *stream);
  */
 void xmpp_stream_process(XmppStream *stream, xmlnode *node);
 
+/**
+ * Get account's information.
+ *
+ * @param stream The stream for the account.
+ */
+void xmpp_stream_get_account_info(XmppStream *stream);
+
 #endif /* HYBRID_XMPP_STREAM_H */

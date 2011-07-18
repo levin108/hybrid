@@ -1,4 +1,6 @@
 #include "xmpp_account.h"
+#include "xmpp_stream.h"
+#include "xmpp_iq.h"
 
 XmppAccount*
 xmpp_account_create(HybridAccount *account, const gchar *username,
