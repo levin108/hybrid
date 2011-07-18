@@ -82,7 +82,17 @@ static gboolean
 xmpp_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 		HybridGroup *new_group)
 {
-	return FALSE;
+	XmppBuddy *xbuddy;
+
+	if (!(xbuddy = xmpp_buddy_find(buddy->id))) {
+		return FALSE;
+	}
+
+	if (xmpp_buddy_set_group(xbuddy, new_group->name) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 HybridModuleInfo module_info = {
