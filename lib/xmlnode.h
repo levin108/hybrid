@@ -159,6 +159,16 @@ xmlnode *xmlnode_new_child(xmlnode *node, const gchar *childname);
 xmlnode *xmlnode_add_child(xmlnode *parent, xmlnode *child);
 
 /**
+ * Add a new text node to @parent.
+ *
+ * @param parent The parent node.
+ * @param text   The content of the text node.
+ *
+ * @return The text node returned;
+ */
+void xmlnode_new_text_child(xmlnode *parent, const gchar *text);
+
+/**
  * Remove a specified node from the xml dom tree.
  *
  * @param node The node to remove.

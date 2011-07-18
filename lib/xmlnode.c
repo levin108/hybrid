@@ -295,6 +295,19 @@ xmlnode_new_child(xmlnode *node, const gchar *childname)
 	return new;
 }
 
+void
+xmlnode_new_text_child(xmlnode *node, const gchar *text)
+{
+	xmlNode *new;
+
+	g_return_if_fail(node != NULL);
+	g_return_if_fail(text != NULL);
+
+	new = xmlNewText((xmlChar *)text);
+
+	xmlAddChild(node->node, new);
+}
+
 xmlnode*
 xmlnode_add_child(xmlnode *parent, xmlnode *child)
 {
