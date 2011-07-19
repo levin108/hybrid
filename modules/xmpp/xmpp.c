@@ -50,7 +50,7 @@ xmpp_modify_status(HybridAccount *account, const gchar *status)
 
 	stream = hybrid_account_get_protocol_data(account);
 
-	if (xmpp_account_modify_status(stream, status) != HYBRID_OK) {
+	if (xmpp_account_modify_status(stream, account->state, status) != HYBRID_OK) {
 		return FALSE;
 	}
 

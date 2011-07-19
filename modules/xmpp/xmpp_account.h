@@ -48,11 +48,13 @@ gint xmpp_account_modify_name(XmppStream *stream, const gchar *name);
  * Modify status for the account.
  *
  * @param stream  The stream for the account to modify.
+ * @param state   The presence state.
  * @param status  The new status string.
  *
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
-gint xmpp_account_modify_status(XmppStream *stream, const gchar *status);
+gint xmpp_account_modify_status(XmppStream *stream, gint state,
+		const gchar *status);
 
 /**
  * Destroy an existing account.

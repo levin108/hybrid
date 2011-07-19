@@ -103,6 +103,8 @@ hybrid_account_init(void)
 				if (atoi(value) == 1) {
 					account->enabled = 1;
 				}
+
+				g_free(value);
 			}
 
 			/* load the icon data. */
@@ -127,7 +129,6 @@ hybrid_account_init(void)
 
 					g_free(crc);
 					g_free(icon_data);
-
 				}
 
 				g_free(value);
@@ -139,7 +140,15 @@ hybrid_account_init(void)
 				if (*value != '\0') {
 					hybrid_account_set_nickname(account, value);
 				}
+				g_free(value);
+			}
 
+			/* load the status */
+			if (xmlnode_has_prop(node, "status")) {
+				value = xmlnode_prop(node, "status");
+				if (*value != '\0') {
+					hybrid_account_set_status_text(account, value);
+				}
 				g_free(value);
 			}
 
@@ -299,6 +308,13 @@ update_node:
 		xmlnode_new_prop(node, "crc", account->icon_crc);
 	}
 
+	if (xmlnode_has_prop(node, "status")) {
+		xmlnode_set_prop(node, "status", account->status_text);
+
+	} else {
+		xmlnode_new_prop(node, "status", account->status_text);
+	}
+
 	xmlnode_save_file(root, account_file);
 
 	g_free(account_file);
@@ -386,6 +402,7 @@ hybrid_account_create(HybridModule *proto)
 	ac->group_list = g_hash_table_new(g_str_hash, g_str_equal);
 	ac->config = global_config;
 	ac->proto = proto;
+	ac->status_text = NULL;
 
 	return ac;
 }
@@ -558,11 +575,15 @@ hybrid_account_set_password(HybridAccount *account, const gchar *password)
 void
 hybrid_account_set_status_text(HybridAccount *account, const gchar *text)
 {
+	gchar *temp;
+
 	g_return_if_fail(account != NULL);
 
-	g_free(account->status_text);
+	temp = account->status_text;
 
 	account->status_text = g_strdup(text);
+
+	g_free(temp);
 }
 
 void
@@ -573,6 +594,13 @@ hybrid_account_set_state(HybridAccount *account, gint state)
 	GtkWidget *presence_image;
 
 	g_return_if_fail(account != NULL);
+
+	/*
+	 * The state wasn't changed, we do nothing.
+	 */
+	if (account->state == state) {
+		return;
+	}
 
 	account->state = state;
 

@@ -328,6 +328,37 @@ xmpp_stream_performtls(XmppStream *stream)
 	}
 }
 
+/**
+ * What should be done after authenticating successfully,
+ * set connection status, set account state, and then fetch
+ * the roster.
+ */
+static void
+auth_success(XmppStream *stream)
+{
+	HybridAccount *account;
+
+	g_return_if_fail(stream != NULL);
+
+	account = stream->account->account;
+
+	if (account->state == HYBRID_STATE_OFFLINE || 
+		account->state == HYBRID_STATE_INVISIBLE) {
+		account->state = HYBRID_STATE_ONLINE;
+	}
+	/* set account's presence state. */
+	hybrid_account_set_state(account, account->state);
+	/*
+	 * Remember to do this before adding any buddies to the blist,
+	 * we should set the account to be connected first.
+	 */
+	hybrid_account_set_connection_status(account,
+			HYBRID_CONNECTION_CONNECTED);
+
+	/* OK, we request the roster from the server. */
+	xmpp_stream_get_roster(stream);
+}
+
 static gboolean
 account_get_info_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 {
@@ -378,15 +409,7 @@ account_get_info_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 		}
 	}
 
-	/*
-	 * Remember to do this before adding any buddies to the blist,
-	 * we should set the account to be connected first.
-	 */
-	hybrid_account_set_connection_status(account,
-			HYBRID_CONNECTION_CONNECTED);
-
-	/* OK, we request the roster from the server. */
-	xmpp_stream_get_roster(stream);
+	auth_success(stream);
 
 	return FALSE;
 }
@@ -413,15 +436,7 @@ start_session_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 
 	} else {
 
-		/*
-		 * Remember to do this before adding any buddies to the blist,
-		 * we should set the account to be connected first.
-		 */
-		hybrid_account_set_connection_status(account,
-				HYBRID_CONNECTION_CONNECTED);
-
-		/* OK, we request the roster from the server. */
-		xmpp_stream_get_roster(stream);
+		auth_success(stream);
 	}
 	
 	return TRUE;

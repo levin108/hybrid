@@ -12,8 +12,11 @@ xmpp_buddy_presence(XmppStream *stream)
 {
 	xmlnode *node;
 	gchar *xml_string;
+	HybridAccount *account;
 
 	g_return_if_fail(stream != NULL);
+
+	account = stream->account->account;
 
 	node = xmlnode_create("presence");
 
@@ -31,6 +34,9 @@ xmpp_buddy_presence(XmppStream *stream)
 	}
 
 	g_free(xml_string);
+
+	xmpp_account_modify_status(stream, account->state, 
+			account->status_text);
 }
 
 void
