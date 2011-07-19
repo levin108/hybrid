@@ -13,6 +13,7 @@
 
 #include "xmpp_stream.h"
 #include "xmpp_buddy.h"
+#include "xmpp_account.h"
 
 const gchar *jabber_server = "talk.l.google.com";
 
@@ -33,6 +34,27 @@ xmpp_login(HybridAccount *account)
 			(connect_callback)xmpp_stream_init, stream);
 
 	return FALSE;
+}
+
+static gboolean
+xmpp_modify_name(HybridAccount *account, const gchar *name)
+{
+
+	return FALSE;
+}
+
+static gboolean
+xmpp_modify_status(HybridAccount *account, const gchar *status)
+{
+	XmppStream *stream;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (xmpp_account_modify_status(stream, status) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 static gboolean
@@ -107,8 +129,8 @@ HybridModuleInfo module_info = {
 
 	xmpp_login,                 /**< login */
 	NULL,              /**< get_info */
-	NULL,
-	NULL,
+	xmpp_modify_name,           /**< modify_name */
+	xmpp_modify_status,         /**< modify_status */
 	NULL,          /**< change_state */
 	NULL,            /**< keep_alive */
 	NULL,       /**< account_tooltip */

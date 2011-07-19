@@ -74,15 +74,21 @@ show_edit_box(gint edit_type)
 		case HYBRID_HEAD_EDIT_NAME:
 
 			markup = _("<b>Please input the name:</b>");
-			gtk_entry_set_text(GTK_ENTRY(hybrid_head->edit_entry),
-					account->nickname);
+
+			if (account->nickname) {
+				gtk_entry_set_text(GTK_ENTRY(hybrid_head->edit_entry),
+						account->nickname);
+			}
 
 			break;
 		case HYBRID_HEAD_EDIT_STATUS:
 
 			markup = _("<b>Please input the status:</b>");
-			gtk_entry_set_text(GTK_ENTRY(hybrid_head->edit_entry),
-					account->status_text);
+			
+			if (account->status_text) {
+				gtk_entry_set_text(GTK_ENTRY(hybrid_head->edit_entry),
+						account->status_text);
+			}
 
 			break;
 		default:

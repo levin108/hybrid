@@ -6,6 +6,8 @@
 
 typedef struct _XmppAccount XmppAccount;
 
+#include "xmpp_stream.h"
+
 struct _XmppAccount {
 	gchar *username;
 	gchar *password;
@@ -31,6 +33,26 @@ extern "C" {
  */
 XmppAccount *xmpp_account_create(HybridAccount *account, const gchar *username,
 					const gchar *password, const gchar *to);
+
+/**
+ * Modify name for the account.
+ *
+ * @param stream  The stream for the account to modify.
+ * @param name    The new name string.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint xmpp_account_modify_name(XmppStream *stream, const gchar *name);
+
+/**
+ * Modify status for the account.
+ *
+ * @param stream  The stream for the account to modify.
+ * @param status  The new status string.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint xmpp_account_modify_status(XmppStream *stream, const gchar *status);
 
 /**
  * Destroy an existing account.

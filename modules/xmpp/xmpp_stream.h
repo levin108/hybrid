@@ -5,8 +5,6 @@
 #include "connect.h"
 #include "account.h"
 
-#include "xmpp_account.h"
-
 #define TLS_NAMESPACE     "urn:ietf:params:xml:ns:xmpp-tls"
 #define SASL_NAMESPACE    "urn:ietf:params:xml:ns:xmpp-sasl"
 #define BIND_NAMESPACE    "urn:ietf:params:xml:ns:xmpp-bind"
@@ -15,6 +13,8 @@
 #define NS_GOOGLE_ROSTER "google:roster"
 
 typedef struct _XmppStream XmppStream;
+
+#include "xmpp_account.h"
 
 typedef gboolean (*trans_callback)(XmppStream *stream, xmlnode *node,
 									gpointer user_data);

@@ -740,6 +740,19 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 	g_free(resource);
 	g_free(bare_jid);
 
+	if (xmlnode_has_prop(root, "type")) {
+
+		value = xmlnode_prop(root, "type");
+		if (g_strcmp0(value, "unavailable") == 0) {
+
+			xmpp_buddy_set_show(buddy, "type");
+			g_free(value);
+
+			return;
+		}
+		g_free(value);
+	}
+
 	/*
 	 * If the presence message doesn't have a <show> label,
 	 * then it means the current status of the buddy is 'avaiable'.
