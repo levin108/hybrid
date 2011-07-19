@@ -597,6 +597,22 @@ fx_get_info(HybridAccount *account, HybridBuddy *buddy)
 }
 
 static gboolean
+fx_modify_name(HybridAccount *account, const gchar *text)
+{
+	printf("%s\n", text);
+
+	return FALSE;
+}
+
+static gboolean
+fx_modify_status(HybridAccount *account, const gchar *text)
+{
+	printf("%s\n", text);
+
+	return FALSE;
+}
+
+static gboolean
 fx_remove(HybridAccount *account, HybridBuddy *buddy)
 {
 	fetion_account *ac;
@@ -793,8 +809,8 @@ HybridModuleInfo module_info = {
 
 	fx_login,                 /**< login */
 	fx_get_info,              /**< get_info */
-	NULL,
-	NULL,
+	fx_modify_name,           /**< modify_name */
+	fx_modify_status,         /**< modify_status */
 	fx_change_state,          /**< change_state */
 	fx_keep_alive,            /**< keep_alive */
 	fx_account_tooltip,       /**< account_tooltip */
