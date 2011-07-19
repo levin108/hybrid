@@ -6,27 +6,6 @@ HybridHead *hybrid_head;
 
 extern HybridTooltip hybrid_tooltip;
 
-static void
-editing_started_cb(GtkCellRenderer *renderer, GtkCellEditable *editable,
-		gchar *path_str, gpointer user_data)
-{
-	GtkEntry *entry;
-	const gchar *text;
-
-	text = "test";
-
-	if (GTK_IS_ENTRY(editable)) {
-		entry = GTK_ENTRY(editable);
-
-		if (!text) {
-			gtk_entry_set_text(entry, "");
-
-		} else {
-			gtk_entry_set_text(entry, text);
-		}
-	}
-}
-
 /**
  * Callback funtion for initializing the data in the tooltip window.
  */
@@ -58,6 +37,157 @@ tooltip_init(HybridTooltipData *tip_data)
 			return TRUE;
 		}
 	}
+
+	return FALSE;
+}
+
+/**
+ * Hide the edit box and show the info panel.
+ */
+static void
+hide_edit_box(void)
+{
+	gtk_widget_show(hybrid_head->eventbox);
+	gtk_widget_hide(hybrid_head->editbox);
+}
+
+/**
+ * Hide the info panel and show the edit box.
+ */
+static void
+show_edit_box(gint edit_type)
+{
+	const gchar *markup;
+	HybridAccount *account;
+
+	/*
+	 * Be sure there's at least one account was enable.
+	 */
+	if (!(account = hybrid_blist_get_current_account())) {
+		return;
+	}
+
+	hybrid_head->edit_account = account;
+	hybrid_head->edit_state = edit_type;
+
+	switch (edit_type) {
+		case HYBRID_HEAD_EDIT_NAME:
+
+			markup = _("<b>Please input the name:</b>");
+			gtk_entry_set_text(GTK_ENTRY(hybrid_head->edit_entry),
+					account->nickname);
+
+			break;
+		case HYBRID_HEAD_EDIT_STATUS:
+
+			markup = _("<b>Please input the status:</b>");
+			gtk_entry_set_text(GTK_ENTRY(hybrid_head->edit_entry),
+					account->status_text);
+
+			break;
+		default:
+			return;
+	}
+
+
+	gtk_label_set_markup(GTK_LABEL(hybrid_head->edit_label), markup);
+
+	gtk_widget_hide(hybrid_head->eventbox);
+	gtk_widget_show(hybrid_head->editbox);
+
+	gtk_widget_grab_focus(hybrid_head->edit_entry);
+}
+
+static void
+modify_name_menu_cb(GtkWidget *widget, gpointer user_data)
+{
+	show_edit_box(HYBRID_HEAD_EDIT_NAME);
+}
+
+static void
+modify_status_menu_cb(GtkWidget *widget, gpointer user_data)
+{
+	show_edit_box(HYBRID_HEAD_EDIT_STATUS);
+}
+
+static gboolean
+button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	/* Show the modify-name panel for left click. */
+	if (event->button == 1) {
+
+		show_edit_box(HYBRID_HEAD_EDIT_STATUS);
+
+		return TRUE;
+	}
+
+	/* Popup menus for right click. */
+	if (event->button == 3) {
+
+		GtkWidget *menu;
+
+		menu = gtk_menu_new();
+
+		hybrid_create_menu(menu, _("Modify Name"), "rename", TRUE,
+						G_CALLBACK(modify_name_menu_cb), NULL);
+
+		hybrid_create_menu(menu, _("Modify Status"), "rename", TRUE,
+						G_CALLBACK(modify_status_menu_cb), NULL);
+
+		gtk_widget_show_all(menu);
+		
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
+				(event != NULL) ? event->button : 0,
+				gdk_event_get_time((GdkEvent*)event));
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static void
+entry_activate_cb(GtkWidget *widget, gpointer user_data)
+{
+	HybridAccount *account;
+	HybridModule *module;
+	const gchar *text;
+
+	hide_edit_box();
+
+	account = hybrid_head->edit_account;
+	module  = account->proto;
+	text    = gtk_entry_get_text(GTK_ENTRY(hybrid_head->edit_entry));
+
+	if (hybrid_head->edit_state == HYBRID_HEAD_EDIT_NAME) {
+		if (module->info->modify_name) {
+			if (!module->info->modify_name(account, text)) {
+				return;
+			}
+
+			account = hybrid_blist_get_current_account();
+			hybrid_account_set_nickname(account, text);
+			hybrid_head_bind_to_account(account);
+		}
+	}
+
+	if (hybrid_head->edit_state == HYBRID_HEAD_EDIT_STATUS) {
+		if (module->info->modify_status) {
+			if (!module->info->modify_status(account, text)) {
+				return;
+			}
+
+			account = hybrid_blist_get_current_account();
+			hybrid_account_set_status_text(account, text);
+			hybrid_head_bind_to_account(account);
+		}
+	}
+}
+
+static gboolean
+focus_out_cb(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
+{
+	hide_edit_box();
 
 	return FALSE;
 }
@@ -95,12 +225,6 @@ cell_view_init(HybridHead *head)
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(head->cellview), renderer, TRUE);
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(head->cellview), renderer,
 			"markup", HYBRID_HEAD_NAME_COLUMN, NULL);
-
-	g_object_set(renderer, "editable", TRUE, NULL);
-
-	g_signal_connect(G_OBJECT(renderer), "editing-started",
-						G_CALLBACK(editing_started_cb), NULL);
-	//g_signal_connect(G_OBJECT(renderer), "edited", G_CALLBACK(edited_cb), NULL);
 
 	g_object_set(renderer, "xalign", 0.0, "yalign", 0.0, "xpad", 6, "ypad", 0, NULL);
 	g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -164,11 +288,45 @@ hybrid_head_bind_to_account(HybridAccount *account)
 
 void hybrid_head_init()
 {
+	GtkWidget *align;
+
 	hybrid_head = g_new0(HybridHead, 1);
-	hybrid_head->cellview = gtk_cell_view_new();
+	hybrid_head->vbox = gtk_vbox_new(FALSE, 0);
 	hybrid_head->eventbox = gtk_event_box_new();
+	hybrid_head->editbox = gtk_vbox_new(TRUE, 4);
+
+	hybrid_head->cellview = gtk_cell_view_new();
 	gtk_container_add(GTK_CONTAINER(hybrid_head->eventbox), 
 	                  hybrid_head->cellview);
+
+	hybrid_head->edit_label = gtk_label_new(NULL);
+	hybrid_head->edit_entry = gtk_entry_new();
+
+	align = gtk_alignment_new(0, 0, 0, 0);
+	gtk_container_add(GTK_CONTAINER(align), hybrid_head->edit_label);
+	gtk_box_pack_start(GTK_BOX(hybrid_head->editbox),
+						align, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hybrid_head->editbox),
+						hybrid_head->edit_entry, FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(hybrid_head->vbox), hybrid_head->eventbox,
+						FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hybrid_head->vbox), hybrid_head->editbox,
+						FALSE, FALSE, 0);
+
+	gtk_container_set_border_width(GTK_CONTAINER(hybrid_head->editbox), 3);
+
+	g_signal_connect(G_OBJECT(hybrid_head->eventbox),
+				     "button_press_event",
+					 GTK_SIGNAL_FUNC(button_press_cb), NULL);
+
+	g_signal_connect(G_OBJECT(hybrid_head->edit_entry),
+				     "focus-out-event",
+					 GTK_SIGNAL_FUNC(focus_out_cb), NULL);
+
+	g_signal_connect(G_OBJECT(hybrid_head->edit_entry),
+				     "activate",
+					 GTK_SIGNAL_FUNC(entry_activate_cb), NULL);
 
 	hybrid_tooltip_setup(hybrid_head->eventbox, NULL, NULL, tooltip_init, NULL);
 

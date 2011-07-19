@@ -107,6 +107,8 @@ HybridModuleInfo module_info = {
 
 	xmpp_login,                 /**< login */
 	NULL,              /**< get_info */
+	NULL,
+	NULL,
 	NULL,          /**< change_state */
 	NULL,            /**< keep_alive */
 	NULL,       /**< account_tooltip */

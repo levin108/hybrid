@@ -793,6 +793,8 @@ HybridModuleInfo module_info = {
 
 	fx_login,                 /**< login */
 	fx_get_info,              /**< get_info */
+	NULL,
+	NULL,
 	fx_change_state,          /**< change_state */
 	fx_keep_alive,            /**< keep_alive */
 	fx_account_tooltip,       /**< account_tooltip */

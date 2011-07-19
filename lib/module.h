@@ -27,6 +27,16 @@ struct _HybridModuleInfo {
 
 	gboolean (*login)(HybridAccount *);
 	void     (*get_info)(HybridAccount *, HybridBuddy *);
+	/*
+	 * Modify nickname of this account.
+	 */
+	gboolean (*modify_name)(HybridAccount *, const gchar *);
+
+	/*
+	 * Modify status text of this account. 
+	 */
+	gboolean (*modify_status)(HybridAccount *, const gchar *);
+
 	gboolean (*change_state)(HybridAccount *, gint);
 	gboolean (*keep_alive)(HybridAccount *);
 	gboolean (*account_tooltip)(HybridAccount *, HybridTooltipData *data);

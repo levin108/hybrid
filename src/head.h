@@ -9,7 +9,20 @@ typedef struct _HybridHead HybridHead;
 struct _HybridHead {
 	GtkWidget *cellview;
 	GtkWidget *eventbox;
+	GtkWidget *editbox;
+	GtkWidget *edit_label;
+	GtkWidget *edit_entry;
+	GtkWidget *vbox;
 	GtkTreeIter iter;
+
+	/* which accout is being edited. */
+	HybridAccount *edit_account;
+	gint edit_state;
+};
+
+enum {
+	HYBRID_HEAD_EDIT_NAME,
+	HYBRID_HEAD_EDIT_STATUS
 };
 
 enum {

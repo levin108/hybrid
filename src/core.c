@@ -194,7 +194,7 @@ ui_init(void)
 
 	/* head area */
 	hybrid_head_init();
-	gtk_box_pack_start(GTK_BOX(vbox), hybrid_head->eventbox, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(vbox), hybrid_head->vbox, FALSE, FALSE, 10);
 
 	/* scroll area (TreeView) */
 	scroll = gtk_scrolled_window_new(NULL, NULL);
@@ -215,6 +215,7 @@ ui_init(void)
 	create_basic_menus(GTK_BOX(vbox));
 
 	gtk_widget_show_all(window);
+	gtk_widget_hide(hybrid_head->editbox);
 }
 
 gint 
