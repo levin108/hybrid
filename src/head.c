@@ -159,7 +159,16 @@ entry_activate_cb(GtkWidget *widget, gpointer user_data)
 	module  = account->proto;
 	text    = gtk_entry_get_text(GTK_ENTRY(hybrid_head->edit_entry));
 
+	if (!account) {
+		return;
+	}
+
 	if (hybrid_head->edit_state == HYBRID_HEAD_EDIT_NAME) {
+		/* No change to the nickname. */
+		if (g_strcmp0(text, account->nickname) == 0) {
+			return;
+		}
+
 		if (module->info->modify_name) {
 			if (!module->info->modify_name(account, text)) {
 				return;
@@ -172,6 +181,11 @@ entry_activate_cb(GtkWidget *widget, gpointer user_data)
 	}
 
 	if (hybrid_head->edit_state == HYBRID_HEAD_EDIT_STATUS) {
+		/* No change to the status text. */
+		if (g_strcmp0(text, account->status_text) == 0) {
+			return;
+		}
+
 		if (module->info->modify_status) {
 			if (!module->info->modify_status(account, text)) {
 				return;

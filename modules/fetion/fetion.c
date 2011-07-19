@@ -599,17 +599,29 @@ fx_get_info(HybridAccount *account, HybridBuddy *buddy)
 static gboolean
 fx_modify_name(HybridAccount *account, const gchar *text)
 {
-	printf("%s\n", text);
+	fetion_account *ac;
 
-	return FALSE;
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (fetion_account_modify_name(ac, text) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 static gboolean
 fx_modify_status(HybridAccount *account, const gchar *text)
 {
-	printf("%s\n", text);
+	fetion_account *ac;
 
-	return FALSE;
+	ac = hybrid_account_get_protocol_data(account);
+
+	if (fetion_account_modify_status(ac, text) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 static gboolean

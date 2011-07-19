@@ -134,12 +134,16 @@ fetion_account *fetion_account_clone(fetion_account *account);
 /**
  * Set the attribute value of the fetion account.
  */
-#define fetion_account_set_sipuri(ac,v)	    do { g_free((ac)->sipuri);   (ac)->sipuri = g_strdup(v); }   while(0)
-#define fetion_account_set_userid(ac,v)	    do { g_free((ac)->userid);   (ac)->userid = g_strdup(v); }   while(0)
-#define fetion_account_set_mobileno(ac,v)	do { g_free((ac)->mobileno); (ac)->mobileno = g_strdup(v); } while(0)
-#define fetion_account_set_ssic(ac,v)	    do { g_free((ac)->ssic);     (ac)->ssic = g_strdup(v); }     while(0)
-#define fetion_account_set_who(ac,v)	    do { g_free((ac)->who);      (ac)->who = g_strdup(v); }      while(0)
-//#define fetion_account_set_sipuri(ac,v)	((ac)->sipuri = g_strdup(v))
+#define fetion_account_set_nickname(ac,v)        do { g_free((ac)->nickname); (ac)->nickname = g_strdup(v); } while(0)
+#define fetion_account_set_sipuri(ac,v)	         do { g_free((ac)->sipuri);   (ac)->sipuri = g_strdup(v); }   while(0)
+#define fetion_account_set_userid(ac,v)	         do { g_free((ac)->userid);   (ac)->userid = g_strdup(v); }   while(0)
+#define fetion_account_set_mobileno(ac,v)        do { g_free((ac)->mobileno); (ac)->mobileno = g_strdup(v); } while(0)
+#define fetion_account_set_ssic(ac,v)	         do { g_free((ac)->ssic);     (ac)->ssic = g_strdup(v); }     while(0)
+#define fetion_account_set_who(ac,v)	         do { g_free((ac)->who);      (ac)->who = g_strdup(v); }      while(0)
+#define fetion_account_set_mood(ac,v)            do { g_free((ac)->mood_phrase); (ac)->mood_phrase = g_strdup(v); } while(0)
+#define fetion_account_set_persion_version(ac,v) do { g_free((ac)->personal_version); (ac)->personal_version = g_strdup(v); } while(0)
+#define fetion_account_set_mood(ac,v)            do { g_free((ac)->mood_phrase); (ac)->mood_phrase = g_strdup(v); } while(0)
+#define fetion_account_set_custom_config(ac,v)   do { g_free((ac)->custom_config); (ac)->custom_config = g_strdup(v); } while(0)
 
 /**
  * Destroy the fetion account.
@@ -152,7 +156,7 @@ void fetion_account_destroy(fetion_account *ac);
  * Update the presence state of the account, the message is:
  *
  * S fetion.com.cn SIP-C/4.0
- * F: 547264589
+ * F: 99999999
  * I: 7
  * Q: 2 S
  * N: SetPresenceV4
@@ -161,6 +165,24 @@ void fetion_account_destroy(fetion_account *ac);
  * <args><presence><basic value="400"/></presence></args>
  */
 gint fetion_account_update_state(fetion_account *ac, gint state);
+
+/**
+ * Modify nickname of the account.
+ *
+ * @param ac   The fetion account.
+ * @param nam  The new name string.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint fetion_account_modify_name(fetion_account *ac, const gchar *name);
+
+/**
+ * Modify status of the account.
+ *
+ * @param ac     The fetion account.
+ * @param status The new status string.
+ */
+gint fetion_account_modify_status(fetion_account *ac, const gchar *status);
 
 /**
  * Set a keep alive message to the server.

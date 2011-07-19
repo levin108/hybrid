@@ -7,6 +7,10 @@
 
 static gchar *generate_set_state_body(gint state);
 static gchar *generate_keep_alive_body();
+static gchar *generate_modify_name_body(fetion_account *account,
+					const gchar *name);
+static gchar *generate_modify_status_body(fetion_account *account,
+					const gchar *status);
 
 /**
  * List of existing channels, whose element is fetion_account.
@@ -106,6 +110,154 @@ fetion_account_update_state(fetion_account *ac, gint state)
 	ac->state = state;
 
 	g_free(res);
+
+	return HYBRID_OK;
+}
+
+/**
+ * Callback function to handle the response of the modify-info request,
+ * we will get the new nickname,status,custom config string,etc.
+ */
+static gint
+modify_info_cb(fetion_account *account, const gchar *sipmsg,
+		fetion_transaction *trans)
+{
+	xmlnode *root;
+	xmlnode *node;
+	gchar *value;
+	gchar *pos;
+
+	hybrid_debug_info("fetion", "modify info,recv:\n%s", sipmsg);
+
+	if (fetion_sip_get_code(sipmsg) != 200) {
+		goto modify_info_err;
+	}
+
+	if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
+		goto modify_info_err;
+	}
+
+	pos += 4;
+
+	if (!(root = xmlnode_root(pos, strlen(pos)))) {
+		goto modify_info_err;
+	}
+
+	if ((node = xmlnode_find(root, "personal"))) {
+
+		if (xmlnode_has_prop(node, "impresa")) {
+
+			value = xmlnode_prop(node, "impresa");
+			fetion_account_set_mood(account, value);
+			hybrid_account_set_status_text(account->account, value);
+			g_free(value);
+		}
+		
+		if (xmlnode_has_prop(node, "nickname")) {
+
+			value = xmlnode_prop(node, "nickname");
+			fetion_account_set_nickname(account, value);
+			hybrid_account_set_nickname(account->account, value);
+			g_free(value);
+		}
+	}
+
+	if ((node = xmlnode_find(root, "custom-config"))) {
+
+		value = xmlnode_content(node);
+		fetion_account_set_custom_config(account, value);
+		g_free(value);
+	}
+
+	return HYBRID_OK;
+
+modify_info_err:
+	hybrid_debug_error("fetion", "modify info error.");
+	return HYBRID_ERROR;
+}
+
+gint
+fetion_account_modify_name(fetion_account *account, const gchar *name)
+{
+	sip_header *eheader;
+	fetion_sip *sip;
+	gchar *body;
+	gchar *sip_text;
+	fetion_transaction *trans;
+
+	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(name != NULL, HYBRID_ERROR);
+
+	sip = account->sip;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+
+	eheader = sip_event_header_create(SIP_EVENT_SETUSERINFO);
+	fetion_sip_add_header(sip, eheader);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, modify_info_cb);
+	transaction_add(account, trans);
+
+	body = generate_modify_name_body(account, name);
+
+	sip_text = fetion_sip_to_string(sip, body);
+
+	g_free(body);
+
+	hybrid_debug_info("fetion", "modify nickname,send:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+		g_free(sip_text);
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
+
+	return HYBRID_OK;
+}
+
+gint
+fetion_account_modify_status(fetion_account *account, const gchar *status)
+{
+	sip_header *eheader;
+	fetion_sip *sip;
+	gchar *body;
+	gchar *sip_text;
+	fetion_transaction *trans;
+
+	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(status != NULL, HYBRID_ERROR);
+
+	sip = account->sip;
+
+	fetion_sip_set_type(sip, SIP_SERVICE);
+
+	eheader = sip_event_header_create(SIP_EVENT_SETUSERINFO);
+	fetion_sip_add_header(sip, eheader);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_callback(trans, modify_info_cb);
+	transaction_add(account, trans);
+
+	body = generate_modify_status_body(account, status);
+
+	sip_text = fetion_sip_to_string(sip, body);
+
+	g_free(body);
+
+	hybrid_debug_info("fetion", "modify status,send:\n%s", sip_text);
+
+	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+		g_free(sip_text);
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(sip_text);
 
 	return HYBRID_OK;
 }
@@ -262,4 +414,56 @@ generate_keep_alive_body()
 	xmlnode_free(root);
 
 	return body;
+}
+
+static gchar*
+generate_modify_name_body(fetion_account *account, const gchar *name)
+{
+	xmlnode *root;
+	xmlnode *cnode;
+	xmlnode *node;
+	gchar *xml_text;
+
+	root = xmlnode_create("args");
+
+	cnode = xmlnode_new_child(root, "userinfo");
+	node = xmlnode_new_child(cnode, "personal");
+	xmlnode_new_prop(node, "nickname", name);
+	xmlnode_new_prop(node, "version", account->personal_version);
+	node = xmlnode_new_child(cnode, "custom-config");
+	xmlnode_new_prop(node, "type", "PC");
+	xmlnode_new_prop(node, "version", account->custom_config_version);
+	xmlnode_set_content(node, account->custom_config);
+
+	xml_text = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return xml_text;
+}
+
+static gchar*
+generate_modify_status_body(fetion_account *account, const gchar *status)
+{
+	xmlnode *root;
+	xmlnode *cnode;
+	xmlnode *node;
+	gchar *xml_text;
+
+	root = xmlnode_create("args");
+
+	cnode = xmlnode_new_child(root, "userinfo");
+	node = xmlnode_new_child(cnode, "personal");
+	xmlnode_new_prop(node, "impresa", status);
+	xmlnode_new_prop(node, "version", account->personal_version);
+	node = xmlnode_new_child(cnode, "custom-config");
+	xmlnode_new_prop(node, "type", "PC");
+	xmlnode_new_prop(node, "version", account->custom_config_version);
+	xmlnode_set_content(node, account->custom_config);
+
+	xml_text = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return xml_text;
 }
