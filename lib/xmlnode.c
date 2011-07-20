@@ -63,10 +63,10 @@ xmlnode_root_from_file(const gchar *filepath)
 
 	g_return_val_if_fail(filepath != NULL, NULL);
 
-	doc = xmlParseFile(filepath);
+
+	doc = xmlReadFile(filepath, NULL, XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
 	
 	if (!doc) {
-		hybrid_debug_error("xml", "parse xml file");
 		return NULL;
 	}
 
