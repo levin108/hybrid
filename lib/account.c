@@ -595,13 +595,6 @@ hybrid_account_set_state(HybridAccount *account, gint state)
 
 	g_return_if_fail(account != NULL);
 
-	/*
-	 * The state wasn't changed, we do nothing.
-	 */
-	if (account->state == state) {
-		return;
-	}
-
 	account->state = state;
 
 	/* 
@@ -620,6 +613,10 @@ hybrid_account_set_state(HybridAccount *account, gint state)
 
 	g_free(menu_name);
 	g_object_unref(presence_pixbuf);
+
+	if (account == hybrid_blist_get_current_account()) {
+		hybrid_head_bind_to_account(account);
+	}
 }
 
 void

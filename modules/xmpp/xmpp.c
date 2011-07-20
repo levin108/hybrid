@@ -14,6 +14,7 @@
 #include "xmpp_stream.h"
 #include "xmpp_buddy.h"
 #include "xmpp_account.h"
+#include "xmpp_message.h"
 
 const gchar *jabber_server = "talk.l.google.com";
 
@@ -117,6 +118,31 @@ xmpp_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 	return TRUE;
 }
 
+static void
+xmpp_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
+{
+	XmppStream *stream;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	xmpp_message_send(stream, text, buddy->id);
+}
+
+static void
+xmpp_close(HybridAccount *account)
+{
+	XmppStream *stream;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	g_source_remove(stream->source);
+	close(stream->sk);
+
+	xmpp_stream_destroy(stream);
+
+	xmpp_buddy_clear();
+}
+
 HybridModuleInfo module_info = {
 	"xmpp",                     /**< name */
 	"levin108",                   /**< author */
@@ -144,8 +170,8 @@ HybridModuleInfo module_info = {
 	xmpp_group_add,             /**< group_add */
 	NULL,       /**< chat_word_limit */
 	NULL,            /**< chat_start */
-	NULL,             /**< chat_send */
-	NULL,                 /**< close */
+	xmpp_chat_send,             /**< chat_send */
+	xmpp_close,                 /**< close */
 	NULL,               /**< actions */
 };
 

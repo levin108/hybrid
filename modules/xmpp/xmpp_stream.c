@@ -1,5 +1,6 @@
 #include "util.h"
 #include "connect.h"
+#include "conv.h"
 
 #include "xmpp_util.h"
 #include "xmpp_stream.h"
@@ -100,7 +101,22 @@ xmpp_stream_set_state(XmppStream *stream, gint state)
 void
 xmpp_stream_destroy(XmppStream *stream)
 {
+	IqTransaction *trans;
+
 	if (stream) {
+		g_free(stream->jid);
+		g_free(stream->stream_id);
+		xmlnode_free(stream->node);
+		xmpp_account_destroy(stream->account);
+		
+		while (stream->pending_trans) {
+			trans = (IqTransaction*)stream->pending_trans->data;
+			iq_transaction_remove(stream, trans);
+		}
+
+		hybrid_connection_destroy(stream->conn);
+		hybrid_ssl_connection_destory(stream->ssl);
+
 		g_free(stream);
 	}
 }
@@ -266,8 +282,8 @@ xmpp_stream_init(gint sk, XmppStream *stream)
 
 	g_free(msg);
 
-	hybrid_event_add(sk, HYBRID_EVENT_READ,
-			(input_func)stream_recv_cb, stream);
+	stream->source = hybrid_event_add(sk, HYBRID_EVENT_READ,
+						(input_func)stream_recv_cb, stream);
 
 	return FALSE;
 }
@@ -346,8 +362,10 @@ auth_success(XmppStream *stream)
 		account->state == HYBRID_STATE_INVISIBLE) {
 		account->state = HYBRID_STATE_ONLINE;
 	}
+
 	/* set account's presence state. */
 	hybrid_account_set_state(account, account->state);
+
 	/*
 	 * Remember to do this before adding any buddies to the blist,
 	 * we should set the account to be connected first.
@@ -760,7 +778,7 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 		value = xmlnode_prop(root, "type");
 		if (g_strcmp0(value, "unavailable") == 0) {
 
-			xmpp_buddy_set_show(buddy, "type");
+			xmpp_buddy_set_show(buddy, value);
 			g_free(value);
 
 			return;
@@ -787,8 +805,8 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 		status = xmlnode_content(node);
 		xmpp_buddy_set_status(buddy, status);
 		g_free(status);
-	}
 
+	} 
 	/*
 	 * Check whether it has a photo label, then we can
 	 * determine whether to fetch the buddy's photo.
@@ -806,6 +824,58 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 
 		g_free(photo);
 	}
+}
+
+static void
+xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
+{
+	gchar *value;
+	gchar *bare_jid;
+	xmlnode *node;
+
+	g_return_if_fail(stream != NULL);
+	g_return_if_fail(root != NULL);
+
+	if (!xmlnode_has_prop(root, "type")) {
+		hybrid_debug_error("xmpp", 
+				"invalid message received without a type property.");
+		return;
+	}
+
+	value = xmlnode_prop(root, "type");
+
+	if (g_strcmp0(value, "chat") != 0) {
+
+		hybrid_debug_error("xmpp", "unsupported message type.");
+		g_free(value);
+
+		return;
+	}
+
+	g_free(value);
+
+	if (!xmlnode_has_prop(root, "from")) {
+		
+		hybrid_debug_error("xmpp", "invalid message without a from property.");
+		return;
+	}
+
+	value = xmlnode_prop(root, "from");
+	bare_jid = get_bare_jid(value);
+	g_free(value);
+
+	if (!(node = xmlnode_find(root, "body"))) {
+		hybrid_debug_error("xmpp", "invalid message without a body.");
+		return;
+	}
+
+	value = xmlnode_content(node);
+
+	hybrid_conv_got_message(stream->account->account,
+			bare_jid, value, time(NULL));
+
+	g_free(value);
+
 }
 
 void
@@ -838,6 +908,10 @@ xmpp_stream_process(XmppStream *stream, xmlnode *node)
 	} else if (g_strcmp0(node->name, "presence") == 0) {
 
 		xmpp_stream_process_presence(stream, node);
+
+	} else if (g_strcmp0(node->name, "message") == 0) {
+
+		xmpp_stream_process_message(stream, node);
 	}
 }
 

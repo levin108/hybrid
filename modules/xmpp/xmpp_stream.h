@@ -21,6 +21,7 @@ typedef gboolean (*trans_callback)(XmppStream *stream, xmlnode *node,
 
 struct _XmppStream {
 	gint sk;  /**< the socket descriptor. */
+	guint source; /**< event source. */
 
 	gint current_iq_id;
 

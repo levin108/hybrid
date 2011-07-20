@@ -142,6 +142,10 @@ gint xmpp_buddy_get_info(XmppStream *stream, const gchar *jid,
 		trans_callback callback, gpointer user_data);
 
 /**
+ * Clear the buddies from the local buddy list.
+ */
+void xmpp_buddy_clear(void);
+/**
  * Destroy a buddy.
  *
  * @param buddy The buddy to destroy.
