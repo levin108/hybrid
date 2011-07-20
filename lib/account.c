@@ -678,6 +678,9 @@ hybrid_account_enable(HybridAccount *account)
 		return;
 	}
 
+	hybrid_account_set_enabled(account, TRUE);
+	hybrid_account_update(account);
+
 	account->login_panel = gtk_frame_new(NULL);
 
 	cellview = gtk_cell_view_new();
@@ -987,8 +990,8 @@ hybrid_get_presence_name(gint presence_state)
 	const gchar *presence_names[] = {
 		N_("Offline"),
 		N_("Invisible"),
-		N_("Busy"),
 		N_("Away"),
+		N_("Busy"),
 		N_("Online")
 	};
 
