@@ -61,8 +61,20 @@ gint xmpp_account_modify_status(XmppStream *stream, gint state,
  *
  * @param stream   The stream for the account to modify.
  * @param filename The filename of the photo.
+ *
+ * @return HYBRID_ERROR or HYBRID_OK in case of an error.
  */
 gint xmpp_account_modify_photo(XmppStream *stream, const gchar *filename);
+
+/**
+ * Modify full name for the account.
+ *
+ * @param stream The stream for the account to modify.
+ * @param name   The full name of the account.
+ *
+ * @return HYBRID_ERROR or HYBRID_OK in case of an error.
+ */
+gint xmpp_account_modify_name(XmppStream *stream, const gchar *name);
 
 /**
  * Destroy an existing account.

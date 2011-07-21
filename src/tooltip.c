@@ -389,6 +389,30 @@ create_pango_layout(const gchar *markup, gint *width, gint *height)
 }
 
 void
+hybrid_tooltip_data_add_title(HybridTooltipData *data, const gchar *title)
+{
+	PangoLayout *layout;
+	gchar *markup;
+	gchar *escaped_value = NULL;
+
+	g_return_if_fail(data != NULL);
+	g_return_if_fail(title != NULL);
+
+	escaped_value = g_markup_escape_text(title, -1);
+
+	markup = g_strdup_printf("<b><span size='x-large'>%s</span></b>",
+					escaped_value);
+
+	g_free(escaped_value);
+
+	layout = create_pango_layout(markup, NULL, NULL);
+
+	g_free(markup);
+
+	data->layouts = g_slist_append(data->layouts, layout);
+}
+
+void
 hybrid_tooltip_data_add_pair(HybridTooltipData *data, const gchar *name,
                                   const gchar *value)
 {
@@ -415,6 +439,8 @@ hybrid_tooltip_data_add_pair(HybridTooltipData *data, const gchar *name,
 	g_free(escaped_value);
 
 	layout = create_pango_layout(markup, NULL, NULL);
+
+	g_free(markup);
 
 	data->layouts = g_slist_append(data->layouts, layout);
 }

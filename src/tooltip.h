@@ -76,6 +76,14 @@ PangoLayout *create_pango_layout(const gchar *markup,
                                  gint *width, gint *height);
 
 /**
+ * Add tooltip title to the tooltip data.
+ *
+ * @param data  The tooltip data.
+ * @param title The tooltip title.
+ */
+void hybrid_tooltip_data_add_title(HybridTooltipData *data, const gchar *title);
+
+/**
  * Add name-value pair to the tooltip data.
  *
  * @param data  The tooltip data.

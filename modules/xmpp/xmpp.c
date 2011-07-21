@@ -40,8 +40,15 @@ xmpp_login(HybridAccount *account)
 static gboolean
 xmpp_modify_name(HybridAccount *account, const gchar *name)
 {
+	XmppStream *stream;
 
-	return FALSE;
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (xmpp_account_modify_name(stream, name) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 static gboolean
@@ -88,22 +95,49 @@ xmpp_change_state(HybridAccount *account, gint state)
 }
 
 static gboolean
+xmpp_account_tooltip(HybridAccount *account, HybridTooltipData *tip_data)
+{
+	XmppStream *stream;
+	gchar *status;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	status = g_strdup_printf("[%s] %s", 
+			hybrid_get_presence_name(account->state),
+			account->status_text ? account->status_text : "");
+
+	hybrid_tooltip_data_add_title(tip_data, account->username);
+	if (account->nickname) {
+		hybrid_tooltip_data_add_pair(tip_data, "Name", account->nickname);
+	}
+	hybrid_tooltip_data_add_pair(tip_data, "Status", status);
+	//hybrid_tooltip_data_add_pair(tip_data, "Resource", bd->resource);
+
+	return TRUE;
+}
+
+static gboolean
 xmpp_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy,
 		HybridTooltipData *tip_data)
 {
 	XmppBuddy *bd;
+	gchar *status;
 
 	if (!(bd = xmpp_buddy_find(buddy->id))) {
 		return FALSE;
 	}
 
-	hybrid_tooltip_data_add_pair(tip_data, "ID", bd->jid);
+	status = g_strdup_printf("[%s] %s", 
+			hybrid_get_presence_name(buddy->state),
+			bd->status ? bd->status : "");
+
+	hybrid_tooltip_data_add_title(tip_data, bd->jid);
 	hybrid_tooltip_data_add_pair(tip_data, "Name", bd->name);
-	hybrid_tooltip_data_add_pair(tip_data, "Mood", bd->status);
-	hybrid_tooltip_data_add_pair(tip_data, "Status",
-	                             hybrid_get_presence_name(buddy->state));
+	hybrid_tooltip_data_add_pair(tip_data, "Status", status);
 	hybrid_tooltip_data_add_pair(tip_data, "Subscription", bd->subscription);
 	hybrid_tooltip_data_add_pair(tip_data, "Resource", bd->resource);
+
+	g_free(status);
 
 	return TRUE;
 }
@@ -189,7 +223,7 @@ HybridModuleInfo module_info = {
 	xmpp_modify_photo,          /**< modify_photo */
 	xmpp_change_state,          /**< change_state */
 	NULL,            /**< keep_alive */
-	NULL,       /**< account_tooltip */
+	xmpp_account_tooltip,       /**< account_tooltip */
 	xmpp_buddy_tooltip,         /**< buddy_tooltip */
 	xmpp_buddy_move,            /**< buddy_move */
 	NULL,                /**< buddy_remove */

@@ -6,6 +6,10 @@
 typedef struct _IqRequest IqRequest;
 typedef struct _IqTransaction IqTransaction;
 
+typedef gboolean (*trans_callback)(XmppStream *stream, xmlnode *node,
+									gpointer user_data);
+
+
 struct _IqRequest {
 	gint type;
 	XmppStream *stream;

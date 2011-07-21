@@ -2,6 +2,7 @@
 #define HYBRID_XMPP_BUDDY_H
 
 #include "xmpp_stream.h"
+#include "xmpp_iq.h"
 
 typedef struct _XmppBuddy XmppBuddy;
 

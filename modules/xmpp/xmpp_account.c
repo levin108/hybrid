@@ -100,6 +100,46 @@ xmpp_account_modify_status(XmppStream *stream, gint state, const gchar *status)
 	return HYBRID_OK;
 }
 
+gboolean
+modify_name_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	printf("%s\n", xmlnode_to_string(root));
+
+	return TRUE;
+}
+
+gint
+xmpp_account_modify_name(XmppStream *stream, const gchar *name)
+{
+	IqRequest *iq;
+	xmlnode *node;
+
+	g_return_val_if_fail(stream != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(name != NULL, HYBRID_ERROR);
+
+	iq = iq_request_create(stream, IQ_TYPE_SET);
+
+	node = xmlnode_new_child(iq->node, "vCard");
+	xmlnode_new_namespace(node, NULL, "vcard-temp");
+
+	node = xmlnode_new_child(node, "FN");
+	xmlnode_set_content(node, name);
+
+	iq_request_set_callback(iq, modify_name_cb, NULL);
+
+	if (iq_request_send(iq) != HYBRID_OK) {
+
+		hybrid_debug_error("xmpp", "modify photo failed.");
+		iq_request_destroy(iq);
+
+		return HYBRID_ERROR;
+	}
+
+	iq_request_destroy(iq);
+
+	return HYBRID_OK;
+}
+
 gint
 xmpp_account_modify_photo(XmppStream *stream, const gchar *filename)
 {

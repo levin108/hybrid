@@ -16,9 +16,6 @@ typedef struct _XmppStream XmppStream;
 
 #include "xmpp_account.h"
 
-typedef gboolean (*trans_callback)(XmppStream *stream, xmlnode *node,
-									gpointer user_data);
-
 struct _XmppStream {
 	gint sk;  /**< the socket descriptor. */
 	guint source; /**< event source. */

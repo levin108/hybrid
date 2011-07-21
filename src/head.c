@@ -160,6 +160,7 @@ modify_status_menu_cb(GtkWidget *widget, gpointer user_data)
 static gboolean
 button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
+#if 0
 	/* Show the modify-name panel for left click. */
 	if (event->button == 1) {
 
@@ -167,6 +168,7 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 		return TRUE;
 	}
+#endif
 
 	/* Popup menus for right click. */
 	if (event->button == 3) {
