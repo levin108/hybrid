@@ -29,6 +29,10 @@ get_resource(const gchar *full_jid)
 
 	for (pos = (gchar *)full_jid; *pos && *pos != '/'; pos ++);
 
+	if (*pos == '\0') {
+		return g_strdup(full_jid);
+	}
+
 	pos ++;
 
 	return g_strndup(pos, full_jid + strlen(full_jid) - pos);
@@ -597,7 +601,46 @@ xmpp_stream_new_on_sasl(XmppStream *stream)
 }
 
 /**
- * Process the iq response.
+ * Process the iq set request.
+ */
+static void
+xmpp_stream_process_iq_set(XmppStream *stream, xmlnode *root)
+{
+	gchar *id;
+	gchar *value;
+	xmlnode *node;
+	gint count = 0;
+
+	g_return_if_fail(stream != NULL);
+	g_return_if_fail(root != NULL);
+
+	node = xmlnode_child(root);
+
+	for (; node; node = node->next, count ++);
+
+	/*
+	 * An IQ stanza of type "get" or "set" MUST contain exactly one
+     * child element, which specifies the semantics of the particular
+     *  request.
+	 */
+	if (count != 1) {
+		/* TODO send error stanza. */
+		return;
+	}
+
+	node = xmlnode_child(root);
+
+	if (g_strcmp0(node->name, "query") == 0) {
+		value = xmlnode_prop(node, "xmlns");
+
+		g_print("####################### %s\n", value);
+
+		g_free(value);
+	}
+}
+
+/**
+ * Process the iq messages.
  */
 static void
 xmpp_stream_process_iq(XmppStream *stream, xmlnode *node)
@@ -606,33 +649,51 @@ xmpp_stream_process_iq(XmppStream *stream, xmlnode *node)
 	gint id_int;
 	GSList *pos;
 	IqTransaction *trans;
+	gchar *value;
 
 	g_return_if_fail(stream != NULL);
 	g_return_if_fail(node != NULL);
 
 	if (!xmlnode_has_prop(node, "type") ||
 		!xmlnode_has_prop(node, "id")) {
-		hybrid_debug_error("xmpp", "invalid iq response.");
+		hybrid_debug_error("xmpp", "invalid iq message.");
 
 		return;
 	}
 
-	id = xmlnode_prop(node, "id");
-	id_int = atoi(id);
-	g_free(id);
+	value = xmlnode_prop(node, "type");
 
-	for (pos = stream->pending_trans; pos; pos = pos->next) {
-		trans = (IqTransaction*)pos->data;
+	/* response to a get or set request. */
+	if (g_strcmp0(value, "result") == 0 ||
+		g_strcmp0(value, "error") == 0) {
 
-		if (trans->iq_id == id_int) {
+		id = xmlnode_prop(node, "id");
+		id_int = atoi(id);
+		g_free(id);
 
-			if (trans->callback) {
-				trans->callback(stream, node, trans->user_data);
+		for (pos = stream->pending_trans; pos; pos = pos->next) {
+			trans = (IqTransaction*)pos->data;
+
+			if (trans->iq_id == id_int) {
+
+				if (trans->callback) {
+					trans->callback(stream, node, trans->user_data);
+				}
+
+				iq_transaction_remove(stream, trans);
 			}
-
-			iq_transaction_remove(stream, trans);
 		}
+
+	/*
+	 * An entity that receives an IQ request of type "get" or "set" MUST
+       reply with an IQ response of type "result" or "error".
+	 */
+	} else if (g_strcmp0(value, "get") == 0) { /* process later. */
+	} else if (g_strcmp0(value, "set") == 0) {
+		xmpp_stream_process_iq_set(stream, node);
 	}
+
+	g_free(value);
 }
 
 /**
@@ -711,9 +772,6 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 		return;
 	}
 
-	xmpp_buddy_set_resource(buddy, resource);
-
-	g_free(resource);
 	g_free(bare_jid);
 
 	if (xmlnode_has_prop(root, "type")) {
@@ -723,11 +781,23 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 
 			xmpp_buddy_set_show(buddy, value);
 			g_free(value);
+			g_free(resource);
+
+			return;
+		} else if (g_strcmp0(value, "subscribed")) {
+
+			g_free(value);
+			g_free(resource);
 
 			return;
 		}
+
+		xmpp_buddy_set_resource(buddy, resource);
+
 		g_free(value);
 	}
+
+	g_free(resource);
 
 	/*
 	 * If the presence message doesn't have a <show> label,

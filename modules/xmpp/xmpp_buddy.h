@@ -145,11 +145,20 @@ gint xmpp_buddy_get_info(XmppStream *stream, const gchar *jid,
 /**
  * Unsubscribe a buddy's presence message.
  *
- * @param buddy The xmpp buddy to unscribe.
+ * @param buddy The xmpp buddy to unsubscribe.
  *
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
 gint xmpp_buddy_unsubscribe(XmppBuddy *buddy);
+
+/**
+ * Subscribe a buddy's presence message.
+ *
+ * @param buddy The xmpp buddy to subscribe.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint xmpp_buddy_subscribe(XmppBuddy *buddy);
 
 /**
  * Remove a buddy from the roster.
@@ -161,7 +170,7 @@ gint xmpp_buddy_unsubscribe(XmppBuddy *buddy);
 gint xmpp_buddy_delete(XmppBuddy *buddy);
 
 /**
- * Add a xmpp buddy.
+ * Add a xmpp buddy item to the roster.
  *
  * @param jid   Bare Jabber ID of the buddy to add.
  * @param name  Alias name set to this buddy.
@@ -169,7 +178,7 @@ gint xmpp_buddy_delete(XmppBuddy *buddy);
  *
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
-gint xmpp_buddy_add(XmppStream *stream, const gchar *jid, const gchar *name,
+gint xmpp_roster_add_item(XmppStream *stream, const gchar *jid, const gchar *name,
 		const gchar *group);
 
 /**

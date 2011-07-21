@@ -1,3 +1,5 @@
+#include "notify.h"
+
 #include "xmpp_buddy.h"
 #include "xmpp_iq.h"
 
@@ -359,6 +361,40 @@ xmpp_buddy_unsubscribe(XmppBuddy *buddy)
 }
 
 gint
+xmpp_buddy_subscribe(XmppBuddy *buddy)
+{
+	xmlnode *root;
+	gchar *xml_string;
+	XmppStream *stream;
+
+	g_return_val_if_fail(buddy != NULL, HYBRID_ERROR);
+
+	root = xmlnode_create("presence");
+	xmlnode_new_prop(root, "to", buddy->jid);
+	xmlnode_new_prop(root, "type", "subscribe");
+
+	xml_string = xmlnode_to_string(root);
+	xmlnode_free(root);
+
+	stream = buddy->stream;
+
+	hybrid_debug_info("xmpp", "subscribe buddy %s", buddy->jid);
+
+	if (hybrid_ssl_write(stream->ssl, xml_string,
+				strlen(xml_string)) == -1) {
+
+		hybrid_debug_error("xmpp", "subscribe buddy failed");
+		g_free(xml_string);
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(xml_string);
+
+	return HYBRID_OK;
+}
+
+gint
 xmpp_buddy_delete(XmppBuddy *buddy)
 {
 	IqRequest *iq;
@@ -392,21 +428,82 @@ xmpp_buddy_delete(XmppBuddy *buddy)
 	return HYBRID_OK;
 }
 
-struct buddy_add_data {
+typedef struct  {
 	gchar *id;
 	gchar *name;
 	gchar *group;
-};
+} buddy_add_data;
 
 static gboolean
-buddy_add_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
 {
+	xmlnode *node;
+	gchar *value;
+	HybridNotify *notify;
+	HybridAccount *account;
+	HybridBuddy *buddy;
+	HybridGroup *group;
+	XmppBuddy *xbuddy;
+
+	account = stream->account->account;
+
+	if (!xmlnode_has_prop(root, "type")) {
+
+		notify = hybrid_notify_create(account, _("Warning"));
+		hybrid_notify_set_text(notify, _("Add buddy failed.\n"
+					"Invalid response message."));
+
+		goto buddy_add_err;
+	}
+
+	value = xmlnode_prop(root, "type");
+
+	if (g_strcmp0(value, "result") == 0) {
+
+		if (!(group = hybrid_blist_find_group(account, data->group))) {
+			hybrid_blist_add_group(account, data->group, data->group);
+		}
+
+		buddy = hybrid_blist_add_buddy(account, group, data->id, data->name);
+
+		xbuddy = xmpp_buddy_create(stream, buddy);
+
+		if (!xbuddy->subscription) {
+			xmpp_buddy_set_subscription(xbuddy, "none");
+		}
+
+		/* OK, add buddy success, subscribe buddy's presence. */
+		xmpp_buddy_subscribe(xbuddy);
+		
+	} else {
+
+		if ((node = xmlnode_find(root, "error"))) {
+			notify = hybrid_notify_create(account, _("Warning"));
+
+			if ((node = xmlnode_find(node, "text"))) {
+
+				value = xmlnode_content(node);
+				hybrid_notify_set_text(notify, value);
+				g_free(value);
+
+			} else {
+				hybrid_notify_set_text(notify, _("Add buddy failed."));
+			}
+		}
+	}
 	
+buddy_add_err:
+
+	g_free(data->id);
+	g_free(data->name);
+	g_free(data->group);
+	g_free(data);
+
 	return FALSE;
 }
 
 gint
-xmpp_buddy_add(XmppStream *stream, const gchar *jid, const gchar *name,
+xmpp_roster_add_item(XmppStream *stream, const gchar *jid, const gchar *name,
 		const gchar *group)
 {
 	IqRequest *iq;
@@ -421,10 +518,11 @@ xmpp_buddy_add(XmppStream *stream, const gchar *jid, const gchar *name,
 
 	iq = iq_request_create(stream, IQ_TYPE_SET);
 	xmlnode_new_prop(iq->node, "from", stream->jid);
-	xmlnode_new_prop(iq->node, "to", jid);
-	xmlnode_new_prop(iq->node, "type", "set");
+	
+	node = xmlnode_new_child(iq->node, "query");
+	xmlnode_new_namespace(node, NULL, NS_IQ_ROSTER);
 
-	node = xmlnode_new_child(iq->node, "item");
+	node = xmlnode_new_child(node, "item");
 	xmlnode_new_prop(node, "jid", jid);
 
 	if (name && *name) {
@@ -441,7 +539,7 @@ xmpp_buddy_add(XmppStream *stream, const gchar *jid, const gchar *name,
 	data->name  = g_strdup(name);
 	data->group = g_strdup(group);
 
-	iq_request_set_callback(iq, buddy_add_cb, data);
+	iq_request_set_callback(iq, (trans_callback)buddy_add_cb, data);
 
 	if (iq_request_send(iq) != HYBRID_OK) {
 		iq_request_destroy(iq);

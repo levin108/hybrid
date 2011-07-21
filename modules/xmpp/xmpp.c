@@ -148,7 +148,7 @@ xmpp_buddy_remove(HybridAccount *account, HybridBuddy *buddy)
 	XmppBuddy *xbuddy;
 
 	if (!(xbuddy = xmpp_buddy_find(buddy->id))) {
-		return FALSE;
+		return TRUE;
 	}
 
 	if (xmpp_buddy_delete(xbuddy) != HYBRID_OK) {
@@ -170,6 +170,21 @@ xmpp_buddy_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 	}
 
 	if (xmpp_buddy_alias(xbuddy, text) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static gboolean
+xmpp_buddy_add(HybridAccount *account, HybridGroup *group, const gchar *name,
+			const gchar *alias, const gchar *tips)
+{
+	XmppStream *stream;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (xmpp_roster_add_item(stream, name, alias, group->name) != HYBRID_OK) {
 		return FALSE;
 	}
 
@@ -246,7 +261,7 @@ HybridModuleInfo module_info = {
 	xmpp_buddy_move,            /**< buddy_move */
 	xmpp_buddy_remove,          /**< buddy_remove */
 	xmpp_buddy_rename,          /**< buddy_rename */
-	NULL,             /**< buddy_add */
+	xmpp_buddy_add,             /**< buddy_add */
 	NULL,          /**< group_rename */
 	NULL,          /**< group_remove */
 	xmpp_group_add,             /**< group_add */
