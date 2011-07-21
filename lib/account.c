@@ -657,6 +657,11 @@ hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 
 	/* Save to the local xml cache file. */
 	hybrid_account_update(account);
+
+	/* reflash the head panel. */
+	if ((account = hybrid_blist_get_current_account())) {
+		hybrid_head_bind_to_account(account);
+	}
 }
 
 void

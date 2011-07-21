@@ -4,12 +4,13 @@
 #include "xmlnode.h"
 #include "connect.h"
 #include "account.h"
+#include "xmlnode.h"
 
-#define TLS_NAMESPACE     "urn:ietf:params:xml:ns:xmpp-tls"
-#define SASL_NAMESPACE    "urn:ietf:params:xml:ns:xmpp-sasl"
-#define BIND_NAMESPACE    "urn:ietf:params:xml:ns:xmpp-bind"
-#define ROSTER_NAMESPACE  "jabber:iq:roster"
-#define SESSION_NAMESPACE "urn:ietf:params:xml:ns:xmpp-session"
+#define NS_XMPP_TLS      "urn:ietf:params:xml:ns:xmpp-tls"
+#define NS_XMPP_SASL     "urn:ietf:params:xml:ns:xmpp-sasl"
+#define NS_XMPP_BIND     "urn:ietf:params:xml:ns:xmpp-bind"
+#define NS_IQ_ROSTER     "jabber:iq:roster"
+#define NS_XMPP_SESSION  "urn:ietf:params:xml:ns:xmpp-session"
 #define NS_GOOGLE_ROSTER "google:roster"
 
 typedef struct _XmppStream XmppStream;

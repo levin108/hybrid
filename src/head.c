@@ -122,7 +122,7 @@ modify_photo_menu_cb(GtkWidget *widget, gpointer user_data)
 	filechooser = gtk_file_chooser_dialog_new(
 						_("Choose the avatar file to upload"),
 						NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
-						_("Upload"), 1, _("Cancel"), 2, NULL);
+						_("Cancel"), 2, _("OK"), 1, NULL);
 	response = gtk_dialog_run(GTK_DIALOG(filechooser));
 
 	if (!(account = hybrid_head->edit_account)) {

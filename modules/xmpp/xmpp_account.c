@@ -1,5 +1,8 @@
+#include "notify.h"
+
 #include "xmpp_account.h"
 #include "xmpp_stream.h"
+#include "xmpp_buddy.h"
 #include "xmpp_iq.h"
 
 XmppAccount*
@@ -33,6 +36,56 @@ xmpp_account_destroy(XmppAccount *account)
 
 		g_free(account);
 	}
+}
+
+gint
+xmpp_account_process_info(XmppStream *stream, xmlnode *root)
+{
+	xmlnode *node;
+	gchar *value;
+	guchar *photo;
+	gint photo_len;
+
+	HybridAccount *account;
+
+	account = stream->account->account;
+
+	if (xmlnode_has_prop(root, "type")) {
+		value = xmlnode_prop(root, "type");
+
+		if (g_strcmp0(value, "result") != 0) {
+			g_free(value);
+			return HYBRID_ERROR;
+		}
+
+		g_free(value);
+	}
+
+	if ((node = xmlnode_find(root, "FN"))) {
+
+		value = xmlnode_content(node);
+		hybrid_account_set_nickname(account, value);
+		g_free(value);
+	}
+
+	if ((node = xmlnode_find(root, "PHOTO"))) {
+
+		if ((node = xmlnode_find(root, "BINVAL"))) {
+
+			value = xmlnode_content(node);
+
+			/* decode the base64-encoded photo string. */
+			photo = hybrid_base64_decode(value, &photo_len);
+
+			/* set icon for the buddy. */
+			hybrid_account_set_icon(account, photo,	photo_len, "");
+
+			g_free(value);
+			g_free(photo);
+		}
+	}
+
+	return HYBRID_OK;
 }
 
 gint
@@ -103,9 +156,74 @@ xmpp_account_modify_status(XmppStream *stream, gint state, const gchar *status)
 gboolean
 modify_name_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 {
-	printf("%s\n", xmlnode_to_string(root));
+	gchar *value;
+	HybridNotify *notify;
+
+	if (!xmlnode_has_prop(root, "type")) {
+		goto modify_name_err;
+	}
+
+	value = xmlnode_prop(root, "type");
+
+	if (g_strcmp0(value, "result") != 0) {
+		g_free(value);
+		goto modify_name_err;
+	}
+
+	g_free(value);
 
 	return TRUE;
+
+modify_name_err:
+
+	notify = hybrid_notify_create(stream->account->account, _("System Message"));
+	hybrid_notify_set_text(notify, _("Modify full name failed."));
+
+	return FALSE;
+}
+
+static gboolean
+account_get_info_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	xmpp_account_process_info(stream, root);
+
+	return TRUE;
+}
+
+static gboolean
+modify_photo_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	gchar *value;
+	HybridNotify *notify;
+
+	if (!xmlnode_has_prop(root, "type")) {
+		goto modify_name_err;
+	}
+
+	value = xmlnode_prop(root, "type");
+
+	if (g_strcmp0(value, "result") != 0) {
+		g_free(value);
+		goto modify_name_err;
+	}
+
+	g_free(value);
+
+	/*
+	 * modify photo success, we fetch the lastest account
+	 * information from the server.
+	 */
+	xmpp_buddy_get_info(stream, stream->account->username,
+				(trans_callback)account_get_info_cb, NULL);
+
+	return TRUE;
+
+modify_name_err:
+
+	notify = hybrid_notify_create(stream->account->account, _("System Message"));
+	hybrid_notify_set_text(notify, _("Modify photo failed."));
+
+	return FALSE;
 }
 
 gint
@@ -140,6 +258,7 @@ xmpp_account_modify_name(XmppStream *stream, const gchar *name)
 	return HYBRID_OK;
 }
 
+
 gint
 xmpp_account_modify_photo(XmppStream *stream, const gchar *filename)
 {
@@ -172,6 +291,8 @@ xmpp_account_modify_photo(XmppStream *stream, const gchar *filename)
 
 	node = xmlnode_new_child(photo_node, "BINVAL");
 	xmlnode_set_content(node, file_base64);
+
+	iq_request_set_callback(iq, modify_photo_cb, NULL);
 
 	if (iq_request_send(iq) != HYBRID_OK) {
 

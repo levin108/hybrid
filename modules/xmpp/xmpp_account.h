@@ -3,6 +3,7 @@
 #include <glib.h>
 
 #include "account.h"
+#include "xmlnode.h"
 
 typedef struct _XmppAccount XmppAccount;
 
@@ -33,6 +34,16 @@ extern "C" {
  */
 XmppAccount *xmpp_account_create(HybridAccount *account, const gchar *username,
 					const gchar *password, const gchar *to);
+
+/**
+ * Process the account information.
+ *
+ * @param stream The stream for the account.
+ * @param root   Root node of the xml context.
+ *
+ * @param HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint xmpp_account_process_info(XmppStream *stream, xmlnode *root);
 
 /**
  * Modify name for the account.

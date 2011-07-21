@@ -193,7 +193,7 @@ xmpp_stream_startsasl(XmppStream *stream)
 	 */
 	node = xmlnode_create("auth");
 
-	xmlnode_new_namespace(node, NULL, SASL_NAMESPACE);
+	xmlnode_new_namespace(node, NULL, NS_XMPP_SASL);
 	xmlnode_new_prop(node, "mechanism", "PLAIN");
 	xmlnode_set_content(node, auth_encoded);
 
@@ -380,52 +380,7 @@ auth_success(XmppStream *stream)
 static gboolean
 account_get_info_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 {
-	xmlnode *node;
-	gchar *value;
-	guchar *photo;
-	gint photo_len;
-
-	HybridAccount *account;
-
-	account = stream->account->account;
-
-	if (xmlnode_has_prop(root, "type")) {
-		value = xmlnode_prop(root, "type");
-
-		if (g_strcmp0(value, "result") != 0) {
-
-			hybrid_account_error_reason(account, _("Login failed."));
-			g_free(value);
-
-			return FALSE;
-		}
-
-		g_free(value);
-	}
-
-	if ((node = xmlnode_find(root, "FN"))) {
-
-		value = xmlnode_content(node);
-		hybrid_account_set_nickname(account, value);
-		g_free(value);
-	}
-
-	if ((node = xmlnode_find(root, "PHOTO"))) {
-
-		if ((node = xmlnode_find(root, "BINVAL"))) {
-
-			value = xmlnode_content(node);
-
-			/* decode the base64-encoded photo string. */
-			photo = hybrid_base64_decode(value, &photo_len);
-
-			/* set icon for the buddy. */
-			hybrid_account_set_icon(account, photo,	photo_len, "");
-
-			g_free(value);
-			g_free(photo);
-		}
-	}
+	xmpp_account_process_info(stream, root);
 
 	auth_success(stream);
 
@@ -482,7 +437,7 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 	iq = iq_request_create(stream, IQ_TYPE_SET);
 
 	node = xmlnode_new_child(iq->node, "session");
-	xmlnode_new_namespace(node, NULL, SESSION_NAMESPACE);
+	xmlnode_new_namespace(node, NULL, NS_XMPP_SESSION);
 
 	iq_request_set_callback(iq, start_session_cb, NULL);
 
@@ -515,7 +470,7 @@ xmpp_stream_bind(XmppStream *stream)
 	iq = iq_request_create(stream, IQ_TYPE_SET);
 
 	node = xmlnode_new_child(iq->node, "bind");
-	xmlnode_new_namespace(node, NULL, BIND_NAMESPACE);
+	xmlnode_new_namespace(node, NULL, NS_XMPP_BIND);
 
 	iq_request_set_callback(iq, resource_bind_cb, NULL);
 
@@ -560,7 +515,7 @@ xmpp_stream_get_roster(XmppStream *stream)
 	iq_request_set_callback(iq, request_roster_cb, NULL);
 
 	node = xmlnode_new_child(iq->node, "query");
-	xmlnode_new_namespace(node, NULL, ROSTER_NAMESPACE);
+	xmlnode_new_namespace(node, NULL, NS_IQ_ROSTER);
 
 #if 0
 	xmlnode_new_namespace(node, "gr", NS_GOOGLE_ROSTER);
@@ -910,7 +865,7 @@ generate_starttls_body(XmppStream *stream)
 	gchar *body;
 
 	node = xmlnode_create("starttls");
-	xmlnode_new_namespace(node, NULL, TLS_NAMESPACE);
+	xmlnode_new_namespace(node, NULL, NS_XMPP_TLS);
 
 	body = xmlnode_to_string(node);
 

@@ -143,6 +143,24 @@ xmpp_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy,
 }
 
 static gboolean
+xmpp_buddy_remove(HybridAccount *account, HybridBuddy *buddy)
+{
+	XmppBuddy *xbuddy;
+
+	if (!(xbuddy = xmpp_buddy_find(buddy->id))) {
+		return FALSE;
+	}
+
+	if (xmpp_buddy_delete(xbuddy) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	xmpp_buddy_destroy(xbuddy);
+
+	return TRUE;
+}
+
+static gboolean
 xmpp_buddy_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
 	XmppBuddy *xbuddy;
@@ -226,8 +244,8 @@ HybridModuleInfo module_info = {
 	xmpp_account_tooltip,       /**< account_tooltip */
 	xmpp_buddy_tooltip,         /**< buddy_tooltip */
 	xmpp_buddy_move,            /**< buddy_move */
-	NULL,                /**< buddy_remove */
-	xmpp_buddy_rename,                /**< buddy_rename */
+	xmpp_buddy_remove,          /**< buddy_remove */
+	xmpp_buddy_rename,          /**< buddy_rename */
 	NULL,             /**< buddy_add */
 	NULL,          /**< group_rename */
 	NULL,          /**< group_remove */

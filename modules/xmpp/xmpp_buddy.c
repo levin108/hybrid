@@ -279,7 +279,7 @@ xmpp_buddy_set_group(XmppBuddy *buddy, const gchar *group)
 	iq = iq_request_create(buddy->stream, IQ_TYPE_SET);
 
 	node = xmlnode_new_child(iq->node, "query");
-	xmlnode_new_namespace(node, NULL, ROSTER_NAMESPACE);
+	xmlnode_new_namespace(node, NULL, NS_IQ_ROSTER);
 	node = xmlnode_new_child(node, "item");
 	xmlnode_new_prop(node, "jid", buddy->jid);
 	node = xmlnode_new_child(node, "group");
@@ -308,7 +308,7 @@ xmpp_buddy_alias(XmppBuddy *buddy, const gchar *alias)
 	iq = iq_request_create(buddy->stream, IQ_TYPE_SET);
 
 	node = xmlnode_new_child(iq->node, "query");
-	xmlnode_new_namespace(node, NULL, ROSTER_NAMESPACE);
+	xmlnode_new_namespace(node, NULL, NS_IQ_ROSTER);
 	node = xmlnode_new_child(node, "item");
 	xmlnode_new_prop(node, "jid", buddy->jid);
 	xmlnode_new_prop(node, "name", alias);
@@ -320,6 +320,137 @@ xmpp_buddy_alias(XmppBuddy *buddy, const gchar *alias)
 	}
 
 	iq_request_destroy(iq);
+
+	return HYBRID_OK;
+}
+
+gint
+xmpp_buddy_unsubscribe(XmppBuddy *buddy)
+{
+	xmlnode *root;
+	gchar *xml_string;
+	XmppStream *stream;
+
+	g_return_val_if_fail(buddy != NULL, HYBRID_ERROR);
+
+	root = xmlnode_create("presence");
+	xmlnode_new_prop(root, "to", buddy->jid);
+	xmlnode_new_prop(root, "type", "unsubscribe");
+
+	xml_string = xmlnode_to_string(root);
+	xmlnode_free(root);
+
+	stream = buddy->stream;
+
+	hybrid_debug_info("xmpp", "unsubscribe buddy %s", buddy->jid);
+
+	if (hybrid_ssl_write(stream->ssl, xml_string,
+				strlen(xml_string)) == -1) {
+
+		hybrid_debug_error("xmpp", "unsubscribe buddy failed");
+		g_free(xml_string);
+
+		return HYBRID_ERROR;
+	}
+
+	g_free(xml_string);
+
+	return HYBRID_OK;
+}
+
+gint
+xmpp_buddy_delete(XmppBuddy *buddy)
+{
+	IqRequest *iq;
+	xmlnode *node;
+	XmppStream *stream;
+
+	g_return_val_if_fail(buddy != NULL, HYBRID_ERROR);
+	
+	stream = buddy->stream;
+
+	iq = iq_request_create(stream, IQ_TYPE_SET);
+
+	node = xmlnode_new_child(iq->node, "query");
+	xmlnode_new_prop(node, "from", stream->jid);
+	xmlnode_new_namespace(node, NULL, NS_IQ_ROSTER);
+
+	node = xmlnode_new_child(node, "item");
+	xmlnode_new_prop(node, "jid", buddy->jid);
+	xmlnode_new_prop(node, "subscription", "remove");
+
+	if (iq_request_send(iq) != HYBRID_OK) {
+
+		hybrid_debug_error("xmpp", "remove buddy failed.");
+		iq_request_destroy(iq);
+
+		return HYBRID_ERROR;
+	}
+
+	iq_request_destroy(iq);
+
+	return HYBRID_OK;
+}
+
+struct buddy_add_data {
+	gchar *id;
+	gchar *name;
+	gchar *group;
+};
+
+static gboolean
+buddy_add_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
+{
+	
+	return FALSE;
+}
+
+gint
+xmpp_buddy_add(XmppStream *stream, const gchar *jid, const gchar *name,
+		const gchar *group)
+{
+	IqRequest *iq;
+	xmlnode *node;
+	HybridAccount *account;
+	buddy_add_data *data;
+
+	g_return_val_if_fail(stream != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(jid != NULL, HYBRID_ERROR);
+
+	account = stream->account->account;
+
+	iq = iq_request_create(stream, IQ_TYPE_SET);
+	xmlnode_new_prop(iq->node, "from", stream->jid);
+	xmlnode_new_prop(iq->node, "to", jid);
+	xmlnode_new_prop(iq->node, "type", "set");
+
+	node = xmlnode_new_child(iq->node, "item");
+	xmlnode_new_prop(node, "jid", jid);
+
+	if (name && *name) {
+		xmlnode_new_prop(node, "name", name);
+	}
+
+	if (group) {
+		node = xmlnode_new_child(node, "group");
+		xmlnode_set_content(node, group);
+	}
+
+	data = g_new0(buddy_add_data, 1);
+	data->id    = g_strdup(jid);
+	data->name  = g_strdup(name);
+	data->group = g_strdup(group);
+
+	iq_request_set_callback(iq, buddy_add_cb, data);
+
+	if (iq_request_send(iq) != HYBRID_OK) {
+		iq_request_destroy(iq);
+		hybrid_account_error_reason(account, "Connection Error.");
+		return HYBRID_ERROR;
+	}
+
+	iq_request_destroy(iq);
+
 
 	return HYBRID_OK;
 }
