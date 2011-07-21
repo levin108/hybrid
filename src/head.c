@@ -105,6 +105,47 @@ show_edit_box(gint edit_type)
 }
 
 static void
+modify_photo_menu_cb(GtkWidget *widget, gpointer user_data)
+{
+	GtkWidget *filechooser;
+	gint response;
+	const gchar *filename;
+	HybridAccount *account;
+	HybridModule *module;
+
+	hybrid_head->edit_account = hybrid_blist_get_current_account();
+
+	if (!hybrid_head->edit_account) {
+		return;
+	}
+
+	filechooser = gtk_file_chooser_dialog_new(
+						_("Choose the avatar file to upload"),
+						NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+						_("Upload"), 1, _("Cancel"), 2, NULL);
+	response = gtk_dialog_run(GTK_DIALOG(filechooser));
+
+	if (!(account = hybrid_head->edit_account)) {
+		return;
+	}
+
+	if (response == 1) {
+
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filechooser));
+
+		if (filename) {
+			module = account->proto;
+			
+			if (module->info->modify_photo) {
+				module->info->modify_photo(account, filename);
+			}
+		}
+	}
+	
+	gtk_widget_destroy(filechooser);
+}
+
+static void
 modify_name_menu_cb(GtkWidget *widget, gpointer user_data)
 {
 	show_edit_box(HYBRID_HEAD_EDIT_NAME);
@@ -133,6 +174,9 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 		GtkWidget *menu;
 
 		menu = gtk_menu_new();
+
+		hybrid_create_menu(menu, _("Modify Photo"), "rename", TRUE,
+						G_CALLBACK(modify_photo_menu_cb), NULL);
 
 		hybrid_create_menu(menu, _("Modify Name"), "rename", TRUE,
 						G_CALLBACK(modify_name_menu_cb), NULL);
@@ -281,7 +325,7 @@ hybrid_head_bind_to_account(HybridAccount *account)
 	} else {
 		pixbuf = hybrid_create_round_pixbuf(account->icon_data,
 							account->icon_data_len, 32);
-		text = g_strdup_printf(_("<b>%s</b> [%s]\n%s"), 
+		text = g_strdup_printf(_("<b>%s</b> [%s]\n<small>%s</small>"), 
 							account->nickname,
 							hybrid_get_presence_name(account->state),
 							account->status_text ? account->status_text : "");

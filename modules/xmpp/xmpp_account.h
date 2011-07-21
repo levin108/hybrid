@@ -57,6 +57,14 @@ gint xmpp_account_modify_status(XmppStream *stream, gint state,
 		const gchar *status);
 
 /**
+ * Modify photo for the account.
+ *
+ * @param stream   The stream for the account to modify.
+ * @param filename The filename of the photo.
+ */
+gint xmpp_account_modify_photo(XmppStream *stream, const gchar *filename);
+
+/**
  * Destroy an existing account.
  *
  * @param account The account to destroy.

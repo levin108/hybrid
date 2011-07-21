@@ -99,3 +99,49 @@ xmpp_account_modify_status(XmppStream *stream, gint state, const gchar *status)
 
 	return HYBRID_OK;
 }
+
+gint
+xmpp_account_modify_photo(XmppStream *stream, const gchar *filename)
+{
+	IqRequest *iq;
+	xmlnode *node;
+	xmlnode *photo_node;
+	guchar *file_bin;
+	gsize file_size;
+	gchar *file_base64;
+
+	g_return_val_if_fail(stream != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(filename != NULL, HYBRID_ERROR);
+
+	if (!g_file_get_contents(filename, (gchar**)&file_bin, &file_size, NULL)) {
+		hybrid_debug_error("xmpp", "file %s doesn't exist.", filename);
+		return HYBRID_ERROR;
+	}
+
+	iq = iq_request_create(stream, IQ_TYPE_SET);
+
+	node = xmlnode_new_child(iq->node, "vCard");
+	xmlnode_new_namespace(node, NULL, "vcard-temp");
+
+	photo_node = xmlnode_new_child(node, "PHOTO");
+	node = xmlnode_new_child(photo_node, "TYPE");
+	xmlnode_set_content(node, "image/png");
+
+	file_base64 = hybrid_base64_encode(file_bin, file_size);
+	g_free(file_bin);
+
+	node = xmlnode_new_child(photo_node, "BINVAL");
+	xmlnode_set_content(node, file_base64);
+
+	if (iq_request_send(iq) != HYBRID_OK) {
+
+		hybrid_debug_error("xmpp", "modify photo failed.");
+		iq_request_destroy(iq);
+
+		return HYBRID_ERROR;
+	}
+
+	iq_request_destroy(iq);
+
+	return HYBRID_OK;
+}

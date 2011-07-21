@@ -442,20 +442,8 @@ start_session_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 
 	account = stream->account->account;
 	
-	if (!account->nickname && !account->icon_crc) {
-		/*
-		 * Both the nickname and the icon checksum of the account
-		 * is NULL, it means that this is the first time this account
-		 * was enabled, so we need to fetch the account's information
-		 * first before we finished logining.
-		 */
-		xmpp_buddy_get_info(stream, stream->account->username,
+	xmpp_buddy_get_info(stream, stream->account->username,
 				(trans_callback)account_get_info_cb, NULL);
-
-	} else {
-
-		auth_success(stream);
-	}
 	
 	return TRUE;
 }

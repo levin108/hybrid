@@ -306,7 +306,28 @@ ssl_conn_sk_ok:
 gint
 hybrid_ssl_write(HybridSslConnection *ssl, const gchar *buf, gint len)
 {
-	return SSL_write(ssl->ssl, buf, len);
+	gint l;
+	gint i;
+
+	for (i = 0; len > 0; i ++) {
+		while (1) {
+			l = SSL_write(ssl->ssl, buf + i * 4096, len > 4096 ? 4096 : len);
+
+			switch (SSL_get_error(ssl->ssl, l)) { 
+				case SSL_ERROR_NONE:
+					len -= 4096;
+					goto ssl_write_ok;
+				case SSL_ERROR_WANT_WRITE:
+					g_usleep(100);
+					continue;
+				default:
+					return -1;
+			}
+		}
+ssl_write_ok:;
+	}
+
+	return len;
 }
 
 gint

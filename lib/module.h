@@ -37,6 +37,11 @@ struct _HybridModuleInfo {
 	 */
 	gboolean (*modify_status)(HybridAccount *, const gchar *);
 
+	/*
+	 * Modify photo of this account.
+	 */
+	gboolean (*modify_photo)(HybridAccount *, const gchar*);
+
 	gboolean (*change_state)(HybridAccount *, gint);
 	gboolean (*keep_alive)(HybridAccount *);
 	gboolean (*account_tooltip)(HybridAccount *, HybridTooltipData *data);

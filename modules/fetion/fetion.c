@@ -823,6 +823,7 @@ HybridModuleInfo module_info = {
 	fx_get_info,              /**< get_info */
 	fx_modify_name,           /**< modify_name */
 	fx_modify_status,         /**< modify_status */
+	NULL,                     /**< modify_photo */
 	fx_change_state,          /**< change_state */
 	fx_keep_alive,            /**< keep_alive */
 	fx_account_tooltip,       /**< account_tooltip */

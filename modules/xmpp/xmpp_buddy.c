@@ -243,7 +243,6 @@ xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *show)
 		state = HYBRID_STATE_AWAY;
 
 	} else if (g_ascii_strcasecmp(show, "avaiable") == 0) {
-		g_print("avaiable\n");
 		state = HYBRID_STATE_ONLINE;
 
 	} else if (g_ascii_strcasecmp(show, "dnd") == 0) {

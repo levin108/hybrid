@@ -59,6 +59,20 @@ xmpp_modify_status(HybridAccount *account, const gchar *status)
 }
 
 static gboolean
+xmpp_modify_photo(HybridAccount *account, const gchar *filename)
+{
+	XmppStream *stream;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (xmpp_account_modify_photo(stream, filename) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static gboolean
 xmpp_change_state(HybridAccount *account, gint state)
 {
 	XmppStream *stream;
@@ -172,6 +186,7 @@ HybridModuleInfo module_info = {
 	NULL,              /**< get_info */
 	xmpp_modify_name,           /**< modify_name */
 	xmpp_modify_status,         /**< modify_status */
+	xmpp_modify_photo,          /**< modify_photo */
 	xmpp_change_state,          /**< change_state */
 	NULL,            /**< keep_alive */
 	NULL,       /**< account_tooltip */
