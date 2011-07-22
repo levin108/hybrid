@@ -414,9 +414,11 @@ static gint
 get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 {
 	HybridNotifyInfo *info;
+	HybridBuddy *hybrid_buddy;
 	fetion_buddy *buddy;
 	gchar *province;
 	gchar *city;
+	GdkPixbuf *pixbuf = NULL;
 
 	//info = (HybridInfo*)trans->data;
 
@@ -435,18 +437,39 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 	info = hybrid_notify_info_create();
 
 	hybrid_info_add_pair(info, _("Nickname"), buddy->nickname);
-	hybrid_info_add_pair(info, _("Localname"), buddy->localname);
+	if (*buddy->localname) {
+		hybrid_info_add_pair(info, _("Localname"), buddy->localname);
+	}
 	hybrid_info_add_pair(info, _("Fetion-no"), buddy->sid);
-	hybrid_info_add_pair(info, _("Mobile-no"), buddy->mobileno);
+	if (*buddy->mobileno) {
+		hybrid_info_add_pair(info, _("Mobile-no"), buddy->mobileno);
+	}
 	hybrid_info_add_pair(info, _("Gender"), 
 		buddy->gender == 1 ? _("Male") :
 		(buddy->gender == 2 ? _("Female") : _("Secrecy")));
-	hybrid_info_add_pair(info, _("Mood"), buddy->mood_phrase);
+
+	if (*buddy->mood_phrase) {
+		hybrid_info_add_pair(info, _("Mood"), buddy->mood_phrase);
+	}
 
 	hybrid_info_add_pair(info, _("Country"),
-			g_strcmp0(buddy->country, "CN") == 0 ? "China" : buddy->country);
+			g_strcmp0(buddy->country, "CN") == 0 || !*buddy->country ?
+			"China" : buddy->country);
 	hybrid_info_add_pair(info, _("Province"), province);
 	hybrid_info_add_pair(info, _("City"), city);
+
+	if ((hybrid_buddy = hybrid_blist_find_buddy(ac->account, buddy->userid))) {
+
+		if (hybrid_buddy->icon_data) { 
+			pixbuf = hybrid_create_pixbuf(hybrid_buddy->icon_data,
+					hybrid_buddy->icon_data_length);
+			hybrid_info_add_pixbuf_pair(info, "Photo", pixbuf);
+
+			if (pixbuf) {
+				g_object_unref(pixbuf);
+			}
+		}
+	}
 
 	g_free(province);
 	g_free(city);
@@ -539,11 +562,24 @@ fx_account_tooltip(HybridAccount *account, HybridTooltipData *tip_data)
 	fetion_account *ac;
 
 	ac = hybrid_account_get_protocol_data(account);
+
+	if (ac->mobileno && *ac->mobileno) {
+		hybrid_tooltip_data_add_title(tip_data, ac->mobileno);
+
+	} else {
+		hybrid_tooltip_data_add_title(tip_data, ac->sid);
+	}
+
 	hybrid_tooltip_data_add_pair(tip_data, "Name", ac->nickname);
 	hybrid_tooltip_data_add_pair(tip_data, "Status",
 	                             hybrid_get_presence_name(account->state));
-	hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", ac->sid);
-	hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", ac->mobileno);
+
+	if (ac->mobileno && *ac->mobileno) {
+		hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", ac->sid);
+
+	} else {
+		hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", ac->mobileno);
+	}
 	hybrid_tooltip_data_add_pair(tip_data, "Mood", ac->mood_phrase);
 
 	return TRUE;
@@ -561,12 +597,31 @@ fx_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy, HybridTooltipData *
 		return FALSE;
 	}
 
+	if (bd->mobileno && *bd->mobileno) {
+		hybrid_tooltip_data_add_title(tip_data, bd->mobileno);
+
+	} else {
+		hybrid_tooltip_data_add_title(tip_data, bd->sid);
+	}
+
+
 	hybrid_tooltip_data_add_pair(tip_data, "Name", bd->nickname);
+	if (*bd->localname) {
+		hybrid_tooltip_data_add_pair(tip_data, "Alias", bd->localname);
+	}
 	hybrid_tooltip_data_add_pair(tip_data, "Status",
 	                             hybrid_get_presence_name(buddy->state));
-	hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", bd->sid);
-	hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", bd->mobileno);
-	hybrid_tooltip_data_add_pair(tip_data, "Mood", bd->mood_phrase);
+
+	if (bd->mobileno && *bd->mobileno) {
+		hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", bd->sid);
+
+	} else {
+		hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", bd->mobileno);
+	}
+
+	if (*bd->mood_phrase) {
+		hybrid_tooltip_data_add_pair(tip_data, "Mood", bd->mood_phrase);
+	}
 	
 	return TRUE;
 }

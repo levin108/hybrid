@@ -22,11 +22,21 @@ struct _HybridNotifyInfo {
 struct _HybridInfoItem {
 	gchar *name;
 	gchar *value;
+	GdkPixbuf *pixbuf;
+	gint type; /* text item or pixbuf item. */
+};
+
+enum {
+	HYBRID_INFO_ITEM_TYPE_TEXT,
+	HYBRID_INFO_ITEM_TYPE_PIXBUF,
 };
 
 enum {
 	HYBRID_INFO_NAME_COLUMN,
 	HYBRID_INFO_VALUE_COLUMN,
+	HYBRID_INFO_PIXBUF_COLUMN,
+	HYBRID_INFO_VALUE_COLUMN_VISIBLE,
+	HYBRID_INFO_PIXBUF_COLUMN_VISIBLE,
 	HYBRID_INFO_COLUMNS
 };
 
@@ -78,6 +88,16 @@ void hybrid_info_notify(HybridAccount *account, HybridNotifyInfo *info,
  */
 void hybrid_info_add_pair(HybridNotifyInfo *info, const gchar *name,
 		const gchar *value);
+
+/**
+ * Add a name-pixbuf pair to the notify info context.
+ *
+ * @param info   The info panel context.
+ * @param name   The name of the pair.
+ * @param pixbuf The pixbuf of the pair.
+ */
+void hybrid_info_add_pixbuf_pair(HybridNotifyInfo *info, const gchar *name,
+		const GdkPixbuf *pixbuf);
 
 #ifdef __cplusplus
 }

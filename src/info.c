@@ -34,9 +34,19 @@ render_column(HybridInfo *info)
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_attributes(column, renderer,
 					    "markup", HYBRID_INFO_VALUE_COLUMN,
+						"visible", HYBRID_INFO_VALUE_COLUMN_VISIBLE,
 					    NULL);
+
 	g_object_set(renderer, "wrap-mode", PANGO_WRAP_CHAR, NULL);
 	g_object_set(renderer, "wrap-width",250, NULL);
+
+	/* pixbuf */
+	renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_tree_view_column_pack_start(column, renderer, FALSE);
+	gtk_tree_view_column_set_attributes(column, renderer,
+						"pixbuf", HYBRID_INFO_PIXBUF_COLUMN,
+						"visible", HYBRID_INFO_PIXBUF_COLUMN_VISIBLE,
+						NULL);
 }
 
 /**
@@ -65,6 +75,9 @@ hybrid_info_item_destroy(HybridInfoItem *item)
 	if (item) {
 		g_free(item->name);
 		g_free(item->value);
+		if (item->pixbuf) {
+			g_object_unref(item->pixbuf);
+		}
 		g_free(item);
 	}
 }
@@ -141,7 +154,7 @@ hybrid_info_create(HybridBuddy *buddy)
 	gtk_container_add(GTK_CONTAINER(halign), label);
 	gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 5);
 
-	title = g_strdup_printf("<b>Information of %s</b>",
+	title = g_strdup_printf(_("<b>Information of %s</b>"),
 			buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id);
 	gtk_label_set_markup(GTK_LABEL(label), title);
 	g_free(title);
@@ -156,9 +169,13 @@ hybrid_info_create(HybridBuddy *buddy)
 
 	store = gtk_list_store_new(HYBRID_INFO_COLUMNS,
 					G_TYPE_STRING,
-					G_TYPE_STRING);
+					G_TYPE_STRING,
+					GDK_TYPE_PIXBUF,
+					G_TYPE_BOOLEAN,
+					G_TYPE_BOOLEAN);
 
 	info->treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	//gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(info->treeview), TRUE);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(info->treeview), FALSE);
 	g_object_unref(store);
 	gtk_container_add(GTK_CONTAINER(scroll), info->treeview);
@@ -219,6 +236,21 @@ hybrid_info_add_pair(HybridNotifyInfo *info, const gchar *name, const gchar *val
 	g_return_if_fail(name != NULL);
 
 	item = hybrid_info_item_create(name, value);
+	item->type = HYBRID_INFO_ITEM_TYPE_TEXT;
+	info->item_list = g_slist_append(info->item_list, item);
+}
+
+void hybrid_info_add_pixbuf_pair(HybridNotifyInfo *info, const gchar *name,
+		const GdkPixbuf *pixbuf)
+{
+	HybridInfoItem *item;
+
+	g_return_if_fail(info != NULL);
+	g_return_if_fail(name != NULL);
+
+	item = hybrid_info_item_create(name, NULL);
+	item->type = HYBRID_INFO_ITEM_TYPE_PIXBUF;
+	item->pixbuf = gdk_pixbuf_copy(pixbuf);
 	info->item_list = g_slist_append(info->item_list, item);
 }
 
@@ -281,7 +313,13 @@ buddy_ok:
 		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 		gtk_list_store_set(GTK_LIST_STORE(model), &iter,
 				HYBRID_INFO_NAME_COLUMN, name_markup,
-				HYBRID_INFO_VALUE_COLUMN, value_escaped, -1);
+				HYBRID_INFO_VALUE_COLUMN, value_escaped,
+				HYBRID_INFO_PIXBUF_COLUMN, item->pixbuf,
+				HYBRID_INFO_VALUE_COLUMN_VISIBLE, 
+				item->type == HYBRID_INFO_ITEM_TYPE_TEXT ? TRUE : FALSE,
+				HYBRID_INFO_PIXBUF_COLUMN_VISIBLE, 
+				item->type == HYBRID_INFO_ITEM_TYPE_PIXBUF ? TRUE : FALSE,
+				-1);
 
 		g_free(name_markup);
 		g_free(name_escaped);
