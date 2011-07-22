@@ -5,6 +5,63 @@
 
 static GHashTable *xmpp_buddies = NULL;
 
+XmppPresence*
+xmpp_presence_create(const gchar *jid, const gchar *status, gint show)
+{
+	XmppPresence *presence;
+
+	g_return_val_if_fail(jid != NULL, NULL);
+
+	presence = g_new0(XmppPresence, 1);
+	presence->full_jid = g_strdup(jid);
+	presence->status = g_strdup(status);
+	presence->show = show;
+
+	return presence;
+}
+
+void
+xmpp_presence_destroy(XmppPresence *presence)
+{
+	XmppBuddy *buddy;
+
+	if (!presence) {
+		return;
+	}
+
+	buddy = presence->buddy;
+
+	buddy->presence_list = g_slist_remove(buddy->presence_list, presence);
+	
+	g_free(presence->full_jid);
+	g_free(presence->status);
+	g_free(presence);
+}
+
+XmppPresence*
+xmpp_buddy_find_presence(XmppBuddy *buddy, const gchar *full_jid)
+{
+	XmppPresence *presence;
+	GSList *pos;
+
+	g_return_val_if_fail(buddy != NULL, NULL);
+	g_return_val_if_fail(full_jid != NULL, NULL);
+
+	if (g_ascii_strncasecmp(buddy->jid, full_jid, strlen(buddy->jid)) != 0) {
+		return NULL;
+	}
+
+	for (pos = buddy->presence_list; pos; pos = pos->next) {
+		presence = (XmppPresence*)pos->data;
+
+		if (g_strcmp0(presence->full_jid, full_jid) == 0) {
+			return presence;
+		}
+	}
+
+	return NULL;
+}
+
 /**
  * Scribe the presence information of the roster by
  * sending a <presence/> label to the server.
@@ -54,7 +111,6 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 	HybridAccount *account;
 	HybridBuddy *hd;
 	XmppBuddy *buddy;
-	gchar *pos;
 
 	g_return_if_fail(stream != NULL);
 	g_return_if_fail(root != NULL);
@@ -89,8 +145,7 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 			name   = xmlnode_prop(node, "name");
 
 		} else {
-			for (pos = jid; *pos && *pos != '@'; pos ++);
-			name = g_strndup(jid, pos - jid);
+			name = NULL;
 		}
 		scribe = xmlnode_prop(node, "subscription");
 
@@ -119,11 +174,11 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 		 * if the name has changed, so we must set the name manually by
 		 * hybrid_blist_set_buddy_name() in case that the name changed.
 		 */
-		hybrid_blist_set_buddy_name(hd, name);
-		g_free(name);
-
 		buddy = xmpp_buddy_create(stream, hd);
 		xmpp_buddy_set_subscription(buddy, scribe);
+
+		xmpp_buddy_set_name(buddy, name);
+		g_free(name);
 	}
 
 	/* subsribe the presence of the roster. */
@@ -160,11 +215,10 @@ xmpp_buddy_create(XmppStream *stream, HybridBuddy *hybrid_buddy)
 	buddy->jid = g_strdup(hybrid_buddy->id);
 	buddy->buddy = hybrid_buddy;
 	buddy->stream = stream;
+	buddy->name = g_strdup(hybrid_buddy->name);
 
-	xmpp_buddy_set_name(buddy, hybrid_buddy->name);
 	xmpp_buddy_set_group_name(buddy, hybrid_buddy->parent->name);
 	xmpp_buddy_set_photo(buddy, hybrid_blist_get_buddy_checksum(hybrid_buddy));
-
 
 	g_hash_table_insert(xmpp_buddies, buddy->jid, buddy);
 
@@ -175,12 +229,20 @@ void
 xmpp_buddy_set_name(XmppBuddy *buddy, const gchar *name)
 {
 	gchar *tmp;
+	gchar *pos;
 
 	g_return_if_fail(buddy != NULL);
 
 	tmp = buddy->name;
 	buddy->name = g_strdup(name);
 	g_free(tmp);
+
+	if (!buddy->name) {
+		for (pos = buddy->jid; *pos && *pos != '@'; pos ++);
+		buddy->name = g_strndup(buddy->jid, pos - buddy->jid);
+	}
+
+	hybrid_blist_set_buddy_name(buddy->buddy, buddy->name);
 }
 
 void
@@ -192,18 +254,6 @@ xmpp_buddy_set_subscription(XmppBuddy *buddy, const gchar *sub)
 
 	tmp = buddy->subscription;
 	buddy->subscription = g_strdup(sub);
-	g_free(tmp);
-}
-
-void
-xmpp_buddy_set_resource(XmppBuddy *buddy, const gchar *resource)
-{
-	gchar *tmp;
-
-	g_return_if_fail(buddy != NULL);
-
-	tmp = buddy->resource;
-	buddy->resource = g_strdup(resource);
 	g_free(tmp);
 }
 
@@ -220,23 +270,32 @@ xmpp_buddy_set_photo(XmppBuddy *buddy, const gchar *photo)
 }
 
 void
-xmpp_buddy_set_status(XmppBuddy *buddy, const gchar *status)
+xmpp_buddy_set_status(XmppBuddy *buddy, const gchar *jid, const gchar *status)
 {
 	gchar *tmp;
+	XmppPresence *presence;
 
 	g_return_if_fail(buddy != NULL);
+
+	if (!(presence = xmpp_buddy_find_presence(buddy, jid))) {
+		presence = xmpp_presence_create(jid, status, HYBRID_STATE_ONLINE);
+		xmpp_buddy_add_presence(buddy, presence);
+
+	} else {
 	
-	tmp = buddy->status;
-	buddy->status = g_strdup(status);
-	g_free(tmp);
+		tmp = presence->status;
+		presence->status = g_strdup(status);
+		g_free(tmp);
+	}
 
 	hybrid_blist_set_buddy_mood(buddy->buddy, status);
 }
 
 void
-xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *show)
+xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *full_jid, const gchar *show)
 {
 	gint state = 0;
+	XmppPresence *presence;
 
 	g_return_if_fail(buddy != NULL);
 	g_return_if_fail(show != NULL);
@@ -252,9 +311,38 @@ xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *show)
 
 	} else if (g_ascii_strcasecmp(show, "unavailable") == 0) {
 		state = HYBRID_STATE_OFFLINE;
+
+	} else {
+		state = HYBRID_STATE_ONLINE;
 	}
 
-	hybrid_blist_set_buddy_state(buddy->buddy, state);
+	if (!(presence = xmpp_buddy_find_presence(buddy, full_jid))) {
+		if (state != HYBRID_STATE_OFFLINE) {
+			presence = xmpp_presence_create(full_jid, NULL, state);
+			xmpp_buddy_add_presence(buddy, presence);
+
+		} else {
+			hybrid_debug_error("xmpp", "FATAL, received a unavailable presence"
+					" that didn't exist in the buddy's presence list.");
+			return;
+		}
+	}
+
+	if (state == HYBRID_STATE_OFFLINE) {
+		xmpp_presence_destroy(presence);
+
+		if (!buddy->presence_list) {
+			hybrid_blist_set_buddy_state(buddy->buddy, state);
+
+		} else {
+			presence = (XmppPresence*)buddy->presence_list->data;
+			hybrid_blist_set_buddy_state(buddy->buddy, presence->show);
+			hybrid_blist_set_buddy_mood(buddy->buddy, presence->status);
+		}
+
+	} else {
+		hybrid_blist_set_buddy_state(buddy->buddy, state);
+	}
 }
 
 void
@@ -267,6 +355,16 @@ xmpp_buddy_set_group_name(XmppBuddy *buddy, const gchar *group)
 	tmp = buddy->group;
 	buddy->group = g_strdup(group);
 	g_free(tmp);
+}
+
+void
+xmpp_buddy_add_presence(XmppBuddy *buddy, XmppPresence *presence)
+{
+	g_return_if_fail(buddy != NULL);
+	g_return_if_fail(presence != NULL);
+
+	buddy->presence_list = g_slist_append(buddy->presence_list, presence);
+	presence->buddy = buddy;
 }
 
 gint
@@ -621,7 +719,6 @@ xmpp_buddy_destroy(XmppBuddy *buddy)
 
 		g_free(buddy->jid);
 		g_free(buddy->name);
-		g_free(buddy->status);
 		g_free(buddy->group);
 
 		g_free(buddy);

@@ -22,6 +22,12 @@ iq_request_create(XmppStream *stream, gint type)
 		case IQ_TYPE_GET:
 			xmlnode_new_prop(iq->node, "type", "get");
 			break;
+		case IQ_TYPE_RESULT:
+			xmlnode_new_prop(iq->node, "type", "result");
+			break;
+		case IQ_TYPE_ERROR:
+			xmlnode_new_prop(iq->node, "type", "error");
+			break;
 		default:
 			g_free(iq);
 			hybrid_debug_error("iq", "unknown iq type.");

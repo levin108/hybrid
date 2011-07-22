@@ -18,6 +18,23 @@
 
 const gchar *jabber_server = "talk.l.google.com";
 
+static gchar*
+get_resource(const gchar *full_jid)
+{
+	gchar *pos;
+
+	for (pos = (gchar *)full_jid; *pos && *pos != '/'; pos ++);
+
+	if (*pos == '\0') {
+		return g_strdup(full_jid);
+	}
+
+	pos ++;
+
+	return g_strndup(pos, full_jid + strlen(full_jid) - pos);
+}
+
+
 static gboolean
 xmpp_login(HybridAccount *account)
 {
@@ -121,23 +138,38 @@ xmpp_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy,
 		HybridTooltipData *tip_data)
 {
 	XmppBuddy *bd;
+	XmppPresence *presence;
 	gchar *status;
+	gchar *resource;
+	gchar *name;
+	GSList *pos;
 
 	if (!(bd = xmpp_buddy_find(buddy->id))) {
 		return FALSE;
 	}
 
-	status = g_strdup_printf("[%s] %s", 
-			hybrid_get_presence_name(buddy->state),
-			bd->status ? bd->status : "");
-
 	hybrid_tooltip_data_add_title(tip_data, bd->jid);
 	hybrid_tooltip_data_add_pair(tip_data, "Name", bd->name);
-	hybrid_tooltip_data_add_pair(tip_data, "Status", status);
-	hybrid_tooltip_data_add_pair(tip_data, "Subscription", bd->subscription);
-	hybrid_tooltip_data_add_pair(tip_data, "Resource", bd->resource);
 
-	g_free(status);
+	for (pos = bd->presence_list; pos; pos = pos->next) {
+		presence = (XmppPresence *)pos->data;
+
+		resource = get_resource(presence->full_jid);
+		status = g_strdup_printf("[<b>%s</b>] %s", 
+				hybrid_get_presence_name(presence->show),
+				presence->status ? presence->status : "");
+
+
+		name = g_strdup_printf(_("Status (%s)"), resource);
+		g_free(resource);
+
+		hybrid_tooltip_data_add_pair_markup(tip_data, name, status);
+
+		g_free(status);
+		g_free(name);
+	}
+
+	hybrid_tooltip_data_add_pair(tip_data, _("Subscription"), bd->subscription);
 
 	return TRUE;
 }

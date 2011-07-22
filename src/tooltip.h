@@ -93,6 +93,17 @@ void hybrid_tooltip_data_add_title(HybridTooltipData *data, const gchar *title);
 void hybrid_tooltip_data_add_pair(HybridTooltipData *data, const gchar *name,
                                   const gchar *value);
 
+/**
+ * Add name-value pair to the tooltip data, the value accepts markup string.
+ *
+ * @param data  The tooltip data.
+ * @param name  The attribute name.
+ * @param value The attribute value.
+ */
+void
+hybrid_tooltip_data_add_pair_markup(HybridTooltipData *data, const gchar *name,
+                                  const gchar *value);
+
 #ifdef __cplusplus
 }
 #endif

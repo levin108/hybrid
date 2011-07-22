@@ -181,6 +181,31 @@ xmlnode_prop(xmlnode *node, const gchar *prop)
 	return value;
 }
 
+gchar*
+xmlnode_get_namespace(xmlnode *node)
+{
+	xmlNs **ns;
+	gint i;
+	gchar *res = NULL;
+
+	if (!(ns = xmlGetNsList(node->doc, node->node))) {
+		return NULL;
+	}
+
+	for (i = 0; ns[i]; i ++) {
+
+		if (!ns[i]->prefix) {
+			res = g_strdup((gchar *)ns[i]->href);
+		}
+
+		xmlFreeNs(ns[i]);
+	}
+
+	xmlFree(ns);
+
+	return res;
+}
+
 gboolean
 xmlnode_has_prop(xmlnode *node, const gchar *prop)
 {

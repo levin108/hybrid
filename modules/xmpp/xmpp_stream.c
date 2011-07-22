@@ -22,22 +22,6 @@ get_bare_jid(const gchar *full_jid)
 	return g_strndup(full_jid, pos - full_jid);
 }
 
-static gchar*
-get_resource(const gchar *full_jid)
-{
-	gchar *pos;
-
-	for (pos = (gchar *)full_jid; *pos && *pos != '/'; pos ++);
-
-	if (*pos == '\0') {
-		return g_strdup(full_jid);
-	}
-
-	pos ++;
-
-	return g_strndup(pos, full_jid + strlen(full_jid) - pos);
-}
-
 XmppStream*
 xmpp_stream_create(XmppAccount *account)
 {
@@ -601,6 +585,60 @@ xmpp_stream_new_on_sasl(XmppStream *stream)
 }
 
 /**
+ * Process the roster set request.
+ */
+static void
+xmpp_stream_process_set_roster(XmppStream *stream, xmlnode *query)
+{
+	xmlnode *node;
+	gchar *value;
+	XmppBuddy *buddy;
+
+	g_return_if_fail(stream != NULL);
+	g_return_if_fail(query != NULL);
+
+	if (!(node = xmlnode_child(query))) {
+		return;
+	}
+
+	while (node) {
+
+		if (g_strcmp0(node->name, "item") != 0) {
+			node = node->next;
+			continue;
+		}
+
+		if (!xmlnode_has_prop(node, "jid")) {
+			node = node->next;
+			continue;
+		}
+
+		value = xmlnode_prop(node, "jid");
+		
+		if (!(buddy = xmpp_buddy_find(value))) {
+			g_free(value);
+			node = node->next;
+			continue;
+		}
+		g_free(value);
+
+		if (xmlnode_has_prop(node, "subscription")) {
+			value = xmlnode_prop(node, "subscription");
+			xmpp_buddy_set_subscription(buddy, value);
+			g_free(value);
+		}
+
+		if (xmlnode_has_prop(node, "name")) {
+			value = xmlnode_prop(node, "name");
+			xmpp_buddy_set_name(buddy, value);
+			g_free(value);
+		}
+
+		node = node->next;
+	}
+}
+
+/**
  * Process the iq set request.
  */
 static void
@@ -631,12 +669,31 @@ xmpp_stream_process_iq_set(XmppStream *stream, xmlnode *root)
 	node = xmlnode_child(root);
 
 	if (g_strcmp0(node->name, "query") == 0) {
-		value = xmlnode_prop(node, "xmlns");
+		value = xmlnode_get_namespace(node);
 
-		g_print("####################### %s\n", value);
+		if (g_strcmp0(value, NS_IQ_ROSTER) == 0) {
+			xmpp_stream_process_set_roster(stream, node);
+		}
 
 		g_free(value);
 	}
+
+	/* send a result response. */
+	IqRequest *iq;
+
+	iq = iq_request_create(stream, IQ_TYPE_RESULT);
+
+	xmlnode_new_prop(iq->node, "from", stream->jid);
+
+	if (xmlnode_has_prop(root, "id")) {
+
+		id = xmlnode_prop(root, "id");
+		xmlnode_set_prop(iq->node, "id", id);
+		g_free(id);
+	}
+
+	iq_request_send(iq);
+	iq_request_destroy(iq);
 }
 
 /**
@@ -748,7 +805,7 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 	xmlnode *node;
 	XmppBuddy *buddy;
 	gchar *value;
-	gchar *resource;
+	gchar *full_jid;
 	gchar *bare_jid;
 	gchar *show;
 	gchar *status;
@@ -759,45 +816,29 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 		return;
 	}
 
-	value = xmlnode_prop(root, "from");
-	bare_jid = get_bare_jid(value);
-	resource = get_resource(value);
-	g_free(value);
+	full_jid = xmlnode_prop(root, "from");
+	bare_jid = get_bare_jid(full_jid);
 
 	if (!(buddy = xmpp_buddy_find(bare_jid))) {
 
-		g_free(bare_jid);
-		g_free(resource);
-
-		return;
+		goto presence_over;
 	}
-
-	g_free(bare_jid);
 
 	if (xmlnode_has_prop(root, "type")) {
 
 		value = xmlnode_prop(root, "type");
 		if (g_strcmp0(value, "unavailable") == 0) {
 
-			xmpp_buddy_set_show(buddy, value);
-			g_free(value);
-			g_free(resource);
+			xmpp_buddy_set_show(buddy, full_jid, value);
+			goto presence_over;
 
-			return;
 		} else if (g_strcmp0(value, "subscribed")) {
 
-			g_free(value);
-			g_free(resource);
-
-			return;
+			goto presence_over;
 		}
-
-		xmpp_buddy_set_resource(buddy, resource);
 
 		g_free(value);
 	}
-
-	g_free(resource);
 
 	/*
 	 * If the presence message doesn't have a <show> label,
@@ -806,17 +847,17 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 	if ((node = xmlnode_find(root, "show"))) {
 
 		show = xmlnode_content(node);
-		xmpp_buddy_set_show(buddy, show);
+		xmpp_buddy_set_show(buddy, full_jid, show);
 		g_free(show);
 
 	} else {
-		xmpp_buddy_set_show(buddy, "avaiable");
+		xmpp_buddy_set_show(buddy, full_jid, "avaiable");
 	}
 
 	if ((node = xmlnode_find(root, "status"))) {
 
 		status = xmlnode_content(node);
-		xmpp_buddy_set_status(buddy, status);
+		xmpp_buddy_set_status(buddy, full_jid, status);
 		g_free(status);
 
 	} 
@@ -837,6 +878,10 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 
 		g_free(photo);
 	}
+	
+presence_over:
+	g_free(full_jid);
+	g_free(bare_jid);
 }
 
 static void

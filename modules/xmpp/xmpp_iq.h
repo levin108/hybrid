@@ -29,6 +29,8 @@ struct _IqTransaction {
 enum {
 	IQ_TYPE_GET,
 	IQ_TYPE_SET,
+	IQ_TYPE_RESULT,
+	IQ_TYPE_ERROR,
 };
 
 #ifdef __cplusplus

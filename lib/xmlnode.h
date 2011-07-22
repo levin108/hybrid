@@ -96,6 +96,16 @@ xmlnode *xmlnode_find(xmlnode *node, const gchar *name);
 gchar *xmlnode_prop(xmlnode *node, const gchar *prop);
 
 /**
+ * Get namespace href string of an given xml node.
+ *
+ * @param node The node.
+ * 
+ * @return The namespace value, should be freed with
+ *         g_free() when no longer needed.
+ */
+gchar *xmlnode_get_namespace(xmlnode *node);
+
+/**
  * Test whether the node has the specified attribute.
  *
  * @param node The node.

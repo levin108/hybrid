@@ -5,16 +5,25 @@
 #include "xmpp_iq.h"
 
 typedef struct _XmppBuddy XmppBuddy;
+typedef struct _XmppPresence XmppPresence;
+
+struct _XmppPresence {
+	gchar *status;
+	gint show;
+	gchar *full_jid;
+
+	XmppBuddy *buddy;
+};
 
 struct _XmppBuddy {
 	gchar *jid;
 	gchar *name;
-	gchar *status;
 	gchar *group;
 	gchar *photo;
 
 	gchar *subscription;
-	gchar *resource;
+
+	GSList *presence_list; /* presence list. */
 
 	XmppStream *stream;
 	HybridBuddy *buddy;
@@ -23,6 +32,34 @@ struct _XmppBuddy {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * Create a presence context.
+ *
+ * @param jid    The full jabber id.
+ * @param status Status string.
+ * @param show   The HYBRID presence state.
+ *
+ * @return Presence created.
+ */
+XmppPresence *xmpp_presence_create(const gchar *jid, const gchar *status, gint show);
+
+/**
+ * Destroy a presence context.
+ *
+ * @param presence The presence to destroy.
+ */
+void xmpp_presence_destroy(XmppPresence *presence);
+
+/**
+ * Find a buddy's presence with specified full jabber id.
+ *
+ * @param buddy    The xmpp buddy.
+ * @param full_jid The full jabber id.
+ * 
+ * @return NULL if not found.
+ */
+XmppPresence *xmpp_buddy_find_presence(XmppBuddy *buddy, const gchar *full_jid);
 
 /**
  * Process the roster returned from the server.
@@ -60,14 +97,6 @@ void xmpp_buddy_set_name(XmppBuddy *buddy, const gchar *name);
 void xmpp_buddy_set_subscription(XmppBuddy *buddy, const gchar *sub);
 
 /**
- * Set resource for the buddy.
- *
- * @param buddy    The xmpp buddy.
- * @param resource The resource string.
- */
-void xmpp_buddy_set_resource(XmppBuddy *buddy, const gchar *resource);
-
-/**
  * Set photo checksum for the buddy.
  *
  * @param buddy The xmpp buddy.
@@ -88,18 +117,22 @@ XmppBuddy *xmpp_buddy_find(const gchar *jid);
 /**
  * Set status for the buddy.
  *
- * @param buddy  The xmpp buddy.
- * @param status The status of the buddy.
+ * @param buddy    The xmpp buddy.
+ * @param full_jid The full jabber id of this presence.
+ * @param status   The status of the presence.
  */
-void xmpp_buddy_set_status(XmppBuddy *buddy, const gchar *status);
+void xmpp_buddy_set_status(XmppBuddy *buddy, const gchar *full_jid,
+		const gchar *status);
 
 /**
  * Set online status for the buddy.
  *
- * @param buddy The xmpp buddy.
- * @param show  The online status.
+ * @param buddy    The xmpp buddy.
+ * @param full_jid The full jabber id of this presence.
+ * @param show     The online status.
  */
-void xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *show);
+void xmpp_buddy_set_show(XmppBuddy *buddy, const gchar *full_jid,
+		const gchar *show);
 
 /**
  * Set group name for the buddy.
@@ -118,6 +151,14 @@ void xmpp_buddy_set_group_name(XmppBuddy *buddy, const gchar *group);
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
 gint xmpp_buddy_set_group(XmppBuddy *buddy, const gchar *group);
+
+/**
+ * Add a presence context to a xmpp buddy.
+ *
+ * @param buddy    The xmpp buddy.
+ * @param presence The presence context.
+ */
+void xmpp_buddy_add_presence(XmppBuddy *buddy, XmppPresence *presence);
 
 /**
  * Set the alias name for the buddy.
