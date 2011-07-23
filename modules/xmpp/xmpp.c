@@ -55,6 +55,103 @@ xmpp_login(HybridAccount *account)
 }
 
 static gboolean
+get_info_cb(XmppStream *stream, xmlnode *root, XmppBuddy *buddy)
+{
+	xmlnode *node;
+	gchar *type;
+	gchar *name;
+	gchar *photo_bin;
+	guchar *photo;
+	gchar *resource;
+	gchar *status;
+	GdkPixbuf *pixbuf;
+	gint photo_len;
+	GSList *pos;
+	XmppPresence *presence;
+
+	HybridNotifyInfo *info;
+
+	if (xmlnode_has_prop(root, "type")) {
+		type = xmlnode_prop(root, "type");
+
+		if (g_strcmp0(type, "result") != 0) {
+
+			hybrid_debug_error("xmpp", "get buddy info error.");
+			g_free(type);
+
+			return FALSE;
+		}
+
+		g_free(type);
+	}
+
+	info = hybrid_notify_info_create();
+
+	for (pos = buddy->presence_list; pos; pos = pos->next) {
+		presence = (XmppPresence*)pos->data;
+
+		resource = get_resource(presence->full_jid);
+		hybrid_info_add_pair(info, _("Resource"), resource);
+		g_free(resource);
+
+		status = g_strdup_printf("[%s] %s", 
+				hybrid_get_presence_name(presence->show), 
+				presence->status ? presence->status : "");
+		hybrid_info_add_pair(info, _("Status"), status);
+		g_free(status);
+
+	}
+
+	if ((node = xmlnode_find(root, "FN"))) {
+		name = xmlnode_content(node);
+
+		hybrid_info_add_pair(info, _("Name"), name);
+		
+		g_free(name);
+	}
+
+	if ((node = xmlnode_find(root, "PHOTO"))) {
+
+		if ((node = xmlnode_find(root, "BINVAL"))) {
+
+			photo_bin = xmlnode_content(node);
+
+			/* decode the base64-encoded photo string. */
+			photo = hybrid_base64_decode(photo_bin, &photo_len);
+
+			pixbuf = hybrid_create_pixbuf(photo, photo_len);
+
+			if (pixbuf) {
+				hybrid_info_add_pixbuf_pair(info, _("Photo"), pixbuf);
+				g_object_unref(pixbuf);
+			}
+
+			g_free(photo_bin);
+			g_free(photo);
+		}
+	}
+
+	hybrid_info_notify(stream->account->account, info, buddy->jid);
+
+	return TRUE;
+}
+
+static void
+xmpp_get_info(HybridAccount *account, HybridBuddy *buddy)
+{
+	XmppStream *stream;
+	XmppBuddy *xbuddy;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (!(xbuddy = xmpp_buddy_find(stream->account, buddy->id))) {
+		return;
+	}
+
+	xmpp_buddy_get_info(stream, buddy->id, (trans_callback)get_info_cb, xbuddy);
+}
+
+static gboolean
 xmpp_modify_name(HybridAccount *account, const gchar *name)
 {
 	XmppStream *stream;
@@ -139,12 +236,15 @@ xmpp_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy,
 {
 	XmppBuddy *bd;
 	XmppPresence *presence;
+	XmppStream *stream;
 	gchar *status;
 	gchar *resource;
 	gchar *name;
 	GSList *pos;
 
-	if (!(bd = xmpp_buddy_find(buddy->id))) {
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (!(bd = xmpp_buddy_find(stream->account, buddy->id))) {
 		return FALSE;
 	}
 
@@ -178,8 +278,11 @@ static gboolean
 xmpp_buddy_remove(HybridAccount *account, HybridBuddy *buddy)
 {
 	XmppBuddy *xbuddy;
+	XmppStream *stream;
 
-	if (!(xbuddy = xmpp_buddy_find(buddy->id))) {
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (!(xbuddy = xmpp_buddy_find(stream->account, buddy->id))) {
 		return TRUE;
 	}
 
@@ -196,8 +299,11 @@ static gboolean
 xmpp_buddy_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
 	XmppBuddy *xbuddy;
+	XmppStream *stream;
 
-	if (!(xbuddy = xmpp_buddy_find(buddy->id))) {
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (!(xbuddy = xmpp_buddy_find(stream->account, buddy->id))) {
 		return FALSE;
 	}
 
@@ -234,8 +340,11 @@ xmpp_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 		HybridGroup *new_group)
 {
 	XmppBuddy *xbuddy;
+	XmppStream *stream;
 
-	if (!(xbuddy = xmpp_buddy_find(buddy->id))) {
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (!(xbuddy = xmpp_buddy_find(stream->account, buddy->id))) {
 		return FALSE;
 	}
 
@@ -268,7 +377,7 @@ xmpp_close(HybridAccount *account)
 
 	xmpp_stream_destroy(stream);
 
-	xmpp_buddy_clear();
+	xmpp_buddy_clear(stream);
 }
 
 HybridModuleInfo module_info = {
@@ -282,7 +391,7 @@ HybridModuleInfo module_info = {
 	"xmpp",                     /**< icon name */
 
 	xmpp_login,                 /**< login */
-	NULL,              /**< get_info */
+	xmpp_get_info,              /**< get_info */
 	xmpp_modify_name,           /**< modify_name */
 	xmpp_modify_status,         /**< modify_status */
 	xmpp_modify_photo,          /**< modify_photo */

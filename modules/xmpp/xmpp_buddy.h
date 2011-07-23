@@ -3,9 +3,11 @@
 
 #include "xmpp_stream.h"
 #include "xmpp_iq.h"
+#include "xmpp_account.h"
 
 typedef struct _XmppBuddy XmppBuddy;
 typedef struct _XmppPresence XmppPresence;
+
 
 struct _XmppPresence {
 	gchar *status;
@@ -107,12 +109,13 @@ void xmpp_buddy_set_photo(XmppBuddy *buddy, const gchar *photo);
 /**
  * Find a buddy with the given bare jabber id.
  *
- * @param jid The bare jid.
+ * @param account The xmpp account.
+ * @param jid     The bare jabber of the buddy to find.
  *
  * @return NULL if not found.
  */
 
-XmppBuddy *xmpp_buddy_find(const gchar *jid);
+XmppBuddy *xmpp_buddy_find(XmppAccount *account, const gchar *jid);
 
 /**
  * Set status for the buddy.
@@ -224,8 +227,10 @@ gint xmpp_roster_add_item(XmppStream *stream, const gchar *jid, const gchar *nam
 
 /**
  * Clear the buddies from the local buddy list.
+ *
+ * @param stream The xmpp stream.
  */
-void xmpp_buddy_clear(void);
+void xmpp_buddy_clear(XmppStream *stream);
 /**
  * Destroy a buddy.
  *

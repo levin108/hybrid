@@ -5,6 +5,7 @@
 #include "account.h"
 #include "xmlnode.h"
 
+
 typedef struct _XmppAccount XmppAccount;
 
 #include "xmpp_stream.h"
@@ -14,6 +15,8 @@ struct _XmppAccount {
 	gchar *password;
 
 	gchar *to;
+
+	GHashTable *buddies;
 
 	HybridAccount *account;
 };

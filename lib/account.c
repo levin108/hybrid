@@ -766,6 +766,7 @@ hybrid_account_close(HybridAccount *account)
 	gpointer key;
 	GtkTreeModel *model;
 	GSList *pos;
+	gboolean has_enabled_account = FALSE;
 
 	g_return_if_fail(account != NULL);
 
@@ -848,8 +849,14 @@ hybrid_account_close(HybridAccount *account)
 
 			hybrid_blist_select_first_item(enabled_account);
 
+			has_enabled_account = TRUE;
+
 			break;
 		}
+	}
+
+	if (!has_enabled_account) {
+		hybrid_head_bind_to_account(NULL);
 	}
 
 	/*

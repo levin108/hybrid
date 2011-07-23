@@ -460,6 +460,9 @@ xmpp_stream_bind(XmppStream *stream)
 	node = xmlnode_new_child(iq->node, "bind");
 	xmlnode_new_namespace(node, NULL, NS_XMPP_BIND);
 
+	node = xmlnode_new_child(node, "resource");
+	xmlnode_set_content(node, "Hybrid");
+
 	iq_request_set_callback(iq, resource_bind_cb, NULL);
 
 	if (iq_request_send(iq) != HYBRID_OK) {
@@ -615,7 +618,7 @@ xmpp_stream_process_set_roster(XmppStream *stream, xmlnode *query)
 
 		value = xmlnode_prop(node, "jid");
 		
-		if (!(buddy = xmpp_buddy_find(value))) {
+		if (!(buddy = xmpp_buddy_find(stream->account, value))) {
 			g_free(value);
 			node = node->next;
 			continue;
@@ -819,7 +822,7 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 	full_jid = xmlnode_prop(root, "from");
 	bare_jid = get_bare_jid(full_jid);
 
-	if (!(buddy = xmpp_buddy_find(bare_jid))) {
+	if (!(buddy = xmpp_buddy_find(stream->account, bare_jid))) {
 
 		goto presence_over;
 	}
@@ -933,7 +936,6 @@ xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
 			bare_jid, value, time(NULL));
 
 	g_free(value);
-
 }
 
 void

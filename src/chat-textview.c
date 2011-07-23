@@ -38,6 +38,7 @@ hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 	GtkTextIter end_iter;
 	GtkTextMark *mark;
 	gchar *names;
+	const gchar *color;
 	struct tm *tm_time;
 	gchar time[128];
 
@@ -50,19 +51,27 @@ hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 	recv_tb  = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
 	gtk_text_buffer_get_end_iter(recv_tb, &end_iter);
 
-	names = g_strdup_printf(_("%s said (%s):"), name, time);
 
 	if (sendout) {
-
-		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
-						names, strlen(names), "blue", "bold", "wrap", NULL);
+		color = "blue";
 
 	} else {
-		gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
-						names, strlen(names), "green", "bold", "wrap", NULL);
+		color = "green";
 	}
 
+	names = g_strdup_printf(" (%s) ", time);
+
+	gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+					names, strlen(names), color, "wrap", NULL);
 	g_free(names);
+
+	gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+					name, strlen(name), color, "bold", "wrap", NULL);
+
+	names = _(" said:");
+
+	gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+					names, strlen(names), color, "wrap", NULL);
 
 	gtk_text_buffer_insert(recv_tb, &end_iter, "\n", -1);
 	

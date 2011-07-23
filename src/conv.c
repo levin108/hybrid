@@ -826,6 +826,7 @@ create_note_label(HybridChatWindow *chat)
 	}
 
 	eventbox = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(eventbox), FALSE);
 	gtk_container_add(GTK_CONTAINER(eventbox), label);
 	gtk_box_pack_start(GTK_BOX(hbox), eventbox, TRUE, TRUE, 0);
 	gtk_widget_add_events(eventbox,
@@ -835,6 +836,7 @@ create_note_label(HybridChatWindow *chat)
 
 	/* close button */
 	eventbox = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(eventbox), FALSE);
 	close_image = gtk_image_new_from_file(PIXMAPS_DIR"menus/close.png");
 	g_signal_connect(G_OBJECT(eventbox), "button-press-event",
 			G_CALLBACK(tab_close_press_cb), chat);
@@ -892,6 +894,7 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 	 * and then setup tooltip on the EventBox.
 	 */
 	eventbox = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(eventbox), FALSE);
 	gtk_container_add(GTK_CONTAINER(eventbox), cellview);
 
 	/* buddy icon renderer */

@@ -3,8 +3,6 @@
 #include "xmpp_buddy.h"
 #include "xmpp_iq.h"
 
-static GHashTable *xmpp_buddies = NULL;
-
 XmppPresence*
 xmpp_presence_create(const gchar *jid, const gchar *status, gint show)
 {
@@ -195,15 +193,18 @@ XmppBuddy*
 xmpp_buddy_create(XmppStream *stream, HybridBuddy *hybrid_buddy)
 {
 	XmppBuddy *buddy;
+	XmppAccount *account;
 	gchar *pos;
 
 	g_return_val_if_fail(hybrid_buddy != NULL, NULL);
 
-	if (!xmpp_buddies) {
-		xmpp_buddies = g_hash_table_new(g_str_hash, g_str_equal);
+	account = stream->account;
+
+	if (!account->buddies) {
+		account->buddies = g_hash_table_new(g_str_hash, g_str_equal);
 	}
 
-	if ((buddy = g_hash_table_lookup(xmpp_buddies, hybrid_buddy->id))) {
+	if ((buddy = g_hash_table_lookup(account->buddies, hybrid_buddy->id))) {
 		return buddy;
 	}
 
@@ -220,7 +221,7 @@ xmpp_buddy_create(XmppStream *stream, HybridBuddy *hybrid_buddy)
 	xmpp_buddy_set_group_name(buddy, hybrid_buddy->parent->name);
 	xmpp_buddy_set_photo(buddy, hybrid_blist_get_buddy_checksum(hybrid_buddy));
 
-	g_hash_table_insert(xmpp_buddies, buddy->jid, buddy);
+	g_hash_table_insert(account->buddies, buddy->jid, buddy);
 
 	return buddy;
 }
@@ -683,10 +684,16 @@ xmpp_buddy_get_info(XmppStream *stream, const gchar *jid,
 }
 
 XmppBuddy*
-xmpp_buddy_find(const gchar *jid)
+xmpp_buddy_find(XmppAccount *account, const gchar *jid)
 {
 	XmppBuddy *buddy;
+	GHashTable *xmpp_buddies;
 	gchar *tmp, *pos;
+
+	g_return_val_if_fail(account != NULL, NULL);
+	g_return_val_if_fail(jid != NULL, NULL);
+
+	xmpp_buddies = account->buddies;
 
 	g_return_val_if_fail(jid != NULL, NULL);
 
@@ -709,7 +716,15 @@ xmpp_buddy_find(const gchar *jid)
 void
 xmpp_buddy_destroy(XmppBuddy *buddy)
 {
+	XmppStream *stream;
+	XmppAccount *account;
+	GHashTable *xmpp_buddies;
+
 	if (buddy) {
+		stream = buddy->stream;
+		account = stream->account;
+		xmpp_buddies = account->buddies;
+
 		g_hash_table_remove(xmpp_buddies, buddy);
 
 		if (g_hash_table_size(xmpp_buddies) == 0) {
@@ -726,13 +741,18 @@ xmpp_buddy_destroy(XmppBuddy *buddy)
 }
 
 void
-xmpp_buddy_clear(void)
+xmpp_buddy_clear(XmppStream *stream)
 {
 	GHashTableIter hash_iter;
 	gpointer key;
 	XmppBuddy *buddy;
+	XmppAccount *account;
 
-	g_hash_table_iter_init(&hash_iter, xmpp_buddies);
+	g_return_if_fail(stream != NULL);
+
+	account = stream->account;
+
+	g_hash_table_iter_init(&hash_iter, account->buddies);
 
 	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&buddy)) {
 		xmpp_buddy_destroy(buddy);

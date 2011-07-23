@@ -21,11 +21,11 @@ xmpp_message_send(XmppStream *stream, const gchar *text, const gchar *to)
 	xml_string = xmlnode_to_string(root);
 	xmlnode_free(root);
 
-	hybrid_debug_info("send message to %s:\n%s", to, xml_string);
+	hybrid_debug_info("xmpp", "send message to %s:\n%s", to, xml_string);
 
 	if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
 
-		hybrid_debug_error("send message to %s failed\n", to);
+		hybrid_debug_error("xmpp", "send message to %s failed\n", to);
 		g_free(xml_string);
 
 		return HYBRID_ERROR;
