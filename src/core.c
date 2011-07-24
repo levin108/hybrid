@@ -70,7 +70,9 @@ add_buddy_cb(GtkWidget *widget, gpointer user_data)
 {
 	HybridBuddyAddWindow *window;
 
-	window = hybrid_buddyadd_window_create();
+	//window = hybrid_buddyadd_window_create();
+	
+	hybrid_buddy_request_window_create(hybrid_blist_get_current_account(), "a", NULL);
 }
 
 static void
