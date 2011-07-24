@@ -276,6 +276,73 @@ xmpp_stream_init(gint sk, XmppStream *stream)
 	return FALSE;
 }
 
+static gboolean
+ping_cb(XmppStream *stream, xmlnode *node, gpointer user_data)
+{
+	gchar *value;
+
+	if (xmlnode_has_prop(node, "type")) {
+		value = xmlnode_prop(node, "type");
+
+		if (g_strcmp0(value, "result") != 0) {
+			hybrid_account_error_reason(stream->account->account,
+					_("Connection Closed."));
+		}
+	}
+
+	if (stream->keepalive_source) {
+		g_source_remove(stream->keepalive_source);
+		stream->keepalive_source = 0;
+	}
+
+	return FALSE;
+}
+
+static gboolean
+ping_timeout_cb(XmppStream *stream)
+{
+	hybrid_account_error_reason(stream->account->account,
+			_("Connection Closed."));
+
+	return FALSE;
+}
+
+gint
+xmpp_stream_ping(XmppStream *stream)
+{
+	IqRequest *iq;
+	xmlnode *node;
+
+	g_return_val_if_fail(stream != NULL, HYBRID_ERROR);
+
+	iq = iq_request_create(stream, IQ_TYPE_GET);
+
+	node = xmlnode_new_child(iq->node, "ping");
+	xmlnode_new_namespace(node, NULL, NS_XMPP_PING);
+
+	iq_request_set_callback(iq, ping_cb, NULL);
+
+	if (stream->keepalive_source) {
+		g_source_remove(stream->keepalive_source);
+	}
+
+	stream->keepalive_source = 
+		g_timeout_add_seconds(10, (GSourceFunc)ping_timeout_cb, stream);
+
+	if (iq_request_send(iq) != HYBRID_OK) {
+
+		iq_request_destroy(iq);
+		hybrid_account_error_reason(stream->account->account,
+				_("Connection Closed."));
+
+		return HYBRID_ERROR;
+	}
+
+	iq_request_destroy(iq);
+
+	return HYBRID_OK;
+}
+
 /**
  * Ok, TLS handshake success, we will continue the authtication
  * through the established TLS channel.

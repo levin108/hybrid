@@ -9,6 +9,7 @@
 #define NS_XMPP_TLS      "urn:ietf:params:xml:ns:xmpp-tls"
 #define NS_XMPP_SASL     "urn:ietf:params:xml:ns:xmpp-sasl"
 #define NS_XMPP_BIND     "urn:ietf:params:xml:ns:xmpp-bind"
+#define NS_XMPP_PING     "urn:xmpp:ping"
 #define NS_IQ_ROSTER     "jabber:iq:roster"
 #define NS_XMPP_SESSION  "urn:ietf:params:xml:ns:xmpp-session"
 #define NS_GOOGLE_ROSTER "google:roster"
@@ -34,6 +35,8 @@ struct _XmppStream {
 	gint state; /**< stream state. */
 
 	GSList *pending_trans; /**< The pending iq transactions. */
+
+	guint keepalive_source; /**< event source of the keep alive timeout event. */
 
 	XmppAccount *account;
 
@@ -62,6 +65,16 @@ extern "C" {
  * @param stream The xmpp stream.
  */
 gboolean xmpp_stream_init(gint sk, XmppStream *stream);
+
+/**
+ * Send a ping message on the stream to keep the 
+ * connection alive.
+ *
+ * @param stream The xmpp stream.
+ * 
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint xmpp_stream_ping(XmppStream *stream);
 
 /**
  * Create a xmpp stream.

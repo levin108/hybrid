@@ -209,6 +209,20 @@ xmpp_change_state(HybridAccount *account, gint state)
 }
 
 static gboolean
+xmpp_keep_alive(HybridAccount *account)
+{
+	XmppStream *stream;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (xmpp_stream_ping(stream) != HYBRID_OK) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static gboolean
 xmpp_account_tooltip(HybridAccount *account, HybridTooltipData *tip_data)
 {
 	XmppStream *stream;
@@ -406,7 +420,7 @@ HybridModuleInfo module_info = {
 	xmpp_modify_status,         /**< modify_status */
 	xmpp_modify_photo,          /**< modify_photo */
 	xmpp_change_state,          /**< change_state */
-	NULL,            /**< keep_alive */
+	xmpp_keep_alive,            /**< keep_alive */
 	xmpp_account_tooltip,       /**< account_tooltip */
 	xmpp_buddy_tooltip,         /**< buddy_tooltip */
 	xmpp_buddy_move,            /**< buddy_move */
