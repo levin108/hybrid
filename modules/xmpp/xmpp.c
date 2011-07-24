@@ -356,6 +356,16 @@ xmpp_buddy_move(HybridAccount *account, HybridBuddy *buddy,
 }
 
 static void
+xmpp_send_typing(HybridAccount *account, HybridBuddy *buddy, HybridInputState state)
+{
+	XmppStream *stream;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	xmpp_message_send_typing(stream, buddy->id, state);
+}
+
+static void
 xmpp_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
 	XmppStream *stream;
@@ -408,6 +418,7 @@ HybridModuleInfo module_info = {
 	xmpp_group_add,             /**< group_add */
 	NULL,       /**< chat_word_limit */
 	NULL,            /**< chat_start */
+	xmpp_send_typing,           /**< chat_send_typing */
 	xmpp_chat_send,             /**< chat_send */
 	xmpp_close,                 /**< close */
 	NULL,               /**< actions */

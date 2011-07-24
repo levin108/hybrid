@@ -2,12 +2,15 @@
 #define HYBRID_CHAT_H
 
 #include <gtk/gtk.h>
-#include "blist.h"
 #include "logs.h"
 
+#include "account.h"
+#include "blist.h"
+
 typedef struct _HybridConversation HybridConversation;
-typedef struct _HybridChatWindow HybridChatWindow;
+typedef struct _HybridChatWindow   HybridChatWindow;
 typedef enum _HybridChatWindowType HybridChatWindowType;
+
 typedef void (*ChatCallback)(HybridAccount *, const gchar *);
 
 struct _HybridConversation {
@@ -70,6 +73,12 @@ struct _HybridChatWindow {
 	/* callback function called when the send button clicked,
 	 * only be used when it's user-defined window. */
 	ChatCallback callback;
+
+	guint typing_source;
+	gboolean is_typing;
+
+	/* event source of the inputing timeout event. */
+	guint input_source;
 };
 
 #define IS_SYSTEM_CHAT(chat_window)       ((chat_window)->type == HYBRID_CHAT_PANEL_SYSTEM)
@@ -94,6 +103,11 @@ enum {
 	BUDDY_STATUS_ICON_COLUMN,
 	BUDDY_PROTO_ICON_COLUMN,
 	LABEL_COLUMNS
+};
+
+enum {
+	MSG_NOTIFICATION_INPUT,
+	MSG_NOTIFICATION_ERROR,
 };
 
 #ifdef __cplusplus
@@ -135,6 +149,15 @@ void hybrid_chat_window_set_icon(HybridChatWindow *window,
 					GdkPixbuf *pixbuf);
 
 /**
+ * Find a chat window for buddy with the given buddy id.
+ *
+ * @param buddy_id ID of the buddy.
+ *
+ * @param chat NULL if not found.
+ */
+HybridChatWindow *hybrid_conv_find_chat(const gchar *buddy_id);
+
+/**
  * Set the callback function for the send button click event,
  * it's only used when the window is a user-defined window,
  * otherwise this function will be ignored.
@@ -148,6 +171,43 @@ void hybrid_chat_window_set_callback(HybridChatWindow *window,
 void hybrid_conv_got_message(HybridAccount *account,
 				const gchar *buddy_id, const gchar *message,
 				time_t time);
+
+/**
+ * Got a status message to display in the receiving window.
+ *
+ * @param account  The account.
+ * @param buddy_id ID of the buddy to which the chat window belongs.
+ * @param text     Content of the status message.
+ * @param type     Tyep of the status.
+ */
+void hybrid_conv_got_status(HybridAccount *account, const gchar *buddy_id,
+		const gchar *text, gint type);
+
+/**
+ * Got an buddy's inputing message.
+ *
+ * @param account   The account.
+ * @param buddy_id  ID of the buddy to which the chat window belongs.
+ * @param auto_stop If TRUE it will set the inputing state to be stoped automaticly. 
+ */
+void hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id,
+		gboolean auto_stop);
+
+/**
+ * Got an buddy's stopping inputing message.
+ *
+ * @param account   The account.
+ * @param buddy_id  ID of the buddy to which the chat window belongs.
+ */
+void hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id);
+
+/**
+ * Clear the inputing message.
+ *
+ * @param account The account.
+ * @param buddy_id ID of the buddy to which the chat window belongs.
+ */
+void hybrid_conv_clear_inputing(HybridAccount *account, const gchar *buddy_id);
 
 /**
  * Update the tips title of the chat window, usually used when

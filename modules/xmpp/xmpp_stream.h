@@ -12,6 +12,7 @@
 #define NS_IQ_ROSTER     "jabber:iq:roster"
 #define NS_XMPP_SESSION  "urn:ietf:params:xml:ns:xmpp-session"
 #define NS_GOOGLE_ROSTER "google:roster"
+#define NS_CHANGESTATES  "http://jabber.org/protocol/chatstates"
 
 typedef struct _XmppStream XmppStream;
 

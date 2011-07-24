@@ -29,6 +29,15 @@ GtkWidget *hybrid_chat_textview_create();
 void hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 								const gchar *message, time_t msg_time, 
 								gboolean sendout);
+/**
+ * Append a notify message to the textview.
+ *
+ * @param textview The textview.
+ * @param text     Content of the notification.
+ * @param type     Type of the notification.
+ */
+void hybrid_chat_textview_notify(GtkWidget *textview, const gchar *text, gint type);
+
 #ifdef __cplusplus
 }
 #endif

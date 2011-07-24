@@ -893,9 +893,12 @@ xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
 	gchar *value;
 	gchar *bare_jid;
 	xmlnode *node;
+	HybridAccount *account;
 
 	g_return_if_fail(stream != NULL);
 	g_return_if_fail(root != NULL);
+
+	account = stream->account->account;
 
 	if (!xmlnode_has_prop(root, "type")) {
 		hybrid_debug_error("xmpp", 
@@ -925,17 +928,27 @@ xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
 	bare_jid = get_bare_jid(value);
 	g_free(value);
 
-	if (!(node = xmlnode_find(root, "body"))) {
-		hybrid_debug_error("xmpp", "invalid message without a body.");
+	if ((node = xmlnode_find(root, "composing"))) {
+		hybrid_conv_got_inputing(account, bare_jid, FALSE);
+	}
+
+	if ((node = xmlnode_find(root, "active"))) {
+		hybrid_conv_clear_inputing(account, bare_jid);
+	}
+
+	if ((node = xmlnode_find(root, "paused"))) {
+		hybrid_conv_stop_inputing(account, bare_jid);
+	}
+
+	if ((node = xmlnode_find(root, "body"))) {
+
+		value = xmlnode_content(node);
+		hybrid_conv_got_message(account, bare_jid, value, time(NULL));
+		g_free(value);
+
 		return;
 	}
 
-	value = xmlnode_content(node);
-
-	hybrid_conv_got_message(stream->account->account,
-			bare_jid, value, time(NULL));
-
-	g_free(value);
 }
 
 void

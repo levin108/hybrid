@@ -7,6 +7,7 @@
 #include "conv.h"
 #include "pref.h"
 #include "util.h"
+#include "module.h"
 
 /* The list of the currently opened conversation dialogs. */
 GSList *conv_list = NULL; 
@@ -208,6 +209,16 @@ chat_found:
 		buddy   = chat->data;
 		module  = account->proto;
 
+		if (chat->typing_source) {
+			g_source_remove(chat->typing_source);
+			chat->typing_source = 0;
+			chat->is_typing = FALSE;
+		}
+
+		if (module->info->chat_send_typing) {
+			module->info->chat_send_typing(account, buddy, INPUT_STATE_ACTIVE);
+		}
+
 		if (module->info->chat_send) {
 			module->info->chat_send(account, buddy, text);
 		}
@@ -380,6 +391,11 @@ close_tab(HybridChatWindow *chat)
 		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), FALSE);
 	}
 
+	/* TODO inplement a chat_window_destroy(). */
+	if (chat->input_source) {
+		g_source_remove(chat->input_source);
+	}
+	g_free(chat->title);
 	g_free(chat);
 
 	if (conv->chat_buddies == NULL) { 
@@ -700,6 +716,26 @@ key_press_func(GtkWidget *widget, GdkEventKey *event, HybridConversation *conv)
 	return FALSE;
 }
 
+static gboolean
+type_finished_cb(HybridChatWindow *chat)
+{
+	HybridAccount *account;
+	HybridModule *module;
+
+	chat->typing_source = 0;
+
+	chat->is_typing = FALSE;
+
+	account = chat->account;
+	module = account->proto;
+
+	if (module->info->chat_send_typing) {
+		module->info->chat_send_typing(account, chat->data, INPUT_STATE_PAUSED);
+	}
+
+	return FALSE;
+}
+
 /**
  * Callback function of the text buffer changed event, to cal the number of words
  * left that can be input into the send textview.
@@ -716,12 +752,26 @@ sendtext_buffer_changed(GtkTextBuffer *buffer, HybridChatWindow *chat)
 	gchar *text;
 	gchar *res;
 
+	account = chat->account;
+	module = account->proto;
+
+	if (!chat->is_typing) {
+
+		if (IS_SYSTEM_CHAT(chat) && module->info->chat_send_typing) {
+
+			chat->typing_source = 
+				g_timeout_add_seconds(4, (GSourceFunc)type_finished_cb, chat);
+
+			chat->is_typing = TRUE;
+
+			module->info->chat_send_typing(account, chat->data, INPUT_STATE_TYPING);
+		}
+	}
+
+	/* calculate number of words left to input. */
 	if (!chat->words_left_label) {
 		return FALSE;
 	}
-
-	account = chat->account;
-	module = account->proto;
 
 	if (!module->info->chat_word_limit ||
 		(totel_count = module->info->chat_word_limit(account)) <= 0) {
@@ -1142,8 +1192,6 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	HybridConversation *conv = NULL;
 	HybridBuddy *buddy;
 	HybridModule *proto;
-	GSList *conv_pos;
-	GSList *chat_pos;
 
 	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(id != NULL, NULL);
@@ -1167,18 +1215,8 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 		}
 	}
 
-	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
-		conv = (HybridConversation*)conv_pos->data;
-
-		for (chat_pos = conv->chat_buddies; chat_pos;
-				chat_pos = chat_pos->next) {
-
-			chat = (HybridChatWindow*)chat_pos->data;
-
-			if (g_strcmp0(id, chat->id) == 0) {
-				goto found;
-			}
-		}
+	if ((chat = hybrid_conv_find_chat(id))) {
+		goto found;
 	}
 
 	/*
@@ -1186,9 +1224,12 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	 */
 	if (hybrid_pref_get_boolean("single_chat_window")) {
 
-		if (!conv) {
+		if (!conv_list) {
 			conv = hybrid_conv_create();
 			conv_list = g_slist_append(conv_list, conv);
+
+		} else {
+			conv = conv_list->data;
 		}
 
 	} else {
@@ -1229,11 +1270,8 @@ hybrid_conv_got_message(HybridAccount *account,
 				const gchar *buddy_id, const gchar *message,
 				time_t time)
 {
-	GSList *conv_pos;
-	GSList *chat_pos;
 	HybridConversation *conv;
 	HybridChatWindow *chat;
-	HybridBuddy *temp_buddy;
 	HybridBuddy *buddy;
 	gchar *msg;
 
@@ -1254,25 +1292,12 @@ hybrid_conv_got_message(HybridAccount *account,
 		return;
 	}
 
-	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
-		conv = (HybridConversation*)conv_pos->data;
-
-		for (chat_pos = conv->chat_buddies; chat_pos; 
-				chat_pos = chat_pos->next) {
-			chat = (HybridChatWindow*)chat_pos->data;
-
-			temp_buddy = chat->data;
-
-			if (g_strcmp0(temp_buddy->id, buddy_id) == 0) {
-				goto got_chat_found;
-			}
-		}
-	}
+	if (!(chat = hybrid_conv_find_chat(buddy_id))) {
 	
-	/* Well, we haven't find an existing chat panel so far, so create one. */
-	chat = hybrid_chat_window_create(account, buddy->id, HYBRID_CHAT_PANEL_SYSTEM);
-
-got_chat_found:
+		/* Well, we haven't find an existing chat panel so far, so create one. */
+		chat = hybrid_chat_window_create(account, buddy->id,
+				HYBRID_CHAT_PANEL_SYSTEM);
+	}
 
 	/* check whether the chat window is active. */
 	conv = chat->parent;
@@ -1301,6 +1326,153 @@ just_show_msg:
 	hybrid_logs_write(chat->logs, buddy->name, msg, FALSE);
 
 	g_free(msg);
+}
+
+void
+hybrid_conv_got_status(HybridAccount *account, const gchar *buddy_id, const gchar *text, gint type)
+{
+	HybridChatWindow *chat;
+	HybridBuddy *buddy;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(buddy_id != NULL);
+
+	if (!(buddy = hybrid_blist_find_buddy(account, buddy_id))) {
+
+		hybrid_debug_error("conv", "buddy doesn't exist.");
+		return;
+	}
+
+	if (!(chat = hybrid_conv_find_chat(buddy_id))) {
+		/*
+		 * Well, we haven't find an existing chat panel so far, check the type
+		 * to determine whether to create a new one.
+		 */
+		if (type == MSG_NOTIFICATION_INPUT) {
+			return;
+
+		} else {
+			chat = hybrid_chat_window_create(account, buddy->id, HYBRID_CHAT_PANEL_SYSTEM);
+		}
+	}
+	
+	if (type == MSG_NOTIFICATION_INPUT) {
+		hybrid_chat_textview_notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
+	}
+
+}
+
+static gboolean
+input_finished_cb(HybridChatWindow *chat)
+{
+	gchar *text;
+	HybridBuddy *buddy;
+
+	if (!IS_SYSTEM_CHAT(chat)) {
+
+		chat->input_source = 0;
+		return FALSE;
+	}
+
+	buddy = (HybridBuddy*)chat->data;
+
+	text = g_strdup_printf(_(" %s stoped inputing"),
+			buddy->name ? buddy->name : buddy->id);
+
+	hybrid_chat_textview_notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
+
+	chat->input_source = 0;
+
+	return FALSE;
+}
+
+void
+hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean auto_stop)
+{
+	HybridBuddy *buddy;
+	HybridChatWindow *chat;
+	gchar *text;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(buddy_id != NULL);
+
+	if (!(buddy = hybrid_blist_find_buddy(account, buddy_id))) {
+
+		hybrid_debug_error("conv", "buddy doesn't exist.");
+		return;
+	}
+
+	if (!(chat = hybrid_conv_find_chat(buddy_id))) {
+		return;
+	}
+
+	text = g_strdup_printf(_(" %s is inputing"), buddy->name);
+
+	hybrid_chat_textview_notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
+	
+	g_free(text);
+
+	if (!auto_stop) {
+		return;
+	}
+
+	if (chat->input_source) {
+		g_source_remove(chat->input_source);
+	}
+
+	chat->input_source = 
+		g_timeout_add_seconds(4, (GSourceFunc)(input_finished_cb), chat);
+}
+
+void
+hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
+{
+	HybridBuddy *buddy;
+	HybridChatWindow *chat;
+	gchar *text;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(buddy_id != NULL);
+
+	if (!(buddy = hybrid_blist_find_buddy(account, buddy_id))) {
+
+		hybrid_debug_error("conv", "buddy doesn't exist.");
+		return;
+	}
+
+	if (!(chat = hybrid_conv_find_chat(buddy_id))) {
+		return;
+	}
+
+	text = g_strdup_printf(_(" %s stoped inputing"), buddy->name);
+	hybrid_chat_textview_notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
+	g_free(text);
+}
+
+void
+hybrid_conv_clear_inputing(HybridAccount *account, const gchar *buddy_id)
+{
+	HybridBuddy *buddy;
+	HybridChatWindow *chat;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(buddy_id != NULL);
+
+	if (!(buddy = hybrid_blist_find_buddy(account, buddy_id))) {
+
+		hybrid_debug_error("conv", "buddy doesn't exist.");
+		return;
+	}
+
+	if (!(chat = hybrid_conv_find_chat(buddy_id))) {
+		return;
+	}
+
+	if (chat->input_source) {
+		g_source_remove(chat->input_source);
+	}
+
+	hybrid_chat_textview_notify(chat->textview, "" , MSG_NOTIFICATION_INPUT);
 }
 
 void
@@ -1355,6 +1527,35 @@ hybrid_chat_window_set_icon(HybridChatWindow *window, GdkPixbuf *pixbuf)
 
 	gtk_list_store_set(store, &window->tipiter,
 			BUDDY_ICON_COLUMN, pixbuf, -1);
+}
+
+HybridChatWindow*
+hybrid_conv_find_chat(const gchar *buddy_id)
+{
+	GSList *conv_pos;
+	GSList *chat_pos;
+	HybridConversation *conv;
+	HybridChatWindow *chat;
+	HybridBuddy *temp_buddy;
+
+	g_return_val_if_fail(buddy_id != NULL, NULL);
+
+	for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
+		conv = (HybridConversation*)conv_pos->data;
+
+		for (chat_pos = conv->chat_buddies; chat_pos; 
+				chat_pos = chat_pos->next) {
+			chat = (HybridChatWindow*)chat_pos->data;
+
+			temp_buddy = chat->data;
+
+			if (g_strcmp0(temp_buddy->id, buddy_id) == 0) {
+				return chat;
+			}
+		}
+	}
+
+	return NULL;
 }
 
 void

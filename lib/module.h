@@ -7,6 +7,15 @@
 typedef struct _HybridModule HybridModule;
 typedef struct _HybridModuleInfo HybridModuleInfo;
 
+typedef enum _HybridInputState HybridInputState;
+
+enum _HybridInputState {
+	INPUT_STATE_TYPING,
+	INPUT_STATE_PAUSED,
+	INPUT_STATE_ACTIVE,
+};
+
+
 #include "account.h"
 #include "tooltip.h"
 #include "blist.h"
@@ -65,6 +74,7 @@ struct _HybridModuleInfo {
 	 */
 	gint     (*chat_word_limit)(HybridAccount *);
 	gboolean (*chat_start)(HybridAccount *, HybridBuddy *);
+	void     (*chat_send_typing)(HybridAccount *, HybridBuddy *, HybridInputState);
 	void     (*chat_send)(HybridAccount *, HybridBuddy *, const gchar *);
 	void     (*close)(HybridAccount *);
 

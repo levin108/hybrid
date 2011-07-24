@@ -892,6 +892,7 @@ HybridModuleInfo module_info = {
 	fx_group_add,             /**< group_add */
 	fx_chat_word_limit,       /**< chat_word_limit */
 	fx_chat_start,            /**< chat_start */
+	NULL,                     /**< chat_send_typing */
 	fx_chat_send,             /**< chat_send */
 	fx_close,                 /**< close */
 	fetion_actions,               /**< actions */
