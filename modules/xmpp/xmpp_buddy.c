@@ -173,7 +173,7 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 		 * hybrid_blist_set_buddy_name() in case that the name changed.
 		 */
 		buddy = xmpp_buddy_create(stream, hd);
-		xmpp_buddy_set_subscription(buddy, scribe);
+		buddy->subscription = g_strdup(scribe);
 
 		xmpp_buddy_set_name(buddy, name);
 		g_free(name);
@@ -252,6 +252,16 @@ xmpp_buddy_set_subscription(XmppBuddy *buddy, const gchar *sub)
 	gchar *tmp;
 
 	g_return_if_fail(buddy != NULL);
+
+	if (g_strcmp0(buddy->subscription, sub) != 0) {
+
+		if (g_strcmp0(sub, "both") == 0) {
+			hybrid_blist_set_buddy_status(buddy->buddy, TRUE);
+
+		} else {
+			hybrid_blist_set_buddy_status(buddy->buddy, FALSE);
+		}
+	}
 
 	tmp = buddy->subscription;
 	buddy->subscription = g_strdup(sub);
