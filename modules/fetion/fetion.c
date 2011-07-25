@@ -216,7 +216,7 @@ process_add_buddy(fetion_account *ac, const gchar *sipmsg)
 	gchar *desc;
 	HybridBuddyReqWindow *req;
 
-	hybrid_debug_info("received add-buddy request:\n%s", sipmsg);
+	hybrid_debug_info("fetion", "received add-buddy request:\n%s", sipmsg);
 
 	if (sip_parse_appbuddy(sipmsg, &userid, &sipuri, &desc) != HYBRID_OK) {
 		return;
@@ -620,9 +620,9 @@ fx_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy, HybridTooltipData *
 		hybrid_tooltip_data_add_title(tip_data, bd->sid);
 	}
 
-
 	hybrid_tooltip_data_add_pair(tip_data, "Name", bd->nickname);
-	if (*bd->localname) {
+
+	if (bd->localname && *bd->localname) {
 		hybrid_tooltip_data_add_pair(tip_data, "Alias", bd->localname);
 	}
 	hybrid_tooltip_data_add_pair(tip_data, "Status",
@@ -635,7 +635,7 @@ fx_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy, HybridTooltipData *
 		hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", bd->mobileno);
 	}
 
-	if (*bd->mood_phrase) {
+	if (bd->mood_phrase && *bd->mood_phrase) {
 		hybrid_tooltip_data_add_pair(tip_data, "Mood", bd->mood_phrase);
 	}
 	
@@ -724,10 +724,19 @@ fx_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 }
 
 static gboolean
-fx_buddy_req(HybridAccount *account, const gchar *id, const gchar *alias,
-		gboolean accept)
+fx_buddy_req(HybridAccount *account, HybridGroup *group,
+		const gchar *id, const gchar *alias,
+		gboolean accept, const gpointer user_data)
 {
-	printf("%s\n", id);
+	fetion_account *ac;
+	const gchar *sipuri;
+
+	ac = hybrid_account_get_protocol_data(account);
+
+	sipuri = (const gchar*)user_data;
+
+	fetion_buddy_handle_request(ac, sipuri, id, alias, group->id, accept);
+
 	return TRUE;
 }
 

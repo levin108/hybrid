@@ -498,11 +498,12 @@ add_buddy_ok:
 
 	if (!(group = hybrid_blist_find_group(account->account, buddy->groups))) {
 		fetion_buddy_destroy(buddy);
+		account->buddies = g_slist_remove(account->buddies, buddy);
 
 		goto add_buddy_unknown_err;
 	}
 
-	if (*(buddy->localname) == '\0') {
+	if (buddy->localname && *(buddy->localname) == '\0') {
 		name = get_sid_from_sipuri(buddy->sipuri);
 
 	} else {
@@ -510,7 +511,6 @@ add_buddy_ok:
 	}
 
 	bd = hybrid_blist_add_buddy(account->account, group, buddy->userid, name);
-
 	hybrid_blist_set_buddy_status(bd, FALSE);
 
 	g_free(name);
@@ -785,6 +785,78 @@ static gint
 handle_request_cb(fetion_account *account, const gchar *sipmsg,
 			fetion_transaction *trans)
 {
+	gchar *pos;
+	gchar *value;
+	fetion_buddy *buddy;
+	xmlnode *root;
+	xmlnode *node;
+	HybridGroup *group;
+	HybridBuddy *bd;
+	gchar *name;
+
+	if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
+		return HYBRID_ERROR;
+	}
+
+	pos += 4;
+
+	if (!(root = xmlnode_root(pos, strlen(pos)))) {
+		return HYBRID_ERROR;
+	}
+
+	if (!(node = xmlnode_find(root, "buddy"))) {
+		return HYBRID_ERROR;
+	}
+
+	if (!xmlnode_has_prop(node, "uri") ||
+		!xmlnode_has_prop(node, "user-id")) {
+		return HYBRID_ERROR;
+	}
+
+	buddy = fetion_buddy_create();
+	buddy->sipuri = xmlnode_prop(node, "uri");
+	buddy->userid = xmlnode_prop(node, "user-id");
+	buddy->sid = get_sid_from_sipuri(buddy->sipuri);
+
+	account->buddies = g_slist_append(account->buddies, buddy);
+
+	if (xmlnode_has_prop(node, "local-name")) {
+		buddy->localname = xmlnode_prop(node, "localname");
+	}
+
+	if (xmlnode_has_prop(node, "buddy-lists")) {
+		buddy->groups = xmlnode_prop(node, "buddy-lists");
+
+	} else {
+		buddy->groups = "0";
+	}
+
+	if (xmlnode_has_prop(node, "relation-status")) {
+		value = xmlnode_prop(node, "relation-status");
+		buddy->status = atoi(value);
+		g_free(value);
+
+	} else {
+		buddy->status = 0;
+	}
+
+	if (!(group = hybrid_blist_find_group(account->account, buddy->groups))) {
+		account->buddies = g_slist_remove(account->buddies, buddy);
+		fetion_buddy_destroy(buddy);
+		return HYBRID_ERROR;
+	}
+
+	if (buddy->localname && *(buddy->localname) == '\0') {
+		name = get_sid_from_sipuri(buddy->sipuri);
+
+	} else {
+		name = g_strdup(buddy->localname);
+	}
+
+	bd = hybrid_blist_add_buddy(account->account, group, buddy->userid, name);
+	hybrid_blist_set_buddy_status(bd, buddy->status == 1 ? TRUE: FALSE);
+
+	g_free(name);
 
 	return HYBRID_OK;
 }
@@ -810,11 +882,13 @@ fetion_buddy_handle_request(fetion_account *ac, const gchar *sipuri,
 	fetion_sip_set_type(sip, SIP_SERVICE);
 	eheader = sip_event_header_create(SIP_EVENT_HANDLECONTACTREQUEST);
 
-	trans = transaction_create();
-	transaction_set_callid(trans, sip->callid);
-	transaction_set_userid(trans, userid);
-	transaction_set_callback(trans, handle_request_cb);
-	transaction_add(ac, trans);
+	if (accept) {
+		trans = transaction_create();
+		transaction_set_callid(trans, sip->callid);
+		transaction_set_userid(trans, userid);
+		transaction_set_callback(trans, handle_request_cb);
+		transaction_add(ac, trans);
+	}
 
 	fetion_sip_add_header(sip, eheader);
 	body = generate_handle_request_body(sipuri, userid, alias, groupid, accept);

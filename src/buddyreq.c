@@ -31,13 +31,24 @@ add_cb(GtkWidget *widget, HybridBuddyReqWindow *req)
 {
 	HybridAccount *account;
 	HybridModule *module;
+	HybridGroup *group;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
 
 	account = req->account;
 	module = account->proto;
 
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(req->group_combo));
+
+	if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(req->group_combo), &iter)) {
+		return;
+	}
+
+	gtk_tree_model_get(model, &iter, BUDDYREQ_GROUP_GROUP_COLUMN, &group, -1);
+
 	if (module->info->buddy_req) {
-		module->info->buddy_req(account, 
-				req->buddy_id, req->buddy_name, req->accept);
+		module->info->buddy_req(account, group,	req->buddy_id, 
+				req->buddy_name, req->accept, req->user_data);
 	}
 
 	gtk_widget_destroy(req->window);
@@ -305,6 +316,7 @@ hybrid_buddy_request_window_create(HybridAccount *account, const gchar *id,
 	req->buddy_id = g_strdup(id);
 	req->buddy_name = g_strdup(name);
 	req->account = account;
+	req->accept = TRUE;
 
 	req->window = hybrid_create_window(_("Buddy-Add Request"), NULL,
 					GTK_WIN_POS_CENTER, FALSE);
