@@ -60,6 +60,7 @@ struct _HybridModuleInfo {
 	gboolean (*buddy_rename)(HybridAccount *, HybridBuddy *, const gchar *);
 	gboolean (*buddy_add)(HybridAccount *, HybridGroup *, const gchar *,
 						const gchar*, const gchar *);
+	gboolean (*buddy_req)(HybridAccount *, const gchar *, const gchar *, gboolean accept);
 	gboolean (*group_rename)(HybridAccount *, HybridGroup *, const gchar *);
 	gboolean (*group_remove)(HybridAccount *, HybridGroup *);
 

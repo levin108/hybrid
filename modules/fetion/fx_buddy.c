@@ -17,6 +17,9 @@ static gchar *generate_rename_buddy_body(const gchar *userid,
 				const gchar *name);
 static gchar *generate_buddy_add_body(const gchar *no, const gchar *groupid,
 				const gchar *localname, const gchar *desc);
+static gchar *generate_handle_request_body(const gchar *sipuri,
+		const gchar *userid, const gchar *alias, const gchar *groupid,
+		gboolean accept);
 
 fetion_buddy*
 fetion_buddy_create(void)
@@ -778,6 +781,57 @@ fetion_update_portrait(fetion_account *ac, fetion_buddy *buddy)
 	hybrid_proxy_connect(ac->portrait_host_name, 80, portrait_conn_cb, data);
 }
 
+static gint
+handle_request_cb(fetion_account *account, const gchar *sipmsg,
+			fetion_transaction *trans)
+{
+
+	return HYBRID_OK;
+}
+
+void
+fetion_buddy_handle_request(fetion_account *ac, const gchar *sipuri,
+		const gchar *userid, const gchar *alias, const gchar *groupid,
+		gboolean accept)
+{
+	fetion_sip *sip;
+	sip_header *eheader;
+	gchar *body;
+	gchar *sip_text;
+	fetion_transaction *trans;
+
+	g_return_if_fail(ac != NULL);
+	g_return_if_fail(sipuri != NULL);
+	g_return_if_fail(userid != NULL);
+	g_return_if_fail(groupid != NULL);
+
+	sip = ac->sip;
+	
+	fetion_sip_set_type(sip, SIP_SERVICE);
+	eheader = sip_event_header_create(SIP_EVENT_HANDLECONTACTREQUEST);
+
+	trans = transaction_create();
+	transaction_set_callid(trans, sip->callid);
+	transaction_set_userid(trans, userid);
+	transaction_set_callback(trans, handle_request_cb);
+	transaction_add(ac, trans);
+
+	fetion_sip_add_header(sip, eheader);
+	body = generate_handle_request_body(sipuri, userid, alias, groupid, accept);
+
+	sip_text = fetion_sip_to_string(sip, body);
+	g_free(body);
+
+	if (send(ac->sk, sip_text, strlen(sip_text), 0) == -1) {
+
+		hybrid_debug_error("fetion", "handle buddy request failed.");
+		g_free(sip_text);
+
+		return;
+	}
+
+	g_free(sip_text);
+}
 
 static gchar*
 generate_get_info_body(const gchar *userid)
@@ -907,6 +961,34 @@ generate_buddy_add_body(const gchar *no, const gchar *groupid,
 	xmlnode_new_prop(node, "addbuddy-phrase-id", "0");
 
 	g_free(sipuri);
+
+	res = xmlnode_to_string(root);
+
+	xmlnode_free(root);
+
+	return res;
+}
+
+static gchar*
+generate_handle_request_body(const gchar *sipuri, const gchar *userid,
+		const gchar *alias, const gchar *groupid, gboolean accept)
+{
+	xmlnode *root;
+	xmlnode *node;
+	gchar *res;
+
+	root = xmlnode_create("args");
+	node = xmlnode_new_child(root, "contacts");
+	node = xmlnode_new_child(node, "buddies");
+	node = xmlnode_new_child(node, "buddy");
+
+	xmlnode_new_prop(node, "user-id", userid);
+	xmlnode_new_prop(node, "uri", sipuri);
+	xmlnode_new_prop(node, "result", accept ? "1": "0");
+	xmlnode_new_prop(node, "buddy-lists", groupid);
+	xmlnode_new_prop(node, "expose-mobile-no", "1");
+	xmlnode_new_prop(node, "expose-name", "1");
+	xmlnode_new_prop(node, "local-name", alias);
 
 	res = xmlnode_to_string(root);
 

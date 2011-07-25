@@ -811,3 +811,40 @@ sip_parse_presence(fetion_account *ac, const gchar *sipmsg)
 
 	return list;
 }
+
+gint
+sip_parse_appbuddy(const gchar *sipmsg, gchar **userid,
+		gchar **sipuri, gchar **desc)
+{
+	gchar *pos;
+	xmlnode *root;
+	xmlnode *node;
+
+	if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
+		return HYBRID_ERROR;
+	}
+
+	pos += 4;
+
+	if (!(root = xmlnode_root(pos, strlen(pos)))) {
+		return HYBRID_ERROR;
+	}
+
+	if (!(node = xmlnode_find(root, "application"))) {
+		return HYBRID_ERROR;
+	}
+
+	if (xmlnode_has_prop(node, "uri") && sipuri != NULL) {
+		*sipuri = xmlnode_prop(node, "uri");
+	}
+
+	if (xmlnode_has_prop(node, "user-id") && userid != NULL) {
+		*userid = xmlnode_prop(node, "user-id");
+	}
+
+	if (xmlnode_has_prop(node, "desc") && desc != NULL) {
+		*desc = xmlnode_prop(node, "desc");
+	}
+
+	return HYBRID_OK;
+}

@@ -247,6 +247,15 @@ void fetion_buddy_destroy(fetion_buddy *buddy);
 void fetion_buddies_init(fetion_account *ac);
 
 /**
+ * Handle the add-buddy request.
+ *
+ * @param ac    The fetion account.
+ */
+void fetion_buddy_handle_request(fetion_account *ac, const gchar *sipuri,
+		const gchar *userid, const gchar *alias, const gchar *groupid,
+		gboolean accept);
+
+/**
  * Callback function to handle the portriat connection event. This callback
  * function may be used by the fx_acccount.c, so we define it as global.
  * It start a http GET request, the full string is like:

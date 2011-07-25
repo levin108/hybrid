@@ -60,19 +60,13 @@ preference_cb(GtkWidget *widget, gpointer user_data)
 static void
 add_group_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridGroupAddWindow *window;
-
-	window = hybrid_groupadd_window_create();
+	hybrid_groupadd_window_create();
 }
 
 static void
 add_buddy_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridBuddyAddWindow *window;
-
-	//window = hybrid_buddyadd_window_create();
-	
-	hybrid_buddy_request_window_create(hybrid_blist_get_current_account(), "a", NULL);
+	hybrid_buddyadd_window_create();
 }
 
 static void

@@ -9,6 +9,7 @@
 #include "conv.h"
 #include "gtkutils.h"
 #include "tooltip.h"
+#include "buddyreq.h"
 
 #include "fetion.h"
 #include "fx_trans.h"
@@ -210,7 +211,22 @@ process_sync_info(fetion_account *ac, const gchar *sipmsg)
 static void
 process_add_buddy(fetion_account *ac, const gchar *sipmsg)
 {
-	printf("%s\n", sipmsg);
+	gchar *sipuri;
+	gchar *userid;
+	gchar *desc;
+	HybridBuddyReqWindow *req;
+
+	hybrid_debug_info("received add-buddy request:\n%s", sipmsg);
+
+	if (sip_parse_appbuddy(sipmsg, &userid, &sipuri, &desc) != HYBRID_OK) {
+		return;
+	}
+
+	req = hybrid_buddy_request_window_create(ac->account, userid, desc);
+	hybrid_buddy_request_set_user_data(req, sipuri, g_free);
+
+	g_free(userid);
+	g_free(desc);
 }
 
 /**
@@ -708,6 +724,14 @@ fx_rename(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 }
 
 static gboolean
+fx_buddy_req(HybridAccount *account, const gchar *id, const gchar *alias,
+		gboolean accept)
+{
+	printf("%s\n", id);
+	return TRUE;
+}
+
+static gboolean
 fx_buddy_add(HybridAccount *account, HybridGroup *group, const gchar *name,
 			const gchar *alias, const gchar *tips)
 {
@@ -887,6 +911,7 @@ HybridModuleInfo module_info = {
 	fx_remove,                /**< buddy_remove */
 	fx_rename,                /**< buddy_rename */
 	fx_buddy_add,             /**< buddy_add */
+	fx_buddy_req,             /**< buddy_req */
 	fx_group_rename,          /**< group_rename */
 	fx_group_remove,          /**< group_remove */
 	fx_group_add,             /**< group_add */

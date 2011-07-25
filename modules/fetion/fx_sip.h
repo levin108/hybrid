@@ -318,6 +318,22 @@ GSList *sip_parse_sync(fetion_account *account, const gchar *sipmsg);
  */
 GSList *sip_parse_presence(fetion_account *ac, const gchar *sipmsg);
 
+/**
+ * Parse the add-buddy request message.
+ *
+ * @param sipmsg The add-buddy request message.
+ * @param userid If not NULL, it will be filled with the userid of the buddy who
+ *               sent the request.
+ * @param sipuri If not NULL, it will be filled with the sipuri of the buddy who
+ *               sent the request.
+ * @param desc If not NULL, it will be filled with the description of the buddy who
+ *               sent the request.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR if @sipmsg is in bad format.
+ */
+gint sip_parse_appbuddy(const gchar *sipmsg, gchar **userid,
+		gchar **sipuri, gchar **desc);
+
 #ifdef __cplusplus
 }
 #endif

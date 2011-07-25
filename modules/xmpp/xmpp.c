@@ -427,15 +427,16 @@ HybridModuleInfo module_info = {
 	xmpp_buddy_remove,          /**< buddy_remove */
 	xmpp_buddy_rename,          /**< buddy_rename */
 	xmpp_buddy_add,             /**< buddy_add */
-	NULL,          /**< group_rename */
-	NULL,          /**< group_remove */
+	NULL,                       /**< buddy_req */
+	NULL,                       /**< group_rename */
+	NULL,                       /**< group_remove */
 	xmpp_group_add,             /**< group_add */
-	NULL,       /**< chat_word_limit */
-	NULL,            /**< chat_start */
+	NULL,                       /**< chat_word_limit */
+	NULL,                       /**< chat_start */
 	xmpp_send_typing,           /**< chat_send_typing */
 	xmpp_chat_send,             /**< chat_send */
 	xmpp_close,                 /**< close */
-	NULL,               /**< actions */
+	NULL,                       /**< actions */
 };
 
 void 
