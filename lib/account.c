@@ -398,8 +398,10 @@ hybrid_account_create(HybridModule *proto)
 
 	HybridAccount *ac = g_new0(HybridAccount, 1);
 	
-	ac->buddy_list = g_hash_table_new(g_str_hash, g_str_equal);
-	ac->group_list = g_hash_table_new(g_str_hash, g_str_equal);
+	ac->buddy_list = g_hash_table_new_full(g_str_hash, g_str_equal,
+			NULL, (GDestroyNotify)hybrid_blist_buddy_destroy);
+	ac->group_list = g_hash_table_new_full(g_str_hash, g_str_equal,
+			NULL, (GDestroyNotify)hybrid_blist_group_destroy);
 	ac->config = global_config;
 	ac->proto = proto;
 	ac->status_text = NULL;
@@ -442,7 +444,6 @@ hybrid_account_clear_buddy(HybridAccount *account)
 	GtkTreeView *treeview;
 	GtkTreeModel *model;
 	HybridGroup *group;
-	HybridBuddy *buddy;
 	HybridConfig *config;
 	HybridBlistCache *cache;
 	GHashTableIter hash_iter;
@@ -466,20 +467,10 @@ hybrid_account_clear_buddy(HybridAccount *account)
 
 	g_hash_table_iter_init(&hash_iter, account->group_list);
 	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
-
 		gtk_tree_store_remove(GTK_TREE_STORE(model), &group->iter);
-
-		hybrid_blist_group_destroy(group);
 	}
 
 	g_hash_table_remove_all(account->group_list);
-
-	g_hash_table_iter_init(&hash_iter, account->buddy_list);
-	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&buddy)) {
-
-		hybrid_blist_buddy_destroy(buddy);
-	}
-
 	g_hash_table_remove_all(account->buddy_list);
 
 	/*
@@ -761,7 +752,6 @@ hybrid_account_close(HybridAccount *account)
 	GHashTableIter hash_iter;
 	HybridAccount *enabled_account;
 	HybridGroup *group;
-	HybridBuddy *buddy;
 	HybridModule *module;
 	gpointer key;
 	GtkTreeModel *model;
@@ -819,22 +809,12 @@ hybrid_account_close(HybridAccount *account)
 		 * resource automaticly.
 		 */
 		gtk_tree_store_remove(GTK_TREE_STORE(model), &group->iter);
-
-		/* Free the memory of the HybridGroups in hashtable */
-		hybrid_blist_group_destroy(group);
 	}
 	/*
 	 * Note that we only remove all the item from the hashtable
 	 * but not destroy it, so is the buddy_list hashtable 
 	 */
 	g_hash_table_remove_all(account->group_list);
-
-	g_hash_table_iter_init(&hash_iter, account->buddy_list);
-	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&buddy)) {
-		/* Free the memory of the HybridBuddys in hashtable */
-		hybrid_blist_buddy_destroy(buddy);
-	}
-	
 	g_hash_table_remove_all(account->buddy_list);
 
 	/*

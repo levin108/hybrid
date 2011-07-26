@@ -201,7 +201,8 @@ xmpp_buddy_create(XmppStream *stream, HybridBuddy *hybrid_buddy)
 	account = stream->account;
 
 	if (!account->buddies) {
-		account->buddies = g_hash_table_new(g_str_hash, g_str_equal);
+		account->buddies = g_hash_table_new_full(g_str_hash, g_str_equal,
+				NULL, (GDestroyNotify)xmpp_buddy_destroy);
 	}
 
 	if ((buddy = g_hash_table_lookup(account->buddies, hybrid_buddy->id))) {
@@ -524,6 +525,8 @@ xmpp_buddy_delete(XmppBuddy *buddy)
 	xmlnode_new_prop(node, "jid", buddy->jid);
 	xmlnode_new_prop(node, "subscription", "remove");
 
+	g_hash_table_remove(stream->account->buddies, buddy->jid);
+
 	if (iq_request_send(iq) != HYBRID_OK) {
 
 		hybrid_debug_error("xmpp", "remove buddy failed.");
@@ -726,22 +729,7 @@ xmpp_buddy_find(XmppAccount *account, const gchar *jid)
 void
 xmpp_buddy_destroy(XmppBuddy *buddy)
 {
-	XmppStream *stream;
-	XmppAccount *account;
-	GHashTable *xmpp_buddies;
-
 	if (buddy) {
-		stream = buddy->stream;
-		account = stream->account;
-		xmpp_buddies = account->buddies;
-
-		g_hash_table_remove(xmpp_buddies, buddy);
-
-		if (g_hash_table_size(xmpp_buddies) == 0) {
-			g_hash_table_destroy(xmpp_buddies);
-			xmpp_buddies = NULL;
-		}
-
 		g_free(buddy->jid);
 		g_free(buddy->name);
 		g_free(buddy->group);
@@ -753,18 +741,15 @@ xmpp_buddy_destroy(XmppBuddy *buddy)
 void
 xmpp_buddy_clear(XmppStream *stream)
 {
-	GHashTableIter hash_iter;
-	gpointer key;
-	XmppBuddy *buddy;
 	XmppAccount *account;
 
 	g_return_if_fail(stream != NULL);
 
 	account = stream->account;
 
-	g_hash_table_iter_init(&hash_iter, account->buddies);
-
-	while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&buddy)) {
-		xmpp_buddy_destroy(buddy);
+	if (!account->buddies) {
+		return;
 	}
+
+	g_hash_table_remove_all(account->buddies);
 }

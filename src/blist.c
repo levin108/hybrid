@@ -1085,9 +1085,6 @@ hybrid_blist_remove_group(HybridGroup *group)
 
 	account = group->account;
 
-	/* remove from the account's group hashtable. */
-	g_hash_table_remove(account->group_list, group);
-
 	/* remove from the treeview. */
 	treeview = GTK_TREE_VIEW(blist->treeview);
 	model = gtk_tree_view_get_model(treeview);
@@ -1099,8 +1096,11 @@ hybrid_blist_remove_group(HybridGroup *group)
 
 	hybrid_blist_cache_flush();
 
-	/* destroy the group object. */
-	hybrid_blist_group_destroy(group);
+	/* 
+	 * remove from the account's group hashtable, and destroy it
+	 * with the DestroyNotify function registered before.
+	 */
+	g_hash_table_remove(account->group_list, group->id);
 }
 
 void
@@ -1214,9 +1214,6 @@ hybrid_blist_remove_buddy(HybridBuddy *buddy)
 	account = buddy->account;
 	model  = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
 
-	/* Remove the buddy from account's buddy_list hashtable. */
-	g_hash_table_remove(account->buddy_list, buddy);
-
 	/* Remove the buddy from the blist's TreeView. */
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &buddy->iter);
 
@@ -1235,7 +1232,8 @@ hybrid_blist_remove_buddy(HybridBuddy *buddy)
 	/* Synchronize the xml cache with the local xml file. */
 	hybrid_blist_cache_flush();
 
-	hybrid_blist_buddy_destroy(buddy);
+	/* Remove the buddy from account's buddy_list hashtable. */
+	g_hash_table_remove(account->buddy_list, buddy->id);
 }
 
 void

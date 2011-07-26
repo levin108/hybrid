@@ -304,8 +304,6 @@ xmpp_buddy_remove(HybridAccount *account, HybridBuddy *buddy)
 		return FALSE;
 	}
 
-	xmpp_buddy_destroy(xbuddy);
-
 	return TRUE;
 }
 
