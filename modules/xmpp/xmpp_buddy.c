@@ -580,6 +580,20 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
 
 		xbuddy = xmpp_buddy_create(stream, buddy);
 
+		if (data->name && *data->name) {
+			xmpp_buddy_set_name(xbuddy, data->name);
+
+		} else {
+			/* set the default name. */
+			gchar *name;
+			gchar *pos;
+			
+			for (pos = xbuddy->jid; *pos && *pos != '@'; pos ++);
+			name = g_strndup(xbuddy->jid, pos - xbuddy->jid);
+			xmpp_buddy_set_name(xbuddy, name);
+			g_free(name);
+		}
+
 		if (!xbuddy->subscription) {
 			xmpp_buddy_set_subscription(xbuddy, "none");
 		}
