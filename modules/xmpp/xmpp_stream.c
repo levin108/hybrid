@@ -301,8 +301,7 @@ ping_cb(XmppStream *stream, xmlnode *node, gpointer user_data)
 static gboolean
 ping_timeout_cb(XmppStream *stream)
 {
-	hybrid_account_error_reason(stream->account->account,
-			_("Connection Closed."));
+	hybrid_debug_error("xmpp", "ping timeout");
 
 	return FALSE;
 }
@@ -327,7 +326,7 @@ xmpp_stream_ping(XmppStream *stream)
 	}
 
 	stream->keepalive_source = 
-		g_timeout_add_seconds(10, (GSourceFunc)ping_timeout_cb, stream);
+		g_timeout_add_seconds(30, (GSourceFunc)ping_timeout_cb, stream);
 
 	if (iq_request_send(iq) != HYBRID_OK) {
 

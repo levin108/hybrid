@@ -455,7 +455,6 @@ invite_buddy_cb(fetion_account *account, const gchar *sipmsg,
  * K: nudge
  *
  * then we send out invite-buddy request:
- *
  */
 static gint
 chat_reg_cb(fetion_account *account, const gchar *sipmsg,
