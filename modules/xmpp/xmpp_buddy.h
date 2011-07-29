@@ -31,6 +31,13 @@ struct _XmppBuddy {
 	HybridBuddy *buddy;
 };
 
+enum {
+	XMPP_PRESENCE_SUBSCRIBE,
+	XMPP_PRESENCE_SUBSCRIBED,
+	XMPP_PRESENCE_UNSUBSCRIBE,
+	XMPP_PRESENCE_UNSUBSCRIBED
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -187,22 +194,16 @@ gint xmpp_buddy_get_info(XmppStream *stream, const gchar *jid,
 		trans_callback callback, gpointer user_data);
 
 /**
- * Unsubscribe a buddy's presence message.
+ * Send a presence message to a jabber buddy, the type of the message
+ * can be "unsubscribe", "subscribe", "unsubscribed", "subscribed"
  *
- * @param buddy The xmpp buddy to unsubscribe.
- *
- * @return HYBRID_OK or HYBRID_ERROR in case of an error.
- */
-gint xmpp_buddy_unsubscribe(XmppBuddy *buddy);
-
-/**
- * Subscribe a buddy's presence message.
- *
- * @param buddy The xmpp buddy to subscribe.
+ * @param stream The xmpp Stream.
+ * @param jid    Full jabber ID of the buddy to which the message is to be sent.
+ * @param type   Type of the presence message.
  *
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
-gint xmpp_buddy_subscribe(XmppBuddy *buddy);
+gint xmpp_buddy_send_presence(XmppStream *stream, const gchar *jid, gint type);
 
 /**
  * Remove a buddy from the roster.

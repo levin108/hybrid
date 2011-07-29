@@ -1,5 +1,7 @@
 #include "util.h"
+#include "gtkutils.h"
 #include "connect.h"
+#include "buddyreq.h"
 #include "conv.h"
 
 #include "xmpp_util.h"
@@ -888,25 +890,39 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 	full_jid = xmlnode_prop(root, "from");
 	bare_jid = get_bare_jid(full_jid);
 
-	if (!(buddy = xmpp_buddy_find(stream->account, bare_jid))) {
-
-		goto presence_over;
-	}
-
 	if (xmlnode_has_prop(root, "type")) {
 
 		value = xmlnode_prop(root, "type");
 		if (g_strcmp0(value, "unavailable") == 0) {
 
+			if (!(buddy = xmpp_buddy_find(stream->account, bare_jid))) {
+				goto presence_over;
+			}
+
 			xmpp_buddy_set_show(buddy, full_jid, value);
+			g_free(value);
 			goto presence_over;
 
-		} else if (g_strcmp0(value, "subscribed")) {
+		} else if (g_strcmp0(value, "subscribed") == 0) {
+			
+			hybrid_message_box_show(HYBRID_MESSAGE_INFO, 
+					"(<b>%s</b>) has accepted your request.", bare_jid);
+			g_free(value);
+			goto presence_over;
 
+		} else if (g_strcmp0(value, "subscribe") == 0) {
+
+			hybrid_buddy_request_window_create(stream->account->account,
+					full_jid, NULL);
+			g_free(value);
 			goto presence_over;
 		}
 
 		g_free(value);
+	}
+
+	if (!(buddy = xmpp_buddy_find(stream->account, bare_jid))) {
+		goto presence_over;
 	}
 
 	/*

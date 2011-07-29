@@ -341,6 +341,46 @@ xmpp_buddy_add(HybridAccount *account, HybridGroup *group, const gchar *name,
 	return TRUE;
 }
 
+static gboolean
+xmpp_buddy_req(HybridAccount *account, HybridGroup *group,
+		const gchar *id, const gchar *alias,
+		gboolean accept, const gpointer user_data)
+{
+	XmppStream *stream;
+	XmppBuddy *buddy;
+	HybridBuddy *bd;
+
+	stream = hybrid_account_get_protocol_data(account);
+
+	if (accept) {
+		xmpp_buddy_send_presence(stream, id, XMPP_PRESENCE_SUBSCRIBED);
+
+		bd = hybrid_blist_add_buddy(account, group, id, alias);
+		buddy = xmpp_buddy_create(stream, bd);
+
+		if (alias && *alias) {
+			xmpp_buddy_set_name(buddy, alias);
+
+		} else {
+			/* set the default name. */
+			gchar *name;
+			gchar *pos;
+			
+			for (pos = (gchar *)id; *pos && *pos != '@'; pos ++);
+			name = g_strndup(id, pos - id);
+			xmpp_buddy_set_name(buddy, name);
+			g_free(name);
+		}
+
+
+	} else {
+		xmpp_buddy_send_presence(stream, id, XMPP_PRESENCE_UNSUBSCRIBED);
+	}
+
+
+	return FALSE;
+}
+
 static void 
 xmpp_group_add(HybridAccount *account, const gchar *text)
 {
@@ -425,7 +465,7 @@ HybridModuleInfo module_info = {
 	xmpp_buddy_remove,          /**< buddy_remove */
 	xmpp_buddy_rename,          /**< buddy_rename */
 	xmpp_buddy_add,             /**< buddy_add */
-	NULL,                       /**< buddy_req */
+	xmpp_buddy_req,                       /**< buddy_req */
 	NULL,                       /**< group_rename */
 	NULL,                       /**< group_remove */
 	xmpp_group_add,             /**< group_add */

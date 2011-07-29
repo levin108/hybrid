@@ -437,63 +437,46 @@ xmpp_buddy_alias(XmppBuddy *buddy, const gchar *alias)
 }
 
 gint
-xmpp_buddy_unsubscribe(XmppBuddy *buddy)
+xmpp_buddy_send_presence(XmppStream *stream, const gchar *jid, gint type)
 {
 	xmlnode *root;
 	gchar *xml_string;
-	XmppStream *stream;
+	const gchar *type_str = NULL;
 
-	g_return_val_if_fail(buddy != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(stream != NULL, HYBRID_ERROR);
+	g_return_val_if_fail(jid != NULL, HYBRID_ERROR);
 
-	root = xmlnode_create("presence");
-	xmlnode_new_prop(root, "to", buddy->jid);
-	xmlnode_new_prop(root, "type", "unsubscribe");
-
-	xml_string = xmlnode_to_string(root);
-	xmlnode_free(root);
-
-	stream = buddy->stream;
-
-	hybrid_debug_info("xmpp", "unsubscribe buddy %s", buddy->jid);
-
-	if (hybrid_ssl_write(stream->ssl, xml_string,
-				strlen(xml_string)) == -1) {
-
-		hybrid_debug_error("xmpp", "unsubscribe buddy failed");
-		g_free(xml_string);
-
-		return HYBRID_ERROR;
+	switch (type) {
+		case XMPP_PRESENCE_SUBSCRIBE:
+			type_str = "subscribe";
+			break;
+		case XMPP_PRESENCE_SUBSCRIBED:
+			type_str = "subscribed";
+			break;
+		case XMPP_PRESENCE_UNSUBSCRIBE:
+			type_str = "unsubscribe";
+			break;
+		case XMPP_PRESENCE_UNSUBSCRIBED:
+			type_str = "unsubscribed";
+			break;
+		default:
+			break;
 	}
 
-	g_free(xml_string);
-
-	return HYBRID_OK;
-}
-
-gint
-xmpp_buddy_subscribe(XmppBuddy *buddy)
-{
-	xmlnode *root;
-	gchar *xml_string;
-	XmppStream *stream;
-
-	g_return_val_if_fail(buddy != NULL, HYBRID_ERROR);
-
 	root = xmlnode_create("presence");
-	xmlnode_new_prop(root, "to", buddy->jid);
-	xmlnode_new_prop(root, "type", "subscribe");
+	xmlnode_new_prop(root, "from", stream->jid);
+	xmlnode_new_prop(root, "to", jid);
+	xmlnode_new_prop(root, "type", type_str);
 
 	xml_string = xmlnode_to_string(root);
 	xmlnode_free(root);
 
-	stream = buddy->stream;
-
-	hybrid_debug_info("xmpp", "subscribe buddy %s", buddy->jid);
+	hybrid_debug_info("xmpp", "send presence:\n%s", xml_string);
 
 	if (hybrid_ssl_write(stream->ssl, xml_string,
 				strlen(xml_string)) == -1) {
 
-		hybrid_debug_error("xmpp", "subscribe buddy failed");
+		hybrid_debug_error("xmpp", "send presence failed");
 		g_free(xml_string);
 
 		return HYBRID_ERROR;
@@ -599,7 +582,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
 		}
 
 		/* OK, add buddy success, subscribe buddy's presence. */
-		xmpp_buddy_subscribe(xbuddy);
+		xmpp_buddy_send_presence(stream, xbuddy->jid, XMPP_PRESENCE_SUBSCRIBE);
 		
 	} else {
 

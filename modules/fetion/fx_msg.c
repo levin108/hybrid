@@ -603,6 +603,8 @@ new_chat_cb(fetion_account *account, const gchar *sipmsg,
 	fetion_transaction *new_trans;
 	fetion_account *new_account;
 
+	printf("%s\n", sipmsg);
+
 	if (!(auth = sip_header_get_attr(sipmsg, "A"))) {
 
 		hybrid_debug_error("fetion", "invalid invitation response.");

@@ -469,7 +469,7 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 	}
 
 	hybrid_info_add_pair(info, _("Country"),
-			g_strcmp0(buddy->country, "CN") == 0 || !*buddy->country ?
+			!buddy->country || g_strcmp0(buddy->country, "CN") == 0 || !*buddy->country ?
 			"China" : buddy->country);
 	hybrid_info_add_pair(info, _("Province"), province);
 	hybrid_info_add_pair(info, _("City"), city);
@@ -822,6 +822,7 @@ static void
 fx_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 {
 	fetion_account *ac;
+	fetion_account *tmp_ac;
 	extern GSList *channel_list;
 	GSList *pos;
 
@@ -840,11 +841,11 @@ fx_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 		 * the existing one, otherwise, start a new channel.
 		 */
 		for (pos = channel_list; pos; pos = pos->next) {
-			ac = (fetion_account*)pos->data;
+			tmp_ac = (fetion_account*)pos->data;
 
-			if (g_strcmp0(ac->who, buddy->id) == 0) {
+			if (g_strcmp0(tmp_ac->who, buddy->id) == 0) {
 				/* yes, we got one. */
-				fetion_message_send(ac, ac->who, text);
+				fetion_message_send(tmp_ac, tmp_ac->who, text);
 
 				return;
 			}
