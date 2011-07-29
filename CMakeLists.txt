@@ -30,6 +30,10 @@ if(NOT DEFINED INCLUDE_INSTALL_DIR)
     set(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include/${PACKAGE_TARNAME}")
 endif(NOT DEFINED INCLUDE_INSTALL_DIR)
 
+if(NOT DEFINED UI_INSTALL_DIR)
+    set(UI_INSTALL_DIR "${DATA_INSTALL_DIR}/ui/")
+endif(NOT DEFINED UI_INSTALL_DIR)
+
 if(NOT DEFINED MAN_INSTALL_DIR)
     set(MAN_INSTALL_DIR "${DATA_INSTALL_DIR}/man")
 endif(NOT DEFINED MAN_INSTALL_DIR)
@@ -47,6 +51,7 @@ add_definitions(-DDESKTOP_DIR="${DESKTOP_INSTALL_DIR}")
 add_definitions(-DDATA_DIR="${DATA_INSTALL_DIR}")
 add_definitions(-DPIXMAPS_DIR="${DATA_INSTALL_DIR}/pixmaps/")
 add_definitions(-DSOUND_DIR="${DATA_INSTALL_DIR}/sound/")
+add_definitions(-DUI_DIR="${UI_INSTALL_DIR}")
 
 # compile option switch
 option(NLS "Native language support" ON)
@@ -151,9 +156,8 @@ else(NLS AND GETTEXT_FOUND)
 	message(STATUS "Native language support:  NO" )
 endif(NLS AND GETTEXT_FOUND)
 add_definitions(-DLOCALE_DIR="${LOCALE_INSTALL_DIR}")
-#add_definitions(-DMODULE_DIR="${MODULE_INSTALL_DIR}")
-add_definitions(-DMODULE_DIR=".")
-add_definitions(-DUI_DIR="../src/ui/")
+add_definitions(-DMODULE_DIR="${MODULE_INSTALL_DIR}")
+#add_definitions(-DMODULE_DIR=".")
 
 ##########################################################################
 
@@ -252,6 +256,8 @@ if(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
     target_link_libraries(hybrid ${DBUSGLIB_LIBRARIES})
 endif(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
 
+install(TARGETS hybrid RUNTIME DESTINATION ${BIN_INSTALL_DIR})
+
 # install include files
 file(GLOB HYBRID_INCLUDES "src/*.h" "lib/*.h")
 install(FILES ${HYBRID_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
@@ -275,6 +281,10 @@ install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/i
 # install sound files 
 file(GLOB HYBRID_ICONS_PIXMAPS "share/sound/*.wav")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/sound/")
+
+# install ui files 
+file(GLOB HYBRID_ICONS_PIXMAPS "src/ui/menu.xml")
+install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${UI_INSTALL_DIR}")
 
 # source list of fetion module
 set(fetion_SRC
