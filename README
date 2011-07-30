@@ -1,0 +1,14 @@
+Hybird is an lightweight IM framework, currently supports China Mobile Fetion protocol and XMPP protocol.
+
+1) license
+
+	Hybrid is a free software released under GPLv2.
+
+1) install
+
+	$git clone git@github.com:levin108/hybrid.git
+
+	$cd hybrid
+	$cmake ..
+	$make
+	#make install
