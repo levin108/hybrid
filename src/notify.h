@@ -72,6 +72,16 @@ void hybrid_notify_set_text(HybridNotify *notify, const gchar *text);
  */
 void hybrid_notify_set_name(HybridNotify *notify, const gchar *name);
 
+/**
+ * Popup a notify message.
+ *
+ * @param pixbuf   The notify icon.
+ * @param title    The title.
+ * @param summary  The summary.
+ */
+void hybrid_notify_popup(GdkPixbuf *pixbuf, const gchar *title,
+		const gchar *summary);
+
 #ifdef __cplusplus
 }
 #endif

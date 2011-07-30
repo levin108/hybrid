@@ -22,6 +22,12 @@
 #include "notify.h"
 #include "gtkutils.h"
 
+#ifdef USE_LIBNOTIFY
+#include <libnotify/notify.h>
+
+static NotifyNotification *notification = NULL;
+#endif
+
 static void
 close_cb(GtkWidget *widget, gpointer user_data)
 {
@@ -179,4 +185,33 @@ hybrid_notify_set_name(HybridNotify *notify, const gchar *name)
 	gtk_list_store_set(store, &notify->iter,
 			NOTIFY_NAME_COLUMN, account_text, -1);
 	g_free(account_text);
+}
+
+void
+hybrid_notify_popup(GdkPixbuf *pixbuf, const gchar *title,
+		const gchar *summary)
+{
+#ifdef USE_LIBNOTIFY
+	if (!notification) {
+	#ifdef LIBNOTIFY_OLD
+		notification = notify_notification_new(title, summary, NULL, NULL);
+	#else
+		notification = notify_notification_new(title, summary, NULL);
+	#endif
+		notify_notification_set_timeout(notification, 2500);
+
+	} else {
+
+		notify_notification_close(notification, NULL);
+
+		notify_notification_update(notification, title, summary, NULL);
+	}
+
+	if (pixbuf) {
+		notify_notification_set_icon_from_pixbuf(notification, pixbuf);
+	}
+
+	notify_notification_show(notification, NULL);
+
+#endif
 }

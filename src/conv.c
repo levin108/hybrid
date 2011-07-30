@@ -23,6 +23,7 @@
 #include "statusicon.h"
 #include "gtkutils.h"
 #include "gtksound.h"
+#include "notify.h"
 #include "chat-textview.h"
 #include "conv.h"
 #include "pref.h"
@@ -1294,6 +1295,8 @@ hybrid_conv_got_message(HybridAccount *account,
 	HybridChatWindow *chat;
 	HybridBuddy *buddy;
 	gchar *msg;
+	gchar *notify_msg;
+	GdkPixbuf *pixbuf;
 
 	gint current_page;
 	gint chat_page;
@@ -1333,6 +1336,17 @@ hybrid_conv_got_message(HybridAccount *account,
 
 	/* change the callback function of the status icon's activate signal. */
 	hybrid_status_icon_blinking(buddy);
+
+	/* notify. */
+	notify_msg = g_strdup_printf(_("%s said:"), 
+			buddy->name && *buddy->name ? buddy->name : buddy->id);
+	pixbuf = hybrid_create_round_pixbuf(buddy->icon_data,
+	                              buddy->icon_data_length, 48);
+
+	hybrid_notify_popup(pixbuf, notify_msg, msg);
+
+	g_object_unref(pixbuf);
+	g_free(notify_msg);
 
 	chat->unread ++;
 
