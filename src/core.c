@@ -15,6 +15,7 @@
 #include "gtksound.h"
 #include "groupadd.h"
 #include "buddyadd.h"
+#include "searchbox.h"
 
 extern HybridBlist *blist;
 extern HybridHead *hybrid_head;
@@ -174,6 +175,7 @@ ui_init(void)
 	GtkWidget *window;
 	GtkWidget *scroll;
 	GtkWidget *vbox;
+	GtkWidget *searchbox;
 
 	/* initialize the status icon. */
 	hybrid_status_icon_init();
@@ -192,13 +194,17 @@ ui_init(void)
 	hybrid_head_init();
 	gtk_box_pack_start(GTK_BOX(vbox), hybrid_head->vbox, FALSE, FALSE, 10);
 
+	/* search box */
+	searchbox = hybrid_search_box_create();
+	gtk_box_pack_start(GTK_BOX(vbox), searchbox, FALSE, FALSE, 0);
+
 	/* scroll area (TreeView) */
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
 								 GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 			GTK_SHADOW_ETCHED_IN);
-	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 2);
 
 	hybrid_vbox = gtk_vbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hybrid_vbox, FALSE, FALSE, 5);
