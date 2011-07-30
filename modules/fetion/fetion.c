@@ -886,8 +886,13 @@ fx_close(HybridAccount *account)
 	ac = hybrid_account_get_protocol_data(account);
 
 	/* close the socket */
-	hybrid_event_remove(ac->source);
-	close(ac->sk);
+	if (ac->source) {
+		hybrid_event_remove(ac->source);
+	}
+	
+	if (ac->sk) {
+		close(ac->sk);
+	}
 
 	/* destroy the group list */
 	while (ac->groups) {
