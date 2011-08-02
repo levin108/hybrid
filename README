@@ -9,6 +9,8 @@ Hybird is an lightweight IM framework, currently supports China Mobile Fetion pr
 	$git clone git@github.com:levin108/hybrid.git
 
 	$cd hybrid
+        $mkdir -p build
+        $cd build
 	$cmake ..
 	$make
 	#make install
