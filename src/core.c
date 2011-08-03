@@ -20,7 +20,13 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+
 #include "config.h"
+
+#ifdef USE_LIBNOTIFY
+ #include <libnotify/notify.h>
+#endif
+
 #include "pref.h"
 #include "module.h"
 #include "head.h"
@@ -249,6 +255,10 @@ main(gint argc, gchar **argv)
 	gdk_threads_init();
 
 	gtk_init(&argc, &argv);
+
+#ifdef USE_LIBNOTIFY
+	notify_init("Hybrid");
+#endif
 
 	hybrid_config_init();
 
