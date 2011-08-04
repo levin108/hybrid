@@ -58,6 +58,7 @@ option(NLS "Native language support" ON)
 option(WITH_LIBNOTIFY "Libnotify support" ON)
 option(WITH_GSTREAMER "GStreamer support" ON)
 option(WITH_LIBXSS "LibXScrnSaver support" ON)
+option(WITH_WEBKIT "Webkit support" ON)
 option(WITH_NETWORKMANAGER "NetworkManager support" ON)
 option(WITH_INDICATE "Ubuntu Indicator support" ON)
 
@@ -71,6 +72,7 @@ endif(NLS)
 pkg_check_modules(GTK2 REQUIRED gtk+-2.0)
 pkg_check_modules(GDKPIXBUF REQUIRED gdk-pixbuf-2.0)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
 pkg_check_modules(GMODULE2 REQUIRED gmodule-2.0)
 pkg_check_modules(OPENSSL REQUIRED openssl)
 pkg_check_modules(LIBXML2 REQUIRED libxml-2.0)
@@ -86,6 +88,10 @@ endif(WITH_GSTREAMER)
 if(WITH_LIBXSS)
     pkg_check_modules(LIBXSS xscrnsaver)
 endif(WITH_LIBXSS)
+
+if(WITH_WEBKIT)
+	pkg_check_modules(WEBKIT webkit-1.0)
+endif(WITH_WEBKIT)
 
 if(WITH_NETWORKMANAGER)
     pkg_check_modules(NETWORKMANAGER NetworkManager)
@@ -123,6 +129,13 @@ if(WITH_LIBXSS AND LIBXSS_FOUND)
 else(WITH_LIBXSS AND LIBXSS_FOUND)
     message(STATUS "Xscreensaver support:     NO" )
 endif(WITH_LIBXSS AND LIBXSS_FOUND)
+
+if(WITH_WEBKIT AND WEBKIT_FOUND)
+	set(USE_WEBKIT 1)
+	message(STATUS "WebKit support:           YES" )
+else(WITH_WEBKIT AND WEBKIT_FOUND)
+	message(STATUS "WebKit support:           NO" )
+endif(WITH_WEBKIT AND WEBKIT_FOUND)
 
 if(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND AND DBUSGLIB_FOUND)
     set(USE_NETWORKMANAGER 1)
@@ -165,6 +178,7 @@ include_directories(
     ${GTK2_INCLUDE_DIRS}
     ${GDKPIXBUF_INCLUDE_DIRS}
     ${GLIB2_INCLUDE_DIRS}
+    ${GOBJECT2_INCLUDE_DIRS}
     ${GMODULE2_INCLUDE_DIRS}
     ${OFETION_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIRS}
@@ -186,6 +200,10 @@ if(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND)
     include_directories(${NETWORKMANAGER_INCLUDE_DIRS})
     include_directories(${DBUSGLIB_INCLUDE_DIRS})
 endif(WITH_NETWORKMANAGER AND NETWORKMANAGER_FOUND)
+
+if (WITH_WEBKIT AND WEBKIT_FOUND)
+	include_directories(${WEBKIT_INCLUDE_DIRS})
+endif(WITH_WEBKIT AND WEBKIT_FOUND)
 
 if(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
     include_directories(${INDICATE_INCLUDE_DIRS})
@@ -217,6 +235,7 @@ set(hybrid_SRC
 	src/tooltip.c
 	src/preference.c
 	src/chat-textview.c
+	src/chat-webkit.c
 	src/groupadd.c
 	src/buddyadd.c
 	src/buddyreq.c
@@ -227,11 +246,14 @@ set(hybrid_SRC
 )
 
 add_executable(hybrid ${hybrid_SRC})
+message(STATUS ${GLIB2_LIBRARIES})
 target_link_libraries(hybrid 
+	${GOBJECT2_LIBRARIES}
+	${GMODULE2_LIBRARIES}
 	${GTK2_LIBRARIES}
+	${GLIB2_LIBRARIES}
 	${GDKPIXBUF_LIBRARIES}
 	${GTHREAD2_LIBRARIES}
-	${GMODULE2_LIBRARIES}
 	${OPENSSL_LIBRARIES}
 	${LIBXML2_LIBRARIES})
 
@@ -246,6 +268,10 @@ endif(WITH_GSTREAMER AND GSTREAMER_FOUND)
 if(WITH_LIBXSS AND LIBXSS_FOUND)
     target_link_libraries(hybrid ${LIBXSS_LIBRARIES})
 endif(WITH_LIBXSS AND LIBXSS_FOUND)
+
+if (WITH_WEBKIT AND WEBKIT_FOUND)
+	target_link_libraries(hybrid ${WEBKIT_LIBRARIES})
+endif(WITH_WEBKIT AND WEBKIT_FOUND)
 
 if(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
     target_link_libraries(hybrid ${INDICATE_LIBRARIES})
@@ -284,7 +310,7 @@ file(GLOB HYBRID_ICONS_PIXMAPS "share/sound/*.wav")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/sound/")
 
 # install ui files 
-file(GLOB HYBRID_ICONS_PIXMAPS "src/ui/menu.xml")
+file(GLOB HYBRID_ICONS_PIXMAPS "src/ui/*")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${UI_INSTALL_DIR}")
 
 # source list of fetion module

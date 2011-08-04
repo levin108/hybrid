@@ -21,8 +21,20 @@
 #include "conv.h"
 #include "chat-textview.h"
 
+static HybridChatTextOps textview_ops = {
+	hybrid_chat_textview_create,
+	hybrid_chat_textview_append,
+	hybrid_chat_textview_notify
+};
+
+void 
+hybrid_chat_set_textview_ops(void)
+{
+	hybrid_conv_set_chat_text_ops(&textview_ops);
+}
+
 GtkWidget*
-hybrid_chat_textview_create()
+hybrid_chat_textview_create(void)
 {
 	GtkWidget *textview;
 	GtkTextBuffer *buffer;
@@ -51,9 +63,8 @@ hybrid_chat_textview_create()
 }
 
 void
-hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
-							const gchar *message, time_t msg_time,
-							gboolean sendout)
+hybrid_chat_textview_append(GtkWidget *textview, HybridAccount *account,
+							HybridBuddy *buddy,	const gchar *message, time_t msg_time)
 {
 	GtkTextBuffer *recv_tb;
 	GtkTextIter end_iter;
@@ -62,6 +73,7 @@ hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 	GtkTextMark *mark;
 	gchar *names;
 	const gchar *color;
+	const gchar *name;
 	struct tm *tm_time;
 	gchar time[128];
 
@@ -93,11 +105,14 @@ hybrid_chat_textview_append(GtkWidget *textview, const gchar *name,
 
 	gtk_text_buffer_get_end_iter(recv_tb, &end_iter);
 
-	if (sendout) {
+	if (!buddy) {
 		color = "blue";
+		name = account->nickname && *account->nickname ?
+				account->nickname : account->username;
 
 	} else {
 		color = "green";
+		name = buddy->name && *buddy->name ? buddy->name : buddy->id;
 	}
 
 	names = g_strdup_printf(" (%s) ", time);

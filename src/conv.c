@@ -25,10 +25,13 @@
 #include "gtksound.h"
 #include "notify.h"
 #include "chat-textview.h"
+#include "chat-webkit.h"
 #include "conv.h"
 #include "pref.h"
 #include "util.h"
 #include "module.h"
+
+static HybridChatTextOps *text_ops = NULL;
 
 /* The list of the currently opened conversation dialogs. */
 GSList *conv_list = NULL; 
@@ -220,9 +223,7 @@ chat_found:
 	account = chat->account;
 
 	/* Add message to the textview. */
-	hybrid_chat_textview_append(chat->textview,
-								account->nickname,
-								text, time(NULL), TRUE);
+	text_ops->append(chat->textview, account, NULL,	text, time(NULL));
 	hybrid_logs_write(chat->logs, account->nickname, text, TRUE);
 
 	/* Call the protocol hook function. */
@@ -312,6 +313,8 @@ hybrid_conv_create()
 	GtkWidget *halign;
 	GtkWidget *button;
 	gint tab_pos;
+
+	hybrid_chat_set_webkit_ops();
 
 	HybridConversation *imconv;
 
@@ -1073,7 +1076,7 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
 			GTK_SHADOW_ETCHED_IN);
 
-	chat->textview = hybrid_chat_textview_create();
+	chat->textview = text_ops->create();
 	g_signal_connect(chat->textview, "focus-in-event",
 					GTK_SIGNAL_FUNC(focus_in_cb), chat);
 	gtk_container_add(GTK_CONTAINER(scroll), chat->textview);
@@ -1356,10 +1359,16 @@ just_show_msg:
 
 	hybrid_sound_play_file(SOUND_DIR"newmessage.wav");
 
-	hybrid_chat_textview_append(chat->textview, buddy->name, msg, time, FALSE);
+	text_ops->append(chat->textview, buddy->account, buddy, msg, time);
 	hybrid_logs_write(chat->logs, buddy->name, msg, FALSE);
 
 	g_free(msg);
+}
+
+void
+hybrid_conv_set_chat_text_ops(HybridChatTextOps *ops)
+{
+	text_ops = ops;
 }
 
 void
@@ -1391,7 +1400,7 @@ hybrid_conv_got_status(HybridAccount *account, const gchar *buddy_id, const gcha
 	}
 	
 	if (type == MSG_NOTIFICATION_INPUT) {
-		hybrid_chat_textview_notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
+		text_ops->notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
 	}
 
 }
@@ -1413,7 +1422,7 @@ input_finished_cb(HybridChatWindow *chat)
 	text = g_strdup_printf(_(" %s stoped inputing"),
 			buddy->name ? buddy->name : buddy->id);
 
-	hybrid_chat_textview_notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
+	text_ops->notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
 
 	chat->input_source = 0;
 
@@ -1442,7 +1451,7 @@ hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean
 
 	text = g_strdup_printf(_(" %s is inputing"), buddy->name);
 
-	hybrid_chat_textview_notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
+	text_ops->notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
 	
 	g_free(text);
 
@@ -1479,7 +1488,7 @@ hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
 	}
 
 	text = g_strdup_printf(_(" %s stoped inputing"), buddy->name);
-	hybrid_chat_textview_notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
+	text_ops->notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
 	g_free(text);
 }
 
@@ -1506,7 +1515,7 @@ hybrid_conv_clear_inputing(HybridAccount *account, const gchar *buddy_id)
 		g_source_remove(chat->input_source);
 	}
 
-	hybrid_chat_textview_notify(chat->textview, "" , MSG_NOTIFICATION_INPUT);
+	text_ops->notify(chat->textview, "" , MSG_NOTIFICATION_INPUT);
 }
 
 void

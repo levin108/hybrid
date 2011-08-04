@@ -29,9 +29,21 @@
 
 typedef struct _HybridConversation HybridConversation;
 typedef struct _HybridChatWindow   HybridChatWindow;
+typedef struct _HybridChatTextOps  HybridChatTextOps;
 typedef enum _HybridChatWindowType HybridChatWindowType;
 
 typedef void (*ChatCallback)(HybridAccount *, const gchar *);
+
+typedef GtkWidget* (*text_create)(void);
+typedef void (*text_append)(GtkWidget *, HybridAccount *,
+							HybridBuddy *,	const gchar *, time_t);
+typedef void (*text_notify)(GtkWidget *, const gchar *, gint);
+
+struct _HybridChatTextOps{
+	text_create create;
+	text_append append;
+	text_notify notify;
+};
 
 struct _HybridConversation {
 	GtkWidget *window;
@@ -191,6 +203,13 @@ void hybrid_chat_window_set_callback(HybridChatWindow *window,
 void hybrid_conv_got_message(HybridAccount *account,
 				const gchar *buddy_id, const gchar *message,
 				time_t time);
+
+/**
+ * Set the chat text ops.
+ *
+ * @param ops The ops methods.
+ */
+void hybrid_conv_set_chat_text_ops(HybridChatTextOps *ops);
 
 /**
  * Got a status message to display in the receiving window.
