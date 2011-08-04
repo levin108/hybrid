@@ -51,10 +51,13 @@ escape_string(const gchar *str)
 
 	while (str && *str) {
 		switch (*str) {
-			case '\n':
-				//res = g_string_append(res, "<br/>");
+			case 13:
+				res = g_string_append(res, "<br/>");
+				break;
+			case '\"':
+				res = g_string_append(res, "\\\"");
+				break;
 			case '\t':
-				return g_string_free(res, FALSE);
 				break;
 			default:
 				res = g_string_append_c(res, *str);
@@ -71,9 +74,9 @@ escape_html(const gchar *str)
 {
 	GString *res;
 
-	res = g_string_new("");
+	res = g_string_sized_new(strlen(str));
 
-	while (str && *str) {
+	while (str && *str != '\0') {
 		switch (*str) {
 			case '\n':
 			case '\t':
@@ -151,15 +154,46 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 	gchar *script;
 	WebKitLoadStatus status;
 	struct timeout_data *data;
+	const gchar *content_html;
+	gchar *icon_path;
+	gchar *icon_name;
+
+	if (buddy) {
+		content_html = UI_DIR"recv.html";
+
+	} else {
+		content_html = UI_DIR"send.html";
+	}
 
 	escaped_message = escape_string(message);
 
-	if (!g_file_get_contents(UI_DIR"send.html", &format, NULL, NULL)) {
+	if (!g_file_get_contents(content_html, &format, NULL, NULL)) {
 		g_free(escaped_message);
 		return;
 	}
 
-	html = g_strdup_printf(format, escaped_message);
+	icon_path = hybrid_config_get_path();
+
+	if (buddy) {
+		icon_name = g_strdup_printf("file://%s/icons/%s", icon_path, buddy->icon_name);
+		html = g_strdup_printf(format, 
+				icon_name,
+				buddy->name && *buddy->name ? buddy->name : buddy->id,
+				escaped_message);
+	} else {
+		icon_name = g_strdup_printf("file://%s/icons/%s", icon_path, account->icon_name);
+		html = g_strdup_printf(format, 
+				account->nickname && *account->nickname ? 
+				account->nickname : account->username,
+				escaped_message,
+				icon_name
+				);
+	}
+
+	g_free(icon_path);
+	g_free(icon_name);
+
+
 	escaped_html = escape_html(html);
 
 	g_object_get(textview, "load-status", &status, NULL);
@@ -173,7 +207,6 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 		g_timeout_add_seconds(0, (GSourceFunc)timeout_cb, data);
 
 	} else {
-		printf("%s\n", script);
 		webkit_web_view_execute_script(WEBKIT_WEB_VIEW(textview), script);
 		g_free(script);
 	}

@@ -58,6 +58,10 @@
 	font-weight: bold;
 }
 
+.icon {
+	vertical-align: top;
+}
+
 .time {
 	text-align: right;
 }
