@@ -25,6 +25,12 @@
  #include <webkit/webkit.h>
 #endif
 
+static gchar *content_html = NULL;
+static gchar *content_css = NULL;
+static gchar *content_full_html = NULL;
+static gchar *content_send = NULL;
+static gchar *content_recv = NULL;
+
 static HybridChatTextOps webkit_ops = {
 	hybrid_chat_webkit_create,
 	hybrid_chat_webkit_append,
@@ -91,34 +97,63 @@ escape_html(const gchar *str)
 	return g_string_free(res, FALSE);
 }
 
+/**
+ * Initialize the webkit context.
+ */
+gint
+hybrid_webkit_init(void)
+{
+	if (!g_file_get_contents(UI_DIR"template.html", &content_html,
+				NULL, NULL)) {
+
+		hybrid_debug_error("webkit", "read template.html failed.");
+		return HYBRID_ERROR;
+	}
+
+	if (!g_file_get_contents(UI_DIR"default.css", &content_css, NULL, NULL)) {
+
+		hybrid_debug_error("webkit", "read default.css failed.");
+		return HYBRID_ERROR;
+	}
+
+	if (!g_file_get_contents(UI_DIR"send.html", &content_send, NULL, NULL)) {
+
+		hybrid_debug_error("webkit", "read send.html failed.");
+		return HYBRID_ERROR;
+	}
+
+	if (!g_file_get_contents(UI_DIR"recv.html", &content_recv, NULL, NULL)) {
+
+		hybrid_debug_error("webkit", "read recv.html failed.");
+		return HYBRID_ERROR;
+	}
+
+	content_full_html = g_strdup_printf(content_html, content_css);
+
+	return HYBRID_OK;
+}
+
+/**
+ * Destroy the webkit context.
+ */
+void
+hybrid_webkit_destroy(void)
+{
+	g_free(content_html);
+	g_free(content_css);
+	g_free(content_send);
+	g_free(content_recv);
+	g_free(content_full_html);
+}
+
 GtkWidget*
 hybrid_chat_webkit_create(void)
 {
 #ifdef USE_WEBKIT
 	GtkWidget *webkit = webkit_web_view_new();
-	gchar *css_string;
-	gchar *full_html;
-	gchar *template_html;
 
-	if (!g_file_get_contents(UI_DIR"template.html", &template_html,
-				NULL, NULL)) {
-		return NULL;
-	}
-
-	if (!g_file_get_contents(UI_DIR"default.css", &css_string, NULL, NULL)) {
-		g_free(template_html);
-		return NULL;
-	}
-
-	full_html = g_strdup_printf(template_html, css_string);
-	g_free(css_string);
-
-	printf("%s\n", full_html);
-
-	webkit_web_view_load_string(WEBKIT_WEB_VIEW(webkit), full_html, NULL, NULL, "file://"UI_DIR);
-
-	g_free(template_html);
-	g_free(full_html);
+	webkit_web_view_load_string(WEBKIT_WEB_VIEW(webkit), content_full_html,
+			NULL, NULL, "file://"UI_DIR);
 
 	return webkit;
 #else
@@ -141,7 +176,6 @@ timeout_cb(struct timeout_data *data)
 	g_free(data->script);
 	g_free(data);
 
-
 	return FALSE;
 }
 
@@ -149,40 +183,26 @@ void
 hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 							HybridBuddy *buddy,	const gchar *message, time_t msg_time)
 {
-	gchar *format;
 	gchar *html, *escaped_html, *escaped_message;
 	gchar *script;
 	WebKitLoadStatus status;
 	struct timeout_data *data;
-	const gchar *content_html;
 	gchar *icon_path;
 	gchar *icon_name;
 
-	if (buddy) {
-		content_html = UI_DIR"recv.html";
-
-	} else {
-		content_html = UI_DIR"send.html";
-	}
-
 	escaped_message = escape_string(message);
-
-	if (!g_file_get_contents(content_html, &format, NULL, NULL)) {
-		g_free(escaped_message);
-		return;
-	}
 
 	icon_path = hybrid_config_get_path();
 
 	if (buddy) {
 		icon_name = g_strdup_printf("file://%s/icons/%s", icon_path, buddy->icon_name);
-		html = g_strdup_printf(format, 
+		html = g_strdup_printf(content_recv, 
 				icon_name,
 				buddy->name && *buddy->name ? buddy->name : buddy->id,
 				escaped_message);
 	} else {
 		icon_name = g_strdup_printf("file://%s/icons/%s", icon_path, account->icon_name);
-		html = g_strdup_printf(format, 
+		html = g_strdup_printf(content_send, 
 				account->nickname && *account->nickname ? 
 				account->nickname : account->username,
 				escaped_message,
@@ -192,7 +212,6 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 
 	g_free(icon_path);
 	g_free(icon_name);
-
 
 	escaped_html = escape_html(html);
 
@@ -214,7 +233,6 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 	g_free(escaped_html);
 	g_free(escaped_message);
 	g_free(html);
-	g_free(format);
 	return;
 }
 

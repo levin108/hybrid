@@ -1240,6 +1240,7 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	}
 
 	if ((chat = hybrid_conv_find_chat(id))) {
+		conv = chat->parent;
 		goto found;
 	}
 
