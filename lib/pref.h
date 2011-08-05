@@ -60,6 +60,16 @@ void hybrid_pref_save(void);
 void hybrid_pref_set_string(const gchar *name, const gchar *value);
 
 /**
+ * Get the string value of a given property.
+ *
+ * @param name The name of the property.
+ *
+ * @return The value of the property, NULL if not found,
+ *         need to be freed with g_free() when no longer needed.
+ */
+gchar *hybrid_pref_get_string(const gchar *name);
+
+/**
  * Set the gboolean value for a property.
  *
  * @param name  The name of the property.

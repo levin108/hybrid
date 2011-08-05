@@ -30,6 +30,7 @@
 typedef struct _HybridConversation HybridConversation;
 typedef struct _HybridChatWindow   HybridChatWindow;
 typedef struct _HybridChatTextOps  HybridChatTextOps;
+typedef struct _HybridChatTheme    HybridChatTheme;
 typedef enum _HybridChatWindowType HybridChatWindowType;
 
 typedef void (*ChatCallback)(HybridAccount *, const gchar *);
@@ -38,6 +39,12 @@ typedef GtkWidget* (*text_create)(void);
 typedef void (*text_append)(GtkWidget *, HybridAccount *,
 							HybridBuddy *,	const gchar *, time_t);
 typedef void (*text_notify)(GtkWidget *, const gchar *, gint);
+typedef void (*theme_set_ops_func)(void);
+
+struct _HybridChatTheme {
+	const gchar *name;
+	theme_set_ops_func func;
+};
 
 struct _HybridChatTextOps{
 	text_create create;
@@ -247,6 +254,13 @@ void hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id);
  * @param buddy_id ID of the buddy to which the chat window belongs.
  */
 void hybrid_conv_clear_inputing(HybridAccount *account, const gchar *buddy_id);
+
+/**
+ * Get the supported theme list.
+ *
+ * @return The theme list terminated with the name set to NULL.
+ */
+HybridChatTheme *hybrid_chat_window_get_themes(void);
 
 /**
  * Update the tips title of the chat window, usually used when

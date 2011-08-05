@@ -21,6 +21,7 @@
 #include "pref.h"
 #include "util.h"
 
+#include "conv.h"
 #include "preference.h"
 #include "gtkutils.h"
 
@@ -72,6 +73,67 @@ create_tab_pos_model(void)
 /**
  * Create the combo box for choosing the tab positons.
  */
+static GtkWidget*
+chat_theme_combo_create()
+{
+	GtkWidget *combo;
+	GtkTreeStore *store;
+	GtkTreeIter iter;
+	GtkCellRenderer *renderer;
+	HybridChatTheme *themes;
+	gchar *chat_theme_name = NULL;
+	gchar *name = NULL;
+	gint i;
+
+	store = gtk_tree_store_new(TAB_POS_COLS,
+				G_TYPE_STRING,
+				G_TYPE_INT);
+
+	themes = hybrid_chat_window_get_themes();
+
+	for (i = 0; themes[i].name; i++) {
+		gtk_tree_store_append(store, &iter, NULL);
+		gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, themes[i].name, -1);
+	}
+
+	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(
+			GTK_CELL_LAYOUT(combo), renderer, FALSE);
+	gtk_cell_layout_set_attributes(
+			GTK_CELL_LAYOUT(combo), renderer,
+		    "text", TAB_POS_NAME_COL, NULL);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+
+	/*
+	 * Set the active item with the local data.
+	 */
+	if ((chat_theme_name = hybrid_pref_get_string("chat_theme")) != NULL) {
+		
+		if(gtk_tree_model_get_iter_root(GTK_TREE_MODEL(store), &iter)) {
+
+			do {
+				gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
+						TAB_POS_NAME_COL, &name, -1);
+
+				if (g_strcmp0(name, chat_theme_name) == 0) {
+
+					gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo), &iter);
+
+					break;
+				}
+
+			} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter));
+		}
+	}
+
+	g_free(chat_theme_name);
+	g_object_unref(store);
+	
+	return combo;
+}
+
 static GtkWidget*
 tab_pos_combo_create()
 {
@@ -138,10 +200,16 @@ pref_basic_init(GtkFixed *fixed)
 			hybrid_pref_get_boolean("hide_chat_buttons"));
 	gtk_fixed_put(fixed, pref_window->hcb_check, 20, 35);
 
+	label = gtk_label_new(_("Chat Theme:"));
+	gtk_fixed_put(fixed, label, 20, 65);
+
+	pref_window->chat_theme_combo = chat_theme_combo_create();
+	gtk_fixed_put(fixed, pref_window->chat_theme_combo, 120, 60);
+
 	label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label),
 			_("<b>Tabs:</b>"));
-	gtk_fixed_put(fixed, label, 20, 65);
+	gtk_fixed_put(fixed, label, 20, 95);
 
 	pref_window->single_cw_check =
 		gtk_check_button_new_with_label(_("Show Messages In A Single Window With Tabs"));
@@ -149,13 +217,13 @@ pref_basic_init(GtkFixed *fixed)
 	gtk_toggle_button_set_active(
 			GTK_TOGGLE_BUTTON(pref_window->single_cw_check),
 			hybrid_pref_get_boolean("single_chat_window"));
-	gtk_fixed_put(fixed, pref_window->single_cw_check, 20, 95);
+	gtk_fixed_put(fixed, pref_window->single_cw_check, 20, 125);
 
 	label = gtk_label_new(_("Tab Position:"));
-	gtk_fixed_put(fixed, label, 20, 135);
+	gtk_fixed_put(fixed, label, 20, 165);
 
 	pref_window->tab_pos_combo = tab_pos_combo_create();
-	gtk_fixed_put(fixed, pref_window->tab_pos_combo, 120, 130);
+	gtk_fixed_put(fixed, pref_window->tab_pos_combo, 120, 160);
 }
 
 /**
@@ -187,6 +255,11 @@ cancel_cb(GtkWidget *widget, gpointer user_data)
 static void
 save_cb(GtkWidget *widget, gpointer user_data)
 {
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gint tab_pos;
+	gchar *chat_theme;
+
 	g_return_if_fail(pref_window != NULL);
 
 	if (gtk_toggle_button_get_active(
@@ -219,10 +292,6 @@ save_cb(GtkWidget *widget, gpointer user_data)
 	/*
 	 * Tab position settings.
 	 */
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	gint tab_pos;
-
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(pref_window->tab_pos_combo));
 
 	gtk_combo_box_get_active_iter(
@@ -231,6 +300,18 @@ save_cb(GtkWidget *widget, gpointer user_data)
 	gtk_tree_model_get(model, &iter, TAB_POS_VALUE_COL, &tab_pos, -1);
 
 	hybrid_pref_set_int("tab_pos", tab_pos);
+
+	/*
+	 * Chat theme settings.
+	 */
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(pref_window->chat_theme_combo));
+
+	gtk_combo_box_get_active_iter(
+			GTK_COMBO_BOX(pref_window->chat_theme_combo), &iter);
+
+	gtk_tree_model_get(model, &iter, TAB_POS_NAME_COL, &chat_theme, -1);
+
+	hybrid_pref_set_string("chat_theme", chat_theme);
 
 	hybrid_pref_save();
 

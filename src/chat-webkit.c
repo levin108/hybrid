@@ -189,6 +189,13 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 	struct timeout_data *data;
 	gchar *icon_path;
 	gchar *icon_name;
+	gchar time[128];
+	struct tm *tm_time;
+
+	g_return_if_fail(textview != NULL);
+
+	tm_time = localtime(&msg_time);
+	strftime(time, sizeof(time) - 1, _("%H:%M:%S"), tm_time);
 
 	escaped_message = escape_string(message);
 
@@ -199,12 +206,14 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 		html = g_strdup_printf(content_recv, 
 				icon_name,
 				buddy->name && *buddy->name ? buddy->name : buddy->id,
+				time,
 				escaped_message);
 	} else {
 		icon_name = g_strdup_printf("file://%s/icons/%s", icon_path, account->icon_name);
 		html = g_strdup_printf(content_send, 
 				account->nickname && *account->nickname ? 
 				account->nickname : account->username,
+				time,
 				escaped_message,
 				icon_name
 				);

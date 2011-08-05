@@ -47,6 +47,11 @@ struct _HybridPreference {
 	 * Combo box for choosing the position of the tabs;
 	 */
 	GtkWidget *tab_pos_combo;
+
+	/*
+	 * Combo box for choosing the chating theme.
+	 */
+	GtkWidget *chat_theme_combo;
 };
 
 #ifdef __cplusplus
