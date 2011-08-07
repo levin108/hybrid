@@ -36,12 +36,15 @@ hybrid_config_get_path(void)
 	gchar *hybrid_path;
 	gint e;
 
-	if (!(home = getenv("HOME"))) {
-		hybrid_debug_error("config", "No environment variable named HOME\n");
-		return NULL;
+	if (!(config_path = getenv("XDG_CONFIG_HOME"))) {
+		if (!(home = getenv("HOME"))) {
+			hybrid_debug_error("config", "No environment variable named HOME\n");
+			return NULL;
+		}
+		config_path = g_strdup_printf("%s/.config", home);
+	} else {
+		config_path = g_strdup_printf("%s", config_path);
 	}
-
-	config_path = g_strdup_printf("%s/.config", home);
 
 	e = mkdir(config_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
