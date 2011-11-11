@@ -328,7 +328,10 @@ hybrid_ssl_write(HybridSslConnection *ssl, const gchar *buf, gint len)
 {
 	gint l;
 	gint i;
+	gint ret;
+	fd_set write_fd;
 
+	/*
 	for (i = 0; len > 0; i ++) {
 		while (1) {
 			l = SSL_write(ssl->ssl, buf + i * 4096, len > 4096 ? 4096 : len);
@@ -346,6 +349,67 @@ hybrid_ssl_write(HybridSslConnection *ssl, const gchar *buf, gint len)
 		}
 ssl_write_ok:;
 	}
+	*/
+
+	for (i = 0; len > 0; i ++) {
+
+reselect:
+		FD_ZERO(&write_fd);
+		FD_SET(ssl->sk, &write_fd);
+
+		/* use select() to determine when to write. */
+		if ((ret = select (ssl->sk + 1, NULL, &write_fd, NULL, NULL)) > 0) {
+
+			if (FD_ISSET(ssl->sk, &write_fd)) {
+
+				l = SSL_write(ssl->ssl, buf + i * 4096, len > 4096 ? 4096 : len);
+
+				/* hybrid_debug_error("ssl", "ssl write with ret: %d\n", ret); */
+
+				switch (SSL_get_error(ssl->ssl, l)) { 
+				case SSL_ERROR_NONE:
+					len -= 4096;
+					break;
+				case SSL_ERROR_WANT_WRITE:
+					hybrid_debug_error("ssl", 
+									   "ssl write with SSL_ERROR_WANT_WRITE.");
+					return -1;
+				case SSL_ERROR_SYSCALL:
+					hybrid_debug_error("ssl", 
+									   "ssl write with SSL_ERROR_SYSCALL.");
+					if (!ret) {
+						return -1;
+					} else {
+						break;
+					}
+				case SSL_ERROR_WANT_X509_LOOKUP:
+					hybrid_debug_error("ssl", 
+									   "ssl write with SSL_ERROR_WANT_X509_LOOKUP.");
+					return -1;
+				case SSL_ERROR_ZERO_RETURN:
+					hybrid_debug_error("ssl", 
+									   "ssl write with SSL_ERROR_ZERO_RETURN.");
+					return -1;
+				case SSL_ERROR_SSL:
+				default:
+					hybrid_debug_error("ssl",
+									   "ssl write with other error.");
+					return -1;
+
+				}
+			} else {
+				hybrid_debug_error("ssl", "ssl write no fd selected.");
+				return -1;
+			}			
+		} else if (0 == ret) {
+			goto reselect;
+		} else {
+			hybrid_debug_error("ssl", "ssl write error, select() return -1.");
+			return -1;
+		}
+		
+	}
+
 
 	return len;
 }
