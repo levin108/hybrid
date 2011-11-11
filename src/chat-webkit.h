@@ -32,6 +32,18 @@ extern "C" {
 void hybrid_chat_set_webkit_ops(void);
 
 /**
+ * Initialize the webkit context.
+ *
+ * @return HYBRID_OK or HYBRID_ERROR in case of an error.
+ */
+gint hybrid_webkit_init(void);
+
+/**
+ * Destroy the webkit context.
+ */
+void hybrid_webkit_destroy(void);
+
+/**
  * Create a chat box with WebKit.
  *
  * @return The chat box created.

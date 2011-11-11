@@ -42,6 +42,7 @@
 #include "groupadd.h"
 #include "buddyadd.h"
 #include "searchbox.h"
+#include "chat-webkit.h"
 
 extern HybridBlist *blist;
 extern HybridHead *hybrid_head;
@@ -60,6 +61,9 @@ window_destroy(GtkWidget *widget, gpointer user_data)
 	/*
 	 * Now free the memory.
 	 */
+#ifdef USE_WEBKIT
+	hybrid_webkit_destroy();
+#endif
 
 	gtk_main_quit();
 }
@@ -258,6 +262,10 @@ main(gint argc, gchar **argv)
 
 #ifdef USE_LIBNOTIFY
 	notify_init("Hybrid");
+#endif
+
+#ifdef USE_WEBKIT
+	hybrid_webkit_init();
 #endif
 
 	hybrid_config_init();

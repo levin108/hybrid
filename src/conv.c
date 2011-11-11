@@ -36,6 +36,21 @@ static HybridChatTextOps *text_ops = NULL;
 /* The list of the currently opened conversation dialogs. */
 GSList *conv_list = NULL; 
 
+static HybridChatTheme theme_list[] = {
+#ifdef USE_WEBKIT
+	{
+		"webkit",
+		hybrid_chat_set_webkit_ops
+	}, 
+#endif
+	{
+		"textview",
+		hybrid_chat_set_textview_ops
+	}, {
+		NULL, NULL
+	}
+};
+
 static GtkWidget *create_note_label(HybridChatWindow *chat);
 static void chat_window_destroy(HybridChatWindow *chat);
 static gboolean key_press_func(GtkWidget *widget, GdkEventKey *event,
@@ -313,8 +328,19 @@ hybrid_conv_create()
 	GtkWidget *halign;
 	GtkWidget *button;
 	gint tab_pos;
+	gchar *chat_theme = NULL;
 
-	hybrid_chat_set_webkit_ops();
+	theme_list[0].func();
+
+	if ((chat_theme = hybrid_pref_get_string("chat_theme")) != NULL) {
+		gint i;
+		for (i = 0; theme_list[i].name; i ++) {
+			if (g_strcmp0(theme_list[i].name, chat_theme) == 0) {
+				theme_list[i].func();
+			}
+		}
+
+	}
 
 	HybridConversation *imconv;
 
@@ -1240,6 +1266,7 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 	}
 
 	if ((chat = hybrid_conv_find_chat(id))) {
+		conv = chat->parent;
 		goto found;
 	}
 
@@ -1648,4 +1675,10 @@ hybrid_chat_window_update_tips(HybridChatWindow *window)
 	gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(window->tablabel), path);
 	gtk_tree_path_free(path);
 
+}
+
+HybridChatTheme*
+hybrid_chat_window_get_themes(void)
+{
+	return theme_list;
 }
