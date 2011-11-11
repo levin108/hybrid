@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *   Copyright (C) 2011 by levin                                           *
  *   levin108@gmail.com                                                    *
@@ -236,6 +237,7 @@ xmpp_keep_alive(HybridAccount *account)
 	stream = hybrid_account_get_protocol_data(account);
 
 	if (xmpp_stream_ping(stream) != HYBRID_OK) {
+		printf("%s\n", "error");
 		return FALSE;
 	}
 

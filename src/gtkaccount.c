@@ -618,18 +618,9 @@ enable_cb(GtkWidget *widget, HybridAccount *account)
 static void
 disable_cb(GtkWidget *widget, HybridAccount *account)
 {
-	GtkWidget *sub_menu;
-
 	hybrid_account_close(account);
 
-	gtk_widget_destroy(account->enable_menu);
-
-	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(account->account_menu));
-
-	account->enable_menu = hybrid_create_menu(sub_menu, _("Enable Account"),
-									NULL, TRUE, G_CALLBACK(enable_cb), account);
-
-	gtk_widget_show(account->enable_menu);
+	hybrid_account_disable_menu(account);
 }
 
 static void
@@ -766,4 +757,22 @@ hybrid_account_remove_menu(HybridAccount *account)
 
 	gtk_widget_destroy(account->account_menu);
 	account->account_menu = NULL;
+}
+
+void
+hybrid_account_disable_menu(HybridAccount *account)
+{
+	GtkWidget *sub_menu;
+
+	g_return_if_fail(account != NULL);
+
+	gtk_widget_destroy(account->enable_menu);
+
+	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(account->account_menu));
+
+	account->enable_menu = hybrid_create_menu(sub_menu, _("Enable Account"),
+									NULL, TRUE, G_CALLBACK(enable_cb), account);
+
+	gtk_widget_show(account->enable_menu);
+
 }

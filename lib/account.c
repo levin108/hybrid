@@ -22,6 +22,7 @@
 #include "util.h"
 #include "config.h"
 #include "account.h"
+#include "gtkaccount.h"
 #include "gtkutils.h"
 #include "notify.h"
 #include "blist.h"
@@ -868,6 +869,9 @@ hybrid_account_close(HybridAccount *account)
 	if (module->info->close) {
 		module->info->close(account);
 	}
+
+	/* Now we need to hide the disable menu,and show the enable menu */
+	hybrid_account_disable_menu(account);
 }
 
 void
