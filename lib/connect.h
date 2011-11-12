@@ -49,6 +49,8 @@ struct _HybridSslConnection {
 	ssl_callback recv_cb;
 	gpointer recv_data;
 
+	BIO *wbio;
+	BIO *rbio;
 	SSL *ssl;
 	SSL_CTX *ssl_ctx;
 };

@@ -36,9 +36,9 @@ hybrid_chat_set_textview_ops(void)
 GtkWidget*
 hybrid_chat_textview_create(void)
 {
-	GtkWidget *textview;
-	GtkTextBuffer *buffer;
-	GtkTextIter end_iter;
+	GtkWidget			*textview;
+	GtkTextBuffer		*buffer;
+	GtkTextIter			 end_iter;
 
 	textview = gtk_text_view_new();
 
@@ -66,16 +66,16 @@ void
 hybrid_chat_textview_append(GtkWidget *textview, HybridAccount *account,
 							HybridBuddy *buddy,	const gchar *message, time_t msg_time)
 {
-	GtkTextBuffer *recv_tb;
-	GtkTextIter end_iter;
-	GtkTextIter stop_iter;
-	GtkTextIter start_iter;
-	GtkTextMark *mark;
-	gchar *names;
-	const gchar *color;
-	const gchar *name;
-	struct tm *tm_time;
-	gchar time[128];
+	GtkTextBuffer		*recv_tb;
+	GtkTextIter			 end_iter;
+	GtkTextIter			 stop_iter;
+	GtkTextIter			 start_iter;
+	GtkTextMark			*mark;
+	gchar				*names;
+	const gchar			*color;
+	const gchar			*name;
+	struct tm			*tm_time;
+	gchar				 time[128];
 
 	g_return_if_fail(textview != NULL);
 	g_return_if_fail(message != NULL);

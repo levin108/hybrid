@@ -30,9 +30,10 @@
 #include "xmpp_buddy.h"
 #include "xmpp_iq.h"
 
-static gchar *generate_starttls_body(XmppStream *stream);
-static gchar *create_initiate_stream(XmppStream *xs);
-static void xmpp_stream_get_roster(XmppStream *stream);
+static gchar	*generate_starttls_body(XmppStream *stream);
+static gchar	*create_initiate_stream(XmppStream *xs);
+static void		 xmpp_stream_get_roster(XmppStream *stream);
+static void		 xmpp_stream_get_vcard(XmppStream *stream);
 
 static gchar*
 get_bare_jid(const gchar *full_jid)
@@ -53,9 +54,10 @@ xmpp_stream_create(XmppAccount *account)
 
 	stream = g_new0(XmppStream, 1);
 
-	stream->account = account;
+	stream->account		  = account;
 	stream->major_version = 1;
 	stream->miner_version = 0;
+	
 
 	return stream;
 }
@@ -162,17 +164,19 @@ xmpp_stream_starttls(XmppStream *stream)
 static void
 xmpp_stream_startsasl(XmppStream *stream)
 {
-	guchar *auth;
-	gchar *auth_encoded;
-	gchar *xml_string;
-	gint username_len;
-	gint password_len;
-
-	xmlnode *node;
+	guchar		*auth;
+	gchar		*auth_encoded;
+	gchar		*xml_string;
+	gint		 username_len;
+	gint		 password_len;
+	xmlnode		*node;
 
 	g_return_if_fail(stream != NULL);
 
 	hybrid_debug_info("xmpp", "start sasl authentication.");
+
+	hybrid_account_set_connection_string(stream->account->account,
+										 "Start sasl authentication.");
 
 	xmpp_stream_set_state(stream, XMPP_STATE_SASL_AUTHENTICATING);
 	/*
@@ -191,7 +195,6 @@ xmpp_stream_startsasl(XmppStream *stream)
 	memcpy(auth + 2 + username_len, stream->account->password,
 			password_len);
 
-
 	auth_encoded = hybrid_base64_encode(auth, username_len + password_len + 2);
 
 	g_free(auth);
@@ -204,6 +207,8 @@ xmpp_stream_startsasl(XmppStream *stream)
 	node = xmlnode_create("auth");
 
 	xmlnode_new_namespace(node, NULL, NS_XMPP_SASL);
+	xmlnode_new_namespace(node, "ga", "http://www.google.com/talk/protocol/auth");
+	xmlnode_new_prop(node, "ga:client-uses-full-bind-result", "true");
 	xmlnode_new_prop(node, "mechanism", "PLAIN");
 	xmlnode_set_content(node, auth_encoded);
 
@@ -230,21 +235,23 @@ xmpp_stream_startsasl(XmppStream *stream)
 static gboolean
 stream_recv_cb(gint sk, XmppStream *stream)
 {
-	gchar buf[BUF_LENGTH];
-	gint n;
+	gchar		buf[BUF_LENGTH];
+	gint		n;
 
 	if (!stream->ssl) {
-
 		if ((n = recv(sk, buf, sizeof(buf) - 1, 0)) == -1) {
 			
 			hybrid_debug_error("xmpp", "init stream error.");
-
 			return FALSE;
 		}
-
 	} else {
+
 		if ((n = hybrid_ssl_read(stream->ssl, buf, sizeof(buf) - 1)) == -1) {
 			
+			hybrid_debug_error("xmpp", "stream read io error.");
+			return TRUE;
+		} else if (0 == n) {
+			hybrid_debug_error("xmpp", "connection closed by server.");
 			return TRUE;
 		}
 	}
@@ -379,6 +386,9 @@ tls_conn_cb(HybridSslConnection *ssl, XmppStream *stream)
 {
 	gchar *msg;
 
+	hybrid_account_set_connection_string(stream->account->account,
+										 "TLS connection established.");
+
 	msg = create_initiate_stream(stream);
 
 	/*
@@ -415,6 +425,9 @@ xmpp_stream_performtls(XmppStream *stream)
 {
 
 	g_return_if_fail(stream != NULL);
+
+	hybrid_account_set_connection_string(stream->account->account,
+										 "Start performing tls");
 
 	if (!(stream->ssl = hybrid_ssl_connect_with_fd(stream->sk,
 					(ssl_callback)tls_conn_cb, stream))) {
@@ -456,7 +469,9 @@ auth_success(XmppStream *stream)
 			HYBRID_CONNECTION_CONNECTED);
 
 	/* OK, we request the roster from the server. */
+	xmpp_stream_get_vcard(stream);
 	xmpp_stream_get_roster(stream);
+
 }
 
 static gboolean
@@ -555,7 +570,7 @@ xmpp_stream_bind(XmppStream *stream)
 	xmlnode_new_namespace(node, NULL, NS_XMPP_BIND);
 
 	node = xmlnode_new_child(node, "resource");
-	xmlnode_set_content(node, "Hybrid");
+	xmlnode_set_content(node, "Hybrid.");
 
 	iq_request_set_callback(iq, resource_bind_cb, NULL);
 
@@ -611,11 +626,43 @@ xmpp_stream_get_roster(XmppStream *stream)
 
 		hybrid_account_error_reason(
 				stream->account->account,
-				"binds a resource error.");
+				"request roster error.");
 		iq_request_destroy(iq);
 
 		return;
 	}
+
+	iq_request_destroy(iq);
+}
+/**
+ * Request the vcard from the server.
+ */
+static void
+xmpp_stream_get_vcard(XmppStream *stream)
+{
+	xmlnode *node;
+	IqRequest *iq;
+
+	g_return_if_fail(stream != NULL);
+
+	xmpp_stream_iqid_increase(stream);
+
+	iq = iq_request_create(stream, IQ_TYPE_GET);
+	//iq_request_set_callback(iq, request_roster_cb, NULL);
+
+	node = xmlnode_new_child(iq->node, "vCard");
+	xmlnode_new_namespace(node, NULL, "vcard-temp");
+
+	if (iq_request_send(iq) != HYBRID_OK) {
+
+		hybrid_account_error_reason(
+				stream->account->account,
+				"request vcard error.");
+		iq_request_destroy(iq);
+
+		return;
+	}
+
 	iq_request_destroy(iq);
 }
 

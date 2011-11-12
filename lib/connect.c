@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *   Copyright (C) 2011 by levin                                           *
  *   levin108@gmail.com                                                    *
@@ -166,13 +167,6 @@ ssl_connect_cb(gint sk, gpointer user_data)
 
 	SSL_set_connect_state(ssl_conn->ssl);
 
-	RAND_poll();
-
-	while (RAND_status() == 0) {
-		unsigned short rand_ret = rand() % 65536;
-		RAND_seed(&rand_ret, sizeof(rand_ret));
-	} 
-
 	for ( ;; ) {
 		l = SSL_connect(ssl_conn->ssl);
 
@@ -205,13 +199,15 @@ HybridSslConnection*
 hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 		gpointer user_data)
 {
+	BIO					*buf_io;
+	BIO					*ssl_bio;
 	HybridSslConnection *conn;
 
 	g_return_val_if_fail(hostname != NULL, NULL);
 	g_return_val_if_fail(port != 0, NULL);
 	g_return_val_if_fail(func != NULL, NULL);
 
-	//SSLeay_add_all_algorithms();
+	SSLeay_add_all_algorithms();
 	SSL_load_error_strings();
 	SSL_library_init();
 
@@ -233,10 +229,20 @@ hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 		hybrid_ssl_connection_destory(conn);
 
 		return NULL;
+
 	}
 
-	conn->conn_cb = func;
+	SSL_set_mode(conn->ssl, SSL_MODE_AUTO_RETRY);
+
+	buf_io	= BIO_new(BIO_f_buffer());
+	ssl_bio = BIO_new(BIO_f_ssl());
+
+	BIO_set_ssl(ssl_bio, conn->ssl, BIO_NOCLOSE);
+	BIO_push(buf_io, ssl_bio);
+	
+	conn->conn_cb	= func;
 	conn->conn_data = user_data;
+	conn->rbio		= buf_io;
 
 	conn->conn = hybrid_proxy_connect(hostname, port, ssl_connect_cb, conn);
 
@@ -248,19 +254,22 @@ hybrid_ssl_connect_with_fd(gint sk,	ssl_callback func, gpointer user_data)
 {
 	gint l;
 	SSL *ssl;
+	BIO *sbio;
+	BIO *buf_io, *ssl_bio;
 	SSL_CTX *ssl_ctx;
 	HybridSslConnection *ssl_conn;
 
 	SSL_load_error_strings();
 	SSL_library_init();
 
-	if (!(ssl_ctx = SSL_CTX_new(SSLv3_client_method()))) {
+	if (!(ssl_ctx = SSL_CTX_new(TLSv1_client_method()))) {
 
 		hybrid_debug_error("ssl", "initialize SSL CTX: %s",
 				ERR_reason_error_string(ERR_get_error()));
 
 		return NULL;
 	}
+
 
 	if (!(ssl = SSL_new(ssl_ctx))) {
 
@@ -270,21 +279,45 @@ hybrid_ssl_connect_with_fd(gint sk,	ssl_callback func, gpointer user_data)
 		return NULL;
 	}
 
+
+	if(SSL_get_peer_certificate(ssl) != NULL) {
+		if(SSL_get_verify_result(ssl) == X509_V_OK) {
+			fprintf(stderr, "client verification with SSL_get_verify_result() succeeded.\n");                
+		} else {
+			fprintf(stderr, "client verification with SSL_get_verify_result() failed.\n");
+			exit(1);
+		}
+	} else {
+		fprintf(stdout, "the peer certificate was not presented.\n");
+	}
+	/*
+	if(SSL_CTX_use_certificate_file(ssl_ctx,CLIENT_CERT,
+									SSL_FILETYPE_PEM) <= 0){
+		ERR_print_errors_fp(stderr);
+		exit(1);
+	}
+ 
+	if(SSL_CTX_use_PrivateKey_file(ssl_ctx,CLIENT_KEY,
+								   SSL_FILETYPE_PEM) <= 0){
+		ERR_print_errors_fp(stderr);
+		exit(1);
+	}
+ 
+	if (!SSL_CTX_load_verify_locations(ssl_ctx,CA_CERT,NULL)) {
+		ERR_print_errors_fp(stderr);
+			exit(1);
+	}
 	if (!SSL_set_fd(ssl, sk)) {
 
 		hybrid_debug_error("ssl", "add ssl to tcp socket:%s", 
 				ERR_reason_error_string(ERR_get_error()));
 		return NULL;
 	}
+	*/
 
-	SSL_set_connect_state(ssl);
-
-	RAND_poll();
-
-	while (RAND_status() == 0) {
-		unsigned short rand_ret = rand() % 65536;
-		RAND_seed(&rand_ret, sizeof(rand_ret));
-	} 
+	sbio = BIO_new(BIO_s_socket());
+	BIO_set_fd(sbio, sk, BIO_NOCLOSE);
+	SSL_set_bio(ssl, sbio, sbio);
 
 	for ( ;; ) {
 		l = SSL_connect(ssl);
@@ -306,7 +339,17 @@ hybrid_ssl_connect_with_fd(gint sk,	ssl_callback func, gpointer user_data)
 		}
 	}
 
+	SSL_set_connect_state(ssl);
+
 ssl_conn_sk_ok:
+
+	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+	
+	buf_io = BIO_new(BIO_f_buffer());
+	ssl_bio = BIO_new(BIO_f_ssl());
+
+	BIO_set_ssl(ssl_bio, ssl, BIO_NOCLOSE);
+	BIO_push(buf_io, ssl_bio);
 
 	ssl_conn = g_new0(HybridSslConnection, 1);
 
@@ -315,6 +358,8 @@ ssl_conn_sk_ok:
 	ssl_conn->ssl_ctx = ssl_ctx;
 	ssl_conn->conn_cb = func;
 	ssl_conn->conn_data = user_data;
+	ssl_conn->rbio = buf_io;
+	ssl_conn->wbio = sbio;
 
 	if (func) {
 		func(ssl_conn, user_data);
@@ -327,10 +372,6 @@ gint
 hybrid_ssl_write(HybridSslConnection *ssl, const gchar *buf, gint len)
 {
 	gint l;
-	gint i;
-	gint ret;
-	fd_set write_fd;
-
 	/*
 	for (i = 0; len > 0; i ++) {
 		while (1) {
@@ -351,65 +392,41 @@ ssl_write_ok:;
 	}
 	*/
 
-	for (i = 0; len > 0; i ++) {
+rewrite:
+	l = SSL_write(ssl->ssl, buf, len);
 
-reselect:
-		FD_ZERO(&write_fd);
-		FD_SET(ssl->sk, &write_fd);
-
-		/* use select() to determine when to write. */
-		if ((ret = select (ssl->sk + 1, NULL, &write_fd, NULL, NULL)) > 0) {
-
-			if (FD_ISSET(ssl->sk, &write_fd)) {
-
-				l = SSL_write(ssl->ssl, buf + i * 4096, len > 4096 ? 4096 : len);
-
-				/* hybrid_debug_error("ssl", "ssl write with ret: %d\n", ret); */
-
-				switch (SSL_get_error(ssl->ssl, l)) { 
-				case SSL_ERROR_NONE:
-					len -= 4096;
-					break;
-				case SSL_ERROR_WANT_WRITE:
-					hybrid_debug_error("ssl", 
-									   "ssl write with SSL_ERROR_WANT_WRITE.");
-					return -1;
-				case SSL_ERROR_SYSCALL:
-					hybrid_debug_error("ssl", 
-									   "ssl write with SSL_ERROR_SYSCALL.");
-					if (!ret) {
-						return -1;
-					} else {
-						break;
-					}
-				case SSL_ERROR_WANT_X509_LOOKUP:
-					hybrid_debug_error("ssl", 
-									   "ssl write with SSL_ERROR_WANT_X509_LOOKUP.");
-					return -1;
-				case SSL_ERROR_ZERO_RETURN:
-					hybrid_debug_error("ssl", 
-									   "ssl write with SSL_ERROR_ZERO_RETURN.");
-					return -1;
-				case SSL_ERROR_SSL:
-				default:
-					hybrid_debug_error("ssl",
-									   "ssl write with other error.");
-					return -1;
-
-				}
-			} else {
-				hybrid_debug_error("ssl", "ssl write no fd selected.");
-				return -1;
-			}			
-		} else if (0 == ret) {
-			goto reselect;
-		} else {
-			hybrid_debug_error("ssl", "ssl write error, select() return -1.");
+	switch (SSL_get_error(ssl->ssl, l)) { 
+	case SSL_ERROR_NONE:
+		if (l != len) {
+			hybrid_debug_error("ssl", 
+							   "ssl write %d bytes but only %d byte succeed.");
 			return -1;
 		}
-		
-	}
+		return l;
+	case SSL_ERROR_WANT_WRITE:
+		hybrid_debug_error("ssl", 
+						   "ssl write with SSL_ERROR_WANT_WRITE.");
+		usleep(100);
+		goto rewrite;
+	case SSL_ERROR_SYSCALL:
+		hybrid_debug_error("ssl", 
+						   "ssl write with io error.");
+		return -1;
+	case SSL_ERROR_WANT_X509_LOOKUP:
+		hybrid_debug_error("ssl", 
+						   "ssl write with SSL_ERROR_WANT_X509_LOOKUP.");
+		return -1;
+	case SSL_ERROR_ZERO_RETURN:
+		hybrid_debug_error("ssl", 
+						   "ssl connection permaturely closed.");
+		return 0;
+	case SSL_ERROR_SSL:
+	default:
+		hybrid_debug_error("ssl",
+						   "ssl write with other error.");
+		return -1;
 
+	}
 
 	return len;
 }
@@ -417,7 +434,37 @@ reselect:
 gint
 hybrid_ssl_read(HybridSslConnection *ssl, gchar *buf, gint len)
 {
-	return SSL_read(ssl->ssl, buf, len);
+	gint ret;
+
+	hybrid_debug_info("ssl", "start ssl read.");
+	
+	ret = BIO_read(ssl->rbio, buf, len);
+
+	switch (SSL_get_error(ssl->ssl, ret)) { 
+	case SSL_ERROR_NONE:
+		hybrid_debug_info("ssl", "ssl read %d bytes, success!", ret);
+		return ret;
+	case SSL_ERROR_WANT_WRITE:
+	case SSL_ERROR_WANT_READ:
+		hybrid_debug_info("ssl", "ssl read WANT RW with ret %d.", ret);
+		break;
+	case SSL_ERROR_SYSCALL:
+		hybrid_debug_info("ssl", "ssl read io error.");
+		return -1;
+	case SSL_ERROR_WANT_X509_LOOKUP:
+		hybrid_debug_info("ssl", "ssl read X509.");
+		return -1;
+	case SSL_ERROR_ZERO_RETURN:
+		hybrid_debug_info("ssl", "ssl connection permaturely closed.");
+		return 0;
+	case SSL_ERROR_SSL:
+	default:
+		hybrid_debug_error("ssl", "ssl read error:%s",
+						   ERR_reason_error_string(ERR_get_error()));
+		return -1;
+	}
+
+	return -1;
 }
 
 void 
