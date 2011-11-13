@@ -241,6 +241,7 @@ set(hybrid_SRC
 	src/buddyreq.c
 	src/statusicon.c
 	src/searchbox.c
+	src/confirm.c
 	src/gtkcellrendererexpander.c
 	src/core.c
 )

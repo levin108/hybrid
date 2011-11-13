@@ -29,12 +29,13 @@ typedef struct _Verification Verification;
 #include "fx_sip.h"
 
 struct _Verification {
-	gchar *algorithm;
-	gchar *type;
-	gchar *text;
-	gchar *tips;
-	gchar *code;
-	gchar *guid;
+	gchar		*algorithm;
+	gchar		*type;
+	gchar		*text;
+	gchar		*tips;
+	gchar		*code;
+	gchar		*guid;
+	gchar		*desc;
 };
 
 
@@ -154,16 +155,16 @@ fetion_account *fetion_account_clone(fetion_account *account);
 /**
  * Set the attribute value of the fetion account.
  */
-#define fetion_account_set_nickname(ac,v)        do { g_free((ac)->nickname); (ac)->nickname = g_strdup(v); } while(0)
-#define fetion_account_set_sipuri(ac,v)	         do { g_free((ac)->sipuri);   (ac)->sipuri = g_strdup(v); }   while(0)
-#define fetion_account_set_userid(ac,v)	         do { g_free((ac)->userid);   (ac)->userid = g_strdup(v); }   while(0)
-#define fetion_account_set_mobileno(ac,v)        do { g_free((ac)->mobileno); (ac)->mobileno = g_strdup(v); } while(0)
-#define fetion_account_set_ssic(ac,v)	         do { g_free((ac)->ssic);     (ac)->ssic = g_strdup(v); }     while(0)
-#define fetion_account_set_who(ac,v)	         do { g_free((ac)->who);      (ac)->who = g_strdup(v); }      while(0)
-#define fetion_account_set_mood(ac,v)            do { g_free((ac)->mood_phrase); (ac)->mood_phrase = g_strdup(v); } while(0)
-#define fetion_account_set_persion_version(ac,v) do { g_free((ac)->personal_version); (ac)->personal_version = g_strdup(v); } while(0)
-#define fetion_account_set_mood(ac,v)            do { g_free((ac)->mood_phrase); (ac)->mood_phrase = g_strdup(v); } while(0)
-#define fetion_account_set_custom_config(ac,v)   do { g_free((ac)->custom_config); (ac)->custom_config = g_strdup(v); } while(0)
+#define fetion_account_set_nickname(ac,v)				do { g_free((ac)->nickname); (ac)->nickname					= g_strdup(v); } while(0)
+#define fetion_account_set_sipuri(ac,v)					do { g_free((ac)->sipuri);   (ac)->sipuri					= g_strdup(v); }   while(0)
+#define fetion_account_set_userid(ac,v)					do { g_free((ac)->userid);   (ac)->userid					= g_strdup(v); }   while(0)
+#define fetion_account_set_mobileno(ac,v)				do { g_free((ac)->mobileno); (ac)->mobileno					= g_strdup(v); } while(0)
+#define fetion_account_set_ssic(ac,v)					do { g_free((ac)->ssic);     (ac)->ssic						= g_strdup(v); }     while(0)
+#define fetion_account_set_who(ac,v)					do { g_free((ac)->who);      (ac)->who						= g_strdup(v); }      while(0)
+#define fetion_account_set_mood(ac,v)					do { g_free((ac)->mood_phrase); (ac)->mood_phrase			= g_strdup(v); } while(0)
+#define fetion_account_set_persion_version(ac,v)		do { g_free((ac)->personal_version); (ac)->personal_version = g_strdup(v); } while(0)
+#define fetion_account_set_mood(ac,v)					do { g_free((ac)->mood_phrase); (ac)->mood_phrase			= g_strdup(v); } while(0)
+#define fetion_account_set_custom_config(ac,v)			do { g_free((ac)->custom_config); (ac)->custom_config		= g_strdup(v); } while(0)
 
 /**
  * Destroy the fetion account.
@@ -222,7 +223,20 @@ gint fetion_account_keep_alive(fetion_account *ac);
  */
 gint fetion_account_update_portrait(fetion_account *ac);
 
+/**
+ * Create an verification object for confirm code verification.
+ *
+ * @return The verification object created.
+ */
+Verification	*fetion_verification_create();
 
+/**
+ * Destroy a verification object.
+ *
+ * @return The verification object to destroy.
+ */
+void fetion_verification_destroy(Verification *verification);
+	
 #ifdef __cplusplus
 }
 #endif

@@ -202,10 +202,10 @@ create_basic_menus(GtkBox *box)
 static void
 ui_init(void)
 {
-	GtkWidget *window;
-	GtkWidget *scroll;
-	GtkWidget *vbox;
-	GtkWidget *searchbox;
+	GtkWidget	*window;
+	GtkWidget	*scroll;
+	GtkWidget	*vbox;
+	GtkWidget	*searchbox;
 
 	/* initialize the status icon. */
 	hybrid_status_icon_init();
@@ -231,9 +231,9 @@ ui_init(void)
 	/* scroll area (TreeView) */
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
-								 GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+								   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
-			GTK_SHADOW_ETCHED_IN);
+										GTK_SHADOW_ETCHED_IN);
 	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 2);
 
 	hybrid_vbox = gtk_vbox_new(FALSE, 0);

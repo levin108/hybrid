@@ -370,6 +370,24 @@ fetion_account_destroy(fetion_account *ac)
 	}
 }
 
+Verification*
+fetion_verification_create()
+{
+	return g_new0(Verification, 1);
+}
+
+void
+fetion_verification_destroy(Verification *verification)
+{
+	if (verification) {
+		g_free(verification->desc);
+		g_free(verification->text);
+		g_free(verification->algorithm);
+		g_free(verification->type);
+		g_free(verification->tips);
+	}
+}
+
 gint
 fetion_account_update_portrait(fetion_account *ac)
 {

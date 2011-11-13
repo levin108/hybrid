@@ -34,9 +34,9 @@ pixbuf_is_opaque(GdkPixbuf *pixbuf) {
 	if (!gdk_pixbuf_get_has_alpha(pixbuf))
 		return TRUE;
 
-	height = gdk_pixbuf_get_height (pixbuf);
+	height	  = gdk_pixbuf_get_height (pixbuf);
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-	pixels = gdk_pixbuf_get_pixels (pixbuf);
+	pixels	  = gdk_pixbuf_get_pixels (pixbuf);
 
 	row = pixels;
 	for (i = 3; i < rowstride; i+=4) {
@@ -62,14 +62,14 @@ pixbuf_is_opaque(GdkPixbuf *pixbuf) {
 
 static void
 pixbuf_make_round(GdkPixbuf *pixbuf) {
-	int width, height, rowstride;
-	guchar *pixels;
+	int			 width, height, rowstride;
+	guchar		*pixels;
 	if (!gdk_pixbuf_get_has_alpha(pixbuf))
 		return;
-	width = gdk_pixbuf_get_width(pixbuf);
-	height = gdk_pixbuf_get_height(pixbuf);
+	width	  = gdk_pixbuf_get_width(pixbuf);
+	height	  = gdk_pixbuf_get_height(pixbuf);
 	rowstride = gdk_pixbuf_get_rowstride(pixbuf);
-	pixels = gdk_pixbuf_get_pixels(pixbuf);
+	pixels	  = gdk_pixbuf_get_pixels(pixbuf);
 
 	if (width < 6 || height < 6)
 		return;
@@ -105,10 +105,10 @@ pixbuf_make_round(GdkPixbuf *pixbuf) {
 GdkPixbuf*
 hybrid_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len)
 {
-	GdkPixbufLoader *loader;
-	GdkPixbuf *pixbuf;
-	guchar *default_pixbuf_data;
-	gsize default_pixbuf_size;
+	GdkPixbufLoader		*loader;
+	GdkPixbuf			*pixbuf;
+	guchar				*default_pixbuf_data;
+	gsize				 default_pixbuf_size;
 
 	loader = gdk_pixbuf_loader_new();
 
@@ -152,8 +152,8 @@ hybrid_create_default_icon(gint scale_size)
 GdkPixbuf*
 hybrid_create_proto_icon(const gchar *proto_name, gint scale_size)
 {
-	GdkPixbuf *pixbuf;
-	gchar *icon_name;
+	GdkPixbuf	*pixbuf;
+	gchar		*icon_name;
 
 	g_return_val_if_fail(proto_name != NULL, NULL);
 	g_return_val_if_fail(*proto_name != '\0', NULL);
@@ -190,13 +190,13 @@ GdkPixbuf*
 hybrid_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
 		gint scale_size)
 {
-	GdkPixbufLoader *loader;
-	GdkPixbuf *pixbuf;
-	GdkPixbuf *newpixbuf;
-	gint orig_width;
-	gint orig_height;
-	guchar *default_pixbuf_data;
-	gsize default_pixbuf_size;
+	GdkPixbufLoader		*loader;
+	GdkPixbuf			*pixbuf;
+	GdkPixbuf			*newpixbuf;
+	gint				 orig_width;
+	gint				 orig_height;
+	guchar				*default_pixbuf_data;
+	gsize				 default_pixbuf_size;
 
 	loader = gdk_pixbuf_loader_new();
 	if (!pixbuf_data || pixbuf_len == 0) { /**< Load the default. */
@@ -285,10 +285,10 @@ hybrid_create_menu(GtkWidget *parent, const gchar *title,
 		GCallback callback,
 		gpointer user_data)
 {
-	GtkWidget *item;
-	GdkPixbuf *pixbuf;
-	GtkWidget *image;
-	gchar *icon_path;
+	GtkWidget	*item;
+	GdkPixbuf	*pixbuf;
+	GtkWidget	*image;
+	gchar		*icon_path;
 
 	g_return_val_if_fail(title != NULL, NULL);
 
@@ -381,9 +381,9 @@ confirm_cancel_btn_cb(GtkWidget *widget, gpointer user_data)
 static void
 confirm_user_btn_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridConfirm *confirm;
-	confirm_cb callback;
-	gpointer cb_user_data;
+	HybridConfirm		*confirm;
+	confirm_cb			 callback;
+	gpointer			 cb_user_data;
 
 	confirm = (HybridConfirm*)user_data;
 	callback = confirm->btn_callback;
@@ -400,15 +400,15 @@ HybridConfirm*
 hybrid_confirm_show(const gchar *title, const gchar *text,
 		const gchar *btn_text, confirm_cb btn_callback, gpointer user_data)
 {
-	GtkWidget *window;
-	GtkWidget *vbox;
-	GtkWidget *hbox;
-	GtkWidget *action_area;
-	GdkPixbuf *pixbuf;
-	GtkWidget *image;
-	GtkWidget *label;
-	GtkWidget *button;
-	HybridConfirm *confirm;
+	GtkWidget			*window;
+	GtkWidget			*vbox;
+	GtkWidget			*hbox;
+	GtkWidget			*action_area;
+	GdkPixbuf			*pixbuf;
+	GtkWidget			*image;
+	GtkWidget			*label;
+	GtkWidget			*button;
+	HybridConfirm		*confirm;
 
 	g_return_val_if_fail(title != NULL, NULL);
 	g_return_val_if_fail(text != NULL, NULL);
@@ -482,18 +482,18 @@ HybridMessageBox*
 hybrid_message_box_show(HybridMessageType type,
 						const gchar *format, ...)
 {
-	GtkWidget *window;
-	GtkWidget *vbox;
-	GtkWidget *hbox;
-	GtkWidget *action_area;
-	GdkPixbuf *pixbuf;
-	GtkWidget *image;
-	GtkWidget *label;
-	GtkWidget *button;
-	HybridMessageBox *msg_box;
-	va_list vlist;
-	gchar *message;
-	const gchar *title_str;
+	GtkWidget			*window;
+	GtkWidget			*vbox;
+	GtkWidget			*hbox;
+	GtkWidget			*action_area;
+	GdkPixbuf			*pixbuf;
+	GtkWidget			*image;
+	GtkWidget			*label;
+	GtkWidget			*button;
+	HybridMessageBox	*msg_box;
+	va_list				 vlist;
+	gchar				*message;
+	const gchar			*title_str;
 
 	g_return_val_if_fail(format != NULL, NULL);
 
@@ -558,4 +558,3 @@ hybrid_message_box_show(HybridMessageType type,
 }
 
 /* ================== Message Box End ======================= */
-

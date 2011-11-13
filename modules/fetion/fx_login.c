@@ -23,6 +23,7 @@
 #include "connect.h"
 #include "eventloop.h"
 #include "xmlnode.h"
+#include "confirm.h"
 
 #include "fetion.h"
 #include "fx_trans.h"
@@ -31,6 +32,18 @@
 #include "fx_group.h"
 #include "fx_buddy.h"
 #include "fx_config.h"
+
+#define VERIFY_TYPE_SSI 1
+#define VERIFY_TYPE_SIP 2
+
+struct verify_data {
+	gint				 type;  /* ssi verify || sipc verify */
+	fetion_account		*ac;    /* common data */
+	HybridSslConnection *ssl;	/* used by ssi verify */
+	gint				 sipc_conn;		/* used by sipc verify */
+	gchar				 response[BUF_LENGTH];		/* used by sipc verify */
+	gchar				*data;
+} verify_data;
 
 static gchar *hash_password_v1(const guchar *b0, gint b0len,
 		const guchar *password,	gint psdlen);
@@ -50,6 +63,12 @@ static gchar *generate_response(const gchar *nonce_raw, const gchar *userid,
 static gint sipc_aut_action(gint sk, fetion_account *ac, const gchar *response);
 static gchar *generate_auth_body(fetion_account *ac);
 static void parse_sipc_resp(fetion_account *ac, const gchar *pos, gint len);
+static gint parse_ssi_fail_resp(fetion_account *ac, const gchar *response);
+static gboolean pic_download_cb(gint sk, gpointer user_data);
+static gboolean pic_read_cb(gint sk, gpointer user_data);
+static void pic_code_ok_cb(HybridAccount *ac, const gchar *code, gpointer user_data);
+static void pic_code_cancel_cb(HybridAccount *ac, gpointer user_data);
+static gint parse_sipc_verification(fetion_account *ac, const gchar *resp);
 /**
  * Parse the ssi authentication response string. then we can
  * get the following information: sipuri/mobileno/sid/ssic.
@@ -105,6 +124,95 @@ ssi_term:
 	hybrid_account_error_reason(ac->account, _("ssi authencation"));
 	xmlnode_free(root);
 	return HYBRID_ERROR;
+}
+static gint
+parse_sipc_verification(fetion_account *ac, const gchar *resp)
+{
+	gchar		*w;
+	gchar		*start;
+	gchar		*end;
+	
+	ac->verification = fetion_verification_create();
+
+	w = sip_header_get_attr(resp, "W");
+
+	for (start = w; *start != '\0' && *start != '\"'; start ++);
+
+	if (!*start) {
+		g_free(w);
+		return HYBRID_ERROR;
+	}
+
+	start ++;
+
+	for (end = start; *end != '\0' && *end != '\"'; end ++);
+
+	if (!*end) {
+		g_free(w);
+		return HYBRID_ERROR;
+	}
+
+	ac->verification->algorithm = g_strndup(start, end - start);
+
+	for (start = end + 1; *start != '\0' && *start != '\"'; start ++);
+
+	if (!*start) {
+		g_free(w);
+		return HYBRID_ERROR;
+	}
+
+	start ++;
+
+	for (end = start; *end != '\0' && *end != '\"'; end ++);
+
+	if (!*end) {
+		g_free(w);
+		return HYBRID_ERROR;
+	}
+
+	ac->verification->type = g_strndup(start, end - start);
+	
+
+	return HYBRID_OK;
+}
+
+static gint
+parse_ssi_fail_resp(fetion_account *ac, const gchar *response)
+{
+	xmlnode				*root;
+	xmlnode				*node;
+	Verification		*ver;
+	gchar				*pos;
+
+	ver = fetion_verification_create();
+
+	if (!(pos = strstr(response, "\r\n\r\n"))) {
+		return HYBRID_ERROR;
+	}
+	
+	pos += 4;
+	
+	root = xmlnode_root(pos, strlen(pos));
+
+	if (!(node = xmlnode_find(root, "results"))) {
+		return HYBRID_ERROR;
+	}
+
+	if (xmlnode_has_prop(node, "desc")) {
+		ver->desc = xmlnode_prop(node, "desc");
+	}
+
+	if (!(node = xmlnode_find(root, "verification"))) {
+		return HYBRID_ERROR;
+	}
+
+	if (xmlnode_has_prop(node, "algorithm")) {
+		ver->algorithm = xmlnode_prop(node, "algorithm");
+	}
+
+	ac->verification = ver;
+
+	return HYBRID_OK;
 }
 
 /**
@@ -181,19 +289,19 @@ error:
 static gboolean
 cfg_connect_cb(gint sk, gpointer user_data)
 {
-	gchar *http;
-	gchar *body;
-	fetion_account *ac = (fetion_account*)user_data;
+	gchar				*http;
+	gchar				*body;
+	fetion_account		*ac = (fetion_account*)user_data;
 
 	hybrid_account_set_connection_string(ac->account, _("Downloading configure file..."));
 
 	body = generate_configuration_body(ac);
 	http = g_strdup_printf("POST /nav/getsystemconfig.aspx HTTP/1.1\r\n"
-				   "User-Agent: IIC2.0/PC "PROTO_VERSION"\r\n"
-				   "Host: %s\r\n"
-				   "Connection: Close\r\n"
-				   "Content-Length: %d\r\n\r\n%s",
-				   NAV_SERVER, strlen(body), body);
+						   "User-Agent: IIC2.0/PC "PROTO_VERSION"\r\n"
+						   "Host: %s\r\n"
+						   "Connection: Close\r\n"
+						   "Content-Length: %d\r\n\r\n%s",
+						   NAV_SERVER, strlen(body), body);
 
 	g_free(body);
 
@@ -208,7 +316,164 @@ cfg_connect_cb(gint sk, gpointer user_data)
 
 	g_free(http);
 
-	hybrid_event_add(sk, HYBRID_EVENT_READ, cfg_read_cb, ac);
+	ac->source = hybrid_event_add(sk, HYBRID_EVENT_READ, cfg_read_cb, ac);
+
+	return FALSE;
+}
+
+static void
+pic_code_ok_cb(HybridAccount *account, const gchar *code, gpointer user_data)
+{
+	fetion_account		*ac = (fetion_account*)user_data;
+	
+	hybrid_debug_info("fetion", "pic code %s inputed.", code);
+
+	g_free(ac->verification->code);
+	ac->verification->code = g_strdup(code);
+
+	if (VERIFY_TYPE_SSI == verify_data.type) {
+		hybrid_ssl_connect(SSI_SERVER, 443, ssi_auth_action, ac);
+		
+	} else {
+		printf("%s\n", verify_data.response);
+		sipc_aut_action(verify_data.sipc_conn, ac, verify_data.response);
+	}
+}
+static void
+pic_code_cancel_cb(HybridAccount *ac, gpointer user_data)
+{
+
+}
+
+static gboolean
+pic_read_cb(gint sk, gpointer user_data)
+{
+	gint		 n, len;
+	gchar		 sipmsg[BUF_LENGTH];
+	gchar		*code, *pos;
+	guchar		*pic;
+	gint		 piclen;
+	xmlnode		*root;
+	xmlnode		*node;
+	
+	fetion_account *ac = (fetion_account*)user_data;
+
+	len	= ac->buffer ? strlen(ac->buffer) : 0;
+
+	if((n = recv(sk, sipmsg, strlen(sipmsg), 0)) == -1) {
+		return -1;
+	}
+	
+	sipmsg[n] = 0;
+	
+	if(n == 0) {
+   		g_source_remove(ac->source);
+		ac->source = 0;
+		close(sk);
+		
+		if(! ac->buffer) {
+			return 0;
+		}
+
+		hybrid_debug_info("fetion", "read message resp:\n%s", ac->buffer);
+
+		if (200 != hybrid_get_http_code(ac->buffer)) {
+			goto read_pic_err;
+		}
+
+		if(!(pos = strstr(ac->buffer, "\r\n\r\n"))) {
+			goto read_pic_err;
+		}
+
+		pos += 4;
+
+		if (!(root = xmlnode_root(pos, strlen(pos)))) {
+			goto read_pic_err;
+		}
+
+		if (!(node = xmlnode_find(root, "pic-certificate"))) {
+			xmlnode_free(root);
+			goto read_pic_err;
+		}
+
+		if (!xmlnode_has_prop(node, "id") || !xmlnode_has_prop(node, "pic")) {
+			xmlnode_free(root);
+			goto read_pic_err;
+		}
+
+		ac->verification->guid = xmlnode_prop(node, "id");
+		code				   = xmlnode_prop(node, "pic");
+		
+		pic = hybrid_base64_decode(code, &piclen);
+
+		hybrid_confirm_window_create(ac->account, pic, piclen,
+									 pic_code_ok_cb, pic_code_cancel_cb, ac);
+
+		g_free(code);
+		g_free(pic);
+		xmlnode_free(root);
+		g_free(ac->buffer);
+		ac->buffer = (gchar*)0;
+
+		return FALSE;
+	}
+
+	ac->buffer = (gchar*)realloc(ac->buffer, len + n + 1);
+	memcpy(ac->buffer + len, sipmsg, n + 1);
+
+	return TRUE;
+
+ read_pic_err:
+	
+	hybrid_debug_error("fetion", "read pic code error.");
+
+	g_free(ac->buffer);
+	ac->buffer = (gchar *)0;
+
+	hybrid_account_error_reason(ac->account, "read pic code error.");
+	
+	return FALSE;
+}
+
+/**
+ * Callback function to handle the pic-code download event.
+ */
+static gboolean
+pic_download_cb(gint sk, gpointer user_data)
+{
+	gchar				*cookie = NULL;
+	gchar				*http;
+	fetion_account		*ac	= (fetion_account*)user_data;
+
+	hybrid_debug_info("fetion", "start downloading pic-cocde.");
+
+	if(ac->ssic) {
+		cookie = g_strdup_printf("Cookie: ssic=%s\r\n", ac->ssic);
+	}
+
+	http = g_strdup_printf("GET /nav/GetPicCodeV4.aspx?algorithm=%s HTTP/1.1\r\n"
+						   "%sHost: %s\r\n"
+						   "User-Agent: IIC2.0/PC "PROTO_VERSION"\r\n"
+						   "Connection: close\r\n\r\n",
+						   ac->verification->algorithm == NULL ? "" : ac->verification->algorithm,
+						   ac->ssic == NULL ? "" : cookie, NAV_SERVER);
+
+	hybrid_debug_info("fetion", "download pic request:\n%s", http);
+
+	if (send(sk, http, strlen(http), 0) == -1) {
+
+		g_free(cookie);
+		g_free(http);
+		
+		return FALSE;
+	}
+
+	ac->buffer = (char*)0;
+
+   	ac->source = hybrid_event_add(sk, HYBRID_EVENT_READ, pic_read_cb, user_data);
+
+	g_free(cookie);
+	g_free(http);
 
 	return FALSE;
 }
@@ -220,11 +485,13 @@ cfg_connect_cb(gint sk, gpointer user_data)
 static gboolean
 ssi_auth_cb(HybridSslConnection *ssl, gpointer user_data)
 {
-	gchar buf[BUF_LENGTH];
-	gchar *pos, *pos1;
-	gint ret;
-	fetion_account *ac = (fetion_account*)user_data;
-
+	gchar		 buf[BUF_LENGTH];
+	gchar		*pos;
+	gchar		*pos1;
+	gint		 ret;
+	gint		 code;
+	fetion_account		*ac = (fetion_account*)user_data;
+	
 	ret = hybrid_ssl_read(ssl, buf, sizeof(buf));
 
 	if (ret == -1 || ret == 0) {
@@ -234,9 +501,26 @@ ssi_auth_cb(HybridSslConnection *ssl, gpointer user_data)
 
 	buf[ret] = '\0';
 
+	hybrid_ssl_connection_destory(ssl);
+
 	hybrid_debug_info("fetion", "recv:\n%s", buf);
 
-	if (hybrid_get_http_code(buf) != 200) {
+	code = hybrid_get_http_code(buf);
+
+	if (421 == code || 420 == code) {			/* confirm code needed. */
+		if (HYBRID_ERROR == parse_ssi_fail_resp(ac, buf)) {
+			goto ssi_auth_err;
+		}
+
+		verify_data.ssl	 = ssl;
+		verify_data.type = VERIFY_TYPE_SSI;
+
+		hybrid_proxy_connect(NAV_SERVER, 80, pic_download_cb, ac);
+		
+		return FALSE;
+	}
+
+	if (200 != code) {
 		goto ssi_auth_err;
 	}
 
@@ -279,18 +563,21 @@ ssi_auth_cb(HybridSslConnection *ssl, gpointer user_data)
 	return FALSE;
 
 ssi_auth_err:
+	
 	hybrid_account_error_reason(ac->account, _("ssi authentication failed"));
+
 	return FALSE;
 }
 
 gboolean 
 ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
 {
-	gchar *password;
-	gchar no_url[URL_LENGTH];
-	gchar verify_url[URL_LENGTH];
-	gchar ssl_buf[BUF_LENGTH];
-	gint pass_type;
+	gchar		*password;
+	gchar		 no_url[URL_LENGTH];
+	gchar		 verify_url[URL_LENGTH];
+	gchar		 ssl_buf[BUF_LENGTH];
+	gint		 pass_type;
+	
 	fetion_account *ac = (fetion_account*)user_data;
 
 	hybrid_account_set_connection_string(ac->account, "Start SSI authenticating...");
@@ -312,22 +599,24 @@ ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
 	 */
 	if (ac->verification != NULL && ac->verification->code != NULL) {
 		g_snprintf(verify_url, sizeof(verify_url) - 1,
-						"&pid=%s&pic=%s&algorithm=%s",
-						ac->verification->guid,
-						ac->verification->code,
-						ac->verification->algorithm);
+				   "&pid=%s&pic=%s&algorithm=%s",
+				   ac->verification->guid,
+				   ac->verification->code,
+				   ac->verification->algorithm);
 	}
+	fetion_verification_destroy(ac->verification);
+	ac->verification = NULL;
 
 	pass_type = (ac->userid == NULL || *(ac->userid) == '\0' ? 1 : 2);
 
 	g_snprintf(ssl_buf, sizeof(ssl_buf) - 1,
-			"GET /ssiportal/SSIAppSignInV4.aspx?%s"
-			"&domains=fetion.com.cn%s&v4digest-type=%d&v4digest=%s\r\n"
-			"User-Agent: IIC2.0/pc "PROTO_VERSION"\r\n"
-			"Host: %s\r\n"
-			"Cache-Control: private\r\n"
-			"Connection: Keep-Alive\r\n\r\n",
-			no_url, verify_url, pass_type, password, SSI_SERVER);
+			   "GET /ssiportal/SSIAppSignInV4.aspx?%s"
+			   "&domains=fetion.com.cn%s&v4digest-type=%d&v4digest=%s\r\n"
+			   "User-Agent: IIC2.0/pc "PROTO_VERSION"\r\n"
+			   "Host: %s\r\n"
+			   "Cache-Control: private\r\n"
+			   "Connection: Keep-Alive\r\n\r\n",
+			   no_url, verify_url, pass_type, password, SSI_SERVER);
 
 	g_free(password);
 
@@ -347,12 +636,13 @@ ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
 static gboolean
 sipc_reg_cb(gint sk, gpointer user_data)
 {
-	gchar buf[BUF_LENGTH];
-	gchar *digest;
-	gchar *nonce, *key, *aeskey;
-	gchar *response;
+	gchar		 buf[BUF_LENGTH];
+	gchar		*digest;
+	gchar		*nonce, *key, *aeskey;
+	gchar		*response;
+	gint		 n;
+	
 	fetion_account *ac = (fetion_account*)user_data;
-	gint n;
 
 	if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
 		hybrid_account_error_reason(ac->account, _("sipc reg error."));
@@ -370,11 +660,18 @@ sipc_reg_cb(gint sk, gpointer user_data)
 		g_free(digest);
 		return FALSE;
 	}
-
+	
 	aeskey = generate_aes_key();
 
 	response = generate_response(nonce, ac->userid, ac->password, key, aeskey);
 
+	/* fill verify_data for pic confirm */
+	strncpy(verify_data.response, response, sizeof(verify_data.response));
+
+	/* now we start to handle the pushed messages */
+	ac->source = hybrid_event_add(sk, HYBRID_EVENT_READ, hybrid_push_cb, ac);
+
+	/* start sipc authencation action. */
 	sipc_aut_action(sk, ac, response);
 
 	g_free(digest);
@@ -393,10 +690,10 @@ sipc_reg_cb(gint sk, gpointer user_data)
 static gboolean
 sipc_reg_action(gint sk, gpointer user_data)
 {
-	gchar *sipmsg;
-	gchar *cnouce = generate_cnouce();
-	fetion_account *ac = (fetion_account*)user_data;
-	fetion_sip *sip = ac->sip;
+	gchar				*sipmsg;
+	gchar				*cnouce = generate_cnouce();
+	fetion_account		*ac		= (fetion_account*)user_data;
+	fetion_sip			*sip	= ac->sip;
 
 	hybrid_debug_info("fetion", "sipc registeration action");
 
@@ -406,10 +703,10 @@ sipc_reg_action(gint sk, gpointer user_data)
 	/* Now we start to register to the sipc server. */
 	fetion_sip_set_type(sip, SIP_REGISTER);
 
-	sip_header *cheader = sip_header_create("CN", cnouce);
-	sip_header *client = sip_header_create("CL",
+	sip_header	*cheader = sip_header_create("CN", cnouce);
+	sip_header	*client	 = sip_header_create("CL",
 			"type=\"pc\" ,version=\""PROTO_VERSION"\"");
-
+	
 	fetion_sip_add_header(sip, cheader);
 	fetion_sip_add_header(sip, client);
 
@@ -441,13 +738,13 @@ sipc_reg_action(gint sk, gpointer user_data)
 gboolean
 hybrid_push_cb(gint sk, gpointer user_data)
 {
-	gchar sipmsg[BUF_LENGTH];
-	gchar *pos;
-	gchar *h;
-	gchar *msg;
-	fetion_account *ac = (fetion_account*)user_data;
-	gint n;
-	guint len, data_len;
+	gchar				 sipmsg[BUF_LENGTH];
+	gchar				*pos;
+	gchar				*h;
+	gchar				*msg;
+	fetion_account		*ac = (fetion_account*)user_data;
+	gint				 n;
+	guint				 len, data_len;
 
 	if ((n = recv(sk, sipmsg, sizeof(sipmsg), 0)) == -1) {
 		hybrid_account_error_reason(ac->account, "connection terminated");
@@ -517,9 +814,9 @@ static gint
 sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 		fetion_transaction *trans)
 {
-	gint code;
-	gint length;
-	gchar *pos;
+	gint		 code;
+	gint		 length;
+	gchar		*pos;
 
 	code = fetion_sip_get_code(sipmsg);
 
@@ -556,15 +853,33 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 		/* start scribe the pushed msg */
 		fetion_buddy_scribe(ac);
 
-	} else {
-		hybrid_debug_error("fetion", "sipc authentication error.");
+	} else if (420 == code || 421 == code) {
+
+		if (HYBRID_ERROR == parse_sipc_verification(ac, sipmsg)) {
+			hybrid_account_error_reason(ac->account,
+										_("Fetion Protocol ERROR."));
+			return FALSE;
+		}
+
+		hybrid_debug_error("fetion", "sipc authentication need Verification.");
+		
+		verify_data.sipc_conn = ac->sk;
+		verify_data.type	  = VERIFY_TYPE_SIP;
+
+		hybrid_proxy_connect(NAV_SERVER, 80, pic_download_cb, ac);
+	
 		g_free(ac->buffer);
 		ac->buffer = NULL;
 
-		return FALSE;
+		return HYBRID_OK;
+	} else {
+		g_free(ac->buffer);
+		ac->buffer = NULL;
+
+		return HYBRID_ERROR;
 	}
 
-	return 0;
+	return HYBRID_ERROR;
 }
 
 /**
@@ -575,14 +890,14 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
 static gint
 sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 {
-	gchar *sipmsg;
-	gchar *body;
-	sip_header *aheader;
-	sip_header *akheader;
-	sip_header *ackheader;
-	fetion_transaction *trans;
+	gchar				*sipmsg;
+	gchar				*body;
+	sip_header			*aheader;
+	sip_header			*akheader;
+	sip_header			*ackheader;
+	fetion_transaction	*trans;
+	fetion_sip			*sip = ac->sip;
 
-	fetion_sip *sip = ac->sip;
 	ac->sk = sk;
 
 	hybrid_debug_info("fetion", "sipc authencation action");
@@ -594,7 +909,7 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 
 	fetion_sip_set_type(sip, SIP_REGISTER);
 
-	aheader = sip_authentication_header_create(response);
+	aheader	 = sip_authentication_header_create(response);
 	akheader = sip_header_create("AK", "ak-value");
 
 	trans = transaction_create();
@@ -612,10 +927,9 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 										  ac->verification->guid);
 		fetion_sip_add_header(sip , ackheader);
 	}
-	//fetion_verification_free(user->verification);
-	//user->verification = NULL;
+	fetion_verification_destroy(ac->verification);
+	ac->verification = NULL;
 	
-
 	sipmsg = fetion_sip_to_string(sip, body);
 
 	g_free(body);
@@ -631,9 +945,6 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
 		return HYBRID_ERROR; 
 	}
 	g_free(sipmsg);
-
-	/* now we start to handle the pushed messages */
-	ac->source = hybrid_event_add(sk, HYBRID_EVENT_READ, hybrid_push_cb, ac);
 
 	return 0;
 }
@@ -652,10 +963,10 @@ static gchar*
 hash_password_v1(const guchar *b0, gint b0len, const guchar *password,
 		gint psdlen) 
 {
-	guchar tmp[20];
-	gchar *res;
-	SHA_CTX ctx;
-	guchar *dst = (guchar*)g_malloc0(b0len + psdlen + 1);
+	guchar		 tmp[20];
+	gchar		*res;
+	SHA_CTX		 ctx;
+	guchar		*dst = (guchar*)g_malloc0(b0len + psdlen + 1);
 
 	memset(tmp, 0, sizeof(tmp));
 	memcpy(dst, b0, b0len);
@@ -682,12 +993,12 @@ hash_password_v1(const guchar *b0, gint b0len, const guchar *password,
 static gchar*
 hash_password_v2(const gchar *userid, const gchar *passwordhex)
 {
-	gint id = atoi(userid);
-	gchar *res;
-	guchar *bid = (guchar*)(&id);
-	guchar ubid[4];
-	gint bpsd_len;
-	guchar *bpsd = strtohex(passwordhex , &bpsd_len);
+	gint		 id	  = atoi(userid);
+	gchar		*res;
+	guchar		*bid  = (guchar*)(&id);
+	guchar		 ubid[4];
+	gint		 bpsd_len;
+	guchar		*bpsd = strtohex(passwordhex , &bpsd_len);
 
 	memcpy(ubid , bid , 4);
 
@@ -714,10 +1025,10 @@ hash_password_v2(const gchar *userid, const gchar *passwordhex)
 static gchar*
 hash_password_v4(const gchar *userid, const gchar *password)
 {
-	const gchar *domain = "fetion.com.cn:";
-	gchar *res, *dst;
-	guchar *udomain = (guchar*)g_malloc0(strlen(domain));
-	guchar *upassword = (guchar*)g_malloc0(strlen(password));
+	const gchar *domain	   = "fetion.com.cn:";
+	gchar		*res, *dst;
+	guchar		*udomain   = (guchar*)g_malloc0(strlen(domain));
+	guchar		*upassword = (guchar*)g_malloc0(strlen(password));
 
 	memcpy(udomain, (guchar*)domain, strlen(domain));
 	memcpy(upassword, (guchar*)password, strlen(password));
@@ -747,10 +1058,10 @@ hash_password_v4(const gchar *userid, const gchar *password)
 static guchar*
 strtohex(const gchar *in, gint *len)
 {
-	guchar *out = (guchar*)g_malloc0(strlen(in)/2 );
-	gint i = 0, j = 0, k = 0, length = 0;
-	gchar tmp[3] = { 0, };
-	gint inlength;
+	guchar		*out = (guchar*)g_malloc0(strlen(in)/2 );
+	gint		 i	 = 0, j = 0, k = 0, length = 0;
+	gchar tmp[3]	 = { 0, };
+	gint		 inlength;
 	inlength = (gint)strlen(in);
 
 	while (i < inlength) {
@@ -783,9 +1094,9 @@ strtohex(const gchar *in, gint *len)
 static gchar*
 hextostr(const guchar *in, gint len) 
 {
-	gchar *res = (gchar*)g_malloc0(len * 2 + 1);
-	gint reslength;
-	gint i = 0;
+	gchar		*res = (gchar*)g_malloc0(len * 2 + 1);
+	gint		 reslength;
+	gint		 i	 = 0;
 
 	while (i < len) {
 		sprintf(res + i * 2, "%02x" , in[i]);
@@ -818,10 +1129,10 @@ hextostr(const guchar *in, gint len)
 static gchar*
 generate_configuration_body(fetion_account *ac)
 {
-	xmlnode *root;
-	xmlnode *node;
+	xmlnode		*root;
+	xmlnode		*node;
 	gchar root_node[] = "<config></config>";
-	gchar *res;
+	gchar		*res;
 
 	g_return_val_if_fail(ac != NULL, NULL);
 
@@ -865,11 +1176,11 @@ generate_configuration_body(fetion_account *ac)
 static gint
 parse_configuration(fetion_account *ac, const gchar *cfg)
 {
-	xmlnode *node;
-	xmlnode *root;
-	gchar *value;
-	gchar *version;
-	gchar *pos, *pos1;
+	xmlnode		*node;
+	xmlnode		*root;
+	gchar		*value;
+	gchar		*version;
+	gchar		*pos, *pos1;
 
 	g_return_val_if_fail(cfg != NULL, 0);
 
@@ -969,8 +1280,8 @@ static gint
 parse_sipc_reg_response(const gchar *reg_response, gchar **nonce, gchar **key)
 {
 	gchar nonce_flag[] = "nonce=\"";
-	gchar key_flag[] = "key=\"";
-	gchar *pos, *cur;
+	gchar key_flag[]   = "key=\"";
+	gchar		*pos, *cur;
 
 	g_return_val_if_fail(reg_response != NULL, HYBRID_ERROR);
 
@@ -1016,17 +1327,16 @@ parse_sipc_error:
 static gchar*
 generate_aes_key()
 {
-	return g_strdup_printf(
-			"%04X%04X%04X%04X%04X%04X%04X%04X"
-			"%04X%04X%04X%04X%04X%04X%04X%04X", 
-			rand() & 0xFFFF, rand() & 0xFFFF, 
-			rand() & 0xFFFF, rand() & 0xFFFF,
-			rand() & 0xFFFF, rand() & 0xFFFF,
-			rand() & 0xFFFF, rand() & 0xFFFF,
-			rand() & 0xFFFF, rand() & 0xFFFF, 
-			rand() & 0xFFFF, rand() & 0xFFFF,
-			rand() & 0xFFFF, rand() & 0xFFFF,
-			rand() & 0xFFFF, rand() & 0xFFFF);
+	return g_strdup_printf("%04X%04X%04X%04X%04X%04X%04X%04X"
+						   "%04X%04X%04X%04X%04X%04X%04X%04X", 
+						   rand() & 0xFFFF, rand() & 0xFFFF, 
+						   rand() & 0xFFFF, rand() & 0xFFFF,
+						   rand() & 0xFFFF, rand() & 0xFFFF,
+						   rand() & 0xFFFF, rand() & 0xFFFF,
+						   rand() & 0xFFFF, rand() & 0xFFFF, 
+						   rand() & 0xFFFF, rand() & 0xFFFF,
+						   rand() & 0xFFFF, rand() & 0xFFFF,
+						   rand() & 0xFFFF, rand() & 0xFFFF);
 }
 
 /**
@@ -1035,12 +1345,11 @@ generate_aes_key()
 static gchar*
 generate_cnouce()
 {
-	return g_strdup_printf(
-			"%04X%04X%04X%04X%04X%04X%04X%04X", 
-			rand() & 0xFFFF, rand() & 0xFFFF, 
-			rand() & 0xFFFF, rand() & 0xFFFF,
-			rand() & 0xFFFF, rand() & 0xFFFF,
-			rand() & 0xFFFF, rand() & 0xFFFF);
+	return g_strdup_printf("%04X%04X%04X%04X%04X%04X%04X%04X", 
+						   rand() & 0xFFFF, rand() & 0xFFFF, 
+						   rand() & 0xFFFF, rand() & 0xFFFF,
+						   rand() & 0xFFFF, rand() & 0xFFFF,
+						   rand() & 0xFFFF, rand() & 0xFFFF);
 }
 
 
@@ -1048,15 +1357,15 @@ static gchar*
 generate_response(const gchar *nouce, const gchar *userid,
 		const gchar *password, const gchar *publickey, const gchar *aeskey_raw)
 {
-	gchar *psdhex = hash_password_v4(userid, password);
-	gchar modulus[257];
-	gchar exponent[7];
-	gint ret, flen;
-	BIGNUM *bnn, *bne;
-	guchar *out;
-	guchar *nonce, *aeskey, *psd, *res;
-	gint nonce_len, aeskey_len, psd_len;
-	RSA *r = RSA_new();
+	gchar		*psdhex = hash_password_v4(userid, password);
+	gchar		 modulus[257];
+	gchar		 exponent[7];
+	gint		 ret, flen;
+	BIGNUM		*bnn, *bne;
+	guchar		*out;
+	guchar		*nonce, *aeskey, *psd, *res;
+	gint		 nonce_len, aeskey_len, psd_len;
+	RSA			*r		= RSA_new();
 
 	memset(modulus, 0, sizeof(modulus));
 	memset(exponent, 0, sizeof(exponent));
@@ -1115,11 +1424,11 @@ generate_response(const gchar *nouce, const gchar *userid,
 static gchar* 
 generate_auth_body(fetion_account *ac)
 {
-	gchar root_raw[] = "<args></args>";
-	xmlnode *node;
-	xmlnode *subnode;
-	gchar *res;
-	xmlnode *root = xmlnode_root(root_raw, strlen(root_raw));
+	gchar root_raw[]  = "<args></args>";
+	xmlnode		*node;
+	xmlnode		*subnode;
+	gchar		*res;
+	xmlnode		*root = xmlnode_root(root_raw, strlen(root_raw));
 
 	node = xmlnode_new_child(root, "device");
 	xmlnode_new_prop(node, "machine-code", "001676C0E351");
@@ -1165,12 +1474,12 @@ generate_auth_body(fetion_account *ac)
 static void
 get_contact_list(fetion_account *ac, xmlnode *contact_node)
 {
-	gchar *temp;
-	gchar *temp1;
-	xmlnode *node;
-	fetion_group *group;
-	fetion_buddy *buddy;
-	gboolean has_ungroup = FALSE;
+	gchar				*temp;
+	gchar				*temp1;
+	xmlnode				*node;
+	fetion_group		*group;
+	fetion_buddy		*buddy;
+	gboolean			 has_ungroup = FALSE;
 
 	g_return_if_fail(ac != NULL);
 	g_return_if_fail(contact_node != NULL);
@@ -1180,10 +1489,10 @@ get_contact_list(fetion_account *ac, xmlnode *contact_node)
 	node = xmlnode_child(node);
 
 	while (node) {
-		temp = xmlnode_prop(node, "name");
+		temp  = xmlnode_prop(node, "name");
 		temp1 = xmlnode_prop(node, "id");
 
-		group = fetion_group_create(atoi(temp1), temp);
+		group	   = fetion_group_create(atoi(temp1), temp);
 		ac->groups = g_slist_append(ac->groups, group);
 
 		g_free(temp);
@@ -1197,12 +1506,12 @@ get_contact_list(fetion_account *ac, xmlnode *contact_node)
 	node = xmlnode_child(node);
 
 	while (node) {
-		buddy = fetion_buddy_create();
-		buddy->userid = xmlnode_prop(node, "i");
-		buddy->sipuri = xmlnode_prop(node, "u");
+		buddy			 = fetion_buddy_create();
+		buddy->userid	 = xmlnode_prop(node, "i");
+		buddy->sipuri	 = xmlnode_prop(node, "u");
 		buddy->localname = xmlnode_prop(node, "n");
-		buddy->groups = xmlnode_prop(node, "l");
-		buddy->sid = get_sid_from_sipuri(buddy->sipuri);
+		buddy->groups	 = xmlnode_prop(node, "l");
+		buddy->sid		 = get_sid_from_sipuri(buddy->sipuri);
 
 		if (xmlnode_has_prop(node, "r")) {
 
@@ -1240,17 +1549,17 @@ get_contact_list(fetion_account *ac, xmlnode *contact_node)
 static void
 get_personal(fetion_account *ac, xmlnode *node)
 {
-	gchar *pos;
-	gchar *temp;
-	gchar *stop;
+	gchar		*pos;
+	gchar		*temp;
+	gchar		*stop;
 	
 	g_return_if_fail(ac != NULL);
 	g_return_if_fail(node != NULL);
 
-	ac->nickname = xmlnode_prop(node, "nickname");
-	ac->mood_phrase = xmlnode_prop(node, "impresa");
+	ac->nickname	 = xmlnode_prop(node, "nickname");
+	ac->mood_phrase	 = xmlnode_prop(node, "impresa");
 	ac->portrait_crc = xmlnode_prop(node, "portrait-crc");
-	temp = xmlnode_prop(node, "carrier-region");
+	temp			 = xmlnode_prop(node, "carrier-region");
 
 	/* region */
 	if (temp) {
@@ -1274,9 +1583,9 @@ get_personal(fetion_account *ac, xmlnode *node)
 static void
 parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 {
-	xmlnode *root;
-	xmlnode *node;
-	gchar *version;
+	xmlnode		*root;
+	xmlnode		*node;
+	gchar		*version;
 
 	g_return_if_fail(ac != NULL);
 	g_return_if_fail(body != NULL);
@@ -1285,13 +1594,13 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 	root = xmlnode_root(body, len);
 
 	/* login info */
-	node = xmlnode_find(root, "client");
-	ac->last_login_ip = xmlnode_prop(root, "last-login-ip");
-	ac->public_ip = xmlnode_prop(root, "public-ip");
+	node				= xmlnode_find(root, "client");
+	ac->last_login_ip	= xmlnode_prop(root, "last-login-ip");
+	ac->public_ip		= xmlnode_prop(root, "public-ip");
 	ac->last_login_time = xmlnode_prop(root, "last-login-time");
 
 	/* personal info */
-	node = xmlnode_find(root, "personal");
+	node	= xmlnode_find(root, "personal");
 	version = xmlnode_prop(node, "version");
 
 	if (g_strcmp0(version, ac->personal_version) == 0) {
@@ -1328,9 +1637,9 @@ parse_sipc_resp(fetion_account *ac, const gchar *body, gint len)
 
 
 	/* contact list version */
-	node = xmlnode_find(root, "contact-list");
+	node	= xmlnode_find(root, "contact-list");
 	version = xmlnode_prop(node, "version");
-
+	
 	if (g_strcmp0(version, ac->contact_list_version) == 0) { 
 		/* load from disk. */
 		g_free(version);

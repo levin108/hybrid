@@ -43,8 +43,9 @@ static HybridGroup *hybrid_blist_find_group_by_name(
 							HybridAccount *account, const gchar *name);
 static void hybrid_group_remove(HybridGroup *group);
 
-static GtkTreePath *current_choose_path = NULL;
-static HybridAccount *current_choose_account = NULL;
+static GtkTreePath		*current_choose_path	= NULL;
+static HybridAccount	*current_choose_account = NULL;
+
 
 HybridBlist*
 hybrid_blist_create()
@@ -58,15 +59,15 @@ static void
 editing_started_cb(GtkCellRenderer *renderer, GtkCellEditable *editable,
 		gchar *path_str, gpointer user_data)
 {
-	GtkTreeView *tree;
-	GtkTreeModel *model;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	HybridBuddy *buddy;
-	HybridGroup *group;
-	GtkEntry *entry;
-	gint depth;
-	const gchar *text;
+	GtkTreeView			*tree;
+	GtkTreeModel		*model;
+	GtkTreePath			*path;
+	GtkTreeIter			 iter;
+	HybridBuddy			*buddy;
+	HybridGroup			*group;
+	GtkEntry			*entry;
+	gint				 depth;
+	const gchar			*text;
 
 	tree  = GTK_TREE_VIEW(blist->treeview);
 	model = gtk_tree_view_get_model(tree);
@@ -113,16 +114,16 @@ static void
 edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 		gpointer user_data)
 {
-	GtkTreeView *tree;
-	GtkTreeModel *model;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	HybridBuddy *buddy;
-	HybridGroup *group;
-	HybridAccount *account;
-	HybridModule *module;
-	gchar *name;
-	gint depth;
+	GtkTreeView			*tree;
+	GtkTreeModel		*model;
+	GtkTreePath			*path;
+	GtkTreeIter			 iter;
+	HybridBuddy			*buddy;
+	HybridGroup			*group;
+	HybridAccount		*account;
+	HybridModule		*module;
+	gchar				*name;
+	gint				 depth;
 
 	tree  = GTK_TREE_VIEW(blist->treeview);
 	model = gtk_tree_view_get_model(tree);
@@ -189,8 +190,8 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 static void
 render_column(HybridBlist *blist)
 {
-	GtkTreeViewColumn *column;
-	GtkCellRenderer *renderer;
+	GtkTreeViewColumn	*column;
+	GtkCellRenderer		*renderer;
 
 	/* expander columns */
 	column = gtk_tree_view_column_new();
@@ -270,9 +271,9 @@ instant_message_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 static void
 buddy_information_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
-	HybridAccount *account = buddy->account;
-	HybridModule *proto = account->proto;
-	HybridInfo *info;
+	HybridAccount		*account = buddy->account;
+	HybridModule		*proto	 = account->proto;
+	HybridInfo			*info;
 
 	/* Call the get information callback in module space. */
 	if (proto->info->get_info) {
@@ -289,22 +290,21 @@ buddy_information_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 static void
 buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
-	const gchar *new_group_name;
-	HybridGroup *group;
-	HybridGroup *orig_group;
-	HybridAccount *account;
-	HybridModule *module;
+	const gchar			*new_group_name;
+	HybridGroup			*group;
+	HybridGroup			*orig_group;
+	HybridAccount		*account;
+	HybridModule		*module;
 		
-	GdkPixbuf *status_icon;
-	GdkPixbuf *proto_icon;
-	GdkPixbuf *buddy_icon;
-
-	GtkTreeView  *tree;
-	GtkTreeModel *model;
+	GdkPixbuf			*status_icon;
+	GdkPixbuf			*proto_icon;
+	GdkPixbuf			*buddy_icon;
+	GtkTreeView			*tree;
+	GtkTreeModel		*model;
 
 	account = buddy->account;
-	module = account->proto;
-
+	module	= account->proto;
+ 
 	new_group_name = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
 
 	if (!(group = hybrid_blist_find_group_by_name(account, new_group_name))) {
@@ -342,17 +342,17 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 		}
 
 		gtk_tree_store_set(GTK_TREE_STORE(model), &buddy->iter,
-				HYBRID_BLIST_BUDDY_ID, buddy->id,
-				HYBRID_BLIST_BUDDY_ICON, buddy_icon,
-				HYBRID_BLIST_STATUS_ICON, status_icon,
-				HYBRID_BLIST_BUDDY_NAME, buddy->name,
-				HYBRID_BLIST_OBJECT_COLUMN, buddy,
-				HYBRID_BLIST_BUDDY_STATE, buddy->state,
-				HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
-				HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-				HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
-				HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-				HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
+						   HYBRID_BLIST_BUDDY_ID, buddy->id,
+						   HYBRID_BLIST_BUDDY_ICON, buddy_icon,
+						   HYBRID_BLIST_STATUS_ICON, status_icon,
+						   HYBRID_BLIST_BUDDY_NAME, buddy->name,
+						   HYBRID_BLIST_OBJECT_COLUMN, buddy,
+						   HYBRID_BLIST_BUDDY_STATE, buddy->state,
+						   HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
+						   HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+						   HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
+						   HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+						   HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
 				-1);
 		/* 
 		 * Change the number of total buddies and online buddies
@@ -392,7 +392,6 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 		xmlnode_new_prop(buddy->cache_node, "crc", buddy->icon_crc);
 
 		hybrid_blist_cache_flush();
-
 	}
 }
 
@@ -402,8 +401,8 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 static void
 hybrid_buddy_remove(HybridBuddy *buddy)
 {
-	HybridAccount *account;
-	HybridModule *module;
+	HybridAccount		*account;
+	HybridModule		*module;
 
 	g_return_if_fail(buddy != NULL);
 
@@ -429,14 +428,14 @@ hybrid_buddy_remove(HybridBuddy *buddy)
 static void
 hybrid_group_remove(HybridGroup *group)
 {
-	HybridAccount *account;
-	HybridModule *proto;
+	HybridAccount		*account;
+	HybridModule		*proto;
 
 	g_return_if_fail(group != NULL);
 
 	/* Call the hook function to remove it in the protocol layer. */
 	account = group->account;
-	proto = account->proto;
+	proto	= account->proto;
 
 	if (proto->info->group_remove) {
 
@@ -465,9 +464,10 @@ remove_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 static void
 rename_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
-	GtkTreeView *tree;
-	GtkTreeModel *model;
-	GtkTreePath *path;
+	GtkTreeView			*tree;
+	GtkTreeModel		*model;
+	GtkTreePath			*path;
+	
 
 	tree = GTK_TREE_VIEW(blist->treeview);
 	model = gtk_tree_view_get_model(tree);
@@ -483,9 +483,9 @@ rename_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 static void
 rename_group_menu_cb(GtkWidget *widget, HybridGroup *group)
 {
-	GtkTreeView *tree;
-	GtkTreeModel *model;
-	GtkTreePath *path;
+	GtkTreeView			*tree;
+	GtkTreeModel		*model;
+	GtkTreePath			*path;
 
 	if (!hybrid_blist_get_group_renamable(group)) {
 		/* This group can't be renamed. */
@@ -518,17 +518,18 @@ remove_group_menu_cb(GtkWidget *widget, HybridGroup *group)
 static GtkWidget*
 create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 {
-	GtkWidget *menu;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkWidget *group_menu;
-	GtkWidget *child_menu;
-	HybridAccount *account;
-	HybridBuddy *buddy;
-	HybridGroup *group;
+	GtkWidget			*menu;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	GtkWidget			*group_menu;
+	GtkWidget			*child_menu;
+	HybridAccount		*account;
+	HybridBuddy			*buddy;
+	HybridGroup			*group;
+	
 
-	GHashTableIter hash_iter;
-	gpointer key;
+	GHashTableIter		hash_iter;
+	gpointer			key;
 
 	g_return_val_if_fail(treeview != NULL, NULL);
 	g_return_val_if_fail(path != NULL, NULL);
@@ -575,11 +576,11 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
 static GtkWidget*
 create_group_menu(GtkWidget *treeview, GtkTreePath *path)
 {
-	GtkWidget *menu;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	HybridAccount *account;
-	HybridGroup *group;
+	GtkWidget			*menu;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	HybridAccount		*account;
+	HybridGroup			*group;
 
 	g_return_val_if_fail(treeview != NULL, NULL);
 	g_return_val_if_fail(path != NULL, NULL);
@@ -625,22 +626,22 @@ account_changed(HybridAccount *account)
 static gboolean
 button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-	GtkWidget *menu;
-	GtkTreeModel *model;
-	GtkTreePath *path;
-	GtkTreeSelection *selection;
-	gint depth;
+	GtkWidget			*menu;
+	GtkTreeModel		*model;
+	GtkTreePath			*path;
+	GtkTreeSelection	*selection;
+	gint				 depth;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 
 	/* left button clicked, change selection signaled. */
 	if (event->button == 1) {
 
-		GtkTreeIter iter;
-		HybridBuddy *buddy;
-		HybridGroup *group;
-		HybridAccount *account;
-		gboolean changed = FALSE;
+		GtkTreeIter		 iter;
+		HybridBuddy		*buddy;
+		HybridGroup		*group;
+		HybridAccount	*account;
+		gboolean		 changed = FALSE;
 
 		gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
 				(gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
@@ -756,10 +757,10 @@ static void
 row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 		GtkTreeViewColumn *col,	gpointer user_data)
 {
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	HybridBuddy *buddy;
-	gint depth;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	HybridBuddy			*buddy;
+	gint				 depth;
 
 	model = gtk_tree_view_get_model(treeview);
 	gtk_tree_model_get_iter(model, &iter, path);
@@ -786,17 +787,18 @@ row_activated_cb(GtkTreeView *treeview, GtkTreePath *path,
 static gboolean
 select_row_cb(GtkWidget *widget, GtkMovementStep arg1, gint arg2, gpointer user_data)
 {
-	GtkTreeSelection *selection;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkTreeIter parent;
-	GtkTreePath *path;
-	HybridBuddy *buddy;
-	HybridGroup *group;
-	HybridAccount *account;
+	GtkTreeSelection	*selection;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	GtkTreeIter			 parent;
+	GtkTreePath			*path;
+	HybridBuddy			*buddy;
+	HybridGroup			*group;
+	HybridAccount		*account;
 
-	gint depth;
-	gint n;
+	gint		depth;
+	gint		n;
+	
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 
@@ -932,13 +934,13 @@ path_found:
 static gboolean
 init_tooltip(HybridTooltipData *data)
 {
-	GtkTreePath *path;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	HybridAccount *account;
-	HybridModule *module;
-	HybridBuddy *buddy;
-	gint depth;
+	GtkTreePath			*path;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridBuddy			*buddy;
+	gint				 depth;
 
 	if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(data->widget),
 	     hybrid_tooltip.rect.x, hybrid_tooltip.rect.y,
@@ -995,18 +997,18 @@ hybrid_blist_init()
 	blist = hybrid_blist_create();
 
 	blist->treemodel = gtk_tree_store_new(HYBRID_BLIST_COLUMNS,
-			G_TYPE_STRING,
-			GDK_TYPE_PIXBUF,
-			G_TYPE_STRING,
-			GDK_TYPE_PIXBUF,
-			GDK_TYPE_PIXBUF,
-			G_TYPE_INT,
-			G_TYPE_POINTER,
-			G_TYPE_BOOLEAN,
-			G_TYPE_BOOLEAN,
-			G_TYPE_BOOLEAN,
-			G_TYPE_BOOLEAN,
-			G_TYPE_BOOLEAN);
+										  G_TYPE_STRING,
+										  GDK_TYPE_PIXBUF,
+										  G_TYPE_STRING,
+										  GDK_TYPE_PIXBUF,
+										  GDK_TYPE_PIXBUF,
+										  G_TYPE_INT,
+										  G_TYPE_POINTER,
+										  G_TYPE_BOOLEAN,
+										  G_TYPE_BOOLEAN,
+										  G_TYPE_BOOLEAN,
+										  G_TYPE_BOOLEAN,
+										  G_TYPE_BOOLEAN);
 
 	blist->treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(
 				blist->treemodel));
@@ -1037,9 +1039,9 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 {
 	g_return_val_if_fail(name != NULL && blist != NULL, NULL);
 
-	gchar *temp;
+	gchar		*temp;
 	HybridGroup *group;
-	GdkPixbuf *proto_icon;
+	GdkPixbuf	*proto_icon;
 
 	g_return_val_if_fail(ac != NULL, NULL);
 	g_return_val_if_fail(id != NULL, NULL);
@@ -1097,9 +1099,9 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 void
 hybrid_blist_remove_group(HybridGroup *group)
 {
-	GtkTreeView *treeview;
-	GtkTreeModel *model;
-	HybridAccount *account;
+	GtkTreeView			*treeview;
+	GtkTreeModel		*model;
+	HybridAccount		*account;
 
 	g_return_if_fail(group != NULL);
 
@@ -1138,11 +1140,11 @@ HybridBuddy*
 hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 		const gchar *name)
 {
-	GdkPixbuf *status_icon;
-	GdkPixbuf *proto_icon;
-	GdkPixbuf *buddy_icon;
-	HybridBuddy *buddy;
-	GtkTreeModel *treemodel;
+	GdkPixbuf			*status_icon;
+	GdkPixbuf			*proto_icon;
+	GdkPixbuf			*buddy_icon;
+	HybridBuddy			*buddy;
+	GtkTreeModel		*treemodel;
 
 	g_return_val_if_fail(blist != NULL, NULL);
 	g_return_val_if_fail(parent != NULL, NULL);
@@ -1184,24 +1186,24 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 	gtk_tree_store_append(GTK_TREE_STORE(treemodel), &buddy->iter, &parent->iter);
 
 	gtk_tree_store_set(GTK_TREE_STORE(treemodel), &buddy->iter,
-			HYBRID_BLIST_BUDDY_ID, id,
-			HYBRID_BLIST_BUDDY_ICON, buddy_icon,
-			HYBRID_BLIST_STATUS_ICON, status_icon,
-			//HYBRID_BLIST_PROTO_ICON, proto_icon,
-			HYBRID_BLIST_BUDDY_NAME, name,
-			HYBRID_BLIST_OBJECT_COLUMN, buddy,
-			HYBRID_BLIST_BUDDY_STATE, HYBRID_STATE_OFFLINE,
-			HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
-			HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
-			HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
-			HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
-			HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
-			-1);
+					   HYBRID_BLIST_BUDDY_ID, id,
+					   HYBRID_BLIST_BUDDY_ICON, buddy_icon,
+					   HYBRID_BLIST_STATUS_ICON, status_icon,
+					   //HYBRID_BLIST_PROTO_ICON, proto_icon,
+					   HYBRID_BLIST_BUDDY_NAME, name,
+					   HYBRID_BLIST_OBJECT_COLUMN, buddy,
+					   HYBRID_BLIST_BUDDY_STATE, HYBRID_STATE_OFFLINE,
+					   HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE, FALSE,
+					   HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE, FALSE,
+					   HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE, TRUE,
+					   HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
+					   HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
+					   -1);
 
-	buddy->id = g_strdup(id);
-	buddy->name = g_strdup(name);
+	buddy->id	   = g_strdup(id);
+	buddy->name	   = g_strdup(name);
 	buddy->account = ac;
-	buddy->parent = parent;
+	buddy->parent  = parent;
 
 	g_hash_table_insert(ac->buddy_list, buddy->id, buddy);
 
@@ -1225,14 +1227,14 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 void
 hybrid_blist_remove_buddy(HybridBuddy *buddy)
 {
-	HybridAccount *account;
-	HybridGroup *group;
-	GtkTreeModel *model;
-
+	HybridAccount		*account;
+	HybridGroup			*group;
+	GtkTreeModel		*model;
+	
 	g_return_if_fail(buddy != NULL);
 
 	account = buddy->account;
-	model  = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
+	model	= gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
 
 	/* Remove the buddy from the blist's TreeView. */
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &buddy->iter);
@@ -1308,9 +1310,9 @@ hybrid_blist_buddy_destroy(HybridBuddy *buddy)
 static void
 hybrid_blist_set_name_field(HybridBuddy *buddy)
 {
-	gchar *text;
-	gchar *mood;
-	gchar *tmp;
+	gchar		*text;
+	gchar		*mood;
+	gchar		*tmp;
 	const gchar *name;
 
 	g_return_if_fail(buddy != NULL);
@@ -1397,10 +1399,10 @@ hybrid_blist_set_group_name(HybridGroup *group, const gchar *name)
 static void
 hybrid_blist_set_state_field(HybridBuddy *buddy)
 {
-	GdkPixbuf *pixbuf;
-	GError *err = NULL;
-	guchar *icon_data;
-	gsize icon_data_length;
+	GdkPixbuf	*pixbuf;
+	GError		*err = NULL;
+	guchar		*icon_data;
+	gsize		 icon_data_length;
 
 	g_return_if_fail(buddy != NULL);
 
@@ -1525,9 +1527,9 @@ hybrid_blist_set_buddy_icon(HybridBuddy *buddy, const guchar *icon_data,
 
 	g_free(buddy->icon_crc);
 	g_free(buddy->icon_data);
-	buddy->icon_data = NULL;
+	buddy->icon_data		= NULL;
 	buddy->icon_data_length = len;
-	buddy->icon_crc = g_strdup(crc);
+	buddy->icon_crc			= g_strdup(crc);
 
 	if (icon_data != NULL) {
 		buddy->icon_data = g_memdup(icon_data, len);
@@ -1541,10 +1543,10 @@ hybrid_blist_set_buddy_icon(HybridBuddy *buddy, const guchar *icon_data,
 void
 hybrid_blist_set_buddy_state(HybridBuddy *buddy, gint state)
 {
-	HybridGroup *group;
-	GtkTreeModel *model;
-	gchar *group_name;
-	gint online;
+	HybridGroup			*group;
+	GtkTreeModel		*model;
+	gchar				*group_name;
+	gint				 online;
 
 	g_return_if_fail(buddy != NULL);
 
@@ -1597,9 +1599,9 @@ hybrid_blist_set_buddy_status(HybridBuddy *buddy, gboolean authorized)
 void
 hybrid_blist_set_buddy_status_priv(HybridBuddy *buddy, gboolean authorized)
 {
-	GdkPixbuf *pixbuf;
-	GtkTreeModel *model;
-	gint status;
+	GdkPixbuf			*pixbuf;
+	GtkTreeModel		*model;
+	gint				 status;
 	
 	g_return_if_fail(buddy != NULL);
 
@@ -1660,9 +1662,9 @@ hybrid_blist_find_group(HybridAccount *account, const gchar *id)
 static HybridGroup*
 hybrid_blist_find_group_by_name(HybridAccount *account, const gchar *name)
 {
-	GHashTableIter hash_iter;
-	gpointer key;
-	HybridGroup *group;
+	GHashTableIter		 hash_iter;
+	gpointer			 key;
+	HybridGroup			*group;
 
 	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(name != NULL, NULL);
@@ -1697,12 +1699,11 @@ hybrid_blist_find_buddy(HybridAccount *account, const gchar *id)
 void
 hybrid_blist_select_first_item(HybridAccount *account)
 {
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-//	GtkTreeIter iter;
-	GHashTableIter hash_iter;
-	HybridGroup *group;
-	gpointer key;
+	GtkTreeModel		*model;
+	GtkTreeSelection	*selection;
+	GHashTableIter		 hash_iter;
+	HybridGroup			*group;
+	gpointer			 key;
 
 	g_return_if_fail(account != NULL);
 
@@ -1736,17 +1737,17 @@ hybrid_blist_select_first_item(HybridAccount *account)
 static void 
 hybrid_blist_group_to_cache(HybridGroup *group)
 {
-	HybridAccount *ac;
-	HybridConfig *config;
-	HybridBlistCache *cache;
-	xmlnode *root;
-	xmlnode *node;
-	xmlnode *temp;
-	gchar *username;
-	gchar *protoname;
-	gchar *id;
-	gchar *name;
-	gchar *renamable;
+	HybridAccount		*ac;
+	HybridConfig		*config;
+	HybridBlistCache	*cache;
+	xmlnode				*root;
+	xmlnode				*node;
+	xmlnode				*temp;
+	gchar				*username;
+	gchar				*protoname;
+	gchar				*id;
+	gchar				*name;
+	gchar				*renamable;
 
 	g_return_if_fail(group != NULL);
 
@@ -1755,10 +1756,10 @@ hybrid_blist_group_to_cache(HybridGroup *group)
 		goto group_exist;
 	}
 
-	ac = group->account;
+	ac	   = group->account;
 	config = ac->config;
-	cache = config->blist_cache;
-	root = cache->root;
+	cache  = config->blist_cache;
+	root   = cache->root;
 
 	if (!(node = xmlnode_find(root, "accounts"))) {
 		hybrid_debug_error("blist", "can't find accounts node in blist cache");
@@ -1885,14 +1886,14 @@ group_exist:
 static void
 hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
 {
-	HybridAccount *ac;
-	HybridConfig *config;
-	HybridBlistCache *cache;
-	xmlnode *root;
-	xmlnode *node;
-	xmlnode *temp;
-	gchar *value;
-	gchar *id;
+	HybridAccount		*ac;
+	HybridConfig		*config;
+	HybridBlistCache	*cache;
+	xmlnode				*root;
+	xmlnode				*node;
+	xmlnode				*temp;
+	gchar				*value;
+	gchar				*id;
 
 	g_return_if_fail(buddy != NULL);
 
@@ -1901,10 +1902,10 @@ hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
 		goto buddy_exist;
 	}
 
-	ac = buddy->account;
+	ac	   = buddy->account;
 	config = ac->config;
-	cache = config->blist_cache;
-	root = cache->root;
+	cache  = config->blist_cache;
+	root   = cache->root;
 
 	if (!(node = buddy->parent->cache_node)) {
 		hybrid_debug_error("blist", 
@@ -2018,11 +2019,11 @@ buddy_exist:
 static void
 hybrid_blist_buddy_icon_save(HybridBuddy *buddy)
 {
-	gchar *name;
-	gchar *hashed_name;
-	HybridAccount *account;
-	HybridModule *module;
-	HybridConfig *config;
+	gchar				*name;
+	gchar				*hashed_name;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridConfig		*config;
 
 	g_return_if_fail(buddy != NULL);
 

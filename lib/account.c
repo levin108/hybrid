@@ -818,7 +818,9 @@ hybrid_account_close(HybridAccount *account)
 	/*
 	 * Remove the keep alive event source.
 	 */
-	g_source_remove(account->keep_alive_source);
+	if (account->keep_alive_source > 0) {
+		g_source_remove(account->keep_alive_source);
+	}
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
 
