@@ -21,6 +21,7 @@
 #include "util.h"
 #include "notify.h"
 #include "gtkutils.h"
+#include "pref.h"
 
 #ifdef USE_LIBNOTIFY
 #include <libnotify/notify.h>
@@ -192,6 +193,10 @@ hybrid_notify_popup(GdkPixbuf *pixbuf, const gchar *title,
 		const gchar *summary)
 {
 #ifdef USE_LIBNOTIFY
+	if (hybrid_pref_get_boolean("close_notify")) {
+		return;
+	}
+	
 	if (!notification) {
 	#ifdef LIBNOTIFY_OLD
 		notification = notify_notification_new(title, summary, NULL, NULL);

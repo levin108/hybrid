@@ -106,6 +106,28 @@ preference_cb(GtkWidget *widget, gpointer user_data)
 }
 
 /**
+ * Callback function for the message notify activate event.
+ */
+static void
+notify_cb(GtkWidget *widget, gpointer user_data)
+{
+	gboolean toggled;
+
+	toggled = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+
+	if (toggled) {
+
+		hybrid_pref_set_boolean("close_notify", TRUE);
+
+	} else {
+
+		hybrid_pref_set_boolean("close_notify", FALSE);
+	}
+
+	hybrid_pref_save();	
+}
+
+/**
  * Callback function for the mute menu's activate event.
  */
 static void
@@ -206,6 +228,18 @@ status_icon_popup_cb(GtkWidget *widget, guint button, guint activate_time,
 	
 	g_signal_connect(menu_item, "toggled",
 	                 G_CALLBACK(mute_cb), NULL);
+
+	/* notify menu */
+	menu_item = gtk_check_menu_item_new_with_label(_("Close Notify"));
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+
+	if (hybrid_pref_get_boolean("close_notify")) {
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), TRUE);
+	}
+
+	g_signal_connect(menu_item, "toggled",
+					 G_CALLBACK(notify_cb), NULL);
 
 	hybrid_create_menu_seperator(menu);
 

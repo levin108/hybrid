@@ -645,8 +645,10 @@ create_account_child_menus(HybridAccount *account)
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(account_menu), menu_shell);
 
-	menu_item = hybrid_create_menu(menu_shell, _("Change State"), NULL,
-						TRUE, NULL, NULL);
+	menu_item = hybrid_create_menu(menu_shell,
+								   _("Change State"), NULL,
+								   HYBRID_IS_CONNECTED(account) ? TRUE: FALSE,
+								   NULL, NULL);
 
 	/* change state child menus. */
 
@@ -685,8 +687,9 @@ create_account_child_menus(HybridAccount *account)
 
 			action = pos->data;
 
-			hybrid_create_menu(menu_shell, action->text, NULL, TRUE,
-					G_CALLBACK(action_cb), action);
+			hybrid_create_menu(menu_shell, action->text, NULL,
+							   HYBRID_IS_CONNECTED(account) ? TRUE: FALSE,
+							   G_CALLBACK(action_cb), action);
 		}
 	}
 
