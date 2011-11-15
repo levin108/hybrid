@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *   Copyright (C) 2011 by levin                                           *
  *   levin108@gmail.com                                                    *
@@ -26,6 +25,7 @@
 #include "network.h"
 #include "eventloop.h"
 #include "connect.h"
+#include "config.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -33,6 +33,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+
+static gint		ssl_verify_certs(SSL *ssl);
 
 /**
  * set the socket to be nonblock
@@ -77,9 +79,9 @@ addr_init(const gchar *hostname, gint port, struct sockaddr *addr)
 	}
 
 	memset(&addr, 0, sizeof(struct sockaddr_in));
-	addr_in->sin_family = AF_INET;
+	addr_in->sin_family		 = AF_INET;
 	addr_in->sin_addr.s_addr = inet_addr(host_ip);
-	addr_in->sin_port = htons(port);
+	addr_in->sin_port		 = htons(port);
 
 	return HYBRID_OK;
 }
@@ -88,9 +90,9 @@ HybridConnection*
 hybrid_proxy_connect(const gchar *hostname, gint port, connect_callback func,
 		gpointer user_data)
 {
-	gint sk;
-	struct sockaddr addr;
-	HybridConnection *conn;
+	gint				 sk;
+	struct sockaddr		 addr;
+	HybridConnection	*conn;
 
 	g_return_val_if_fail(port != 0, NULL);
 	g_return_val_if_fail(hostname != NULL, NULL);
@@ -124,22 +126,20 @@ hybrid_proxy_connect(const gchar *hostname, gint port, connect_callback func,
 		if (errno != EINPROGRESS) {
 
 			hybrid_debug_error("connect", "connect to \'%s:%d\':%s", hostname,
-					port, strerror(errno));
+							   port, strerror(errno));
 			hybrid_connection_destroy(conn);
-
 			return NULL;
 		}
 
 		hybrid_debug_info("connect", "connect in progress");
 
 		hybrid_event_add(sk, HYBRID_EVENT_WRITE, func, user_data);
-
 	} else {
 		/* connection establish imediately */
 		func(sk, user_data);
 	}
 
-	conn->sk = sk;
+	conn->sk   = sk;
 	conn->host = g_strdup(hostname);
 	conn->port = port;
 	
@@ -152,47 +152,133 @@ hybrid_proxy_connect(const gchar *hostname, gint port, connect_callback func,
 static gboolean
 ssl_connect_cb(gint sk, gpointer user_data)
 {
-	gint l;
-	gboolean res;
+	gint				 l;
+	gboolean			 res;
 	HybridSslConnection *ssl_conn = (HybridSslConnection*)user_data;
 
 	if (!SSL_set_fd(ssl_conn->ssl, sk)) {
 
 		hybrid_debug_error("ssl", "add ssl to tcp socket:%s", 
-				ERR_reason_error_string(ERR_get_error()));
+						   ERR_reason_error_string(ERR_get_error()));
 		return FALSE;
 	}
 
 	ssl_conn->sk = sk;
-
 	SSL_set_connect_state(ssl_conn->ssl);
 
-	for ( ;; ) {
-		l = SSL_connect(ssl_conn->ssl);
+ ssl_reconnect:
+	l = SSL_connect(ssl_conn->ssl);
 
-		switch (SSL_get_error(ssl_conn->ssl, l)) { 
-			case SSL_ERROR_NONE:
-				goto ssl_ok;
-			case SSL_ERROR_WANT_WRITE:
-			case SSL_ERROR_WANT_READ:
-				continue;
-			case SSL_ERROR_SYSCALL:
-			case SSL_ERROR_WANT_X509_LOOKUP:
-			case SSL_ERROR_ZERO_RETURN:
-			case SSL_ERROR_SSL:
-			default:
-				ERR_print_errors_fp(stderr);
-				goto ssl_err;
-				break;
-		}
-
+	switch (SSL_get_error(ssl_conn->ssl, l)) { 
+	case SSL_ERROR_NONE:
+		goto ssl_ok;
+	case SSL_ERROR_WANT_WRITE:
+	case SSL_ERROR_WANT_READ:
+		usleep(100);
+		goto ssl_reconnect;
+	case SSL_ERROR_SYSCALL:
+	case SSL_ERROR_WANT_X509_LOOKUP:
+	case SSL_ERROR_ZERO_RETURN:
+	case SSL_ERROR_SSL:
+	default:
+		ERR_print_errors_fp(stderr);
+		goto ssl_err;
+		break;
 	}
-ssl_ok:
-	res = ssl_conn->conn_cb(ssl_conn, ssl_conn->conn_data);
 
+ssl_ok:
+	if (HYBRID_OK != ssl_verify_certs(ssl_conn->ssl)) {
+		return FALSE;
+	}
+
+	res = ssl_conn->conn_cb(ssl_conn, ssl_conn->conn_data);
 	return res;
+	
 ssl_err:
 	return FALSE;
+}
+
+/**
+ * Create a new SSL struct with certificates loaded.
+ */
+static SSL*
+ssl_new_with_certs(SSL_CTX *ctx)
+{
+	SSL *ssl;
+	
+	g_return_val_if_fail(ctx != NULL, NULL);
+	
+	if(SSL_CTX_use_certificate_file(ctx, CCERT_DIR"/client_cert",
+									SSL_FILETYPE_PEM) <= 0) {
+		ERR_print_errors_fp(stderr);
+	}
+ 
+	if(SSL_CTX_use_PrivateKey_file(ctx, CCERT_DIR"/client_key",
+								   SSL_FILETYPE_PEM) <= 0) {
+		ERR_print_errors_fp(stderr);
+	}
+
+    if (!SSL_CTX_load_verify_locations(ctx, NULL, CERTS_DIR)) {
+		ERR_print_errors_fp(stderr);
+	}
+
+	if (!(ssl = SSL_new(ctx))) {
+		hybrid_debug_error("ssl", "create SSl:%s",
+						   ERR_reason_error_string(ERR_get_error()));
+		return NULL;
+	}
+
+	return ssl;
+
+}
+
+/**
+ * Verify the peer's	certificate, if successfully verified,
+ * save the peer's certificate
+ */
+static gint
+ssl_verify_certs(SSL *ssl)
+{
+	FILE		*f;
+	X509		*x;
+	gchar		*cert_path;
+	gchar		*cert_file;
+	gchar		 buf[256];
+	gchar		*pos;
+
+	hybrid_debug_info("ssl", "verifying the peer's certificate");
+	
+	if ((x = SSL_get_peer_certificate(ssl)) != NULL) {
+		if (SSL_get_verify_result(ssl)		== X509_V_OK) {
+
+			X509_NAME_oneline(X509_get_subject_name(x), buf, 256);
+
+			hybrid_debug_error("ssl", "client verification succeeded.");
+			
+			cert_path = hybrid_config_get_cert_path();
+			
+			if ((pos = strstr(buf, "CN="))) {
+				cert_file = g_strdup_printf("%s/%s", cert_path, pos + 3);
+			} else {
+				cert_file = g_strdup_printf("%s/%s", cert_path, buf);
+			}
+			
+			g_free(cert_path);
+			
+			f = fopen(cert_file, "w+");
+			PEM_write_X509(f, x);
+			fclose(f);
+			g_free(cert_file);
+			
+		} else {
+			hybrid_debug_error("ssl", "client verification failed.");
+			return HYBRID_ERROR;
+		}
+	} else {
+		hybrid_debug_error("ssl", "the peer certificate was not presented.\n");
+	}
+
+	return HYBRID_OK;
 }
 
 HybridSslConnection* 
@@ -214,22 +300,15 @@ hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 	conn = g_new0(HybridSslConnection, 1);
 
 	if (!(conn->ssl_ctx = SSL_CTX_new(SSLv23_client_method()))) {
-
 		hybrid_debug_error("ssl", "initialize SSL CTX: %s",
-				ERR_reason_error_string(ERR_get_error()));
+						   ERR_reason_error_string(ERR_get_error()));
 		hybrid_ssl_connection_destory(conn);
-
 		return NULL;
 	}
 
-	if (!(conn->ssl = SSL_new(conn->ssl_ctx))) {
-
-		hybrid_debug_error("ssl", "create SSl:%s",
-				ERR_reason_error_string(ERR_get_error()));
+	if (!(conn->ssl = ssl_new_with_certs(conn->ssl_ctx))) {
 		hybrid_ssl_connection_destory(conn);
-
 		return NULL;
-
 	}
 
 	SSL_set_mode(conn->ssl, SSL_MODE_AUTO_RETRY);
@@ -252,11 +331,12 @@ hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 HybridSslConnection*
 hybrid_ssl_connect_with_fd(gint sk,	ssl_callback func, gpointer user_data)
 {
-	gint l;
-	SSL *ssl;
-	BIO *sbio;
-	BIO *buf_io, *ssl_bio;
-	SSL_CTX *ssl_ctx;
+	gint				 l;
+	SSL					*ssl;
+	BIO					*sbio;
+	BIO					*buf_io;
+	BIO					*ssl_bio;
+	SSL_CTX				*ssl_ctx;
 	HybridSslConnection *ssl_conn;
 
 	SSL_load_error_strings();
@@ -265,83 +345,51 @@ hybrid_ssl_connect_with_fd(gint sk,	ssl_callback func, gpointer user_data)
 	if (!(ssl_ctx = SSL_CTX_new(TLSv1_client_method()))) {
 
 		hybrid_debug_error("ssl", "initialize SSL CTX: %s",
-				ERR_reason_error_string(ERR_get_error()));
-
+						   ERR_reason_error_string(ERR_get_error()));
 		return NULL;
 	}
 
-
-	if (!(ssl = SSL_new(ssl_ctx))) {
-
-		hybrid_debug_error("ssl", "create SSl:%s",
-				ERR_reason_error_string(ERR_get_error()));
-
+	if (!(ssl = ssl_new_with_certs(ssl_ctx))) {
 		return NULL;
 	}
 
-
-	if(SSL_get_peer_certificate(ssl) != NULL) {
-		if(SSL_get_verify_result(ssl) == X509_V_OK) {
-			fprintf(stderr, "client verification with SSL_get_verify_result() succeeded.\n");                
-		} else {
-			fprintf(stderr, "client verification with SSL_get_verify_result() failed.\n");
-			exit(1);
-		}
-	} else {
-		fprintf(stdout, "the peer certificate was not presented.\n");
-	}
-	/*
-	if(SSL_CTX_use_certificate_file(ssl_ctx,CLIENT_CERT,
-									SSL_FILETYPE_PEM) <= 0){
-		ERR_print_errors_fp(stderr);
-		exit(1);
-	}
- 
-	if(SSL_CTX_use_PrivateKey_file(ssl_ctx,CLIENT_KEY,
-								   SSL_FILETYPE_PEM) <= 0){
-		ERR_print_errors_fp(stderr);
-		exit(1);
-	}
- 
-	if (!SSL_CTX_load_verify_locations(ssl_ctx,CA_CERT,NULL)) {
-		ERR_print_errors_fp(stderr);
-			exit(1);
-	}
 	if (!SSL_set_fd(ssl, sk)) {
-
 		hybrid_debug_error("ssl", "add ssl to tcp socket:%s", 
-				ERR_reason_error_string(ERR_get_error()));
+						   ERR_reason_error_string(ERR_get_error()));
 		return NULL;
 	}
-	*/
 
 	sbio = BIO_new(BIO_s_socket());
 	BIO_set_fd(sbio, sk, BIO_NOCLOSE);
 	SSL_set_bio(ssl, sbio, sbio);
 
-	for ( ;; ) {
-		l = SSL_connect(ssl);
-
-		switch (SSL_get_error(ssl, l)) { 
-			case SSL_ERROR_NONE:
-				goto ssl_conn_sk_ok;
-			case SSL_ERROR_WANT_WRITE:
-			case SSL_ERROR_WANT_READ:
-				continue;
-			case SSL_ERROR_SYSCALL:
-			case SSL_ERROR_WANT_X509_LOOKUP:
-			case SSL_ERROR_ZERO_RETURN:
-			case SSL_ERROR_SSL:
-			default:
-				hybrid_debug_error("ssl", "ssl hand-shake error:%s",
-					ERR_reason_error_string(ERR_get_error()));
-				return NULL;
-		}
-	}
-
 	SSL_set_connect_state(ssl);
 
+ reconnect:
+	l = SSL_connect(ssl);
+
+	switch (SSL_get_error(ssl, l)) { 
+	case SSL_ERROR_NONE:
+		goto ssl_conn_sk_ok;
+	case SSL_ERROR_WANT_WRITE:
+	case SSL_ERROR_WANT_READ:
+		usleep(100);
+		goto reconnect;
+	case SSL_ERROR_SYSCALL:
+	case SSL_ERROR_WANT_X509_LOOKUP:
+	case SSL_ERROR_ZERO_RETURN:
+	case SSL_ERROR_SSL:
+	default:
+		hybrid_debug_error("ssl", "ssl hand-shake error:%s",
+						   ERR_reason_error_string(ERR_get_error()));
+		return NULL;
+	}
+	
 ssl_conn_sk_ok:
+
+	if (HYBRID_OK != ssl_verify_certs(ssl)) {
+		return NULL;
+	}
 
 	SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 	
@@ -353,13 +401,13 @@ ssl_conn_sk_ok:
 
 	ssl_conn = g_new0(HybridSslConnection, 1);
 
-	ssl_conn->sk = sk;
-	ssl_conn->ssl = ssl;
-	ssl_conn->ssl_ctx = ssl_ctx;
-	ssl_conn->conn_cb = func;
+	ssl_conn->sk		= sk;
+	ssl_conn->ssl		= ssl;
+	ssl_conn->ssl_ctx	= ssl_ctx;
+	ssl_conn->conn_cb	= func;
 	ssl_conn->conn_data = user_data;
-	ssl_conn->rbio = buf_io;
-	ssl_conn->wbio = sbio;
+	ssl_conn->rbio		= buf_io;
+	ssl_conn->wbio		= sbio;
 
 	if (func) {
 		func(ssl_conn, user_data);
@@ -422,10 +470,10 @@ rewrite:
 		return 0;
 	case SSL_ERROR_SSL:
 	default:
+		ERR_print_errors_fp(stderr);
 		hybrid_debug_error("ssl",
 						   "ssl write with other error.");
 		return -1;
-
 	}
 
 	return len;

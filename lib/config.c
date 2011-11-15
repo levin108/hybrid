@@ -71,6 +71,30 @@ hybrid_config_get_path(void)
 	return hybrid_path;
 }
 
+gchar*
+hybrid_config_get_cert_path(void)
+{
+	gchar		*config_path;
+	gchar		*cert_path;
+	gint		 e;
+	
+	config_path = hybrid_config_get_path();
+	cert_path = g_strdup_printf("%s/certificates", config_path);
+	g_free(config_path);
+
+	e = mkdir(cert_path, S_IRWXU|S_IRWXO|S_IRWXG);
+
+	if (e && access(cert_path, R_OK|W_OK)) {
+		hybrid_debug_error("config", "%s,cannot create, read or write",
+						   cert_path);
+		g_free(cert_path);
+		return NULL;
+	}
+
+	return cert_path;
+}
+
+
 HybridConfig*
 hybrid_config_create()
 {

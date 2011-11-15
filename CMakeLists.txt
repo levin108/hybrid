@@ -38,6 +38,10 @@ if(NOT DEFINED MAN_INSTALL_DIR)
     set(MAN_INSTALL_DIR "${DATA_INSTALL_DIR}/man")
 endif(NOT DEFINED MAN_INSTALL_DIR)
 
+if(NOT DEFINED CERTS_INSTALL_DIR)
+	set(CERTS_INSTALL_DIR "$DATA_INSTALL_DIR/ca-certs")
+endif(NOT DEFINED CERTS_INSTALL_DIR)
+
 if(NOT DEFINED LOCALE_INSTALL_DIR)
     set(LOCALE_INSTALL_DIR "${DATA_INSTALL_DIR}/locale/")
 endif(NOT DEFINED LOCALE_INSTALL_DIR)
@@ -52,9 +56,11 @@ add_definitions(-DDATA_DIR="${DATA_INSTALL_DIR}")
 add_definitions(-DPIXMAPS_DIR="${DATA_INSTALL_DIR}/pixmaps/")
 add_definitions(-DSOUND_DIR="${DATA_INSTALL_DIR}/sound/")
 add_definitions(-DUI_DIR="${UI_INSTALL_DIR}")
+add_definitions(-DCERTS_DIR="${DATA_INSTALL_DIR}/ca-certs/")
+add_definitions(-DCCERT_DIR="${DATA_INSTALL_DIR}/c-cert")
 
 # compile option switch
-option(NLS "Native language support" ON)
+# option(NLS "Native language support" ON)
 option(WITH_LIBNOTIFY "Libnotify support" ON)
 option(WITH_GSTREAMER "GStreamer support" ON)
 option(WITH_LIBXSS "LibXScrnSaver support" ON)
@@ -161,13 +167,15 @@ configure_file(config-hybrid.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 
 add_definitions(-g -Wall)
-if(NLS AND GETTEXT_FOUND)
-	add_definitions(-DGETTEXT_PACKAGE="${PACKAGE_TARNAME}")
-	add_definitions(-DENABLE_NLS="1")
-	message(STATUS "Native language support:  YES" )
-else(NLS AND GETTEXT_FOUND)
-	message(STATUS "Native language support:  NO" )
-endif(NLS AND GETTEXT_FOUND)
+
+#if(NLS AND GETTEXT_FOUND)
+#	add_definitions(-DGETTEXT_PACKAGE="${PACKAGE_TARNAME}")
+#	add_definitions(-DENABLE_NLS="1")
+#	message(STATUS "Native language support:  YES" )
+#else(NLS AND GETTEXT_FOUND)
+#	message(STATUS "Native language support:  NO" )
+#endif(NLS AND GETTEXT_FOUND)
+
 add_definitions(-DLOCALE_DIR="${LOCALE_INSTALL_DIR}")
 add_definitions(-DMODULE_DIR="${MODULE_INSTALL_DIR}")
 #add_definitions(-DMODULE_DIR=".")
@@ -313,6 +321,14 @@ install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/sound/")
 # install ui files 
 file(GLOB HYBRID_ICONS_PIXMAPS "src/ui/*")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${UI_INSTALL_DIR}")
+
+#install ca certs files
+file(GLOB HYBRID_CA_CERTS "share/ca-certs/*")
+install(FILES ${HYBRID_CA_CERTS} DESTINATION "${DATA_INSTALL_DIR}/ca-certs/")
+
+#include client certs files
+file(GLOB HYBRID_CLIENT_CERT "share/c-cert/*")
+install(FILES ${HYBRID_CLIENT_CERT} DESTINATION "${DATA_INSTALL_DIR}/c-cert/")
 
 # source list of fetion module
 set(fetion_SRC
