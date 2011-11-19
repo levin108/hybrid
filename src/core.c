@@ -281,7 +281,7 @@ main(gint argc, gchar **argv)
 	hybrid_conn_init();
 
 	hybrid_sound_init(argc, argv);
-	
+
 	ui_init();
 
 	hybrid_account_enable_all();

@@ -46,25 +46,30 @@ enum {
 	ACCOUNT_COLUMNS
 };
 
+/* This function is a bit long, but in simple logic,
+   so don't be bothered :) */
 void
 hybrid_account_init(void)
 {
-	gchar *account_file;
-	gchar *config_path;
-	xmlnode *root;
-	xmlnode *node;
-	HybridAccount *account;
-	gboolean flush = FALSE;
-
-	gchar *username;
-	gchar *protoname;
-	gchar *password;
-	gchar *value;
-	gchar *icon_data;
-	gsize icon_data_len;
-	gchar *icon_path;
-	gchar *crc;
-	HybridModule *module;
+	gchar		*account_file;
+	gchar		*config_path;
+	xmlnode		*root;
+	xmlnode		*node;
+	gboolean	 flush = FALSE;
+	gchar		*username;
+	gchar		*protoname;
+	gchar		*password;
+	gchar		*value;
+	gchar		*icon_data;
+	gsize		 icon_data_len;
+	gchar		*icon_path;
+	gchar		*crc;
+	GSList		*pos;
+	
+	HybridAccount				*account;
+	HybridModule				*module;
+	HybridAccountVariable		*var;
+	
 
 	config_path = hybrid_config_get_path();
 	account_file = g_strdup_printf("%s/accounts.xml", config_path);
@@ -100,6 +105,14 @@ hybrid_account_init(void)
 			protoname = xmlnode_prop(node, "proto");
 
 			module = hybrid_module_find(protoname);
+
+			if (!module) {
+				hybrid_debug_error("account", "module not found.");
+				g_free(username);
+				g_free(protoname);
+				node = node->next;
+				continue;
+			}
 
 			account = hybrid_account_create(module);
 			hybrid_account_set_username(account, username);
@@ -154,7 +167,42 @@ hybrid_account_init(void)
 
 				g_free(value);
 			}
+			
+			/* load protocol-defined variables. */
+			for (pos = module->option_list; pos; pos = pos->next) {
+				var = (HybridAccountVariable*)pos->data;
+				if (!xmlnode_has_prop(node, var->name)) {
+					continue;
+				}
 
+				switch (var->type) {
+				case VARIABLE_TYPE_STRING:
+					hybrid_account_set_string_variable(account,
+													   var->name,
+													   var->str_value);
+					break;
+
+				case VARIABLE_TYPE_INTEGER:
+					value = xmlnode_prop(node, var->name);
+					hybrid_account_set_int_variable(account,
+													var->name,
+													atoi(value));
+					g_free(value);
+					break;
+
+				case VARIABLE_TYPE_BOOLEAN:
+					value = xmlnode_prop(node, var->name);
+					hybrid_account_set_bool_variable(account,
+									  var->name,
+									  g_strcmp0(value, "TRUE")? TRUE: FALSE);
+					g_free(value);
+					break;
+					
+				default:
+					break;
+				}
+			}
+			
 			/* load the nickname */
 			if (xmlnode_has_prop(node, "name")) {
 				value = xmlnode_prop(node, "name");
@@ -176,6 +224,11 @@ hybrid_account_init(void)
 			/* init actions. */
 			if (module->info->actions) {
 				account->action_list = module->info->actions(account);
+			}
+
+			/* init login action */
+			if (module->info->options) {
+				account->option_list = module->info->options(account);
 			}
 
 			account_list = g_slist_append(account_list, account);
@@ -217,7 +270,14 @@ hybrid_account_get(const gchar *proto_name,	const gchar *username)
 		return NULL;
 	}
 
-	account = hybrid_account_create(module);
+	account	= hybrid_account_create(module);
+
+	/* this callback only called once here for account to get
+	   a list of protocol-defined variables for this account. */
+	if (module->info->options()) {
+		account->option_list = module->info->options();
+	}
+	
 	hybrid_account_set_username(account, username);
 
 	account_list = g_slist_append(account_list, account);
@@ -228,13 +288,15 @@ hybrid_account_get(const gchar *proto_name,	const gchar *username)
 void
 hybrid_account_update(HybridAccount *account)
 {
-	gchar *account_file;
-	gchar *config_path;
-	xmlnode *root;
-	xmlnode *node;
-	gchar *username;
-	gchar *protoname;
-	gchar *temp;
+	gchar						*account_file;
+	gchar						*config_path;
+	xmlnode						*root;
+	xmlnode						*node;
+	gchar						*username;
+	gchar						*protoname;
+	gchar						*temp;
+	HybridAccountVariable		*var;
+	GSList						*pos;
 
 	config_path = hybrid_config_get_path();
 	account_file = g_strdup_printf("%s/accounts.xml", config_path);
@@ -336,6 +398,44 @@ update_node:
 		xmlnode_new_prop(node, "status", account->status_text);
 	}
 
+	/* save protocol-defined variables. */
+	for (pos = account->option_list; pos; pos = pos->next) {
+		var = (HybridAccountVariable*)pos->data;
+
+		const gchar		*text;
+		gchar			*tmp = NULL;
+
+		switch (var->type) {
+		case VARIABLE_TYPE_STRING:
+			text = var->str_value;
+			break;
+			
+		case VARIABLE_TYPE_BOOLEAN:
+			if (var->bool_value) {
+				text = "TRUE";
+			} else {
+				text = "FALSE";
+			}
+			break;
+
+		case VARIABLE_TYPE_INTEGER:
+			tmp	 = g_strdup_printf("%d", var->int_value);
+			text = tmp;
+			break;
+		default:
+			text = "";
+			break;
+		}
+		
+		if (xmlnode_has_prop(node, var->name)) {
+			xmlnode_set_prop(node, var->name, text);
+		} else {
+			xmlnode_new_prop(node, var->name, text);
+		}
+
+		g_free(tmp);
+	}
+
 	xmlnode_save_file(root, account_file);
 
 	g_free(account_file);
@@ -345,14 +445,14 @@ update_node:
 void
 hybrid_account_remove(const gchar *protoname, const gchar *username)
 {
-	gchar *account_file;
-	gchar *config_path;
-	HybridAccount *account;
-	xmlnode *root;
-	xmlnode *node;
-	GSList *pos;
-	gchar *user_name;
-	gchar *proto_name;
+	gchar				*account_file;
+	gchar				*config_path;
+	HybridAccount		*account;
+	xmlnode				*root;
+	xmlnode				*node;
+	GSList				*pos;
+	gchar				*user_name;
+	gchar				*proto_name;
 
 	/* Remove the revelent node from accounts.xml */
 	config_path = hybrid_config_get_path();
@@ -415,6 +515,7 @@ HybridAccount*
 hybrid_account_create(HybridModule *proto)
 {
 	extern HybridConfig *global_config;
+	
 	g_return_val_if_fail(proto != NULL, NULL);
 
 	HybridAccount *ac = g_new0(HybridAccount, 1);
@@ -423,8 +524,8 @@ hybrid_account_create(HybridModule *proto)
 			NULL, (GDestroyNotify)hybrid_blist_buddy_destroy);
 	ac->group_list = g_hash_table_new_full(g_str_hash, g_str_equal,
 			NULL, (GDestroyNotify)hybrid_blist_group_destroy);
-	ac->config = global_config;
-	ac->proto = proto;
+	ac->config		= global_config;
+	ac->proto		= proto;
 	ac->status_text = NULL;
 
 	return ac;
@@ -433,8 +534,8 @@ hybrid_account_create(HybridModule *proto)
 void
 hybrid_account_destroy(HybridAccount *account)
 {
-	GSList *pos;
-	HybridAction *action;
+	GSList				*pos;
+	HybridAction		*action;
 
 	if (account) {
 		g_free(account->username);
@@ -462,19 +563,19 @@ hybrid_account_destroy(HybridAccount *account)
 void
 hybrid_account_clear_buddy(HybridAccount *account)
 {
-	GtkTreeView *treeview;
-	GtkTreeModel *model;
-	HybridGroup *group;
-	HybridConfig *config;
-	HybridBlistCache *cache;
-	GHashTableIter hash_iter;
-	gpointer key;
+	GtkTreeView			*treeview;
+	GtkTreeModel		*model;
+	HybridGroup			*group;
+	HybridConfig		*config;
+	HybridBlistCache	*cache;
+	GHashTableIter		 hash_iter;
+	gpointer			 key;
 
-	gchar *username;
-	gchar *proto;
+	gchar		*username;
+	gchar		*proto;
 
-	xmlnode *root;
-	xmlnode *node;
+	xmlnode		*root;
+	xmlnode		*node;
 
 	g_return_if_fail(account != NULL);
 
@@ -601,9 +702,9 @@ hybrid_account_set_status_text(HybridAccount *account, const gchar *text)
 void
 hybrid_account_set_state(HybridAccount *account, gint state)
 {
-	gchar *menu_name;
-	GdkPixbuf *presence_pixbuf;
-	GtkWidget *presence_image;
+	gchar		*menu_name;
+	GdkPixbuf	*presence_pixbuf;
+	GtkWidget	*presence_image;
 
 	g_return_if_fail(account != NULL);
 
@@ -679,15 +780,15 @@ hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 void
 hybrid_account_enable(HybridAccount *account)
 {
-	extern GtkWidget *hybrid_vbox;
-	GtkWidget *cellview;
-	GtkListStore *store;
-	GtkTreePath *path;
-	GtkWidget *vbox;
-	GtkCellRenderer *renderer;
-	GdkPixbuf *pixbuf;
-	GtkWidget *align;
-	gchar *text;
+	extern GtkWidget	*hybrid_vbox;
+	GtkWidget			*cellview;
+	GtkListStore		*store;
+	GtkTreePath			*path;
+	GtkWidget			*vbox;
+	GtkCellRenderer		*renderer;
+	GdkPixbuf			*pixbuf;
+	GtkWidget			*align;
+	gchar				*text;
 
 	g_return_if_fail(account != NULL);
 
@@ -764,20 +865,20 @@ hybrid_account_enable(HybridAccount *account)
 
 	gtk_widget_show_all(account->login_panel);
 
-	account->proto->info->login(account);
+	account->proto->info->im_ops->login(account);
 }
 
 void
 hybrid_account_close(HybridAccount *account)
 {
-	GHashTableIter hash_iter;
-	HybridAccount *enabled_account;
-	HybridGroup *group;
-	HybridModule *module;
-	gpointer key;
-	GtkTreeModel *model;
-	GSList *pos;
-	gboolean has_enabled_account = FALSE;
+	GHashTableIter		 hash_iter;
+	HybridAccount		*enabled_account;
+	HybridGroup			*group;
+	HybridModule		*module;
+	gpointer			 key;
+	GtkTreeModel		*model;
+	GSList				*pos;
+	gboolean			 has_enabled_account = FALSE;
 
 	g_return_if_fail(account != NULL);
 
@@ -868,8 +969,8 @@ hybrid_account_close(HybridAccount *account)
 	 */
 	module = account->proto;
 
-	if (module->info->close) {
-		module->info->close(account);
+	if (module->info->im_ops->close) {
+		module->info->im_ops->close(account);
 	}
 
 	/* Now we need to hide the disable menu,and show the enable menu */
@@ -879,8 +980,8 @@ hybrid_account_close(HybridAccount *account)
 void
 hybrid_account_close_all()
 {
-	GSList *pos;
-	HybridAccount *account;
+	GSList				*pos;
+	HybridAccount		*account;
 
 	for (pos = account_list; pos; pos = pos->next) {
 
@@ -894,8 +995,8 @@ hybrid_account_close_all()
 void
 hybrid_account_enable_all()
 {
-	GSList *pos;
-	HybridAccount *account;
+	GSList				*pos;
+	HybridAccount		*account;
 
 	for (pos = account_list; pos; pos = pos->next) {
 
@@ -930,8 +1031,8 @@ keep_alive_cb(HybridAccount *account)
 
 	module = account->proto;
 
-	if (module->info->keep_alive) {
-		return module->info->keep_alive(account);
+	if (module->info->im_ops->keep_alive) {
+		return module->info->im_ops->keep_alive(account);
 	}
 
 	return TRUE;
@@ -946,7 +1047,7 @@ remove_login_cb(HybridAccount *account)
 	if (account->login_panel) {
 		gtk_widget_destroy(account->login_panel);
 		account->login_panel = NULL;
-		account->login_tips = NULL;
+		account->login_tips	 = NULL;
 	}
 
 	return FALSE;
@@ -1036,9 +1137,9 @@ blist_set_buddy_icon(HybridBuddy *buddy,
 	g_free(buddy->icon_crc);
 	g_free(buddy->icon_data);
 
-	buddy->icon_data = NULL;
+	buddy->icon_data		= NULL;
 	buddy->icon_data_length = len;
-	buddy->icon_crc = g_strdup(crc);
+	buddy->icon_crc			= g_strdup(crc);
 
 	if (icon_data != NULL) {
 		buddy->icon_data = g_memdup(icon_data, len);
@@ -1066,27 +1167,27 @@ blist_set_buddy_icon(HybridBuddy *buddy,
 static void
 load_blist_from_disk(HybridAccount *account)
 {
-	HybridConfig *config;
-	HybridBlistCache *cache;
-	HybridGroup *group;
-	HybridBuddy *buddy;
-	xmlnode *root;
-	xmlnode *node;
-	xmlnode *group_node;
-	xmlnode *buddy_node;
-	xmlnode *account_node;
-	gchar *id;
-	gchar *name;
-	gchar *value;
-	guchar *icon_data;
-	gsize icon_data_len;
+	HybridConfig		*config;
+	HybridBlistCache	*cache;
+	HybridGroup			*group;
+	HybridBuddy			*buddy;
+	xmlnode				*root;
+	xmlnode				*node;
+	xmlnode				*group_node;
+	xmlnode				*buddy_node;
+	xmlnode				*account_node;
+	gchar				*id;
+	gchar				*name;
+	gchar				*value;
+	guchar				*icon_data;
+	gsize				 icon_data_len;
 
 
 	g_return_if_fail(account != NULL);
 
 	config = account->config;
-	cache = config->blist_cache;
-	root = cache->root;
+	cache  = config->blist_cache;
+	root   = cache->root;
 
 	if (!(node = xmlnode_find(root, "accounts"))) {
 		hybrid_debug_error("account", 
@@ -1108,7 +1209,7 @@ load_blist_from_disk(HybridAccount *account)
 				"invalid account node in blist.xml");
 			continue;
 		}
-		name = xmlnode_prop(account_node, "username");
+		name  = xmlnode_prop(account_node, "username");
 		value = xmlnode_prop(account_node, "proto");
 
 		if (g_strcmp0(name, account->username) == 0 &&
@@ -1273,10 +1374,10 @@ account_found:
 static void
 hybrid_account_icon_save(HybridAccount *account)
 {
-	gchar *name;
-	gchar *hashed_name;
-	HybridModule *module;
-	HybridConfig *config;
+	gchar				*name;
+	gchar				*hashed_name;
+	HybridModule		*module;
+	HybridConfig		*config;
 
 	g_return_if_fail(account != NULL);
 
@@ -1288,7 +1389,7 @@ hybrid_account_icon_save(HybridAccount *account)
 	config = account->config;
 
 	if (!account->icon_name) {
-		name = g_strdup_printf("%s_%s", module->info->name, account->username);
+		name		= g_strdup_printf("%s_%s", module->info->name, account->username);
 		hashed_name = hybrid_sha1(name, strlen(name));
 		g_free(name);
 
@@ -1319,7 +1420,173 @@ account_set_icon(HybridAccount *account, const guchar *icon_data,
 	g_free(account->icon_data);
 	g_free(account->icon_crc);
 
-	account->icon_data = g_memdup(icon_data, icon_data_len);
-	account->icon_crc = g_strdup(icon_crc);
+	account->icon_data	   = g_memdup(icon_data, icon_data_len);
+	account->icon_crc	   = g_strdup(icon_crc);
 	account->icon_data_len = icon_data_len;
+}
+
+HybridAccountVariable*
+hybrid_variable_create(HybridAccountVariableType		 type,
+					   const gchar						*name,
+					   const gchar						*title)
+	
+	
+{
+	HybridAccountVariable		*var;
+
+	g_return_val_if_fail(name != NULL, NULL);
+
+	var = g_new0(HybridAccountVariable, 1);
+
+	var->type  = type;
+	var->name  = g_strdup(name);
+	var->title = g_strdup(title);
+	
+	return var;
+}
+
+void
+hybrid_variable_destroy(HybridAccountVariable *var)
+{
+	if (var) {
+		g_free(var->name);
+		g_free(var->title);
+		g_free(var->str_value);
+
+		g_free(var);
+	}
+}
+
+void
+hybrid_account_set_string_variable(HybridAccount		*account,
+								   const gchar			*name,
+								   const gchar			*value)
+	
+{
+	GSList						*pos;
+	HybridAccountVariable		*var;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(name != NULL);
+
+	for (pos = account->option_list; pos; pos = pos->next) {
+		var	= (HybridAccountVariable*)pos->data;
+		
+		if (g_strcmp0(var->name, name) == 0) {
+			g_free(var->str_value);
+			var->str_value = g_strdup(value);
+			break;
+		}
+	}
+}
+
+const gchar*
+hybrid_account_get_string_variable(HybridAccount		*account,
+								   const gchar			*name)
+{
+	GSList						*pos;
+	HybridAccountVariable		*var;
+
+	g_return_val_if_fail(account != NULL, NULL);
+	g_return_val_if_fail(name != NULL, NULL);
+
+	for (pos = account->option_list; pos; pos = pos->next) {
+		var = (HybridAccountVariable*)var;
+
+		if (g_strcmp0(var->name, name) == 0) {
+			return var->str_value;
+		}
+	}
+
+	return NULL;
+}
+	
+
+void
+hybrid_account_set_bool_variable(HybridAccount	*account,
+								 const gchar	*name,
+								 gboolean		 value)
+{
+	GSList						*pos;
+	HybridAccountVariable		*var;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(name != NULL);
+
+	for (pos = account->option_list; pos; pos = pos->next) {
+		var	= (HybridAccountVariable*)pos->data;
+		
+		if (g_strcmp0(var->name, name) == 0) {
+			var->bool_value = value;
+			break;
+		}
+	}
+
+}
+	
+
+gboolean
+hybrid_account_get_bool_variable(HybridAccount	*account,
+								 const gchar	*name)
+{
+
+	GSList						*pos;
+	HybridAccountVariable		*var;
+
+	g_return_val_if_fail(account != NULL, FALSE);
+	g_return_val_if_fail(name != NULL, FALSE);
+
+	for (pos = account->option_list; pos; pos = pos->next) {
+		var = (HybridAccountVariable*)var;
+
+		if (g_strcmp0(var->name, name) == 0) {
+			return var->bool_value;
+		}
+	}
+
+	return FALSE;
+}
+
+void
+hybrid_account_set_int_variable(HybridAccount	*account,
+								const gchar		*name,
+								gint			 value)
+{
+	GSList						*pos;
+	HybridAccountVariable		*var;
+
+	g_return_if_fail(account != NULL);
+	g_return_if_fail(name != NULL);
+
+	for (pos = account->option_list; pos; pos = pos->next) {
+		var	= (HybridAccountVariable*)pos->data;
+		
+		if (g_strcmp0(var->name, name) == 0) {
+			var->int_value = value;
+			break;
+		}
+	}
+}
+	
+
+gint
+hybrid_account_get_int_variable(HybridAccount	*account,
+								const gchar		*name)
+{
+
+	GSList						*pos;
+	HybridAccountVariable		*var;
+
+	g_return_val_if_fail(account != NULL, 0);
+	g_return_val_if_fail(name != NULL, 0);
+
+	for (pos = account->option_list; pos; pos = pos->next) {
+		var = (HybridAccountVariable*)var;
+
+		if (g_strcmp0(var->name, name) == 0) {
+			return var->int_value;
+		}
+	}
+
+	return 0;
 }

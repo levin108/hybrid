@@ -159,18 +159,20 @@ page_found:
 static gboolean
 init_tooltip(HybridTooltipData *data)
 {
-	HybridBuddy *buddy;
-	HybridAccount *account;
-	HybridModule *module;
+	HybridBuddy			*buddy;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
 
 	buddy = (HybridBuddy*)data->user_data;
 
 	account = buddy->account;
-	module = account->proto;
+	module	= account->proto;
+	ops		= module->info->im_ops;
 
-	if (module->info->buddy_tooltip) {
+	if (ops->buddy_tooltip) {
 		
-		if (!module->info->buddy_tooltip(account, buddy, data)) {
+		if (!ops->buddy_tooltip(account, buddy, data)) {
 			return FALSE;
 		}
 	}
@@ -189,19 +191,19 @@ init_tooltip(HybridTooltipData *data)
 static void
 message_send(HybridConversation *conv)
 {
-	GtkTextBuffer *send_tb;
-	GtkTextIter start_iter;
-	GtkTextIter stop_iter;
-	GtkTextView *textview;
-	GSList *pos;
-	HybridChatWindow *chat;
-	gint current_page;
-	gchar *text;
+	GtkTextBuffer		*send_tb;
+	GtkTextIter			 start_iter;
+	GtkTextIter			 stop_iter;
+	GtkTextView			*textview;
+	GSList				*pos;
+	HybridChatWindow	*chat;
+	gint				 current_page;
+	gchar				*text;
 
-	HybridBuddy   *buddy;
-	HybridAccount *account;
-	HybridModule  *module;
-
+	HybridBuddy			*buddy;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
 
 	/* find the current chat panel. */
 	current_page = gtk_notebook_current_page(GTK_NOTEBOOK(conv->notebook));
@@ -243,8 +245,9 @@ chat_found:
 
 	/* Call the protocol hook function. */
 	if (IS_SYSTEM_CHAT(chat)) {
-		buddy   = chat->data;
-		module  = account->proto;
+		buddy  = chat->data;
+		module = account->proto;
+		ops	   = module->info->im_ops;
 
 		if (chat->typing_source) {
 			g_source_remove(chat->typing_source);
@@ -252,12 +255,12 @@ chat_found:
 			chat->is_typing = FALSE;
 		}
 
-		if (module->info->chat_send_typing) {
-			module->info->chat_send_typing(account, buddy, INPUT_STATE_ACTIVE);
+		if (ops->chat_send_typing) {
+			ops->chat_send_typing(account, buddy, INPUT_STATE_ACTIVE);
 		}
 
-		if (module->info->chat_send) {
-			module->info->chat_send(account, buddy, text);
+		if (ops->chat_send) {
+			ops->chat_send(account, buddy, text);
 		}
 	}
 
@@ -769,18 +772,19 @@ key_press_func(GtkWidget *widget, GdkEventKey *event, HybridConversation *conv)
 static gboolean
 type_finished_cb(HybridChatWindow *chat)
 {
-	HybridAccount *account;
-	HybridModule *module;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
 
 	chat->typing_source = 0;
-
-	chat->is_typing = FALSE;
+	chat->is_typing		= FALSE;
 
 	account = chat->account;
-	module = account->proto;
+	module	= account->proto;
+	ops		= module->info->im_ops;
 
-	if (module->info->chat_send_typing) {
-		module->info->chat_send_typing(account, chat->data, INPUT_STATE_PAUSED);
+	if (ops->chat_send_typing) {
+		ops->chat_send_typing(account, chat->data, INPUT_STATE_PAUSED);
 	}
 
 	return FALSE;
@@ -793,28 +797,30 @@ type_finished_cb(HybridChatWindow *chat)
 static gboolean
 sendtext_buffer_changed(GtkTextBuffer *buffer, HybridChatWindow *chat)
 {
-	GtkTextIter  startIter;
-	GtkTextIter  endIter;
-	gint count;
-	gint totel_count;
-	HybridAccount *account;
-	HybridModule *module;
-	gchar *text;
-	gchar *res;
+	GtkTextIter			 startIter;
+	GtkTextIter			 endIter;
+	gint				 count;
+	gint				 totel_count;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
+	gchar				*text;
+	gchar				*res;
 
 	account = chat->account;
-	module = account->proto;
+	module	= account->proto;
+	ops		= module->info->im_ops;
 
 	if (!chat->is_typing) {
 
-		if (IS_SYSTEM_CHAT(chat) && module->info->chat_send_typing) {
+		if (IS_SYSTEM_CHAT(chat) && ops->chat_send_typing) {
 
 			chat->typing_source = 
 				g_timeout_add_seconds(4, (GSourceFunc)type_finished_cb, chat);
 
 			chat->is_typing = TRUE;
 
-			module->info->chat_send_typing(account, chat->data, INPUT_STATE_TYPING);
+			ops->chat_send_typing(account, chat->data, INPUT_STATE_TYPING);
 		}
 	}
 
@@ -823,8 +829,8 @@ sendtext_buffer_changed(GtkTextBuffer *buffer, HybridChatWindow *chat)
 		return FALSE;
 	}
 
-	if (!module->info->chat_word_limit ||
-		(totel_count = module->info->chat_word_limit(account)) <= 0) {
+	if (!ops->chat_word_limit ||
+		(totel_count = ops->chat_word_limit(account)) <= 0) {
 
 		return FALSE;
 	}
@@ -1078,15 +1084,16 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 static void
 init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 {
-	GtkWidget *scroll;
-	GtkWidget *button;
-	GtkWidget *image_icon;
-	GtkWidget *limit_label;
-	GtkTextBuffer *send_buffer;
-	gchar *word_limit_string;
-	gint word_limit;
-	HybridAccount *account;
-	HybridModule *module;
+	GtkWidget			*scroll;
+	GtkWidget			*button;
+	GtkWidget			*image_icon;
+	GtkWidget			*limit_label;
+	GtkTextBuffer		*send_buffer;
+	gchar				*word_limit_string;
+	gint				 word_limit;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
 
 	g_return_if_fail(vbox != NULL);
 	g_return_if_fail(chat != NULL);
@@ -1126,10 +1133,11 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 		gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
 
 		account = chat->account;
-		module = account->proto;
+		module	= account->proto;
+		ops		= module->info->im_ops;
 
-		if (module->info->chat_word_limit &&
-			(word_limit = module->info->chat_word_limit(account)) > 0) {
+		if (ops->chat_word_limit &&
+			(word_limit = ops->chat_word_limit(account)) > 0) {
 
 			word_limit_string =
 				g_strdup_printf(_("Total %d character, left "), word_limit);
@@ -1238,10 +1246,11 @@ HybridChatWindow*
 hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 		HybridChatWindowType type)
 {
-	HybridChatWindow *chat = NULL;
-	HybridConversation *conv = NULL;
-	HybridBuddy *buddy;
-	HybridModule *proto;
+	HybridChatWindow	*chat = NULL;
+	HybridConversation	*conv = NULL;
+	HybridBuddy			*buddy;
+	HybridModule		*proto;
+	HybridIMOps			*ops;
 
 	g_return_val_if_fail(account != NULL, NULL);
 	g_return_val_if_fail(id != NULL, NULL);
@@ -1255,11 +1264,12 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 		}
 
 		proto = account->proto;
+		ops	  = proto->info->im_ops;
 
 		/* we will check whether the protocol allows this buddy to be activated. */
-		if (proto->info->chat_start) {
+		if (ops->chat_start) {
 			
-			if (!proto->info->chat_start(account, buddy)) {
+			if (!ops->chat_start(account, buddy)) {
 				return NULL;
 			}
 		}

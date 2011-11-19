@@ -23,8 +23,10 @@
 
 #include <glib.h>
 
-typedef struct _HybridAccount HybridAccount;
-typedef enum _HybridConnectionStatusType HybridConnectionStatusType;
+typedef struct _HybridAccountVariable			HybridAccountVariable;
+typedef struct _HybridAccount					HybridAccount;
+typedef enum _HybridConnectionStatusType		HybridConnectionStatusType;
+typedef enum _HybridAccountVariableType			HybridAccountVariableType;
 
 #include "util.h"
 #include "config.h"
@@ -56,13 +58,30 @@ struct _HybridAccount {
 
 	gpointer protocol_data;
 
-	GSList *action_list; /* list of action menus. */
+	GSList		*action_list;	/* list of action menus. */
+	GSList		*option_list;	/* list of login options. */
 
-	GHashTable *buddy_list;
-	GHashTable *group_list;
+	GHashTable	*buddy_list;
+	GHashTable	*group_list;
 
-	HybridConfig *config;
-	HybridModule *proto;
+	HybridConfig		*config;
+	HybridModule		*proto;
+};
+
+enum _HybridAccountVariableType {
+	VARIABLE_TYPE_STRING,
+	VARIABLE_TYPE_BOOLEAN,
+	VARIABLE_TYPE_INTEGER,
+};
+
+struct _HybridAccountVariable {
+	HybridAccountVariableType	 type;
+	gchar						*title;
+	gchar						*name;
+	gchar						*str_value;
+	gboolean					 bool_value;
+	gint						 int_value;
+	GtkWidget					*widget;
 };
 
 enum {
@@ -302,6 +321,93 @@ void hybrid_account_set_connection_string(HybridAccount *account,
  * @return The name of the presence state.
  */
 const gchar *hybrid_get_presence_name(gint presence_state);
+
+/**
+ * Create an variable object.
+ *
+ * @param type The account variable type.
+ * @param name The name of the variable.
+ *
+ * @return The variable object created.
+ */
+HybridAccountVariable *hybrid_variable_create(HybridAccountVariableType	 type,
+											  const gchar				*var_name,
+											  const gchar				*var_title);
+
+/**
+ * Destroy an variable object.
+ *
+ * @param variable The variable object to destroy.
+ */
+void	hybrid_variable_destroy(HybridAccountVariable *variable);
+
+/**
+ * Set the string value for a user-defined variable. 
+ *
+ * @param account The account context.
+ * @param name    The name of the string variable.
+ * @param value   The value of the variable.
+ */
+void hybrid_account_set_string_variable(HybridAccount	*account,
+										const gchar		*name,
+										const gchar		*value);
+
+/**
+ * Get the value of an user-defined string variable.
+ *
+ * @param account The account context.
+ * @param name    The name of the string variable.
+ *
+ * @return The value of the string variable.
+ */
+const gchar* hybrid_account_get_string_variable(HybridAccount	*account,
+												const gchar		*name);
+
+/**
+ * Set the boolean value for a user-defined variable. 
+ *
+ * @param account The account context.
+ * @param name    The name of the boolean variable.
+ * @param value   The value of the boolean variable.
+ */
+void hybrid_account_set_bool_variable(HybridAccount		*account,
+									  const gchar		*name,
+									  gboolean			 value);
+
+ /**
+ * Get the value of an user-defined boolean variable.
+ *
+ * @param account The account context.
+ * @param name    The name of the boolean value.
+ *
+ * @return The value of the boolean variable.
+ */
+gboolean hybrid_account_get_bool_variable(HybridAccount	*account,
+										  const gchar	*name);
+	
+	
+/**
+ * Set the integer value for a user-defined variable. 
+ *
+ * @param account The account context.
+ * @param name    The name of the integer variable.
+ * @param value   The value of the integer variable.
+ */
+void hybrid_account_set_int_variable(HybridAccount		*account,
+									 const gchar		*name,
+									 gint				 value);
+	
+ /**
+ * Get the value of an user-defined integer variable.
+ *
+ * @param account The account context.
+ * @param name    The name of the integer value.
+ *
+ * @return The value of the integer variable.
+ */
+gint hybrid_account_get_int_variable(HybridAccount		*account,
+									 const gchar		*name);
+	
 
 #ifdef __cplusplus
 }

@@ -40,7 +40,7 @@ static void add_cb(GtkWidget *widget, gpointer user_data);
 static void delete_cb(GtkWidget *widget, gpointer user_data);
 static void disable_cb(GtkWidget *widget, HybridAccount *account);
 static void enable_cb(GtkWidget *widget, HybridAccount *account);
-
+static void paint_edit_area(HybridAccountEditPanel *panel);
 static HybridAccountPanel *account_panel = NULL;
 
 extern GSList *account_list;
@@ -57,14 +57,14 @@ static void
 enable_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 		gpointer user_data)
 {
-	HybridAccountPanel *panel = (HybridAccountPanel*)user_data;
-	GtkTreeModel *model;
-	GtkTreeIter  iter;
-	GtkTreePath *path;
-	gboolean fixed;
-	gchar *username;
-	HybridAccount *account;
-	GSList *pos = NULL;
+	HybridAccountPanel	*panel = (HybridAccountPanel*)user_data;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	GtkTreePath			*path;
+	gboolean			 fixed;
+	gchar				*username;
+	HybridAccount		*account;
+	GSList				*pos   = NULL;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(panel->account_tree));
 	path = gtk_tree_path_new_from_string(path_str);
@@ -116,9 +116,9 @@ enable_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 static void
 render_column(HybridAccountPanel *panel)
 {
-	GtkTreeViewColumn *column;
-	GtkCellRenderer *renderer;
-	GtkWidget *treeview;
+	GtkTreeViewColumn	*column;
+	GtkCellRenderer		*renderer;
+	GtkWidget			*treeview;
 
 	treeview = panel->account_tree;
 
@@ -178,25 +178,26 @@ render_column(HybridAccountPanel *panel)
 static void
 hybrid_account_panel_init(HybridAccountPanel *panel)
 {
-	GtkTreeIter iter;
-	GdkPixbuf *pixbuf;
-	HybridAccount *account;
-	extern GSList *account_list;
-	GSList *pos;
+	extern GSList		*account_list;
+	GtkTreeIter			 iter;
+	GdkPixbuf			*pixbuf;
+	HybridAccount		*account;
+	GSList				*pos;
 
 	g_return_if_fail(panel != NULL);
 
 	for (pos = account_list; pos; pos = pos->next) {
 		
 		account = (HybridAccount*)pos->data;
-		pixbuf = hybrid_create_proto_icon(account->proto->info->name, 16);
+		pixbuf	= hybrid_create_proto_icon(account->proto->info->name, 16);
+		
 		gtk_list_store_append(GTK_LIST_STORE(panel->account_store), &iter);
 		gtk_list_store_set(GTK_LIST_STORE(panel->account_store), &iter,
-				HYBRID_ENABLE_COLUMN, TRUE,
-				HYBRID_NAME_COLUMN, account->username,
-				HYBRID_PROTO_ICON_COLUMN, pixbuf,
-				HYBRID_PROTO_NAME_COLUMN, account->proto->info->name,
-				HYBRID_ENABLE_COLUMN, account->enabled, -1);
+						   HYBRID_ENABLE_COLUMN, TRUE,
+						   HYBRID_NAME_COLUMN, account->username,
+						   HYBRID_PROTO_ICON_COLUMN, pixbuf,
+						   HYBRID_PROTO_NAME_COLUMN, account->proto->info->name,
+						   HYBRID_ENABLE_COLUMN, account->enabled, -1);
 
 		g_object_unref(pixbuf);
 	}
@@ -218,12 +219,12 @@ close_cb(GtkWidget *widget, gpointer user_data)
 HybridAccountPanel*
 hybrid_account_panel_create()
 {
-	HybridAccountPanel *panel;
-	GtkWidget *scroll;
-	GtkWidget *vbox;
-	GtkWidget *button;
-	GtkWidget *halign;
-	GtkWidget *action_area;
+	HybridAccountPanel	*panel;
+	GtkWidget			*scroll;
+	GtkWidget			*vbox;
+	GtkWidget			*button;
+	GtkWidget			*halign;
+	GtkWidget			*action_area;
 
 	if (account_panel) {
 		gtk_window_present(GTK_WINDOW(account_panel->window));
@@ -249,11 +250,11 @@ hybrid_account_panel_create()
 								 GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 	panel->account_store = gtk_list_store_new(HYBRID_ACCOUNT_COLUMNS,
-							G_TYPE_BOOLEAN,
-							G_TYPE_STRING,
-							GDK_TYPE_PIXBUF,
-							G_TYPE_STRING,
-							G_TYPE_POINTER);
+											  G_TYPE_BOOLEAN,
+											  G_TYPE_STRING,
+											  GDK_TYPE_PIXBUF,
+											  G_TYPE_STRING,
+											  G_TYPE_POINTER);
 	panel->account_tree = gtk_tree_view_new_with_model(
 							GTK_TREE_MODEL(panel->account_store));
 	gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(panel->account_tree), TRUE);
@@ -262,8 +263,9 @@ hybrid_account_panel_create()
 
 	render_column(panel);
 
-	halign = gtk_alignment_new(1, 0, 0, 0);
+	halign		= gtk_alignment_new(1, 0, 0, 0);
 	action_area = gtk_hbox_new(FALSE, 0);
+	
 	gtk_container_add(GTK_CONTAINER(halign), action_area);
 	gtk_box_pack_start(GTK_BOX(vbox), halign, FALSE, FALSE, 5);
 
@@ -314,8 +316,10 @@ create_protocol_model()
 		module = (HybridModule*)pos->data;
 		pixbuf = hybrid_create_proto_icon(module->info->name, 16);
 		gtk_tree_store_append(store, &iter, NULL);
-		gtk_tree_store_set(store, &iter, PROTOCOL_ICON_COLUMN, pixbuf,
-						PROTOCOL_NAME_COLUMN, module->info->name, -1);
+		gtk_tree_store_set(store, &iter,
+						   PROTOCOL_ICON_COLUMN, pixbuf,
+						   PROTOCOL_NAME_COLUMN, module->info->name,
+						   -1);
 		g_object_unref(pixbuf);
 	}
 
@@ -337,14 +341,16 @@ edit_account_cancel_cb(GtkWidget *widget, gpointer user_data)
 static void
 edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridAccountEditPanel *panel;
-	HybridAccount *account;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GdkPixbuf *pixbuf;
-	const gchar *username;
-	const gchar *password;
-	gchar *protoname;
+	HybridAccountEditPanel		*panel;
+	HybridAccount				*account;
+	GtkTreeModel				*model;
+	GtkTreeIter					 iter;
+	GdkPixbuf					*pixbuf;
+	HybridAccountVariable		*var;
+	GSList						*pos;
+	const gchar					*username;
+	const gchar					*password;
+	gchar						*protoname;
 
 	panel = (HybridAccountEditPanel*)user_data;
 
@@ -384,16 +390,46 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 				GTK_TREE_VIEW(account_panel->account_tree));
 		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 		gtk_list_store_set(GTK_LIST_STORE(model), &iter,
-				HYBRID_ENABLE_COLUMN, TRUE,
-				HYBRID_NAME_COLUMN, username,
-				HYBRID_PROTO_ICON_COLUMN, pixbuf,
-				HYBRID_PROTO_NAME_COLUMN, protoname, -1);
+						   HYBRID_ENABLE_COLUMN, TRUE,
+						   HYBRID_NAME_COLUMN, username,
+						   HYBRID_PROTO_ICON_COLUMN, pixbuf,
+						   HYBRID_PROTO_NAME_COLUMN, protoname, -1);
 
 		g_object_unref(pixbuf);
 	}
 
 	/* create account's menus */
 	hybrid_account_create_menu(account);
+
+	/* set user-defined variables. */
+	for (pos = account->proto->option_list; pos; pos = pos->next) {
+
+		const gchar		*str_value;
+		gint			 int_value;
+		gboolean		 bool_value;
+
+		var	 = (HybridAccountVariable*)pos->data;
+
+		switch (var->type) {
+		case VARIABLE_TYPE_STRING:
+			str_value  = gtk_entry_get_text(GTK_ENTRY(var->widget));
+			hybrid_account_set_string_variable(account, var->name, str_value);
+			break;
+		case VARIABLE_TYPE_BOOLEAN:
+			bool_value = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(var->widget));
+			hybrid_account_set_bool_variable(account, var->name, bool_value);
+			break;
+		case VARIABLE_TYPE_INTEGER:
+			str_value  = gtk_entry_get_text(GTK_ENTRY(var->widget));
+			int_value  = atoi(str_value);
+			hybrid_account_set_int_variable(account, var->name, int_value);
+			break;
+		default:
+			break;
+		}
+		
+		var->widget = NULL;
+	}
 
 	/* enable the account */
 	hybrid_account_enable(account);
@@ -405,28 +441,134 @@ edit_account_save_cb(GtkWidget *widget, gpointer user_data)
 	g_free(panel);
 }
 
+static void
+proto_combo_changed(GtkComboBox *widget, HybridAccountEditPanel *panel)
+{
+	gtk_widget_destroy(panel->user_table);
+
+	panel->user_table = gtk_table_new(2, 8, FALSE);
+	gtk_box_pack_start(GTK_BOX(panel->basic_vbox),
+					   panel->user_table, TRUE, TRUE, 0);
+
+   	paint_edit_area(panel);
+	gtk_widget_show_all(panel->user_table);
+}
+
+static void
+paint_edit_area(HybridAccountEditPanel *panel)
+{
+	GtkWidget					*table;
+	GtkWidget					*label;
+	GtkWidget					*entry;
+	GtkWidget					*align;
+	GtkTreeIter					 iter;
+	GtkTreeModel				*model;
+	HybridModule				*module;
+	gchar						*name;
+	GSList						*pos;
+	HybridAccountVariable		*var;
+	int							 i;
+
+	table				  = panel->user_table;
+	align				  = gtk_alignment_new(1.0, 0.5, 0.0, 0.0);
+	label				  = gtk_label_new(_("Username:"));
+	panel->username_entry = gtk_entry_new();
+
+	gtk_container_add(GTK_CONTAINER(align), label);
+	gtk_widget_set_size_request(panel->username_entry, 150, 25);
+	gtk_table_attach(GTK_TABLE(table), align, 0, 1, 1, 2,
+					 GTK_FILL, GTK_FILL, 0, 0);
+	gtk_table_attach(GTK_TABLE(table), panel->username_entry,
+					 1, 2, 1, 2, GTK_FILL, GTK_FILL, 5, 5);
+
+	label				  = gtk_label_new(_("Password:"));
+	align				  = gtk_alignment_new(1.0, 0.5, 0.0, 0.0);
+	panel->password_entry = gtk_entry_new();
+
+	gtk_container_add(GTK_CONTAINER(align), label);
+	gtk_entry_set_visibility(GTK_ENTRY(panel->password_entry) , FALSE);
+	gtk_widget_set_size_request(panel->password_entry, 150, 25);
+	gtk_table_attach(GTK_TABLE(table), align, 0, 1, 2, 3,
+					 GTK_FILL, GTK_FILL, 5, 5);
+	gtk_table_attach(GTK_TABLE(table), panel->password_entry,
+					 1, 2, 2, 3, GTK_FILL, GTK_FILL, 5, 5);
+
+	/* load user-defined options. */
+	if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(panel->proto_combo), &iter)) {
+		goto no_module;
+	}
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(panel->proto_combo));
+	gtk_tree_model_get(model, &iter, PROTOCOL_NAME_COLUMN, &name, -1);
+
+	if (!(module = hybrid_module_find(name))) {
+		g_free(name);
+		goto no_module;
+	}
+
+	for (pos = module->option_list, i = 4; pos; pos = pos->next, i ++) {
+		var = (HybridAccountVariable*)pos->data;
+		if (VARIABLE_TYPE_STRING == var->type) {
+			
+			label = gtk_label_new(var->title);
+			align = gtk_alignment_new(1.0, 0.5, 0.0, 0.0);
+			gtk_container_add(GTK_CONTAINER(align), label);
+			gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+			entry = gtk_entry_new();
+			gtk_widget_set_size_request(entry, 150, 25);
+			gtk_table_attach(GTK_TABLE(table), align, 0, 1, i, i + 1,
+							 GTK_FILL, GTK_FILL, 5, 5);
+			gtk_table_attach(GTK_TABLE(table), entry,
+							 1, 2, i, i + 1, GTK_FILL, GTK_FILL, 5, 5);
+			
+			var->widget = entry;
+			
+		} else if (VARIABLE_TYPE_BOOLEAN == var->type) {
+			
+			align = gtk_alignment_new(0.0, 0.0, 0.0, 0.0);
+			label = gtk_check_button_new_with_label(var->title);
+			gtk_container_add(GTK_CONTAINER(align), label);
+			gtk_table_attach(GTK_TABLE(table), align,
+							 1, 2, i, i + 1, GTK_FILL, GTK_FILL, 5, 5);
+
+			var->widget = label;
+		}
+	}
+	
+	g_free(name);
+
+ no_module:
+	
+	/* Just to fill the space. */
+	label = gtk_label_new(NULL);
+	gtk_table_attach(GTK_TABLE(table), label, 0, 2, 7, 8, GTK_EXPAND, GTK_EXPAND, 0, 0);
+
+}
+
 static HybridAccountEditPanel*
 create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 {
-	GtkWidget *fixed;
-	GtkWidget *label;
-	GtkWidget *notebook;
-	GtkWidget *vbox;
-	HybridAccountEditPanel *panel;
-	GtkWidget *halign;
-	GtkWidget *action_area;
-	GtkWidget *button;
-	GtkCellRenderer *renderer;
-	GtkTreeModel *proto_model;
+	GtkWidget			*label;
+	GtkWidget			*notebook;
+	GtkWidget			*vbox;
+	GtkWidget			*hbox;
+	GtkWidget			*halign;
+	GtkWidget			*action_area;
+	GtkWidget			*button;
+	GtkWidget			*align;
+	GtkCellRenderer		*renderer;
+	GtkTreeModel		*proto_model;
+	
+	HybridAccountEditPanel		*panel;
 
 	panel = g_new0(HybridAccountEditPanel, 1);
 
 	panel->parent = parent;
 	panel->window = hybrid_create_window(
 				is_add ? _("Add a new account") : _("Edit the account"),
-				NULL, GTK_WIN_POS_CENTER, FALSE);
+				NULL, GTK_WIN_POS_CENTER, TRUE);
 	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 8);
-	gtk_widget_set_size_request(panel->window, 300, 400);
+   	gtk_widget_set_size_request(panel->window, 300, 400);
 
 	/* Global VBox */
 	vbox = gtk_vbox_new(FALSE, 0);
@@ -436,51 +578,44 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 	gtk_box_pack_start(GTK_BOX(vbox), notebook, TRUE, TRUE, 5);
 
 	/* Basic Page. */
-	label = gtk_label_new("Basic");
-	fixed = gtk_fixed_new();
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), fixed, label);
+	label			  = gtk_label_new("Basic");
+	panel->basic_vbox = gtk_vbox_new(FALSE, 0);
 
-	label = gtk_label_new(NULL);
-	gtk_label_set_markup(GTK_LABEL(label), _("<b>Login Options</b>"));
-	gtk_fixed_put(GTK_FIXED(fixed), label, 20, 20);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), panel->basic_vbox, label);
 
-
-	label = gtk_label_new(_("Protocol:"));
-	gtk_fixed_put(GTK_FIXED(fixed), label, 20, 60);
-
-	proto_model = create_protocol_model();
+	align			   = gtk_alignment_new(1.0, 0.5, 0.0, 0.0);
+	label			   = gtk_label_new(_("Protocol:"));
+	proto_model		   = create_protocol_model();
 	panel->proto_combo = gtk_combo_box_new_with_model(proto_model);
+
 	gtk_combo_box_set_active(GTK_COMBO_BOX(panel->proto_combo), 0);
 	g_object_unref(proto_model);
 
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(panel->proto_combo),
-			renderer, FALSE);
+							   renderer, FALSE);
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(panel->proto_combo),
-			renderer, "pixbuf", PROTOCOL_ICON_COLUMN, NULL);
+								   renderer, "pixbuf",
+								   PROTOCOL_ICON_COLUMN, NULL);
+	
 	renderer = gtk_cell_renderer_text_new();
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(panel->proto_combo),
-			renderer, FALSE);
+							   renderer, FALSE);
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(panel->proto_combo),
-			renderer, "text", PROTOCOL_NAME_COLUMN, NULL);
+								   renderer, "text",
+								   PROTOCOL_NAME_COLUMN, NULL);
+	gtk_widget_set_size_request(panel->proto_combo, 170, 30);
 
-	gtk_widget_set_size_request(panel->proto_combo, 150, 30);
-	gtk_fixed_put(GTK_FIXED(fixed), panel->proto_combo, 100, 55);
+	hbox = gtk_hbox_new(FALSE, 10);
+	gtk_container_add(GTK_CONTAINER(align), label);
+	gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox), panel->proto_combo, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(panel->basic_vbox), hbox, FALSE, FALSE, 10);
 
-	label = gtk_label_new(_("Username:"));
-	gtk_fixed_put(GTK_FIXED(fixed), label, 20, 95);
-
-	panel->username_entry = gtk_entry_new();
-	gtk_widget_set_size_request(panel->username_entry, 150, 25);
-	gtk_fixed_put(GTK_FIXED(fixed), panel->username_entry, 100, 95);
-
-	label = gtk_label_new(_("Password:"));
-	gtk_fixed_put(GTK_FIXED(fixed), label, 20, 130);
-
-	panel->password_entry = gtk_entry_new();
-	gtk_entry_set_visibility(GTK_ENTRY(panel->password_entry) , FALSE);
-	gtk_widget_set_size_request(panel->password_entry, 150, 25);
-	gtk_fixed_put(GTK_FIXED(fixed), panel->password_entry, 100, 130);
+	panel->user_table = gtk_table_new(2, 8, FALSE);
+	gtk_box_pack_start(GTK_BOX(panel->basic_vbox), panel->user_table, TRUE, TRUE, 0);
+	
+	paint_edit_area(panel);
 
 	/* Action Area */
 	halign = gtk_alignment_new(1, 0, 0, 0);
@@ -492,16 +627,19 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 	gtk_widget_set_size_request(button, 80, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 0);
 	g_signal_connect(button, "clicked",
-			G_CALLBACK(edit_account_cancel_cb), panel);
+					 G_CALLBACK(edit_account_cancel_cb), panel);
 
 	button = gtk_button_new_with_label(_("Save"));
 	gtk_widget_set_size_request(button, 80, 30);
 	gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 0);
 	g_signal_connect(button, "clicked",
-			G_CALLBACK(edit_account_save_cb), panel);
+					 G_CALLBACK(edit_account_save_cb), panel);
 
 
 	gtk_widget_show_all(panel->window);
+		
+	g_signal_connect(panel->proto_combo, "changed",
+					 G_CALLBACK(proto_combo_changed), panel);
 
 	return panel;
 }
@@ -509,8 +647,8 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
 static void
 add_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridAccountPanel *panel;
-	HybridAccountEditPanel *edit_panel;
+	HybridAccountPanel			*panel;
+	HybridAccountEditPanel		*edit_panel;
 
 	panel = (HybridAccountPanel*)user_data;
 
@@ -520,14 +658,14 @@ add_cb(GtkWidget *widget, gpointer user_data)
 static void
 delete_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridAccountPanel *panel;
-	HybridAccount *account;
-	GtkTreeView *tree;
-	GtkTreeModel *model;
-	GtkTreeSelection *selection;
-	GtkTreeIter iter;
-	gchar *username;
-	gchar *protoname;
+	HybridAccountPanel	*panel;
+	HybridAccount		*account;
+	GtkTreeView			*tree;
+	GtkTreeModel		*model;
+	GtkTreeSelection	*selection;
+	GtkTreeIter			 iter;
+	gchar				*username;
+	gchar				*protoname;
 
 	panel = (HybridAccountPanel*)user_data;
 
@@ -571,20 +709,21 @@ delete_cb(GtkWidget *widget, gpointer user_data)
 static void
 change_state_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridAccount *account;
-	HybridModule *module;
-	HybridAccountMenuData *data;
+	HybridAccount				*account;
+	HybridModule				*module;
+	HybridIMOps					*im_ops;
+	HybridAccountMenuData		*data;
 
 	data = (HybridAccountMenuData*)user_data;
 	account = data->account;
 
 	module = account->proto;
+	im_ops = module->info->im_ops;
 
-	if (module->info->change_state) {
+	if (im_ops->change_state) {
 		account->state = data->presence_state;
 
-		if (module->info->change_state(account,
-					data->presence_state)) {
+		if (im_ops->change_state(account, data->presence_state)) {
 			hybrid_account_set_state(account, data->presence_state);
 		}
 	}
@@ -626,18 +765,18 @@ disable_cb(GtkWidget *widget, HybridAccount *account)
 static void
 create_account_child_menus(HybridAccount *account)
 {
-	GtkWidget *account_menu;
-	GtkWidget *menu_shell;
-	GtkWidget *menu_item;
-	GtkWidget *child_menu;
-	GtkWidget *child_menu_item;
-	GdkPixbuf *presence_pixbuf;
-	GtkWidget *presence_image;
-	HybridAccountMenuData *data;
-	HybridAction *action;
-	HybridModule *proto;
-	GSList *pos;
-	gint state;
+	GtkWidget					*account_menu;
+	GtkWidget					*menu_shell;
+	GtkWidget					*menu_item;
+	GtkWidget					*child_menu;
+	GtkWidget					*child_menu_item;
+	GdkPixbuf					*presence_pixbuf;
+	GtkWidget					*presence_image;
+	HybridAccountMenuData		*data;
+	HybridAction				*action;
+	HybridModule				*proto;
+	GSList						*pos;
+	gint						 state;
 
 	account_menu = account->account_menu;
 
@@ -710,10 +849,10 @@ create_account_child_menus(HybridAccount *account)
 void
 hybrid_account_create_menu(HybridAccount *account)
 {
-	gchar *menu_name;
-	GdkPixbuf *presence_pixbuf;
-	GtkWidget *presence_image;
-	GtkWidget *account_shell;
+	gchar		*menu_name;
+	GdkPixbuf	*presence_pixbuf;
+	GtkWidget	*presence_image;
+	GtkWidget	*account_shell;
 
 	g_return_if_fail(account != NULL);
 

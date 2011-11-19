@@ -60,17 +60,17 @@ static gboolean
 xmpp_login(HybridAccount *account)
 {
 	XmppAccount *ac;
-	XmppStream *stream;
+	XmppStream	*stream;
 
 	ac = xmpp_account_create(account, account->username,
-						account->password, "gmail.com");
+							 account->password, "gmail.com");
 	
 	stream = xmpp_stream_create(ac);
 
 	hybrid_account_set_protocol_data(account, stream);
 
 	hybrid_proxy_connect(jabber_server, 5222,
-			(connect_callback)xmpp_stream_init, stream);
+						 (connect_callback)xmpp_stream_init, stream);
 
 	return FALSE;
 }
@@ -456,24 +456,21 @@ xmpp_close(HybridAccount *account)
 
 	stream = hybrid_account_get_protocol_data(account);
 
-	g_source_remove(stream->source);
+	if (stream->source > 0) {
+		g_source_remove(stream->source);
+	}
+
+	if (stream->keepalive_source > 0) {
+		g_source_remove(stream->keepalive_source);
+	}
+	
 	close(stream->sk);
 
 	xmpp_stream_destroy(stream);
-
 	xmpp_buddy_clear(stream);
 }
 
-HybridModuleInfo module_info = {
-	"xmpp",                     /**< name */
-	"levin108",                   /**< author */
-	N_("jabber client"),          /**< summary */
-	/* description */
-	N_("implement xmpp protocol"), 
-	"http://basiccoder.com",      /**< homepage */
-	"0","1",                      /**< major version, minor version */
-	"xmpp",                     /**< icon name */
-
+HybridIMOps im_ops = {
 	xmpp_login,                 /**< login */
 	xmpp_get_info,              /**< get_info */
 	xmpp_modify_name,           /**< modify_name */
@@ -496,7 +493,23 @@ HybridModuleInfo module_info = {
 	xmpp_send_typing,           /**< chat_send_typing */
 	xmpp_chat_send,             /**< chat_send */
 	xmpp_close,                 /**< close */
-	NULL,                       /**< actions */
+};
+
+HybridModuleInfo module_info = {
+	"xmpp",                     /**< name */
+	"levin108",                 /**< author */
+	N_("jabber client"),        /**< summary */
+	/* description */
+	N_("implement xmpp protocol"), 
+	"http://basiccoder.com",      /**< homepage */
+	"0","1",                    /**< major version, minor version */
+	"xmpp",                     /**< icon name */
+	MODULE_TYPE_IM,
+
+	&im_ops,
+	NULL,
+	NULL,
+	NULL, /**< actions */
 };
 
 void 

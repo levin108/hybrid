@@ -32,13 +32,14 @@ extern HybridTooltip hybrid_tooltip;
 static gboolean
 tooltip_init(HybridTooltipData *tip_data)
 {
-	HybridAccount *account;
-	HybridModule *module;
-
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
 	
 	if ((account = hybrid_blist_get_current_account())) {
 
 		module = account->proto;
+		ops	   = module->info->im_ops;
 
 		if (tip_data->icon) {
 			g_object_unref(tip_data->icon);
@@ -48,8 +49,8 @@ tooltip_init(HybridTooltipData *tip_data)
 							account->icon_data,
 							account->icon_data_len, PORTRAIT_WIDTH);
 
-		if (module->info->account_tooltip) {
-			if (!module->info->account_tooltip(account, tip_data)){
+		if (ops->account_tooltip) {
+			if (!ops->account_tooltip(account, tip_data)){
 
 				return FALSE;
 			}
@@ -127,11 +128,12 @@ show_edit_box(gint edit_type)
 static void
 modify_photo_menu_cb(GtkWidget *widget, gpointer user_data)
 {
-	GtkWidget *filechooser;
-	gint response;
-	const gchar *filename;
-	HybridAccount *account;
-	HybridModule *module;
+	GtkWidget			*filechooser;
+	gint				 response;
+	const gchar			*filename;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
 
 	hybrid_head->edit_account = hybrid_blist_get_current_account();
 
@@ -143,7 +145,7 @@ modify_photo_menu_cb(GtkWidget *widget, gpointer user_data)
 						_("Choose the avatar file to upload"),
 						NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
 						_("Cancel"), 2, _("OK"), 1, NULL);
-	response = gtk_dialog_run(GTK_DIALOG(filechooser));
+	response	= gtk_dialog_run(GTK_DIALOG(filechooser));
 
 	if (!(account = hybrid_head->edit_account)) {
 		return;
@@ -155,9 +157,10 @@ modify_photo_menu_cb(GtkWidget *widget, gpointer user_data)
 
 		if (filename) {
 			module = account->proto;
+			ops	   = module->info->im_ops;
 			
-			if (module->info->modify_photo) {
-				module->info->modify_photo(account, filename);
+			if (ops->modify_photo) {
+				ops->modify_photo(account, filename);
 			}
 		}
 	}
@@ -221,14 +224,16 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 static void
 entry_activate_cb(GtkWidget *widget, gpointer user_data)
 {
-	HybridAccount *account;
-	HybridModule *module;
-	const gchar *text;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
+	const gchar			*text;
 
 	hide_edit_box();
 
 	account = hybrid_head->edit_account;
 	module  = account->proto;
+	ops		= module->info->im_ops;
 	text    = gtk_entry_get_text(GTK_ENTRY(hybrid_head->edit_entry));
 
 	if (!account) {
@@ -241,8 +246,8 @@ entry_activate_cb(GtkWidget *widget, gpointer user_data)
 			return;
 		}
 
-		if (module->info->modify_name) {
-			if (!module->info->modify_name(account, text)) {
+		if (ops->modify_name) {
+			if (!ops->modify_name(account, text)) {
 				return;
 			}
 
@@ -258,8 +263,8 @@ entry_activate_cb(GtkWidget *widget, gpointer user_data)
 			return;
 		}
 
-		if (module->info->modify_status) {
-			if (!module->info->modify_status(account, text)) {
+		if (ops->modify_status) {
+			if (!ops->modify_status(account, text)) {
 				return;
 			}
 

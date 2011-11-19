@@ -49,14 +49,16 @@ destroy_cb(GtkWidget *widget, HybridBuddyReqWindow *req)
 static void
 add_cb(GtkWidget *widget, HybridBuddyReqWindow *req)
 {
-	HybridAccount *account;
-	HybridModule *module;
-	HybridGroup *group;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
+	HybridAccount		*account;
+	HybridModule		*module;
+	HybridIMOps			*ops;
+	HybridGroup			*group;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
 
 	account = req->account;
-	module = account->proto;
+	module	= account->proto;
+	ops		= module->info->im_ops;
 
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(req->group_combo));
 
@@ -66,8 +68,8 @@ add_cb(GtkWidget *widget, HybridBuddyReqWindow *req)
 
 	gtk_tree_model_get(model, &iter, BUDDYREQ_GROUP_GROUP_COLUMN, &group, -1);
 
-	if (module->info->buddy_req) {
-		module->info->buddy_req(account, group,	req->buddy_id, 
+	if (ops->buddy_req) {
+		ops->buddy_req(account, group,	req->buddy_id, 
 				req->buddy_name, req->accept, req->user_data);
 	}
 

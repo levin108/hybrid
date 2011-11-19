@@ -57,7 +57,6 @@ xmpp_stream_create(XmppAccount *account)
 	stream->account		  = account;
 	stream->major_version = 1;
 	stream->miner_version = 0;
-	
 
 	return stream;
 }
@@ -116,9 +115,10 @@ xmpp_stream_destroy(XmppStream *stream)
 	IqTransaction *trans;
 
 	if (stream) {
+
 		g_free(stream->jid);
 		g_free(stream->stream_id);
-		xmlnode_free(stream->node);
+		
 		xmpp_account_destroy(stream->account);
 		
 		while (stream->pending_trans) {
@@ -129,7 +129,11 @@ xmpp_stream_destroy(XmppStream *stream)
 		hybrid_connection_destroy(stream->conn);
 		hybrid_ssl_connection_destory(stream->ssl);
 
+		xmlnode_free(stream->node);
+		stream->node = NULL;
+		
 		g_free(stream);
+		stream = NULL;
 	}
 }
 
@@ -251,8 +255,9 @@ stream_recv_cb(gint sk, XmppStream *stream)
 			hybrid_debug_error("xmpp", "stream read io error.");
 			return TRUE;
 		} else if (0 == n) {
+			
 			hybrid_debug_error("xmpp", "connection closed by server.");
-			return TRUE;
+			return FALSE;
 		}
 	}
 
@@ -278,7 +283,7 @@ xmpp_stream_init(gint sk, XmppStream *stream)
 	if (send(sk, msg, strlen(msg), 0) == -1) {
 
 		hybrid_account_error_reason(stream->account->account,
-				"send initial jabber request failed");
+									"send initial jabber request failed");
 
 		return FALSE;
 	}
@@ -291,7 +296,7 @@ xmpp_stream_init(gint sk, XmppStream *stream)
 	if (send(sk, msg, strlen(msg), 0) == -1) {
 
 		hybrid_account_error_reason(stream->account->account,
-				"send initial jabber request failed");
+									"send initial jabber request failed");
 		g_free(msg);
 
 		return FALSE;
@@ -300,7 +305,7 @@ xmpp_stream_init(gint sk, XmppStream *stream)
 	g_free(msg);
 
 	stream->source = hybrid_event_add(sk, HYBRID_EVENT_READ,
-						(input_func)stream_recv_cb, stream);
+									  (input_func)stream_recv_cb, stream);
 
 	return FALSE;
 }
@@ -1106,6 +1111,21 @@ xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
 
 }
 
+static void
+xmpp_stream_process_failure(XmppStream *stream, xmlnode *root)
+{
+	xmlnode				*node;
+	HybridAccount		*account;
+
+	account = stream->account->account;
+	
+	if ((node = xmlnode_find(root, "not-authorized"))) {
+		hybrid_account_error_reason(account,
+									_("Account not authorized."
+									  " Check Username and Password."));
+	}
+}
+
 void
 xmpp_stream_process(XmppStream *stream, xmlnode *node)
 {
@@ -1140,7 +1160,19 @@ xmpp_stream_process(XmppStream *stream, xmlnode *node)
 	} else if (g_strcmp0(node->name, "message") == 0) {
 
 		xmpp_stream_process_message(stream, node);
+		
+	} else if (g_strcmp0(node->name, "failure") == 0) {
+		
+		xmpp_stream_process_failure(stream, node);
+
+		/* Here we only take login failure into consideration.
+		 so we just return without free the xml node, leaving it
+		to be freed in the protocol's close() callback function. */
+		return;
 	}
+
+	xmlnode_free(stream->node);
+	stream->node = NULL;
 }
 
 static gchar*

@@ -253,7 +253,7 @@ ssl_verify_certs(SSL *ssl)
 
 			X509_NAME_oneline(X509_get_subject_name(x), buf, 256);
 
-			hybrid_debug_error("ssl", "client verification succeeded.");
+			hybrid_debug_info("ssl", "client verification succeeded.");
 			
 			cert_path = hybrid_config_get_cert_path();
 			
@@ -272,7 +272,7 @@ ssl_verify_certs(SSL *ssl)
 			
 		} else {
 			hybrid_debug_error("ssl", "client verification failed.");
-			return HYBRID_ERROR;
+			return HYBRID_OK;
 		}
 	} else {
 		hybrid_debug_error("ssl", "the peer certificate was not presented.\n");

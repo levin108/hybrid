@@ -748,8 +748,8 @@ fx_buddy_req(HybridAccount *account, HybridGroup *group,
 		const gchar *id, const gchar *alias,
 		gboolean accept, const gpointer user_data)
 {
-	fetion_account *ac;
-	const gchar *sipuri;
+	fetion_account		*ac;
+	const gchar			*sipuri;
 
 	ac = hybrid_account_get_protocol_data(account);
 
@@ -914,8 +914,8 @@ fx_close(HybridAccount *account)
 static GSList*
 fetion_actions(HybridAccount *account)
 {
-	GSList *list = NULL;
-	HybridAction *action;
+	GSList				*list = NULL;
+	HybridAction		*action;
 
 	action = hybrid_action_create(account, _("SMS To Me"), sms_to_me_cb);
 	list   = g_slist_append(list, action);
@@ -923,15 +923,7 @@ fetion_actions(HybridAccount *account)
 	return list;
 }
 
-HybridModuleInfo module_info = {
-	"fetion",                     /**< name */
-	"levin108",                   /**< author */
-	N_("fetion client"),          /**< summary */
-	/* description */
-	N_("hybrid plugin implementing Fetion Protocol version 4"), 
-	"http://basiccoder.com",      /**< homepage */
-	"0","1",                      /**< major version, minor version */
-	"fetion",                     /**< icon name */
+HybridIMOps im_ops = {
 
 	fx_login,                 /**< login */
 	fx_get_info,              /**< get_info */
@@ -955,7 +947,22 @@ HybridModuleInfo module_info = {
 	NULL,                     /**< chat_send_typing */
 	fx_chat_send,             /**< chat_send */
 	fx_close,                 /**< close */
-	fetion_actions,               /**< actions */
+};
+
+HybridModuleInfo module_info = {
+	"fetion",                   /**< name */
+	"levin108",                 /**< author */
+	N_("fetion client"),        /**< summary */
+	/* description */
+	N_("hybrid plugin implementing Fetion Protocol version 4"), 
+	"http://basiccoder.com",      /**< homepage */
+	"0","1",                    /**< major version, minor version */
+	"fetion",                   /**< icon name */
+	MODULE_TYPE_IM,
+	&im_ops,
+	NULL,
+	fetion_actions,				/**< actions */
+	NULL,
 };
 
 void 

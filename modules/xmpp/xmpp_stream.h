@@ -40,30 +40,25 @@ typedef struct _XmppStream XmppStream;
 #include "xmpp_account.h"
 
 struct _XmppStream {
-	gint sk;  /**< the socket descriptor. */
-	guint source; /**< event source. */
+	gint		sk;				  /**< the socket descriptor. */
+	guint		source;			  /**< event source. */
+	guint		keepalive_source; /**< event source of the keep alive timeout event. */
+	gint		current_iq_id;
 
-	gint current_iq_id;
+	gchar		*stream_id;
+	gchar		*jid;
+	gint		 major_version; /**< default 1 */
+	gint		 miner_version; /**< default 0 */
 
-	gchar *stream_id;
-	gchar *jid;
-	gint major_version; /**< default 1 */
-	gint miner_version; /**< default 0 */
+	xmlnode		*node;			/**< current xml node for parsing the xml stream. */
+	gint		 state;			/**< stream state. */
+	GSList		*pending_trans; /**< The pending iq transactions. */
 
-	xmlnode *node; /**< current xml node for parsing the xml stream. */
 
-	gint state; /**< stream state. */
-
-	GSList *pending_trans; /**< The pending iq transactions. */
-
-	guint keepalive_source; /**< event source of the keep alive timeout event. */
-
-	XmppAccount *account;
-
-	HybridConnection *conn;
+	XmppAccount			*account;
+	HybridConnection	*conn;
 	HybridSslConnection *ssl;
-
-	xmlParserCtxt *xml_ctxt;
+	xmlParserCtxt		*xml_ctxt;
 };
 
 enum {

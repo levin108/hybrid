@@ -29,15 +29,17 @@ resolve_host(const gchar *hostname, gchar *ip)
 {
 	g_return_val_if_fail(hostname != NULL, HYBRID_ERROR);
 
-	struct addrinfo *result;
-	struct sockaddr_in *addr;
-	gchar *hash_value;
+	struct addrinfo		*result;
+	struct addrinfo		*rp;
+	struct sockaddr_in	*addr;
+	gchar				*hash_value;
+	gchar				 buf[32];
 
 	hybrid_debug_info("dns", "resolve host \'%s\'", hostname);
 
 	if (host_hash && (hash_value = g_hash_table_lookup(host_hash, hostname))) {
 		strcpy(ip, (gchar*)hash_value);	
-		hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'", hostname, ip);
+		hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'[cached]", hostname, ip);
 		return HYBRID_OK;
 	}
 
@@ -47,14 +49,32 @@ resolve_host(const gchar *hostname, gchar *ip)
 		return HYBRID_ERROR;
 	}
 
-	addr = (struct sockaddr_in*)result->ai_addr;
+	for (rp = result; rp != NULL; rp = rp->ai_next) {
+		addr = (struct sockaddr_in*)rp->ai_addr;
 
-	if (!inet_ntop(AF_INET, (void*)&addr->sin_addr, ip, 16)) {
-		hybrid_debug_error("dns", "reslove host \'%s\' failed when"
-				" transforming binary ip address to doted ip address",
-				hostname);
-		return HYBRID_ERROR;
+		memset(buf, 0, sizeof(buf));
+		
+		if (!inet_ntop(AF_INET, (void*)&addr->sin_addr, buf, 16)) {
+
+			hybrid_debug_error("dns", "reslove host \'%s\' failed when"
+							   " transforming binary ip address to doted ip address",
+							   hostname);
+			
+			continue;
+		}
+		
+		if (g_strcmp0(buf, "0.0.0.0") == 0	||
+			g_strcmp0(buf, "127.0.0.1")		  == 0) {
+			continue;
+		}
+
+		strncpy(ip, buf, strlen(buf));
+		goto addr_success;
 	}
+
+	return HYBRID_ERROR;
+
+ addr_success:
 
 	if (!host_hash) {
 		host_hash = g_hash_table_new(g_str_hash, g_str_equal);
@@ -64,7 +84,7 @@ resolve_host(const gchar *hostname, gchar *ip)
 
 	g_hash_table_insert(host_hash, (gchar*)hostname, hash_value);
 
-	hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'", hostname, ip);
+	hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'[new]", hostname, ip);
 
 	return HYBRID_OK;
 }

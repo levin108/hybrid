@@ -122,6 +122,7 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 	HybridGroup			*group;
 	HybridAccount		*account;
 	HybridModule		*module;
+	HybridIMOps			*ops;
 	gchar				*name;
 	gint				 depth;
 
@@ -159,13 +160,13 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 	 * yes, we've changed the alias name of the buddy/group, we should
 	 * call the protocol-specified hook function. 
 	 */
-
-	if (depth > 1) { /* rename buddy */
+	if (depth > 1) {			/* rename buddy */
 		account = buddy->account;
-		module  = account->proto;
+		module = account->proto;
+		ops	   = module->info->im_ops;
 
-		if (module->info->buddy_rename) {
-			if (!module->info->buddy_rename(account, buddy, text)) {
+		if (ops->buddy_rename) {
+			if (!ops->buddy_rename(account, buddy, text)) {
 				return;
 			}
 
@@ -173,12 +174,12 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 		}
 
 	} else { /* rename group */
-
 		account = group->account;
-		module  = account->proto;
+		module = account->proto;
+		ops	   = module->info->im_ops;
 
-		if (module->info->group_rename) {
-			if (!module->info->group_rename(account, group, text)) {
+		if (ops->group_rename) {
+			if (!ops->group_rename(account, group, text)) {
 				return;
 			}
 
@@ -273,14 +274,15 @@ buddy_information_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
 	HybridAccount		*account = buddy->account;
 	HybridModule		*proto	 = account->proto;
+	HybridIMOps			*ops	 = proto->info->im_ops;
 	HybridInfo			*info;
 
 	/* Call the get information callback in module space. */
-	if (proto->info->get_info) {
+	if (ops->get_info) {
 		
 		info = hybrid_info_create(buddy);
 
-		proto->info->get_info(account, buddy);
+		ops->get_info(account, buddy);
 	}
 }
 
@@ -295,6 +297,7 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 	HybridGroup			*orig_group;
 	HybridAccount		*account;
 	HybridModule		*module;
+	HybridIMOps			*ops;
 		
 	GdkPixbuf			*status_icon;
 	GdkPixbuf			*proto_icon;
@@ -304,6 +307,7 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 
 	account = buddy->account;
 	module	= account->proto;
+	ops		= module->info->im_ops;
  
 	new_group_name = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
 
@@ -313,8 +317,8 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
 		return;
 	}
 
-	if (module->info->buddy_move) {
-		if (!module->info->buddy_move(account, buddy, group)) {
+	if (ops->buddy_move) {
+		if (!ops->buddy_move(account, buddy, group)) {
 			hybrid_debug_error("blist", "move buddy protocol error");
 			return;
 		}
@@ -403,19 +407,21 @@ hybrid_buddy_remove(HybridBuddy *buddy)
 {
 	HybridAccount		*account;
 	HybridModule		*module;
+	HybridIMOps			*ops;
 
 	g_return_if_fail(buddy != NULL);
 
 	account = buddy->account;
 	module  = account->proto;
+	ops		= module->info->im_ops;
 
 	/*
 	 * If the buddy_remove hook function not defined, or if the
 	 * buddy_remove defined but returned FALSE, then we should
 	 * cancel the remove action in GUI, yes, we just return.
 	 */
-	if (!module->info->buddy_remove ||
-		!module->info->buddy_remove(account, buddy)) {
+	if (!ops->buddy_remove ||
+		!ops->buddy_remove(account, buddy)) {
 		return;
 	}
 
@@ -430,16 +436,18 @@ hybrid_group_remove(HybridGroup *group)
 {
 	HybridAccount		*account;
 	HybridModule		*proto;
+	HybridIMOps			*ops;
 
 	g_return_if_fail(group != NULL);
 
 	/* Call the hook function to remove it in the protocol layer. */
 	account = group->account;
 	proto	= account->proto;
+	ops		= proto->info->im_ops;
 
-	if (proto->info->group_remove) {
+	if (ops->group_remove) {
 
-		if (!(proto->info->group_remove(account, group))) {
+		if (!(ops->group_remove(account, group))) {
 			return;
 		}
 	}
@@ -939,6 +947,7 @@ init_tooltip(HybridTooltipData *data)
 	GtkTreeIter			 iter;
 	HybridAccount		*account;
 	HybridModule		*module;
+	HybridIMOps			*ops;
 	HybridBuddy			*buddy;
 	gint				 depth;
 
@@ -973,10 +982,11 @@ init_tooltip(HybridTooltipData *data)
 
 	account = buddy->account;
 	module  = account->proto;
+	ops		= module->info->im_ops;
 
-	if (module->info->buddy_tooltip) {
+	if (ops->buddy_tooltip) {
 
-		if (!module->info->buddy_tooltip(account, buddy, data)) {
+		if (!ops->buddy_tooltip(account, buddy, data)) {
 			return FALSE;
 		}
 	}

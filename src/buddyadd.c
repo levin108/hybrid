@@ -173,18 +173,19 @@ destroy_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
 static void
 add_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
 {
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkComboBox *combo;
-	GtkTextBuffer *buffer;
-	GtkTextIter start_iter;
-	GtkTextIter end_iter;
-	HybridAccount *account;
-	HybridModule *proto;
-	HybridGroup *group;
-	const gchar *name;
-	const gchar *alias;
-	const gchar *tips;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	GtkComboBox			*combo;
+	GtkTextBuffer		*buffer;
+	GtkTextIter			 start_iter;
+	GtkTextIter			 end_iter;
+	HybridAccount		*account;
+	HybridModule		*proto;
+	HybridIMOps			*ops;
+	HybridGroup			*group;
+	const gchar			*name;
+	const gchar			*alias;
+	const gchar			*tips;
 
 	combo = GTK_COMBO_BOX(window->account_combo);
 
@@ -221,9 +222,10 @@ add_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
 	tips = gtk_text_buffer_get_text(buffer, &start_iter, &end_iter, TRUE);
 
 	proto = account->proto;
+	ops	  = proto->info->im_ops;
 
-	if (proto->info->buddy_add) {
-		proto->info->buddy_add(account, group, name, alias, tips);
+	if (ops->buddy_add) {
+		ops->buddy_add(account, group, name, alias, tips);
 	}
 
 	gtk_widget_destroy(window->window);

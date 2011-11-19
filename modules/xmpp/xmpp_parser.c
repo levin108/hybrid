@@ -107,10 +107,15 @@ static void
 parse_element_end(void *user_data, const xmlChar *element_name,
 				 const xmlChar *prefix, const xmlChar *namespace)
 {
-	XmppStream *stream;
-	gchar *xml_string;
+	XmppStream	*stream;
+	gchar		*xml_string;
 
 	stream = (XmppStream *)user_data;
+
+	if (xmlStrcmp(element_name, BAD_CAST "stream") == 0) {
+		hybrid_debug_info("xmpp", "got an end element.");
+		return;
+	}
 
 	if (!stream->node) {
 		hybrid_debug_error("xmpp",
@@ -121,7 +126,6 @@ parse_element_end(void *user_data, const xmlChar *element_name,
 	if (g_strcmp0(stream->node->name, (gchar *)element_name)) {
 
 		hybrid_debug_error("xmpp", "invalid end element.");
-
 		return;
 	}
 
@@ -132,12 +136,7 @@ parse_element_end(void *user_data, const xmlChar *element_name,
 		xml_string = xmlnode_to_string(stream->node);
 
 		hybrid_debug_info("xmpp", "recv:\n%s", xml_string);
-
 		xmpp_stream_process(stream, stream->node);
-
-		xmlnode_free(stream->node);
-		stream->node = NULL;
-
 		g_free(xml_string);
 	}
 }
@@ -184,41 +183,39 @@ xmpp_process_pushed(XmppStream *stream, const gchar *buffer, gint len)
 	gint ret;
 
 	if (stream->xml_ctxt) {
-
 		if ((ret = xmlParseChunk(stream->xml_ctxt, buffer, len, 0))
 				!= XML_ERR_OK) {
 
-			xmlError *err = xmlCtxtGetLastError(stream->xml_ctxt);
-
-			xmlErrorLevel level = XML_ERR_WARNING;
+			xmlError			*err   = xmlCtxtGetLastError(stream->xml_ctxt);
+			xmlErrorLevel		 level = XML_ERR_WARNING;
 
 			if (err) {
 				level = err->level;
 			}
 
 			switch (level) {
-				case XML_ERR_NONE:
-					hybrid_debug_info("xmpp",
-							"xmlParseChunk returned info %i\n", ret);
-					break;
-				case XML_ERR_WARNING:
-					hybrid_debug_error("xmpp",
-							"xmlParseChunk returned warning %i\n", ret);
-					break;
-				case XML_ERR_ERROR:
-					hybrid_debug_error("xmpp",
-							"xmlParseChunk returned error %i\n", ret);
-					break;
-				case XML_ERR_FATAL:
-					hybrid_debug_error("xmpp",
-							"xmlParseChunk returned fatal %i\n", ret);
-					break;
+			case XML_ERR_NONE:
+				hybrid_debug_info("xmpp",
+								  "xmlParseChunk returned info %i\n", ret);
+				break;
+			case XML_ERR_WARNING:
+				hybrid_debug_error("xmpp",
+								   "xmlParseChunk returned warning %i\n", ret);
+				break;
+			case XML_ERR_ERROR:
+				hybrid_debug_error("xmpp",
+								   "xmlParseChunk returned error %i\n", ret);
+				break;
+			case XML_ERR_FATAL:
+				hybrid_debug_error("xmpp",
+								   "xmlParseChunk returned fatal %i\n", ret);
+				break;
 			}
 		}
 
 	} else {
 		stream->xml_ctxt = xmlCreatePushParserCtxt(&xmpp_xml_parser,
-							stream, buffer, len, NULL);
+												   stream, buffer, len, NULL);
 		xmlParseChunk(stream->xml_ctxt, "", 0, 0);
 	}
 }

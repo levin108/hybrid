@@ -103,11 +103,12 @@ destroy_cb(GtkWidget *widget, HybridGroupAddWindow *window)
 static void
 save_cb(GtkWidget *widget, HybridGroupAddWindow *window)
 {
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	HybridAccount *account;
-	HybridModule *proto;
-	const gchar *name;
+	GtkTreeModel		*model;
+	GtkTreeIter			 iter;
+	HybridAccount		*account;
+	HybridModule		*proto;
+	HybridIMOps			*ops;
+	const gchar			*name;
 
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(window->account_combo));
 
@@ -133,10 +134,11 @@ save_cb(GtkWidget *widget, HybridGroupAddWindow *window)
 	}
 
 	proto = account->proto;
+	ops	  = proto->info->im_ops;
 
 	/* call the protocol hook function. */
-	if (proto->info->group_add) {
-		proto->info->group_add(account, name);
+	if (ops->group_add) {
+		ops->group_add(account, name);
 	}
 
 	/* destroy the groupadd window. */
