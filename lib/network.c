@@ -27,64 +27,64 @@ static GHashTable *host_hash = NULL;
 gint 
 resolve_host(const gchar *hostname, gchar *ip)
 {
-	g_return_val_if_fail(hostname != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(hostname != NULL, HYBRID_ERROR);
 
-	struct addrinfo		*result;
-	struct addrinfo		*rp;
-	struct sockaddr_in	*addr;
-	gchar				*hash_value;
-	gchar				 buf[32];
+    struct addrinfo    *result;
+    struct addrinfo    *rp;
+    struct sockaddr_in *addr;
+    gchar              *hash_value;
+    gchar               buf[32];
 
-	hybrid_debug_info("dns", "resolve host \'%s\'", hostname);
+    hybrid_debug_info("dns", "resolve host \'%s\'", hostname);
 
-	if (host_hash && (hash_value = g_hash_table_lookup(host_hash, hostname))) {
-		strcpy(ip, (gchar*)hash_value);	
-		hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'[cached]", hostname, ip);
-		return HYBRID_OK;
-	}
+    if (host_hash && (hash_value = g_hash_table_lookup(host_hash, hostname))) {
+        strcpy(ip, (gchar*)hash_value);    
+        hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'[cached]", hostname, ip);
+        return HYBRID_OK;
+    }
 
-	if (getaddrinfo(hostname, NULL, NULL, &result) != 0) {
-		hybrid_debug_error("resolve_host", "resolve host \'%s\' failed",
-				hostname);
-		return HYBRID_ERROR;
-	}
+    if (getaddrinfo(hostname, NULL, NULL, &result) != 0) {
+        hybrid_debug_error("resolve_host", "resolve host \'%s\' failed",
+                hostname);
+        return HYBRID_ERROR;
+    }
 
-	for (rp = result; rp != NULL; rp = rp->ai_next) {
-		addr = (struct sockaddr_in*)rp->ai_addr;
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+        addr = (struct sockaddr_in*)rp->ai_addr;
 
-		memset(buf, 0, sizeof(buf));
-		
-		if (!inet_ntop(AF_INET, (void*)&addr->sin_addr, buf, 16)) {
+        memset(buf, 0, sizeof(buf));
+        
+        if (!inet_ntop(AF_INET, (void*)&addr->sin_addr, buf, 16)) {
 
-			hybrid_debug_error("dns", "reslove host \'%s\' failed when"
-							   " transforming binary ip address to doted ip address",
-							   hostname);
-			
-			continue;
-		}
-		
-		if (g_strcmp0(buf, "0.0.0.0") == 0	||
-			g_strcmp0(buf, "127.0.0.1")		  == 0) {
-			continue;
-		}
+            hybrid_debug_error("dns", "reslove host \'%s\' failed when"
+                               " transforming binary ip address to doted ip address",
+                               hostname);
+            
+            continue;
+        }
+        
+        if (g_strcmp0(buf, "0.0.0.0") == 0    ||
+            g_strcmp0(buf, "127.0.0.1")          == 0) {
+            continue;
+        }
 
-		strncpy(ip, buf, strlen(buf));
-		goto addr_success;
-	}
+        strncpy(ip, buf, strlen(buf));
+        goto addr_success;
+    }
 
-	return HYBRID_ERROR;
+    return HYBRID_ERROR;
 
  addr_success:
 
-	if (!host_hash) {
-		host_hash = g_hash_table_new(g_str_hash, g_str_equal);
-	}
+    if (!host_hash) {
+        host_hash = g_hash_table_new(g_str_hash, g_str_equal);
+    }
 
-	hash_value = g_strdup(ip);
+    hash_value = g_strdup(ip);
 
-	g_hash_table_insert(host_hash, (gchar*)hostname, hash_value);
+    g_hash_table_insert(host_hash, (gchar*)hostname, hash_value);
 
-	hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'[new]", hostname, ip);
+    hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'[new]", hostname, ip);
 
-	return HYBRID_OK;
+    return HYBRID_OK;
 }

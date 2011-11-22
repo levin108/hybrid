@@ -27,31 +27,33 @@
 typedef struct _HybridConnection HybridConnection;
 typedef struct _HybridSslConnection HybridSslConnection;
 
-
 typedef gboolean (*connect_callback)(gint sk, gpointer user_data);
 typedef gboolean (*ssl_callback)(HybridSslConnection *ssl_conn, gpointer user_data);
+
+#define SSL_CALLBACK(ssl)   ((ssl_callback)ssl)
+#define CONN_CALLBACK(conn) ((conn_callback)conn)
 
 #include "eventloop.h"
 
 struct _HybridConnection {
-	gint sk;
+	gint   sk;
 	gchar *host;
-	gint port;
+	gint   port;
 };
 
 struct _HybridSslConnection {
-	gint sk;
+	gint              sk;
 	HybridConnection *conn;
 
 	ssl_callback conn_cb;
-	gpointer conn_data;
+	gpointer     conn_data;
 
 	ssl_callback recv_cb;
-	gpointer recv_data;
+	gpointer     recv_data;
 
-	BIO *wbio;
-	BIO *rbio;
-	SSL *ssl;
+	BIO     *wbio;
+	BIO     *rbio;
+	SSL     *ssl;
 	SSL_CTX *ssl_ctx;
 };
 
@@ -73,7 +75,7 @@ extern "C" {
  *         NULL if there was an error.
  */
 HybridConnection* hybrid_proxy_connect(const gchar *hostname, gint port,
-		connect_callback func, gpointer user_data);
+                                       connect_callback func, gpointer user_data);
 
 /**
  * Make a SSL connection to the specified host and port.
@@ -89,7 +91,7 @@ HybridConnection* hybrid_proxy_connect(const gchar *hostname, gint port,
  *         NULL if there was an error.
  */
 HybridSslConnection* hybrid_ssl_connect(const gchar *hostname, gint port,
-		ssl_callback func, gpointer user_data);
+                                        ssl_callback func, gpointer user_data);
 
 /**
  * Make a SSL hand-shake on the established tcp connection.
@@ -104,7 +106,7 @@ HybridSslConnection* hybrid_ssl_connect(const gchar *hostname, gint port,
  *         NULL if there was an error.
  */
 HybridSslConnection* hybrid_ssl_connect_with_fd(gint sk,
-		ssl_callback func, gpointer user_data);
+                                                ssl_callback func, gpointer user_data);
 
 /**
  * Write data to a SSL connection.

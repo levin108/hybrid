@@ -24,12 +24,12 @@
 #include <glib.h>
 #include <gmodule.h>
 
-typedef struct _HybridModule			HybridModule;
-typedef struct _HybridModuleInfo		HybridModuleInfo;
-typedef struct _HybridIMOps				HybridIMOps;
-typedef struct _HybridEmailOps			HybridEmailOps;
-typedef enum _HybridInputState			HybridInputState;
-typedef enum _HybridModuleType			HybridModuleType;
+typedef struct _HybridModule	 HybridModule;
+typedef struct _HybridModuleInfo HybridModuleInfo;
+typedef struct _HybridIMOps		 HybridIMOps;
+typedef struct _HybridEmailOps	 HybridEmailOps;
+typedef enum _HybridInputState	 HybridInputState;
+typedef enum _HybridModuleType	 HybridModuleType;
 
 enum _HybridInputState {
 	INPUT_STATE_TYPING,
@@ -79,8 +79,8 @@ struct _HybridIMOps {
 	/*
 	 * Show account tooltip when mouse over the account panel.
 	 */
-	gboolean (*account_tooltip)(HybridAccount			*account,
-								HybridTooltipData		*data);
+	gboolean (*account_tooltip)(HybridAccount	  *account,
+								HybridTooltipData *data);
 
 	/*
 	 * Show buddy tooltip when mouse over a certain buddy.
@@ -92,22 +92,22 @@ struct _HybridIMOps {
 	/*
 	 * Move a buddy to a new group.
 	 */
-	gboolean (*buddy_move)(HybridAccount		*account,
-						   HybridBuddy			*buddy,
-						   HybridGroup			*group);
-
+	gboolean (*buddy_move)(HybridAccount *account,
+						   HybridBuddy	 *buddy,
+						   HybridGroup	 *group);
+  
 	/*
 	 * Remove a buddy from the buddy list.
 	 */
-	gboolean (*buddy_remove)(HybridAccount		*account,
-							 HybridBuddy		*buddy);
+	gboolean (*buddy_remove)(HybridAccount *account,
+							 HybridBuddy   *buddy);
 
 	/*
 	 * Modify the local-name of a buddy.
 	 */
-	gboolean (*buddy_rename)(HybridAccount		*account,
-							 HybridBuddy		*buddy,
-							 const gchar		*new_name);
+	gboolean (*buddy_rename)(HybridAccount *account,
+							 HybridBuddy   *buddy,
+							 const gchar   *new_name);
 
 	/*
 	 * Add a new buddy.
@@ -118,31 +118,33 @@ struct _HybridIMOps {
 						  const gchar	*alias,
 						  const gchar	*tips);
 	
-	gboolean (*buddy_req)(HybridAccount			*account,
-						  HybridGroup			*group,
-						  const gchar			*id,
-						  const gchar			*alias,
-						  gboolean				 accept,
-						  const gpointer		 user_data);
+	gboolean (*buddy_req)(HybridAccount	 *account,
+						  HybridGroup	 *group,
+						  const gchar	 *id,
+						  const gchar	 *alias,
+						  gboolean		  accept,
+						  const gpointer  user_data);
 	
 	/*
 	 * Modify the name of the group.
 	 */
-	gboolean (*group_rename)(HybridAccount		*account,
-							 HybridGroup *		 group,
-							 const gchar		*new_name);
+	gboolean (*group_rename)(HybridAccount *account,
+							 HybridGroup *	group,
+							 const gchar   *new_name);
 	/*
 	 * Remove a group.
 	 */
-	gboolean (*group_remove)(HybridAccount		*account,
-							 HybridGroup		*group);
-	/*
+	gboolean (*group_remove)(HybridAccount *account,
+							 HybridGroup   *group);
+
+    /*
 	 * Group-add hook function, note that it won't add the new group to the
 	 * buddy list automaticly, you should add it manually in the hook function.
 	 */
-	void     (*group_add)(HybridAccount			*account,
-						  const gchar			*group_name);
-	/*
+	void     (*group_add)(HybridAccount	*account,
+						  const gchar	*group_name);
+
+    /*
 	 * To get the word limit in a chat window, return zero for no limit.
 	 */
 	gint     (*chat_word_limit)(HybridAccount *account);
@@ -150,15 +152,15 @@ struct _HybridIMOps {
 	/*
 	 * Start chat with a buddy.
 	 */
-	gboolean (*chat_start)(HybridAccount		*account,
-						   HybridBuddy			*buddy);
+	gboolean (*chat_start)(HybridAccount *account,
+						   HybridBuddy	 *buddy);
 
 	/*
 	 * Send input state to a certain buddy.
 	 */
-	void     (*chat_send_typing)(HybridAccount			*account,
-								 HybridBuddy			*buddy,
-								 HybridInputState		 state);
+	void     (*chat_send_typing)(HybridAccount	  *account,
+								 HybridBuddy	  *buddy,
+								 HybridInputState  state);
 	
 	/*
 	 * Send a message to a certain buddy.
@@ -176,24 +178,27 @@ struct _HybridIMOps {
 
 struct _HybridEmailOps {
 	gboolean (*login)(HybridAccount *account);
+    gboolean (*close)(HybridAccount *account);
 };
 
 struct _HybridModuleInfo {
-	gchar				*name;
-	gchar				*author;
-	gchar				*summary;
-	gchar				*description;
-	gchar				*homepage;
-	gchar				*major_version;
-	gchar				*minor_version;
-	gchar				*icon; /**< The name of the protocol icon, ie,
+	gchar *name;
+	gchar *author;
+	gchar *summary;
+	gchar *description;
+	gchar *homepage;
+	gchar *major_version;
+	gchar *minor_version;
+	gchar *icon; /**< The name of the protocol icon, ie,
 				   "msn" for "msn.png", the protocol icon must
 				   be in "png" format, and stored in 
 				   HYBRID_INSTALL_DIR/share/hybrid/protocols
 					   */
-	HybridModuleType	 module_type;
-	HybridIMOps			*im_ops;
-	HybridEmailOps		*email_ops;
+  
+	HybridModuleType  module_type;
+	HybridIMOps		 *im_ops;
+	HybridEmailOps	 *email_ops;
+  
 	
 	/*
 	 * To tell the plugin which menus this account has.
@@ -208,11 +213,12 @@ struct _HybridModuleInfo {
 
 struct _HybridModule {
 	/* full path of the library file */
-	gchar				*path;
-	gboolean			 loaded;
-	GSList				*option_list;
+	gchar            *path;
+	gboolean          loaded;
+	GSList           *option_list;
 	/* plugin info */
-	HybridModuleInfo	*info;
+	HybridModuleInfo *info;
+  
 };
 
 #ifdef __cplusplus

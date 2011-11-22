@@ -56,7 +56,7 @@ extern "C" {
  * @return The account created.
  */
 XmppAccount *xmpp_account_create(HybridAccount *account, const gchar *username,
-					const gchar *password, const gchar *to);
+                                 const gchar *password, const gchar *to);
 
 /**
  * Process the account information.
@@ -88,7 +88,7 @@ gint xmpp_account_modify_name(XmppStream *stream, const gchar *name);
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
 gint xmpp_account_modify_status(XmppStream *stream, gint state,
-		const gchar *status);
+                                const gchar *status);
 
 /**
  * Modify photo for the account.

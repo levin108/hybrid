@@ -23,30 +23,32 @@
 
 #include <gtk/gtk.h>
 
-typedef struct _HybridAccountPanel		HybridAccountPanel;
-typedef struct _HybridAccountEditPanel	HybridAccountEditPanel;
-typedef struct _HybridAccountMenuData	HybridAccountMenuData;
+typedef struct _HybridAccountPanel	   HybridAccountPanel;
+typedef struct _HybridAccountEditPanel HybridAccountEditPanel;
+typedef struct _HybridAccountMenuData  HybridAccountMenuData;
 
 struct _HybridAccountPanel {
-	GtkWidget			*window;
-	GtkListStore		*account_store;
-	GtkWidget			*account_tree;
+	GtkWidget              *window;
+	GtkListStore           *account_store;
+	GtkWidget              *account_tree;
+    HybridAccountEditPanel *edit_panel;
 };
 
 struct _HybridAccountEditPanel {
-	HybridAccountPanel	*parent;
-	GtkWidget			*window;
-	GtkWidget			*username_entry;
-	GtkWidget			*password_entry;
-	GtkWidget			*proto_combo;
-	GtkWidget			*user_table;
-	GtkWidget			*basic_vbox;
+	HybridAccountPanel *parent;
+	GtkWidget		   *window;
+	GtkWidget		   *username_entry;
+	GtkWidget		   *password_entry;
+	GtkWidget		   *proto_combo;
+	GtkWidget		   *user_table;
+	GtkWidget		   *basic_vbox;
+    gboolean            is_add;
 };
 
 
 struct _HybridAccountMenuData {
-	HybridAccount		*account;
-	gint				 presence_state;
+	HybridAccount *account;
+	gint		   presence_state;
 };
 
 

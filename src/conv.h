@@ -42,8 +42,8 @@ typedef void (*text_notify)(GtkWidget *, const gchar *, gint);
 typedef void (*theme_set_ops_func)(void);
 
 struct _HybridChatTheme {
-	const gchar *name;
-	theme_set_ops_func func;
+	const gchar        *name;
+	theme_set_ops_func  func;
 };
 
 struct _HybridChatTextOps{
@@ -55,7 +55,7 @@ struct _HybridChatTextOps{
 struct _HybridConversation {
 	GtkWidget *window;
 	GtkWidget *notebook;
-	GSList *chat_buddies;
+	GSList    *chat_buddies;
 };
 
 enum _HybridChatWindowType {
@@ -78,42 +78,43 @@ enum _HybridChatWindowType {
 };
 
 struct _HybridChatWindow {
-	HybridConversation *parent;
-	HybridChatWindowType type;
-	HybridAccount *account;
-	gchar *id;
+	HybridConversation   *parent;
+	HybridChatWindowType  type;
+	HybridAccount        *account;
+	gchar                *id;
 
-	gchar *title;   /**< only be used when it's user-defined window. */
-	GdkPixbuf *icon;/**< only be used when it's user-defined window. */
+	gchar     *title;           /**< only be used when it's user-defined window. */
+	GdkPixbuf *icon;            /**< only be used when it's user-defined window. */
 
-	gint unread; /* count of the unread message. */
+	gint unread;                /* count of the unread message. */
 
-	HybridLogs *logs; /* log context. */
+	HybridLogs *logs;           /* log context. */
 
-	gpointer data;
+	gpointer   data;
 	GtkWidget *pagelabel;
+  
 
 	GtkWidget *textview;
 	GtkWidget *toolbar;
 	GtkWidget *sendtext;
-	GtkWidget *vbox; /**< The Notebook child widget */
+	GtkWidget *vbox;            /**< The Notebook child widget */
 
 	/* label to show how many words left that can be input. */
 	GtkWidget *words_left_label;
-
+  
 	/* tab label */
-	GtkWidget *tablabel;
-	GtkTreeIter tabiter;
+	GtkWidget   *tablabel;
+	GtkTreeIter  tabiter;
 
 	/* tip label */
-	GtkWidget *tiplabel;
-	GtkTreeIter tipiter;
+	GtkWidget   *tiplabel;
+	GtkTreeIter  tipiter;
 
 	/* callback function called when the send button clicked,
 	 * only be used when it's user-defined window. */
 	ChatCallback callback;
 
-	guint typing_source;
+	guint    typing_source;
 	gboolean is_typing;
 
 	/* event source of the inputing timeout event. */

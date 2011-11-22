@@ -29,70 +29,70 @@
 static void
 add_pad(GstElement *element , GstPad *pad , gpointer data)
 {
-	gchar *name;
-	GstElement *sink = (GstElement*)data;
+    gchar *name;
+    GstElement *sink = (GstElement*)data;
 
-	name = gst_pad_get_name(pad);
-	gst_element_link_pads(element, name, sink, "sink");
-	g_free(name);
+    name = gst_pad_get_name(pad);
+    gst_element_link_pads(element, name, sink, "sink");
+    g_free(name);
 }
 
 void
 hybrid_sound_play_file(const gchar *filename) 
 {
 
-	GstElement *pipeline;
-	GstElement *source, *parser, *sink;
+    GstElement *pipeline;
+    GstElement *source, *parser, *sink;
 
-	if (hybrid_pref_get_boolean("mute")) {
-		return;
-	}
+    if (hybrid_pref_get_boolean("mute")) {
+        return;
+    }
 
-	pipeline = gst_pipeline_new("audio-player");
+    pipeline = gst_pipeline_new("audio-player");
 
-	source = gst_element_factory_make("filesrc" , "source");
+    source = gst_element_factory_make("filesrc" , "source");
 
-	if (!source) {
-		g_warning("make filesrc element failed");
-		return;
-	}
+    if (!source) {
+        g_warning("make filesrc element failed");
+        return;
+    }
 
-	parser = gst_element_factory_make("wavparse" , "parser");
+    parser = gst_element_factory_make("wavparse" , "parser");
 
-	if (!parser) {
-		g_warning("make wavparse element failed");
-		return;
-	}
+    if (!parser) {
+        g_warning("make wavparse element failed");
+        return;
+    }
 
-	sink = gst_element_factory_make("alsasink" , "output");
+    sink = gst_element_factory_make("alsasink" , "output");
 
-	if (!sink) {
-		g_warning("make alsasink element failed");
-		return;
-	}
+    if (!sink) {
+        g_warning("make alsasink element failed");
+        return;
+    }
 
-	g_object_set(G_OBJECT(source), "location",
-			filename , NULL);
+    g_object_set(G_OBJECT(source), "location",
+            filename , NULL);
 
-	gst_bin_add_many(GST_BIN(pipeline), source, parser , sink , NULL);
+    gst_bin_add_many(GST_BIN(pipeline), source, parser , sink , NULL);
 
-	g_signal_connect(parser, "pad-added",
-			G_CALLBACK(add_pad) , sink);
+    g_signal_connect(parser, "pad-added",
+            G_CALLBACK(add_pad) , sink);
 
-	if (!gst_element_link(source , parser)) {
-		g_warning("linke source to parser failed");
-	}
+    if (!gst_element_link(source , parser)) {
+        g_warning("linke source to parser failed");
+    }
 
-	gst_element_set_state(pipeline , GST_STATE_PLAYING);
+    gst_element_set_state(pipeline , GST_STATE_PLAYING);
 
-	g_object_unref(pipeline);
+    g_object_unref(pipeline);
 }
 
 void
 hybrid_sound_init(gint argc, gchar **argv)
 {
-	gst_init(&argc, &argv);
-	return;
+    gst_init(&argc, &argv);
+    return;
 }
 
 #else /* USE_GSTREAMER */
@@ -100,13 +100,13 @@ hybrid_sound_init(gint argc, gchar **argv)
 void
 hybrid_sound_play_file(const gchar *filename)
 {
-	return;
+    return;
 }
 
 void
 hybrid_sound_init(gint argc, gchar **argv)
 {
-	return;
+    return;
 }
 
 #endif /* USE_GSTREAMER */

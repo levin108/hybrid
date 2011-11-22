@@ -25,50 +25,50 @@
 #define GROUPNAME_LENGTH   320
 #define CONTACTNAME_LENGTH 320
 
-typedef struct _HybridBlist HybridBlist;
-typedef struct _HybridGroup HybridGroup;
-typedef struct _HybridBuddy HybridBuddy;
+typedef struct _HybridBlist        HybridBlist;
+typedef struct _HybridGroup        HybridGroup;
+typedef struct _HybridBuddy        HybridBuddy;
 typedef enum _HybridBlistCacheType HybridBlistCacheType;
 
 #include "xmlnode.h"
 #include "account.h"
 
 struct _HybridBlist {
-	GtkWidget *treeview;
-	GtkTreeStore *treemodel;
+	GtkWidget         *treeview;
+	GtkTreeStore      *treemodel;
 	GtkTreeViewColumn *text_column;
-	GtkCellRenderer *text_renderer;
+	GtkCellRenderer   *text_renderer;
 };
 
 struct _HybridGroup {
-	GtkTreeIter iter;
-	HybridAccount *account; /**< The corresponding xml node in cache context.*/
+	GtkTreeIter    iter;
+	HybridAccount *account;     /**< The corresponding xml node in cache context.*/
 
 	xmlnode *cache_node;
 
-	gint buddy_count; /**< count of the buddies belonging to this group. */
-	gint online_count; /**< count of the online buddies belonging to this group.*/
+	gint   buddy_count;         /**< count of the buddies belonging to this group. */
+	gint   online_count;        /**< count of the online buddies belonging to this group.*/
 	gchar *id;
 	gchar *name;
-	gint renamable; /**< whether this group can be renamed. */
+	gint   renamable;           /**< whether this group can be renamed. */
 };
 
 struct _HybridBuddy {
-	GtkTreeIter iter;
+	GtkTreeIter    iter;
 	HybridAccount *account;
-	HybridGroup *parent;
+	HybridGroup   *parent;
 
-	xmlnode *cache_node; /**< The corresponding xml node in cache context.*/
+	xmlnode *cache_node;        /**< The corresponding xml node in cache context.*/
 
-	gchar *id;	/**< User Identity. */
-	gchar *name; /**< The name string. */
-	gchar *mood; /**< The mood phrase. */
-	gint   state; /**< The presence status. */
-	gint status; /**< 0 if this buddy is normal, 1 if it's unathorized. */
-	gchar *icon_name; /**< The portrait file name.  */
-	guchar *icon_data; /**< The portrait raw data. */
-	gsize icon_data_length; /**< The size of the portrait raw data */
-	gchar *icon_crc; /**< The portrait crc. */
+	gchar  *id;                 /**< User Identity. */
+	gchar  *name;               /**< The name string. */
+	gchar  *mood;               /**< The mood phrase. */
+	gint    state;              /**< The presence status. */
+	gint    status;             /**< 0 if this buddy is normal, 1 if it's unathorized. */
+	gchar  *icon_name;          /**< The portrait file name.  */
+	guchar *icon_data;          /**< The portrait raw data. */
+	gsize   icon_data_length;   /**< The size of the portrait raw data */
+	gchar  *icon_crc;           /**< The portrait crc. */
 };
 
 enum {

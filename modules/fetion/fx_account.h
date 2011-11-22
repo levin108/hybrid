@@ -29,28 +29,28 @@ typedef struct _Verification Verification;
 #include "fx_sip.h"
 
 struct _Verification {
-	gchar		*algorithm;
-	gchar		*type;
-	gchar		*text;
-	gchar		*tips;
-	gchar		*code;
-	gchar		*guid;
-	gchar		*desc;
+	gchar *algorithm;
+	gchar *type;
+	gchar *text;
+	gchar *tips;
+	gchar *code;
+	gchar *guid;
+	gchar *desc;
 };
 
 
 struct _fetion_account {
 	HybridAccount *account;
-	gint sk; /**< The socket descriptor. */
-	guint source; /**< The ID of the event source. */
+	gint           sk;          /**< The socket descriptor. */
+	guint          source;      /**< The ID of the event source. */
 
-	gchar *buffer; /**< buffer for received data */
+	gchar *buffer;              /**< buffer for received data */
 
-	gchar *sid;      /**< Fetion number. */
-	gchar *userid;   /**< user id */
-	gchar *mobileno; /**< Mobile phone number */
-	gchar *password; /**< Raw password not hashed */
-	gchar *sipuri;   /**< sipuri like 'sip:100@fetion.com.cn' */
+	gchar *sid;                 /**< Fetion number. */
+	gchar *userid;              /**< user id */
+	gchar *mobileno;            /**< Mobile phone number */
+	gchar *password;            /**< Raw password not hashed */
+	gchar *sipuri;              /**< sipuri like 'sip:100@fetion.com.cn' */
 	gchar *nickname;
 	gchar *mood_phrase;	
 	gchar *portrait_crc;
@@ -59,18 +59,18 @@ struct _fetion_account {
 	gchar *city;
 	gint   gender;
 
-	GSList *groups; /**< The group list */
-	GSList *buddies; /**< The buddy list */
+	GSList *groups;             /**< The group list */
+	GSList *buddies;            /**< The buddy list */
 
 	gchar *sms_online_status;
 	gchar *public_ip;					
 	gchar *last_login_ip;				
-	gchar *last_login_time;				
+	gchar *last_login_time;
 
-	gchar *portrait_host_name; /**< host name of the portrait server */
-	gchar *portrait_host_path; /**< path on the portrait server */
-	gchar *sipc_proxy_ip; /**< ip address of the sipc host */
-	gint  sipc_proxy_port; /**< port of the sipc host */
+	gchar *portrait_host_name;  /**< host name of the portrait server */
+	gchar *portrait_host_path;  /**< path on the portrait server */
+	gchar *sipc_proxy_ip;       /**< ip address of the sipc host */
+	gint   sipc_proxy_port;     /**< port of the sipc host */
 
 	/* config versions */
 	gchar *cfg_server_version;
@@ -90,8 +90,8 @@ struct _fetion_account {
 	gint login_status; 	
 
 	gchar *carrier;
-	gint carrier_status;
-	gint bound_to_mobile;
+	gint   carrier_status;
+	gint   bound_to_mobile;
 
 	/* versions */
 	gchar *personal_version;
@@ -139,7 +139,7 @@ extern "C" {
  * @return NULL if there was an error. fetion_account if success.
  */
 fetion_account *fetion_account_create(HybridAccount *account, const gchar *no,
-		const gchar *password);
+                                      const gchar *password);
 
 /**
  * Clone an account with the basic attribute, when we start a new socket channel,
@@ -155,16 +155,16 @@ fetion_account *fetion_account_clone(fetion_account *account);
 /**
  * Set the attribute value of the fetion account.
  */
-#define fetion_account_set_nickname(ac,v)				do { g_free((ac)->nickname); (ac)->nickname					= g_strdup(v); } while(0)
-#define fetion_account_set_sipuri(ac,v)					do { g_free((ac)->sipuri);   (ac)->sipuri					= g_strdup(v); }   while(0)
-#define fetion_account_set_userid(ac,v)					do { g_free((ac)->userid);   (ac)->userid					= g_strdup(v); }   while(0)
-#define fetion_account_set_mobileno(ac,v)				do { g_free((ac)->mobileno); (ac)->mobileno					= g_strdup(v); } while(0)
-#define fetion_account_set_ssic(ac,v)					do { g_free((ac)->ssic);     (ac)->ssic						= g_strdup(v); }     while(0)
-#define fetion_account_set_who(ac,v)					do { g_free((ac)->who);      (ac)->who						= g_strdup(v); }      while(0)
-#define fetion_account_set_mood(ac,v)					do { g_free((ac)->mood_phrase); (ac)->mood_phrase			= g_strdup(v); } while(0)
-#define fetion_account_set_persion_version(ac,v)		do { g_free((ac)->personal_version); (ac)->personal_version = g_strdup(v); } while(0)
-#define fetion_account_set_mood(ac,v)					do { g_free((ac)->mood_phrase); (ac)->mood_phrase			= g_strdup(v); } while(0)
-#define fetion_account_set_custom_config(ac,v)			do { g_free((ac)->custom_config); (ac)->custom_config		= g_strdup(v); } while(0)
+#define fetion_account_set_nickname(ac,v)		 do { g_free((ac)->nickname); (ac)->nickname				 = g_strdup(v); } while(0)
+#define fetion_account_set_sipuri(ac,v)			 do { g_free((ac)->sipuri);   (ac)->sipuri                   = g_strdup(v); }   while(0)
+#define fetion_account_set_userid(ac,v)			 do { g_free((ac)->userid);   (ac)->userid                   = g_strdup(v); }   while(0)
+#define fetion_account_set_mobileno(ac,v)		 do { g_free((ac)->mobileno); (ac)->mobileno				 = g_strdup(v); } while(0)
+#define fetion_account_set_ssic(ac,v)			 do { g_free((ac)->ssic);     (ac)->ssic					 = g_strdup(v); }     while(0)
+#define fetion_account_set_who(ac,v)			 do { g_free((ac)->who);      (ac)->who                      = g_strdup(v); }      while(0)
+#define fetion_account_set_mood(ac,v)			 do { g_free((ac)->mood_phrase); (ac)->mood_phrase           = g_strdup(v); } while(0)
+#define fetion_account_set_persion_version(ac,v) do { g_free((ac)->personal_version); (ac)->personal_version = g_strdup(v); } while(0)
+#define fetion_account_set_mood(ac,v)			 do { g_free((ac)->mood_phrase); (ac)->mood_phrase           = g_strdup(v); } while(0)
+#define fetion_account_set_custom_config(ac,v)	 do { g_free((ac)->custom_config); (ac)->custom_config       = g_strdup(v); } while(0)
 
 /**
  * Destroy the fetion account.

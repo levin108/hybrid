@@ -28,9 +28,9 @@ typedef struct _xmlnode xmlnode;
 struct _xmlnode {
 	xmlNode *node;
 	xmlDoc  *doc;
-	gint is_root;
-	gchar *name;
-	gchar *prefix;
+	gint     is_root;
+	gchar   *name;
+	gchar   *prefix;
 	xmlnode *parent;
 	xmlnode *child;
 	xmlnode *next;
@@ -58,7 +58,7 @@ xmlnode *xmlnode_create(const gchar *name);
  * @param url    The url of the namespace.
  */
 void xmlnode_new_namespace(xmlnode *node, const gchar *prefix,
-		const gchar *url);
+                           const gchar *url);
 
 /**
  * Get the root element of the xml context.

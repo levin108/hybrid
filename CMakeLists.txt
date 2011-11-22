@@ -230,7 +230,6 @@ set(hybrid_SRC
 	lib/util.c
 	lib/pref.c
 	lib/logs.c
-	lib/imap.c
 	src/gtkconn.c
 	src/gtksound.c
 	src/gtkutils.c
@@ -374,6 +373,20 @@ add_library(xmpp SHARED ${xmpp_SRC})
 
 # install fetion module
 install(TARGETS xmpp
+	LIBRARY DESTINATION ${MODULE_INSTALL_DIR}
+	ARCHIVE DESTINATION ${MODULE_INSTALL_DIR}
+)
+
+# source list of email module
+set(email_SRC
+	modules/email/mail.c
+    modules/email/imap.c
+)
+
+add_library(email SHARED ${email_SRC})
+
+# install email modules/xmpp/xmpp
+install(TARGETS email
 	LIBRARY DESTINATION ${MODULE_INSTALL_DIR}
 	ARCHIVE DESTINATION ${MODULE_INSTALL_DIR}
 )
