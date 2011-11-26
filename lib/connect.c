@@ -78,7 +78,7 @@ addr_init(const gchar *hostname, gint port, struct sockaddr *addr)
         return HYBRID_ERROR;
     }
 
-    memset(&addr, 0, sizeof(struct sockaddr_in));
+    memset(addr, 0, sizeof(struct sockaddr_in));
     addr_in->sin_family      = AF_INET;
     addr_in->sin_addr.s_addr = inet_addr(host_ip);
     addr_in->sin_port        = htons(port);
