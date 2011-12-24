@@ -26,7 +26,7 @@
 typedef struct _fetion_group fetion_group;
 
 struct _fetion_group {
-	gint group_id;
+	gint   group_id;
 	gchar *group_name;
 };
 

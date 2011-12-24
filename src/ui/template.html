@@ -3,13 +3,23 @@
 	<head>
 		<style type="text/css">%s</style>
 	</head>
-	<body></body>
+	<body>
+		<div></div>
+		<table class='notify'>
+			<tr><td id="notify_area"></td></tr>
+		</table>
+	</body>
 	<script type="text/javascript">
 		function appendMessage(html) {
-			var body = document.getElementsByTagName('body')[0];
+			var body = document.getElementsByTagName('div')[0];
 			var node = document.createElement('span');
 			node.innerHTML = html;
 			body.appendChild(node);
+			document.body.scrollTop = document.body.offsetHeight;
+		}
+		function notify(str) {
+			var body = document.getElementById("notify_area");
+			body.innerHTML = str;
 			document.body.scrollTop = document.body.offsetHeight;
 		}
 	</script>

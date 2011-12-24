@@ -37,7 +37,7 @@ extern "C" {
  * @param url     The url of the url to be set.
  */
 gint fetion_message_parse_sysmsg(const gchar *sipmsg,
-		gchar **content, gchar **url);
+                                 gchar **content, gchar **url);
 
 /**
  * Send a text message to a buddy who is invisible or offline.
@@ -49,7 +49,7 @@ gint fetion_message_parse_sysmsg(const gchar *sipmsg,
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
 gint fetion_message_send(fetion_account *account, const gchar *userid,
-						const gchar *text);
+                         const gchar *text);
 
 /**
  * Send a text message to ourselves.

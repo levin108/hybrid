@@ -109,22 +109,22 @@ typedef struct _sip_header sip_header;
  * sip header.
  */
 struct _sip_header {
-	gchar *name;        /**< sip header namne */
-	gchar *value;       /**< sip header value */
-	sip_header *next;	/**< next sip header */
+	gchar      *name;           /**< sip header namne */
+	gchar      *value;          /**< sip header value */
+	sip_header *next;           /**< next sip header */
 };
 
 /**
  * Sip context to handle sip message.
  */
 struct _fetion_sip {
-	gint type;				/**< sip message type */
-	gchar *from;			/**< sender's fetion number,in sip header it's "F: "  */
-	gint callid;
-	gint sequence;			/**< sequence number , in sip it`s "Q: " */
-	gint threadCount;		/**< listening threads count using this sip */
-	gchar *sipuri;			/**< outer sipuri used when listening */
-	sip_header *header;		/**< some othre header list	*/
+	gint        type;			/**< sip message type */
+	gchar      *from;			/**< sender's fetion number,in sip header it's "F: "  */
+	gint        callid;
+	gint        sequence;		/**< sequence number , in sip it`s "Q: " */
+	gint        threadCount;	/**< listening threads count using this sip */
+	gchar      *sipuri;			/**< outer sipuri used when listening */
+	sip_header *header;         /**< some othre header list	*/
 };
 
 #ifdef __cplusplus

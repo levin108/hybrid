@@ -30,6 +30,8 @@
 
 typedef gboolean (*input_func)(gint sk, gpointer user_data);
 
+#define EVENT_CALLBACK(cb) ((input_func)cb)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,7 +46,7 @@ extern "C" {
  * @return The event source id.
  */
 guint hybrid_event_add(gint sk, gint event_type, input_func func,
-		gpointer user_data);
+                       gpointer user_data);
 
 /**
  * Remove an event handler.
@@ -65,7 +67,7 @@ gboolean hybrid_event_remove(guint source);
  * @return The event source id.
  */
 guint hybrid_ssl_event_add(HybridSslConnection *isc, ssl_callback func,
-		gpointer user_data);
+                           gpointer user_data);
 
 #ifdef __cplusplus
 }

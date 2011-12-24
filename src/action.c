@@ -22,34 +22,34 @@
 
 HybridAction*
 hybrid_action_create(HybridAccount *account, const gchar *text, 
-		ActionCallback callback)
+                     ActionCallback callback)
 {
-	HybridAction *action;
+    HybridAction *action;
 
-	g_return_val_if_fail(account != NULL, NULL);
-	g_return_val_if_fail(text != NULL, NULL);
+    g_return_val_if_fail(account != NULL, NULL);
+    g_return_val_if_fail(text != NULL, NULL);
 
-	action = g_new0(HybridAction, 1);
-	action->text     = g_strdup(text);
-	action->account  = account;
-	action->callback = callback;
+    action = g_new0(HybridAction, 1);
+    action->text     = g_strdup(text);
+    action->account  = account;
+    action->callback = callback;
 
-	return action;
+    return action;
 }
 
 void
 hybrid_action_destroy(HybridAction *action)
 {
-	if (action) {
-		g_free(action->text);
-		g_free(action);
-	}
+    if (action) {
+        g_free(action->text);
+        g_free(action);
+    }
 }
 
 HybridAccount*
 hybrid_action_get_account(HybridAction *action)
 {
-	g_return_val_if_fail(action != NULL, NULL);
+    g_return_val_if_fail(action != NULL, NULL);
 
-	return action->account;
+    return action->account;
 }

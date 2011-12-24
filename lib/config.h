@@ -50,6 +50,13 @@ extern "C" {
 gchar *hybrid_config_get_path(void);
 
 /**
+ * Get the absolute path of the certificate directory,
+ * such as /home/levin/.config/hybrid/certificates, if not
+ * exists, create it.
+ */
+gchar *hybrid_config_get_cert_path(void);
+
+/**
  * Create a config context.
  *
  * @return The config structure created.

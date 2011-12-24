@@ -31,16 +31,16 @@
 
 
 enum {
-	P_ONLINE = 		 400, 
-	P_RIGHTBACK = 	 300,
-	P_AWAY = 		 100,
-	P_BUSY = 		 600,
-	P_OUTFORLUNCH =  500,
-	P_ONTHEPHONE = 	 150,
-	P_MEETING = 	 850,
+	P_ONLINE       = 400, 
+	P_RIGHTBACK    = 300,
+	P_AWAY         = 100,
+	P_BUSY         = 600,
+	P_OUTFORLUNCH  = 500,
+	P_ONTHEPHONE   = 150,
+	P_MEETING      = 850,
 	P_DONOTDISTURB = 800,
-	P_INVISIBLE =	 0,
-	P_OFFLINE =      -1
+	P_INVISIBLE    = 0,
+	P_OFFLINE      = -1
 };
 
 #ifdef __cplusplus

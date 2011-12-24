@@ -27,14 +27,14 @@ typedef struct _IqRequest IqRequest;
 typedef struct _IqTransaction IqTransaction;
 
 typedef gboolean (*trans_callback)(XmppStream *stream, xmlnode *node,
-									gpointer user_data);
+                                   gpointer user_data);
 
 
 struct _IqRequest {
-	gint type;
-	XmppStream *stream;
-	xmlnode *node; /**< root node of the xml context. */
-	gint id;
+	gint           type;
+	XmppStream    *stream;
+	xmlnode       *node;        /**< root node of the xml context. */
+	gint           id;
 	IqTransaction *trans;
 };
 
@@ -42,7 +42,7 @@ struct _IqTransaction {
 	gint iq_id;
 
 	trans_callback callback;
-	gpointer user_data;
+	gpointer       user_data;
 };
 
 
@@ -110,7 +110,7 @@ IqTransaction *iq_transaction_create(gint iq_id);
  * @param user_data User-specified data for the callback function.
  */
 void iq_transaction_set_callback(IqTransaction *trans, trans_callback callback,
-						gpointer user_data);
+                                 gpointer user_data);
 
 /**
  * Add a transaction to the stream's pending list.
@@ -134,10 +134,6 @@ void iq_transaction_remove(XmppStream *stream, IqTransaction *trans);
  * @param trans The transaction to destroy.
  */
 void iq_transaction_destroy(IqTransaction *trans);
-
-#ifdef __cplusplus
-}
-#endif
 
 #ifdef __cplusplus
 }

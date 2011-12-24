@@ -35,26 +35,26 @@ struct _fetion_buddy {
 	gchar *nickname;
 	gchar *mood_phrase;
 	gchar *carrier;
-	gint carrier_status;
-	gint gender;
+	gint   carrier_status;
+	gint   gender;
 	gchar *portrait_crc;
-	gchar *groups; /**< it's the group IDs,in form of 3,5,7 */
+	gchar *groups;              /**< it's the group IDs,in form of 3,5,7 */
 	gchar *country;
 	gchar *province;
 	gchar *city;
-	gint status;
-	gint state;
+	gint   status;
+	gint   state;
 };
 
 typedef struct _portrait_trans portrait_trans;
 typedef struct _portrait_data portrait_data;
 
 struct _portrait_trans {
-	gchar *data; /**< portrait image data. */
-	gint data_size; /**< length of the portrait buffer data. */
-	gint data_len; /**< length of the portrait image data. */
-	gint portrait_type;
-	fetion_buddy *buddy;
+	gchar          *data;       /**< portrait image data. */
+	gint            data_size;  /**< length of the portrait buffer data. */
+	gint            data_len;   /**< length of the portrait image data. */
+	gint            portrait_type;
+	fetion_buddy   *buddy;
 	fetion_account *ac;
 };
 
@@ -62,14 +62,14 @@ struct _portrait_trans {
  * Structure to deliver to the portrait callback function.
  */
 struct _portrait_data {
-	fetion_buddy *buddy;
-	gint portrait_type;
+	fetion_buddy   *buddy;
+	gint            portrait_type;
 	fetion_account *ac;
 };
 
 enum {
-	PORTRAIT_TYPE_BUDDY, /**< flag to fetch buddy's portrait. */
-	PORTRAIT_TYPE_ACCOUNT /**< flag to fetch account's portrait. */
+	PORTRAIT_TYPE_BUDDY,        /**< flag to fetch buddy's portrait. */
+	PORTRAIT_TYPE_ACCOUNT       /**< flag to fetch account's portrait. */
 };
 
 #ifdef __cplusplus

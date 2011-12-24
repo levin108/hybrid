@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 #include <unistd.h>
 #include <glib/gi18n.h>
 #include <locale.h>
@@ -34,7 +35,9 @@
 
 /* network headers */
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 

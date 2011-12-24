@@ -31,317 +31,317 @@ static gchar *generate_group_remove_body(const gchar *groupid);
 fetion_group*
 fetion_group_create(gint id, const gchar *name)
 {
-	fetion_group *group;
+    fetion_group *group;
 
-	g_return_val_if_fail(name != NULL, NULL);
+    g_return_val_if_fail(name != NULL, NULL);
 
-	group = g_new0(fetion_group, 1);
-	group->group_id = id;
-	group->group_name = g_strdup(name);
+    group = g_new0(fetion_group, 1);
+    group->group_id = id;
+    group->group_name = g_strdup(name);
 
-	return group;
+    return group;
 }
 
 void
 fetion_group_destroy(fetion_group *group)
 {
-	if (group) {
-		g_free(group->group_name);
-		g_free(group);
-	}
+    if (group) {
+        g_free(group->group_name);
+        g_free(group);
+    }
 }
 
 static gint
 group_edit_cb(fetion_account *ac, const gchar *sipmsg,
-			fetion_transaction *trans)
+            fetion_transaction *trans)
 {
-	hybrid_debug_info("fetion", "edit group, recv:\n%s", sipmsg);
+    hybrid_debug_info("fetion", "edit group, recv:\n%s", sipmsg);
 
-	return HYBRID_OK;
+    return HYBRID_OK;
 }
 
 gint
 fetion_group_edit(fetion_account *account, const gchar *id,
-						const gchar *name)
+                        const gchar *name)
 {
-	fetion_sip *sip;
-	sip_header *eheader;
-	fetion_transaction *trans;
-	gchar *body;
-	gchar *sip_text;
+    fetion_sip *sip;
+    sip_header *eheader;
+    fetion_transaction *trans;
+    gchar *body;
+    gchar *sip_text;
 
-	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
-	g_return_val_if_fail(id != NULL, HYBRID_ERROR);
-	g_return_val_if_fail(name != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(id != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(name != NULL, HYBRID_ERROR);
 
-	sip = account->sip;
+    sip = account->sip;
 
-	fetion_sip_set_type(sip, SIP_SERVICE);
+    fetion_sip_set_type(sip, SIP_SERVICE);
 
-	eheader = sip_event_header_create(SIP_EVENT_SETBUDDYLISTINFO);
-	fetion_sip_add_header(sip, eheader);
+    eheader = sip_event_header_create(SIP_EVENT_SETBUDDYLISTINFO);
+    fetion_sip_add_header(sip, eheader);
 
-	trans = transaction_create();
-	transaction_set_callid(trans, sip->callid);
-	transaction_set_callback(trans, group_edit_cb);
-	transaction_add(account, trans);
+    trans = transaction_create();
+    transaction_set_callid(trans, sip->callid);
+    transaction_set_callback(trans, group_edit_cb);
+    transaction_add(account, trans);
 
-	body = generate_group_edit_body(id, name);
-	sip_text = fetion_sip_to_string(sip, body);
-	g_free(body);
+    body = generate_group_edit_body(id, name);
+    sip_text = fetion_sip_to_string(sip, body);
+    g_free(body);
 
-	hybrid_debug_info("fetion", "rename group,send\n%s", sip_text);
+    hybrid_debug_info("fetion", "rename group,send\n%s", sip_text);
 
-	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+    if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
 
-		hybrid_debug_info("fetion", "rename group failed");
+        hybrid_debug_info("fetion", "rename group failed");
 
-		return HYBRID_ERROR;
-	}
+        return HYBRID_ERROR;
+    }
 
-	g_free(sip_text);
+    g_free(sip_text);
 
-	return HYBRID_OK;
+    return HYBRID_OK;
 }
 
 static gint
 group_remove_cb(fetion_account *ac, const gchar *sipmsg,
-				fetion_transaction *trans)
+                fetion_transaction *trans)
 {
-	hybrid_debug_info("fetion", "remove buddy, recv:\n%s", sipmsg);
+    hybrid_debug_info("fetion", "remove buddy, recv:\n%s", sipmsg);
 
-	return HYBRID_OK;
+    return HYBRID_OK;
 }
 
 gint
 fetion_group_remove(fetion_account *account, const gchar *groupid)
 {
-	fetion_sip *sip;
-	sip_header *eheader;
-	gchar *body;
-	gchar *sip_text;
-	fetion_transaction *trans;
+    fetion_sip *sip;
+    sip_header *eheader;
+    gchar *body;
+    gchar *sip_text;
+    fetion_transaction *trans;
 
-	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
-	g_return_val_if_fail(groupid != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(groupid != NULL, HYBRID_ERROR);
 
-	sip = account->sip;
+    sip = account->sip;
 
-	fetion_sip_set_type(sip, SIP_SERVICE);
+    fetion_sip_set_type(sip, SIP_SERVICE);
 
-	eheader = sip_event_header_create(SIP_EVENT_DELETEBUDDYLIST);
-	fetion_sip_add_header(sip, eheader);
+    eheader = sip_event_header_create(SIP_EVENT_DELETEBUDDYLIST);
+    fetion_sip_add_header(sip, eheader);
 
-	trans = transaction_create();
-	transaction_set_callid(trans, sip->callid);
-	transaction_set_callback(trans, group_remove_cb);
-	transaction_add(account, trans);
+    trans = transaction_create();
+    transaction_set_callid(trans, sip->callid);
+    transaction_set_callback(trans, group_remove_cb);
+    transaction_add(account, trans);
 
-	body = generate_group_remove_body(groupid);
-	sip_text = fetion_sip_to_string(sip, body);
-	g_free(body);
+    body = generate_group_remove_body(groupid);
+    sip_text = fetion_sip_to_string(sip, body);
+    g_free(body);
 
-	hybrid_debug_info("fetion", "remove group, send:\n%s", sip_text);
+    hybrid_debug_info("fetion", "remove group, send:\n%s", sip_text);
 
-	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+    if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
 
-		hybrid_debug_info("fetion", "remove group error");
+        hybrid_debug_info("fetion", "remove group error");
 
-		return HYBRID_ERROR;
-	}
+        return HYBRID_ERROR;
+    }
 
-	g_free(sip_text);
-	
-	return HYBRID_OK;
+    g_free(sip_text);
+    
+    return HYBRID_OK;
 }
 
 static gint
 group_add_cb(fetion_account *account, const gchar *sipmsg,
-			fetion_transaction *trans)
+            fetion_transaction *trans)
 {
-	gint code;
-	gchar *pos;
-	xmlnode *root;
-	xmlnode *node;
-	gchar *group_name;
-	gchar *group_id;
+    gint code;
+    gchar *pos;
+    xmlnode *root;
+    xmlnode *node;
+    gchar *group_name;
+    gchar *group_id;
 
-	hybrid_debug_info("fetion", "group add, recv:\n%s", sipmsg);
+    hybrid_debug_info("fetion", "group add, recv:\n%s", sipmsg);
 
-	if ((code = fetion_sip_get_code(sipmsg)) != 200) {
-		goto group_add_error;
-	}
+    if ((code = fetion_sip_get_code(sipmsg)) != 200) {
+        goto group_add_error;
+    }
 
-	if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
-		goto group_add_error;
-	}
+    if (!(pos = strstr(sipmsg, "\r\n\r\n"))) {
+        goto group_add_error;
+    }
 
-	pos += 4;
+    pos += 4;
 
-	if (!(root = xmlnode_root(pos, strlen(pos)))) {
-		goto group_add_error;
-	}
+    if (!(root = xmlnode_root(pos, strlen(pos)))) {
+        goto group_add_error;
+    }
 
-	if (!(node = xmlnode_find(root, "buddy-list"))) {
-		goto group_add_error;
-	}
+    if (!(node = xmlnode_find(root, "buddy-list"))) {
+        goto group_add_error;
+    }
 
-	if (!xmlnode_has_prop(node, "id") || !xmlnode_has_prop(node, "name")) {
-		goto group_add_error;
-	}
+    if (!xmlnode_has_prop(node, "id") || !xmlnode_has_prop(node, "name")) {
+        goto group_add_error;
+    }
 
-	group_id = xmlnode_prop(node, "id");
-	group_name = xmlnode_prop(node, "name");
+    group_id = xmlnode_prop(node, "id");
+    group_name = xmlnode_prop(node, "name");
 
-	hybrid_blist_add_group(account->account, group_id, group_name);
+    hybrid_blist_add_group(account->account, group_id, group_name);
 
-	return HYBRID_OK;
+    return HYBRID_OK;
 
 group_add_error:
 
-	hybrid_debug_error("fetion", "group add error: %d", code);
+    hybrid_debug_error("fetion", "group add error: %d", code);
 
-	/* TODO popup warning box. */
+    /* TODO popup warning box. */
 
-	return HYBRID_ERROR;
+    return HYBRID_ERROR;
 }
 
 gint
 fetion_group_add(fetion_account *account, const gchar *name)
 {
-	fetion_sip *sip;
-	sip_header *eheader;
-	gchar *body;
-	gchar *sip_text; 
-	fetion_transaction *trans;
+    fetion_sip *sip;
+    sip_header *eheader;
+    gchar *body;
+    gchar *sip_text; 
+    fetion_transaction *trans;
 
-	g_return_val_if_fail(account != NULL, HYBRID_ERROR);
-	g_return_val_if_fail(name != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(account != NULL, HYBRID_ERROR);
+    g_return_val_if_fail(name != NULL, HYBRID_ERROR);
 
-	sip = account->sip;
+    sip = account->sip;
 
-	fetion_sip_set_type(sip, SIP_SERVICE);
+    fetion_sip_set_type(sip, SIP_SERVICE);
 
-	eheader = sip_event_header_create(SIP_EVENT_CREATEBUDDYLIST);
-	fetion_sip_add_header(sip, eheader);
+    eheader = sip_event_header_create(SIP_EVENT_CREATEBUDDYLIST);
+    fetion_sip_add_header(sip, eheader);
 
-	trans = transaction_create();
-	transaction_set_callid(trans, sip->callid);
-	transaction_set_callback(trans, group_add_cb);
-	transaction_add(account, trans);
+    trans = transaction_create();
+    transaction_set_callid(trans, sip->callid);
+    transaction_set_callback(trans, group_add_cb);
+    transaction_add(account, trans);
 
-	body = generate_group_add_body(name);
-	sip_text = fetion_sip_to_string(sip , body);
-	g_free(body);
+    body = generate_group_add_body(name);
+    sip_text = fetion_sip_to_string(sip , body);
+    g_free(body);
 
-	hybrid_debug_info("fetion", "add group, send:\n%s", sip_text);
+    hybrid_debug_info("fetion", "add group, send:\n%s", sip_text);
 
-	if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
-		
-		hybrid_debug_error("fetion", "add group failed");
+    if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
+        
+        hybrid_debug_error("fetion", "add group failed");
 
-		return HYBRID_ERROR;
-	}
+        return HYBRID_ERROR;
+    }
 
-	g_free(sip_text);
+    g_free(sip_text);
 
-	return HYBRID_OK;
+    return HYBRID_OK;
 }
 
 void
 fetion_groups_init(fetion_account *ac)
 {
-	GSList *pos;
-	HybridGroup *hgroup;
-	fetion_group *group;
-	gchar buf[BUF_LENGTH];
+    GSList *pos;
+    HybridGroup *hgroup;
+    fetion_group *group;
+    gchar buf[BUF_LENGTH];
 
-	for (pos = ac->groups; pos; pos = pos->next) {
+    for (pos = ac->groups; pos; pos = pos->next) {
 
-		group = (fetion_group*)pos->data;
+        group = (fetion_group*)pos->data;
 
-		g_snprintf(buf, sizeof(buf) - 1, "%d", group->group_id);
-		hgroup = hybrid_blist_add_group(ac->account, buf, group->group_name);
+        g_snprintf(buf, sizeof(buf) - 1, "%d", group->group_id);
+        hgroup = hybrid_blist_add_group(ac->account, buf, group->group_name);
 
-		/* The group named 'Ungrouped' can't be renamed. */
-		if (group->group_id == 0) {
-			hybrid_blist_set_group_renamable(hgroup, FALSE);
-		}
-	}
+        /* The group named 'Ungrouped' can't be renamed. */
+        if (group->group_id == 0) {
+            hybrid_blist_set_group_renamable(hgroup, FALSE);
+        }
+    }
 }
 
 static gchar*
 generate_group_edit_body(const gchar *group_id, const gchar *group_name)
 {
-	const gchar *body;
-	xmlnode *root;
-	xmlnode *node;
-	gchar *res;
+    const gchar *body;
+    xmlnode *root;
+    xmlnode *node;
+    gchar *res;
 
-	body = "<args></args>";
+    body = "<args></args>";
 
-	root = xmlnode_root(body, strlen(body));
+    root = xmlnode_root(body, strlen(body));
 
-	node = xmlnode_new_child(root, "contacts");
-	node = xmlnode_new_child(node, "buddy-lists");
-	node = xmlnode_new_child(node, "buddy-list");
+    node = xmlnode_new_child(root, "contacts");
+    node = xmlnode_new_child(node, "buddy-lists");
+    node = xmlnode_new_child(node, "buddy-list");
 
-	xmlnode_new_prop(node, "id", group_id);
-	xmlnode_new_prop(node, "name", group_name);
+    xmlnode_new_prop(node, "id", group_id);
+    xmlnode_new_prop(node, "name", group_name);
 
-	res = xmlnode_to_string(root);
+    res = xmlnode_to_string(root);
 
-	xmlnode_free(root);
+    xmlnode_free(root);
 
-	return res;
+    return res;
 }
 
 static gchar*
 generate_group_add_body(const gchar *name)
 {
-	const gchar *body;
-	xmlnode *root;
-	xmlnode *node;
-	gchar *res;
+    const gchar *body;
+    xmlnode *root;
+    xmlnode *node;
+    gchar *res;
 
-	body = "<args></args>";
+    body = "<args></args>";
 
-	root = xmlnode_root(body, strlen(body));
+    root = xmlnode_root(body, strlen(body));
 
-	node = xmlnode_new_child(root, "contacts");
-	node = xmlnode_new_child(node, "buddy-lists");
-	node = xmlnode_new_child(node, "buddy-list");
+    node = xmlnode_new_child(root, "contacts");
+    node = xmlnode_new_child(node, "buddy-lists");
+    node = xmlnode_new_child(node, "buddy-list");
 
-	xmlnode_new_prop(node, "name", name);
+    xmlnode_new_prop(node, "name", name);
 
-	res = xmlnode_to_string(root);
+    res = xmlnode_to_string(root);
 
-	xmlnode_free(root);
+    xmlnode_free(root);
 
-	return res;
+    return res;
 }
 
 static gchar*
 generate_group_remove_body(const gchar *groupid)
 {
-	const gchar *body;
-	xmlnode *root;
-	xmlnode *node;
-	gchar *res;
+    const gchar *body;
+    xmlnode *root;
+    xmlnode *node;
+    gchar *res;
 
-	body = "<args></args>";
+    body = "<args></args>";
 
-	root = xmlnode_root(body, strlen(body));
+    root = xmlnode_root(body, strlen(body));
 
-	node = xmlnode_new_child(root, "contacts");
-	node = xmlnode_new_child(node, "buddy-lists");
-	node = xmlnode_new_child(node, "buddy-list");
+    node = xmlnode_new_child(root, "contacts");
+    node = xmlnode_new_child(node, "buddy-lists");
+    node = xmlnode_new_child(node, "buddy-list");
 
-	xmlnode_new_prop(node, "id", groupid);
+    xmlnode_new_prop(node, "id", groupid);
 
-	res = xmlnode_to_string(root);
+    res = xmlnode_to_string(root);
 
-	xmlnode_free(root);
+    xmlnode_free(root);
 
-	return res;
+    return res;
 }

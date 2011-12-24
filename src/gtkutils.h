@@ -23,16 +23,18 @@
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+#include "account.h"
 
-typedef struct _HybridConfirm HybridConfirm;
+typedef struct _HybridConfirm	 HybridConfirm;
 typedef struct _HybridMessageBox HybridMessageBox;
-typedef enum _HybridMessageType HybridMessageType;
-typedef void (*confirm_cb)(gpointer user_data);
+typedef enum _HybridMessageType	 HybridMessageType;
+
+typedef	void (*confirm_cb)(gpointer user_data);
 
 struct _HybridConfirm {
-	GtkWidget *window;
-	confirm_cb btn_callback;
-	gpointer user_data;
+	GtkWidget  *window;
+	confirm_cb	btn_callback;
+	gpointer	user_data;
 };
 
 enum _HybridMessageType{
@@ -41,8 +43,8 @@ enum _HybridMessageType{
 };
 
 struct _HybridMessageBox {
-	GtkWidget *window;
-	HybridMessageType type;
+	GtkWidget		  *window;
+	HybridMessageType  type;
 };
 
 #ifdef __cplusplus
