@@ -36,10 +36,14 @@ GdkPixbuf *default_icon;
 
 #define HYBRID_BLINK_TIMEOUT 500
 
+static void
+hybrid_status_icon_restore(HybridStatusIcon *status_icon)
+{
+}
+
 static gboolean
 hybrid_status_icon_blinker(HybridStatusIcon *status_icon)
 {
-    fprintf(stderr, "%s\n", __func__);
     struct HybridBlinker *blinker = &status_icon->blinker;
     GtkStatusIcon *icon = status_icon->icon;
 
@@ -55,7 +59,6 @@ hybrid_status_icon_blinker(HybridStatusIcon *status_icon)
 static void
 hybrid_status_icon_set_blinking(HybridStatusIcon *status_icon, gboolean blink)
 {
-    fprintf(stderr, "%s, %d\n", __func__, blink);
     struct HybridBlinker *blinker = &status_icon->blinker;
     GtkStatusIcon *icon = status_icon->icon;
 
