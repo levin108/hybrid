@@ -36,9 +36,78 @@ GdkPixbuf *default_icon;
 
 #define HYBRID_BLINK_TIMEOUT 500
 
+static const gpointer icon_funcs[] = {
+    [GTK_IMAGE_EMPTY] = NULL,
+    [GTK_IMAGE_PIXMAP] = NULL,
+    [GTK_IMAGE_IMAGE] = NULL,
+    [GTK_IMAGE_PIXBUF] = {gtk_status_icon_get_pixbuf,
+                          gtk_status_icon_set_from_pixbuf},
+    [GTK_IMAGE_STOCK] = {gtk_status_icon_get_stock,
+                         gtk_status_icon_set_from_stock},
+    [GTK_IMAGE_ICON_SET] = NULL,
+    [GTK_IMAGE_ANIMATION] = NULL,
+    [GTK_IMAGE_ICON_NAME] = {gtk_status_icon_get_icon_name,
+                             gtk_status_icon_set_from_icon_name},
+    [GTK_IMAGE_GICON] = {gtk_status_icon_get_gicon,
+                         gtk_status_icon_set_from_gicon}
+}
+
+static void
+hybrid_status_icon_backup(HybridStatusIcon *status_icon)
+{
+    struct HybridBlinker *blinker = &status_icon->blinker;
+    GtkStatusIcon *icon = status_icon->icon;
+
+    blinker->img_type = gtk_status_icon_get_storage_type(icon);
+
+    gpointer func2 = icon_funcs[blinker->img_type];
+
+    if (!func2) {
+        if (blinker->img_type != GTK_IMAGE_EMPTY) {
+            fprintf(stderr, "Cannot restore the icon.\n");
+        }
+        blinker->back = NULL;
+        return;
+    }
+    gpointer (*get_func)(GtkStatusIcon *icon) = func2[0];
+
+    blinker->back = get_func(icon);
+
+    if (blinker->img_type == GTK_IMAGE_PIXBUF ||
+        blinker->img_type == GTK_IMAGE_GICON) {
+        g_object_ref(blinker->back);
+    } else {
+        blinker->back = g_strdup(blinker->back);
+    }
+}
+
 static void
 hybrid_status_icon_restore(HybridStatusIcon *status_icon)
 {
+    struct HybridBlinker *blinker = &status_icon->blinker;
+    GtkStatusIcon *icon = status_icon->icon;
+
+    gpointer func2 = icon_funcs[blinker->img_type];
+    void (*set_func)(GtkStatusIcon *icon, gpointer p) = func2[0];
+
+    set_func(icon, blinker->back);
+}
+
+static void
+hybrid_status_icon_clear_back(HybridStatusIcon *status_icon)
+{
+    struct HybridBlinker *blinker = &status_icon->blinker;
+    GtkStatusIcon *icon = status_icon->icon;
+
+    if (blinker->img_type == GTK_IMAGE_PIXBUF ||
+        blinker->img_type == GTK_IMAGE_GICON) {
+        g_object_unref(blinker->back);
+    } else {
+        g_free(blinker->back);
+    }
+
+    blinker->back = NULL;
+    blinker->img_type = 0;
 }
 
 static gboolean

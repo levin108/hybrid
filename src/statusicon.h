@@ -30,7 +30,8 @@ struct HybridBlinker {
     gint timeout;
     gboolean off;
     GdkPixbuf *blank;
-    GdkPixbuf *back;
+    GtkImageType img_type;
+    gpointer back;
 };
 
 struct _HybridStatusIcon {
