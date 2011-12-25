@@ -26,9 +26,17 @@
 
 typedef struct _HybridStatusIcon HybridStatusIcon;
 
+struct HybridBlinker {
+    gint timeout;
+    gboolean off;
+    GdkPixbuf *blank;
+    GdkPixbuf *back;
+};
+
 struct _HybridStatusIcon {
-	GtkStatusIcon *icon;
-	gint conn_id;
+    GtkStatusIcon *icon;
+    gint conn_id;
+    struct HybridBlinker blinker;
 };
 
 #ifdef __cplusplus

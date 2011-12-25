@@ -46,8 +46,6 @@ hybrid_config_get_path(void)
             config_path = g_strdup_printf("%s", config_path);
     }
 
-    config_path = g_strdup_printf("%s/.config", home);
-
     e = mkdir(config_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
     if (e && access(config_path, R_OK|W_OK)) {
