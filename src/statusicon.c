@@ -36,21 +36,21 @@ GdkPixbuf *default_icon;
 
 #define HYBRID_BLINK_TIMEOUT 500
 
-static const gpointer icon_funcs[] = {
-    [GTK_IMAGE_EMPTY] = NULL,
-    [GTK_IMAGE_PIXMAP] = NULL,
-    [GTK_IMAGE_IMAGE] = NULL,
+static const gpointer icon_funcs[][2] = {
+    [GTK_IMAGE_EMPTY] = {NULL, NULL},
+    [GTK_IMAGE_PIXMAP] = {NULL, NULL},
+    [GTK_IMAGE_IMAGE] = {NULL, NULL},
     [GTK_IMAGE_PIXBUF] = {gtk_status_icon_get_pixbuf,
                           gtk_status_icon_set_from_pixbuf},
     [GTK_IMAGE_STOCK] = {gtk_status_icon_get_stock,
                          gtk_status_icon_set_from_stock},
-    [GTK_IMAGE_ICON_SET] = NULL,
-    [GTK_IMAGE_ANIMATION] = NULL,
+    [GTK_IMAGE_ICON_SET] = {NULL, NULL},
+    [GTK_IMAGE_ANIMATION] = {NULL, NULL},
     [GTK_IMAGE_ICON_NAME] = {gtk_status_icon_get_icon_name,
                              gtk_status_icon_set_from_icon_name},
     [GTK_IMAGE_GICON] = {gtk_status_icon_get_gicon,
                          gtk_status_icon_set_from_gicon}
-}
+};
 
 static void
 hybrid_status_icon_backup(HybridStatusIcon *status_icon)
@@ -60,16 +60,16 @@ hybrid_status_icon_backup(HybridStatusIcon *status_icon)
 
     blinker->img_type = gtk_status_icon_get_storage_type(icon);
 
-    gpointer func2 = icon_funcs[blinker->img_type];
+    gpointer (*get_func)(GtkStatusIcon *icon) =
+        icon_funcs[blinker->img_type][0];
 
-    if (!func2) {
+    if (!get_func) {
         if (blinker->img_type != GTK_IMAGE_EMPTY) {
             fprintf(stderr, "Cannot restore the icon.\n");
         }
         blinker->back = NULL;
         return;
     }
-    gpointer (*get_func)(GtkStatusIcon *icon) = func2[0];
 
     blinker->back = get_func(icon);
 
@@ -87,8 +87,8 @@ hybrid_status_icon_restore(HybridStatusIcon *status_icon)
     struct HybridBlinker *blinker = &status_icon->blinker;
     GtkStatusIcon *icon = status_icon->icon;
 
-    gpointer func2 = icon_funcs[blinker->img_type];
-    void (*set_func)(GtkStatusIcon *icon, gpointer p) = func2[0];
+    void (*set_func)(GtkStatusIcon *icon, gpointer p) =
+        icon_funcs[blinker->img_type][1];
 
     set_func(icon, blinker->back);
 }
@@ -97,7 +97,6 @@ static void
 hybrid_status_icon_clear_back(HybridStatusIcon *status_icon)
 {
     struct HybridBlinker *blinker = &status_icon->blinker;
-    GtkStatusIcon *icon = status_icon->icon;
 
     if (blinker->img_type == GTK_IMAGE_PIXBUF ||
         blinker->img_type == GTK_IMAGE_GICON) {
@@ -119,7 +118,7 @@ hybrid_status_icon_blinker(HybridStatusIcon *status_icon)
     if ((blinker->off = !blinker->off)) {
         gtk_status_icon_set_from_pixbuf(icon, blinker->blank);
     } else {
-        gtk_status_icon_set_from_pixbuf(icon, blinker->back);
+        hybrid_status_icon_restore(status_icon);
     }
 
     return TRUE;
@@ -129,15 +128,13 @@ static void
 hybrid_status_icon_set_blinking(HybridStatusIcon *status_icon, gboolean blink)
 {
     struct HybridBlinker *blinker = &status_icon->blinker;
-    GtkStatusIcon *icon = status_icon->icon;
 
     if (blink) {
         if (blinker->timeout)
             return;
         blinker->blank = default_icon;
         g_object_ref(blinker->blank);
-        blinker->back = gtk_status_icon_get_pixbuf(icon);
-        g_object_ref(blinker->back);
+        hybrid_status_icon_backup(status_icon);
         blinker->timeout =
             gdk_threads_add_timeout(HYBRID_BLINK_TIMEOUT,
                                     (GSourceFunc)hybrid_status_icon_blinker,
@@ -148,9 +145,8 @@ hybrid_status_icon_set_blinking(HybridStatusIcon *status_icon, gboolean blink)
         g_source_remove(blinker->timeout);
         blinker->timeout = 0;
         blinker->off = FALSE;
-        gtk_status_icon_set_from_pixbuf(icon, blinker->back);
-        g_object_unref(blinker->back);
-        blinker->back = NULL;
+        hybrid_status_icon_restore(status_icon);
+        hybrid_status_icon_clear_back(status_icon);
         g_object_unref(blinker->blank);
         blinker->blank = NULL;
     }
@@ -393,11 +389,11 @@ status_icon_msg_cb(GtkWidget *widget, gpointer user_data)
     g_signal_handler_disconnect(G_OBJECT(status_icon->icon),
                 status_icon->conn_id);
 
-    gtk_status_icon_set_from_pixbuf(
-            GTK_STATUS_ICON(status_icon->icon), default_icon);
-
 //    gtk_status_icon_set_blinking(GTK_STATUS_ICON(status_icon->icon), FALSE);
     hybrid_status_icon_set_blinking(status_icon, FALSE);
+
+    gtk_status_icon_set_from_pixbuf(
+            GTK_STATUS_ICON(status_icon->icon), default_icon);
 
     status_icon->conn_id =
         g_signal_connect(G_OBJECT(status_icon->icon), "activate",
@@ -485,11 +481,11 @@ hybrid_status_icon_blinking(HybridBuddy *buddy)
         g_signal_handler_disconnect(G_OBJECT(status_icon->icon),
                     status_icon->conn_id);
 
-        gtk_status_icon_set_from_pixbuf(
-                GTK_STATUS_ICON(status_icon->icon), default_icon);
-
 //        gtk_status_icon_set_blinking(GTK_STATUS_ICON(status_icon->icon), FALSE);
         hybrid_status_icon_set_blinking(status_icon, FALSE);
+
+        gtk_status_icon_set_from_pixbuf(
+                GTK_STATUS_ICON(status_icon->icon), default_icon);
 
         status_icon->conn_id =
             g_signal_connect(G_OBJECT(status_icon->icon), "activate",
