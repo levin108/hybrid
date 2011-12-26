@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Hybrid
+GenericName=Hybrid IM Client
+X-GNOME-FullName=Hybrid IM Client
+Type=Application
+Comment=IM Client
+Exec=hybrid
+Icon=hybrid
+Categories=GTK;GNOME;Network;
+X-GNOME-Gettext-Domain=hybrid
