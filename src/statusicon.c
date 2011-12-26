@@ -132,12 +132,12 @@ hybrid_status_icon_set_blank(HybridStatusIcon *status_icon)
     if (blinker->blank)
         return;
 
-    gint width = gdk_pixbuf_get_width(default_icon);
-    gint height = gdk_pixbuf_get_height(default_icon);
+    fprintf(stderr, "%d\n", gdk_pixbuf_get_colorspace(default_icon));
 
-    blinker->blank = gdk_pixbuf_copy(default_icon);
+    blinker->blank = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8,
+                                    gdk_pixbuf_get_width(default_icon),
+                                    gdk_pixbuf_get_height(default_icon));
     gdk_pixbuf_fill(blinker->blank, 0x00000000);
-    //g_object_ref(blinker->blank);
 }
 
 static void
