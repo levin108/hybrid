@@ -59,22 +59,27 @@ GtkUIManager *menu_ui_manager;
 gboolean close_main_win_quit = FALSE;
 
 static gboolean
-window_destroy(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+window_delete(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     if (close_main_win_quit) {
         gtk_widget_destroy(widget);
-        /*
-         * Now free the memory.
-         */
-#ifdef USE_WEBKIT
-        hybrid_webkit_destroy();
-#endif
-        gtk_main_quit();
     } else {
         gtk_widget_hide(widget);
     }
 
     return TRUE;
+}
+
+static void
+window_destroy(GtkWidget *widget, gpointer user_date)
+{
+    /*
+     * Now free the memory.
+     */
+#ifdef USE_WEBKIT
+    hybrid_webkit_destroy();
+#endif
+    gtk_main_quit();
 }
 
 static void
@@ -227,7 +232,8 @@ ui_init(void)
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_container_add(GTK_CONTAINER(window), vbox);
 
-    g_signal_connect(window, "delete_event", G_CALLBACK(window_destroy), NULL);
+    g_signal_connect(window, "delete_event", G_CALLBACK(window_delete), NULL);
+    g_signal_connect(window, "destroy", G_CALLBACK(window_destroy), NULL);
 
     /* head area */
     hybrid_head_init();
