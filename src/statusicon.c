@@ -389,7 +389,6 @@ status_icon_msg_cb(GtkWidget *widget, gpointer user_data)
     g_signal_handler_disconnect(G_OBJECT(status_icon->icon),
                 status_icon->conn_id);
 
-//    gtk_status_icon_set_blinking(GTK_STATUS_ICON(status_icon->icon), FALSE);
     hybrid_status_icon_set_blinking(status_icon, FALSE);
 
     gtk_status_icon_set_from_pixbuf(
@@ -465,7 +464,6 @@ hybrid_status_icon_blinking(HybridBuddy *buddy)
         gtk_status_icon_set_from_pixbuf(
                 GTK_STATUS_ICON(status_icon->icon), pixbuf);
 
-//        gtk_status_icon_set_blinking(GTK_STATUS_ICON(status_icon->icon), TRUE);
         hybrid_status_icon_set_blinking(status_icon, TRUE);
 
         g_object_unref(pixbuf);
@@ -481,7 +479,6 @@ hybrid_status_icon_blinking(HybridBuddy *buddy)
         g_signal_handler_disconnect(G_OBJECT(status_icon->icon),
                     status_icon->conn_id);
 
-//        gtk_status_icon_set_blinking(GTK_STATUS_ICON(status_icon->icon), FALSE);
         hybrid_status_icon_set_blinking(status_icon, FALSE);
 
         gtk_status_icon_set_from_pixbuf(
