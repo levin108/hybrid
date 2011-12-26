@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
 "POT-Creation-Date: 2011-12-26 11:44-0500\n"
-"PO-Revision-Date: 2011-12-26 11:58-0500\n"
+"PO-Revision-Date: 2011-12-26 12:23-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -661,7 +661,6 @@ msgstr ""
 
 #. account menu.
 #: src/core.c:148
-#, fuzzy
 msgid "_Account"
 msgstr "帐户(_A)"
 
