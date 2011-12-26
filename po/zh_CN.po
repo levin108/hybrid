@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-26 11:44-0500\n"
-"PO-Revision-Date: 2011-12-26 12:23-0500\n"
+"POT-Creation-Date: 2011-12-26 15:12-0500\n"
+"PO-Revision-Date: 2011-12-26 15:25-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -123,7 +123,7 @@ msgstr "<span size='small'><b>加入到组:</b></span>"
 msgid "<span size='small'><b>Alias(Optional):</b></span>"
 msgstr "<span size='small'><b>别名(可选):</b></span>"
 
-#: src/core.c:193
+#: src/core.c:198
 msgid "About"
 msgstr "关于"
 
@@ -131,7 +131,7 @@ msgstr "关于"
 msgid "Accept"
 msgstr "接受"
 
-#: modules/xmpp/xmpp_stream.c:1124
+#: modules/xmpp/xmpp_stream.c:1120
 msgid "Account not authorized. Check Username and Password."
 msgstr "未通过验证, 请检查用户名和密码."
 
@@ -139,11 +139,11 @@ msgstr "未通过验证, 请检查用户名和密码."
 msgid "Add"
 msgstr "添加"
 
-#: src/blist.c:612 src/buddyadd.c:379 src/core.c:178 src/core.c:180
+#: src/blist.c:612 src/buddyadd.c:379 src/core.c:183 src/core.c:185
 msgid "Add Buddy"
 msgstr "添加联系人"
 
-#: src/core.c:186 src/core.c:188 src/groupadd.c:237
+#: src/core.c:191 src/core.c:193 src/groupadd.c:237
 msgid "Add Group"
 msgstr "添加组"
 
@@ -189,7 +189,7 @@ msgstr "底部"
 msgid "Buddies"
 msgstr "联系人"
 
-#: modules/fetion/fetion.c:223
+#: modules/fetion/fetion.c:224
 #, c-format
 msgid "Buddy <b>%s</b> has %s your add-buddy request."
 msgstr "<b>%s</b> %s了 您的添加好友请求."
@@ -235,7 +235,7 @@ msgstr ""
 msgid "Choose the avatar file to upload"
 msgstr "请选择需要上传的头像"
 
-#: modules/fetion/fetion.c:495
+#: modules/fetion/fetion.c:496
 msgid "City"
 msgstr "城市"
 
@@ -273,16 +273,20 @@ msgstr "验证码"
 msgid "Connecting to IMAP server."
 msgstr "正在连接IMAP服务器"
 
-#: modules/xmpp/xmpp_stream.c:326 modules/xmpp/xmpp_stream.c:375
+#: modules/xmpp/xmpp_stream.c:325 modules/xmpp/xmpp_stream.c:374
 msgid "Connection Closed."
 msgstr "连接关闭."
+
+#: modules/xmpp/xmpp_buddy.c:675
+msgid "Connection Error."
+msgstr "连接错误."
 
 #: lib/logs.c:155
 #, c-format
 msgid "Conversation with %s (%s) at %d-%d-%d"
 msgstr "与%s (%s) 在 %d-%d-%d 的对话"
 
-#: modules/fetion/fetion.c:491
+#: modules/fetion/fetion.c:492
 msgid "Country"
 msgstr "国家"
 
@@ -314,19 +318,19 @@ msgstr "启用帐户"
 msgid "Enabled"
 msgstr "启用"
 
-#: modules/fetion/fetion.c:485
+#: modules/fetion/fetion.c:486
 msgid "Female"
 msgstr "女"
 
-#: modules/fetion/fx_login.c:860
+#: modules/fetion/fx_login.c:858
 msgid "Fetion Protocol ERROR."
 msgstr "飞信协议错误."
 
-#: modules/fetion/fetion.c:479
+#: modules/fetion/fetion.c:480
 msgid "Fetion-no"
 msgstr "飞信号"
 
-#: modules/fetion/fetion.c:483
+#: modules/fetion/fetion.c:484
 msgid "Gender"
 msgstr "性别"
 
@@ -334,7 +338,7 @@ msgstr "性别"
 msgid "Hide Action Buttons"
 msgstr "隐藏动作按钮"
 
-#: src/core.c:222
+#: src/core.c:227
 msgid "Hybrid"
 msgstr ""
 
@@ -382,20 +386,20 @@ msgstr "不可见"
 msgid "Left"
 msgstr "左"
 
-#: modules/fetion/fetion.c:477
+#: modules/fetion/fetion.c:478
 msgid "Localname"
 msgstr "本地名称"
 
-#: modules/fetion/fetion.c:484
+#: modules/fetion/fetion.c:485
 msgid "Male"
 msgstr "男"
 
-#: src/core.c:154 src/gtkaccount.c:259
+#: src/core.c:159 src/gtkaccount.c:259
 msgid "Manage Account"
 msgstr "管理账户"
 
 #. account menu.
-#: src/core.c:152 src/statusicon.c:334
+#: src/core.c:157 src/statusicon.c:334
 msgid "Manage Accounts"
 msgstr "管理账户"
 
@@ -403,7 +407,7 @@ msgstr "管理账户"
 msgid "Message"
 msgstr "消息"
 
-#: modules/fetion/fetion.c:481
+#: modules/fetion/fetion.c:482
 msgid "Mobile-no"
 msgstr "手机号"
 
@@ -431,7 +435,7 @@ msgstr "更改全名失败."
 msgid "Modify photo failed."
 msgstr "更改照片失败."
 
-#: modules/fetion/fetion.c:488
+#: modules/fetion/fetion.c:489
 msgid "Mood"
 msgstr "心情"
 
@@ -444,7 +448,7 @@ msgstr "移动到"
 msgid "Mute"
 msgstr "静音"
 
-#: modules/xmpp/xmpp.c:129
+#: modules/xmpp/xmpp.c:128
 msgid "Name"
 msgstr "名称"
 
@@ -452,7 +456,7 @@ msgstr "名称"
 msgid "New Mail."
 msgstr "新邮件"
 
-#: modules/fetion/fetion.c:475
+#: modules/fetion/fetion.c:476
 msgid "Nickname"
 msgstr "昵称"
 
@@ -480,7 +484,7 @@ msgstr "在线"
 msgid "Password:"
 msgstr "密码:"
 
-#: modules/xmpp/xmpp.c:146
+#: modules/xmpp/xmpp.c:144
 msgid "Photo"
 msgstr "照片"
 
@@ -492,7 +496,7 @@ msgstr "弹出当前页"
 msgid "Port:"
 msgstr "端口:"
 
-#: src/core.c:170 src/core.c:172 src/preference.c:399
+#: src/core.c:175 src/core.c:177 src/preference.c:399
 msgid "Preference"
 msgstr "首选项"
 
@@ -504,11 +508,11 @@ msgstr "协议"
 msgid "Protocol:"
 msgstr "协议:"
 
-#: modules/fetion/fetion.c:494
+#: modules/fetion/fetion.c:495
 msgid "Province"
 msgstr "省"
 
-#: src/core.c:160 src/core.c:162
+#: src/core.c:165 src/core.c:167
 msgid "Quit"
 msgstr "退出"
 
@@ -537,7 +541,11 @@ msgstr "资源"
 msgid "Right"
 msgstr "右"
 
-#: modules/fetion/fetion.c:544 modules/fetion/fetion.c:920
+#: modules/xmpp/xmpp_stream.c:230
+msgid "SASL authentication error."
+msgstr "ssi验证错误."
+
+#: modules/fetion/fetion.c:545 modules/fetion/fetion.c:921
 msgid "SMS To Me"
 msgstr "发短信给自己"
 
@@ -549,7 +557,7 @@ msgstr "保存"
 msgid "Screen jitter"
 msgstr "闪屏"
 
-#: modules/fetion/fetion.c:485
+#: modules/fetion/fetion.c:486
 msgid "Secrecy"
 msgstr "保密"
 
@@ -574,25 +582,41 @@ msgstr "显示联系人列表"
 msgid "Sound"
 msgstr "声音"
 
+#: modules/fetion/fx_login.c:581
+msgid "Start SSI authenticating..."
+msgstr "开始SSI验证..."
+
+#: modules/xmpp/xmpp_stream.c:434
+msgid "Start performing tls"
+msgstr "开始TLS"
+
+#: modules/xmpp/xmpp_stream.c:183
+msgid "Start sasl authentication."
+msgstr "开始sasl验证..."
+
 #: modules/xmpp/xmpp.c:121
 msgid "Status"
 msgstr "状态"
 
-#: modules/xmpp/xmpp.c:299
+#: modules/xmpp/xmpp.c:297
 #, c-format
 msgid "Status (%s)"
 msgstr "状态 (%s)"
 
-#: modules/xmpp/xmpp.c:308
+#: modules/xmpp/xmpp.c:306
 msgid "Subscription"
 msgstr "订阅"
 
-#: modules/fetion/fetion.c:373 modules/xmpp/xmpp_account.c:199
+#: modules/fetion/fetion.c:374 modules/xmpp/xmpp_account.c:199
 #: modules/xmpp/xmpp_account.c:243
 msgid "System Message"
 msgstr "系统消息"
 
-#: modules/xmpp/xmpp_stream.c:441
+#: modules/xmpp/xmpp_stream.c:394
+msgid "TLS connection established."
+msgstr "TLS连接建立."
+
+#: modules/xmpp/xmpp_stream.c:440
 msgid "TLS hand-shake failed."
 msgstr "TLS握手失败."
 
@@ -611,11 +635,11 @@ msgstr ""
 
 # ?
 #. *< add an "ungroup" group
-#: modules/fetion/fx_login.c:1534
+#: modules/fetion/fx_login.c:1532
 msgid "Ungrouped"
 msgstr "未分组"
 
-#: modules/fetion/fetion.c:467 modules/fetion/fetion.c:471
+#: modules/fetion/fetion.c:468 modules/fetion/fetion.c:472
 msgid "Unknown"
 msgstr "未知"
 
@@ -645,7 +669,7 @@ msgid "Warning"
 msgstr "警告"
 
 #: modules/fetion/fetion.c:101
-msgid "Your account has logined elsewhere. You are forced to quit."
+msgid "Your account has logined elsewhere.You are forced to quit."
 msgstr "您的帐户已在其他地方登陆. 您被强迫登出."
 
 #: src/conv.c:841
@@ -660,28 +684,40 @@ msgid "[<span color='#0099ff'>%d</span>] characters"
 msgstr ""
 
 #. account menu.
-#: src/core.c:148
+#: src/core.c:153
 msgid "_Account"
 msgstr "帐户(_A)"
 
 #. help menu.
-#: src/core.c:192
+#: src/core.c:197
 msgid "_Help"
 msgstr "帮助(_H)"
 
 #. tools menu.
-#: src/core.c:166
+#: src/core.c:171
 msgid "_Tools"
 msgstr "工具(_T)"
 
 # ?
-#: modules/fetion/fetion.c:226
+#: modules/fetion/fetion.c:227
 msgid "accepted"
 msgstr "接受"
 
-#: modules/fetion/fetion.c:226
+#: modules/xmpp/xmpp_stream.c:585
+msgid "binds a resource error."
+msgstr "资源绑定错误."
+
+#: modules/fetion/fx_login.c:748
+msgid "connection terminated"
+msgstr "连接中断."
+
+#: modules/fetion/fetion.c:227
 msgid "declined"
 msgstr "拒绝"
+
+#: modules/fetion/fx_login.c:311
+msgid "downloading cfg error"
+msgstr "下载cfg错误"
 
 #. *< name
 #. *< author
@@ -691,13 +727,13 @@ msgstr "邮件提示"
 
 #. *< name
 #. *< author
-#: modules/fetion/fetion.c:955
+#: modules/fetion/fetion.c:956
 msgid "fetion client"
 msgstr "飞信客户端"
 
 #. *< summary
 #. description
-#: modules/fetion/fetion.c:957
+#: modules/fetion/fetion.c:958
 msgid "hybrid plugin implementing Fetion Protocol version 4"
 msgstr "hybrid的飞信协议4插件"
 
@@ -709,13 +745,13 @@ msgstr "hybrid的IMAP邮件提示插件"
 
 #. *< summary
 #. description
-#: modules/xmpp/xmpp.c:503
+#: modules/xmpp/xmpp.c:501
 msgid "implement xmpp protocol"
 msgstr "实现了XMPP协议"
 
 #. *< name
 #. *< author
-#: modules/xmpp/xmpp.c:501
+#: modules/xmpp/xmpp.c:499
 msgid "jabber client"
 msgstr "jabber客户端"
 
@@ -727,19 +763,40 @@ msgstr "登录成功"
 msgid "read cfg failed"
 msgstr "读取配置文件失败"
 
+#: modules/fetion/fx_login.c:432
+msgid "read pic code error."
+msgstr "读取pic错误."
+
+#: modules/xmpp/xmpp_stream.c:632
+msgid "request roster error."
+msgstr "请求名单错误."
+
 #: modules/xmpp/xmpp_buddy.c:209
 msgid "request roster failed."
 msgstr "请求名单失败."
 
-#: modules/xmpp/xmpp_stream.c:522
+#: modules/xmpp/xmpp_stream.c:662
+msgid "request vcard error."
+msgstr "获取名片错误."
+
+#: modules/xmpp/xmpp_stream.c:521
 msgid "resource bind error."
 msgstr "资源绑定错误."
 
-#: modules/xmpp/xmpp_stream.c:528
+#: modules/xmpp/xmpp_stream.c:527
 msgid "resource bind error: no jabber id returned."
 msgstr "资源绑定错误: 没有返回jabber id."
 
-#: modules/fetion/fx_login.c:648
+#: modules/xmpp/xmpp_stream.c:285 modules/xmpp/xmpp_stream.c:298
+#: modules/xmpp/xmpp_stream.c:411
+msgid "send initial jabber request failed"
+msgstr "初始jabber请求发送失败"
+
+#: modules/fetion/fx_login.c:721
+msgid "sipc reg error"
+msgstr "SIPC注册错误."
+
+#: modules/fetion/fx_login.c:646
 msgid "sipc reg error."
 msgstr "SIPC注册错误."
 
@@ -747,11 +804,15 @@ msgstr "SIPC注册错误."
 msgid "ssi authencation"
 msgstr "ssi验证"
 
-#: modules/fetion/fx_login.c:567
+#: modules/fetion/fx_login.c:565
 msgid "ssi authentication failed"
 msgstr "ssi验证失败"
 
-#: modules/fetion/fx_login.c:701
+#: modules/xmpp/xmpp_stream.c:725
+msgid "start new stream on sasl layer error"
+msgstr "在sasl上新建流错误"
+
+#: modules/fetion/fx_login.c:699
 msgid "start registering to the sipc server."
 msgstr "正在注册到SIPC服务器."
 
@@ -759,6 +820,10 @@ msgstr "正在注册到SIPC服务器."
 msgid "start session error."
 msgstr "启动会话错误."
 
-#: modules/fetion/fx_login.c:906
+#: modules/fetion/fx_login.c:904
 msgid "start sipc authenticating..."
 msgstr "开始SIPC验证..."
+
+#: modules/xmpp/xmpp_buddy.c:107
+msgid "subscribe presence failed"
+msgstr "订阅现场失败"
