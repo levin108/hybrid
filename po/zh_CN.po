@@ -6,11 +6,11 @@ msgstr " %s 正在输入"
 #: src/conv.c:1458 src/conv.c:1526
 #, c-format
 msgid " %s stoped inputing"
-msgstr ""
+msgstr "%s 停止输入"
 
 #: src/chat-textview.c:127
 msgid " said:"
-msgstr ""
+msgstr " 说:"
 
 #: src/chat-textview.c:84 src/chat-webkit.c:199
 msgid "%H:%M:%S"
@@ -20,17 +20,17 @@ msgstr ""
 #: src/conv.c:1380
 #, c-format
 msgid "%s said:"
-msgstr ""
+msgstr "%s 说:"
 
 #: src/info.c:154
 #, c-format
 msgid "%s's information"
-msgstr ""
+msgstr "%s 的信息"
 
 #: src/buddyreq.c:234
 #, c-format
 msgid "%s(%s) wants to add you as a friend."
-msgstr ""
+msgstr "%s(%s) 希望加您为好友"
 
 #: src/head.c:355
 #, c-format
@@ -41,271 +41,273 @@ msgstr ""
 
 #: src/buddyadd.c:272
 msgid "<b>Account:</b>"
-msgstr ""
+msgstr "<b>帐户:</b>"
 
 #: src/buddyadd.c:314
 msgid "<b>Add To Group:</b>"
-msgstr ""
+msgstr "<b>加到组</b>"
 
 #: src/buddyadd.c:305
 msgid "<b>Alias(Optional):</b>"
-msgstr ""
+msgstr "<b>别名(可选)</b>"
 
 #: src/preference.c:193
 msgid "<b>Chat Window:</b>"
-msgstr ""
+msgstr "<b>聊天窗口</b>"
 
 #: src/info.c:177
 #, c-format
 msgid "<b>Information of %s</b>"
-msgstr ""
+msgstr "<b>%s的信息</b>"
 
 #: src/groupadd.c:187
 msgid "<b>Please choose an account:</b>"
-msgstr ""
+msgstr "<b>请选择一个帐户:</b>"
 
 #: src/groupadd.c:209
 msgid "<b>Please input the group name:</b>"
-msgstr ""
+msgstr "<b>请输入组名:</b>"
 
 #: src/head.c:97
 msgid "<b>Please input the name:</b>"
-msgstr ""
+msgstr "<b>请输入名称:</b>"
 
 #: src/head.c:107
 msgid "<b>Please input the status:</b>"
-msgstr ""
+msgstr "<b>请输入状态:</b>"
 
 #: src/preference.c:211
 msgid "<b>Tabs:</b>"
-msgstr ""
+msgstr "<b>标签:</b>"
 
 #: src/buddyadd.c:344
 msgid "<b>Tips(Optional):</b>"
-msgstr ""
+msgstr "<b>说明(可选):</b>"
 
 #: src/buddyadd.c:296
 msgid "<b>Username:</b>"
-msgstr ""
+msgstr "<b>用户名:</b>"
 
 #: src/confirm.c:78
 msgid "<i>Code:</i>"
-msgstr ""
+msgstr "<i>验证码:</i>"
 
 #: src/confirm.c:74
 msgid "<i>Please input the following code in the picture:</i>"
-msgstr ""
+msgstr "<i>请输入图中的字符:</i>"
 
 #: src/buddyreq.c:295
 msgid "<span size='small'><b>Add To Group:</b></span>"
-msgstr ""
+msgstr "<span size='small'><b>加入到组:</b></span>"
 
 #: src/buddyreq.c:280
 msgid "<span size='small'><b>Alias(Optional):</b></span>"
-msgstr ""
+msgstr "<span size='small'><b>别名(可选):</b></span>"
 
 #: src/buddyreq.c:263
 msgid "Accept"
-msgstr ""
+msgstr "接受"
 
 #: modules/xmpp/xmpp_stream.c:1124
 msgid "Account not authorized. Check Username and Password."
-msgstr ""
+msgstr "未通过验证, 请检查用户名和密码."
 
 #: src/buddyadd.c:361 src/gtkaccount.c:295
 msgid "Add"
-msgstr ""
+msgstr "添加"
 
 #: src/blist.c:612 src/buddyadd.c:379
 msgid "Add Buddy"
-msgstr ""
+msgstr "添加联系人"
 
 #: src/groupadd.c:237
 msgid "Add Group"
-msgstr ""
+msgstr "添加组"
 
 #: src/gtkaccount.c:753
 msgid "Add a new account"
-msgstr ""
+msgstr "新建帐户"
 
 #: modules/xmpp/xmpp_buddy.c:619
 msgid "Add buddy failed."
-msgstr ""
+msgstr "添加联系人失败."
 
 #: modules/xmpp/xmpp_buddy.c:568
 msgid ""
 "Add buddy failed.\n"
 "Invalid response message."
-msgstr ""
+msgstr "添加联系人失败.\n"
+"无效的回复信息."
 
 #: src/blist.c:462
 #, c-format
 msgid "Are you sure to delete the buddy <b>%s</b> (%s)"
-msgstr ""
+msgstr "您确定要删除联系人 <b>%s</b> (%s)"
 
 #: src/blist.c:517
 #, c-format
 msgid "Are you sure to delete the group <b>%s</b>"
-msgstr ""
+msgstr "您确定要删除组 <b>%s</b>"
 
 #: lib/account.c:1127
 msgid "Away"
-msgstr ""
+msgstr "离开"
 
 #: src/preference.c:347
 msgid "Basic Settings"
-msgstr ""
+msgstr "基本设置"
 
 #: src/preference.c:60
 msgid "Bottom"
-msgstr ""
+msgstr "底部"
 
 #: modules/xmpp/xmpp_buddy.c:175
 msgid "Buddies"
-msgstr ""
+msgstr "联系人"
 
 #: modules/fetion/fetion.c:223
 #, c-format
 msgid "Buddy <b>%s</b> has %s your add-buddy request."
-msgstr ""
+msgstr "<b>%s</b> %s了 您的添加好友请求."
 
 #: src/blist.c:554
 msgid "Buddy Information"
-msgstr ""
+msgstr "联系人信息"
 
 #: src/buddyreq.c:344
 msgid "Buddy-Add Request"
-msgstr ""
+msgstr "添加联系人请求"
 
 #: lib/account.c:1128
 msgid "Busy"
-msgstr ""
+msgstr "忙碌"
 
 #: src/buddyadd.c:366 src/buddyreq.c:321 src/confirm.c:101 src/groupadd.c:224
 #: src/gtkaccount.c:812 src/gtkutils.c:459 src/head.c:147 src/preference.c:368
 msgid "Cancel"
-msgstr ""
+msgstr "取消"
 
 #: src/gtkaccount.c:997
 msgid "Change State"
-msgstr ""
+msgstr "更改状态"
 
 #: src/preference.c:203
 msgid "Chat Theme:"
-msgstr ""
+msgstr "聊天主题:"
 
 #: src/conv.c:1123
 msgid "Chat logs"
-msgstr ""
+msgstr "聊天记录"
 
 #: modules/email/mail.c:232
 msgid ""
 "Check Interval\n"
 "(seconds):"
-msgstr ""
+msgstr "检查间隔\n"
+"(秒)"
 
 #: src/head.c:145
 msgid "Choose the avatar file to upload"
-msgstr ""
+msgstr "请选择需要上传的头像"
 
 #: modules/fetion/fetion.c:495
 msgid "City"
-msgstr ""
+msgstr "城市"
 
 #: src/conv.c:389 src/gtkaccount.c:310 src/info.c:209 src/notify.c:148
 msgid "Close"
-msgstr ""
+msgstr "关闭"
 
 #: src/conv.c:627
 msgid "Close All Pages"
-msgstr ""
+msgstr "关闭所有页面"
 
 #. create move menu
 #: src/conv.c:606
 msgid "Close Current Page"
-msgstr ""
+msgstr "关闭当前页"
 
 #. notify menu
 #: src/statusicon.c:376
 msgid "Close Notify"
-msgstr ""
+msgstr "关闭提示"
 
 #: src/conv.c:620
 msgid "Close Other Pages"
-msgstr ""
+msgstr "关闭其他页"
 
 #: src/blist.c:465 src/blist.c:519
 msgid "Confirm"
-msgstr ""
+msgstr "确认"
 
 #: src/confirm.c:60
 msgid "Confirm Code"
-msgstr ""
+msgstr "验证码"
 
 #: modules/email/mail.c:181
 msgid "Connecting to IMAP server."
-msgstr ""
+msgstr "正在连接IMAP服务器"
 
 #: modules/xmpp/xmpp_stream.c:326 modules/xmpp/xmpp_stream.c:375
 msgid "Connection Closed."
-msgstr ""
+msgstr "连接关闭."
 
 #: lib/logs.c:155
 #, c-format
 msgid "Conversation with %s (%s) at %d-%d-%d"
-msgstr ""
+msgstr "与%s (%s) 在 %d-%d-%d 的对话"
 
 #: modules/fetion/fetion.c:491
 msgid "Country"
-msgstr ""
+msgstr "国家"
 
 #: src/buddyreq.c:267
 msgid "Decline"
-msgstr ""
+msgstr "拒绝"
 
 #: src/blist.c:465 src/blist.c:519 src/gtkaccount.c:300
 msgid "Delete"
-msgstr ""
+msgstr "删除"
 
 #: src/gtkaccount.c:958 src/gtkaccount.c:1051
 msgid "Disable Account"
-msgstr ""
+msgstr "禁用帐户"
 
 #: modules/fetion/fx_login.c:296
 msgid "Downloading configure file..."
-msgstr ""
+msgstr "正在下载配置文件..."
 
 #: src/gtkaccount.c:753
 msgid "Edit the account"
-msgstr ""
+msgstr "编辑帐户"
 
 #: src/gtkaccount.c:1055 src/gtkaccount.c:1130
 msgid "Enable Account"
-msgstr ""
+msgstr "启用帐户"
 
 #: src/gtkaccount.c:141
 msgid "Enabled"
-msgstr ""
+msgstr "启用"
 
 #: modules/fetion/fetion.c:485
 msgid "Female"
-msgstr ""
+msgstr "女"
 
 #: modules/fetion/fx_login.c:860
 msgid "Fetion Protocol ERROR."
-msgstr ""
+msgstr "飞信协议错误."
 
 #: modules/fetion/fetion.c:479
 msgid "Fetion-no"
-msgstr ""
+msgstr "飞信号"
 
 #: modules/fetion/fetion.c:483
 msgid "Gender"
-msgstr ""
+msgstr "性别"
 
 #: src/preference.c:198
 msgid "Hide Action Buttons"
-msgstr ""
+msgstr "隐藏动作按钮"
 
 #: src/core.c:213
 msgid "Hybrid"
@@ -313,23 +315,23 @@ msgstr ""
 
 #: modules/email/imap.c:108
 msgid "I Know"
-msgstr ""
+msgstr "知道了"
 
 #: modules/email/imap.c:238
 msgid "IMAP Authenticate Failed. Check your username and password."
-msgstr ""
+msgstr "IMAP验证错误. 请检查您的用户名和密码."
 
 #: modules/email/mail.c:157
 msgid "IMAP Authenticate failed."
-msgstr ""
+msgstr "IMAP验证错误."
 
 #: modules/email/mail.c:150
 msgid "IMAP Authenticating."
-msgstr ""
+msgstr "IMAP验证中."
 
 #: modules/email/imap.c:174
 msgid "IMAP Connection Closed."
-msgstr ""
+msgstr "IMAP连结关闭."
 
 #: modules/email/imap.c:225
 msgid "IMAP OK."
@@ -337,105 +339,105 @@ msgstr ""
 
 #: modules/email/mail.c:221
 msgid "IMAP Server:"
-msgstr ""
+msgstr "IMAP服务器:"
 
 #: src/gtkutils.c:513
 msgid "Information"
-msgstr ""
+msgstr "信息"
 
 #: src/blist.c:552
 msgid "Instant Message"
-msgstr ""
+msgstr "即时信息"
 
 #: lib/account.c:1126
 msgid "Invisible"
-msgstr ""
+msgstr "不可见"
 
 #: src/preference.c:66
 msgid "Left"
-msgstr ""
+msgstr "左"
 
 #: modules/fetion/fetion.c:477
 msgid "Localname"
-msgstr ""
+msgstr "本地名称"
 
 #: modules/fetion/fetion.c:484
 msgid "Male"
-msgstr ""
+msgstr "男"
 
 #: src/gtkaccount.c:259
 msgid "Manage Account"
-msgstr ""
+msgstr "管理账户"
 
 #. account menu.
 #: src/statusicon.c:334
 msgid "Manage Accounts"
-msgstr ""
+msgstr "管理账户"
 
 #: src/gtkutils.c:516
 msgid "Message"
-msgstr ""
+msgstr "消息"
 
 #: modules/fetion/fetion.c:481
 msgid "Mobile-no"
-msgstr ""
+msgstr "手机号"
 
 #: src/gtkaccount.c:305
 msgid "Modify"
-msgstr ""
+msgstr "更改"
 
 #: src/head.c:206
 msgid "Modify Name"
-msgstr ""
+msgstr "更改名称"
 
 #: src/head.c:203
 msgid "Modify Photo"
-msgstr ""
+msgstr "更改照片"
 
 #: src/head.c:209
 msgid "Modify Status"
-msgstr ""
+msgstr "更改状态"
 
 #: modules/xmpp/xmpp_account.c:200
 msgid "Modify full name failed."
-msgstr ""
+msgstr "更改全名失败."
 
 #: modules/xmpp/xmpp_account.c:244
 msgid "Modify photo failed."
-msgstr ""
+msgstr "更改照片失败."
 
 #: modules/fetion/fetion.c:488
 msgid "Mood"
-msgstr ""
+msgstr "心情"
 
 #: src/blist.c:557
 msgid "Move To"
-msgstr ""
+msgstr "移动到"
 
 #. mute menu.
 #: src/preference.c:235 src/statusicon.c:364
 msgid "Mute"
-msgstr ""
+msgstr "静音"
 
 #: modules/xmpp/xmpp.c:129
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #: modules/email/imap.c:92
 msgid "New Mail."
-msgstr ""
+msgstr "新邮件"
 
 #: modules/fetion/fetion.c:475
 msgid "Nickname"
-msgstr ""
+msgstr "昵称"
 
 #: src/head.c:349
 msgid "No account was enabled."
-msgstr ""
+msgstr "没有已启用的帐号"
 
 #: src/notify.c:60
 msgid "Notification"
-msgstr ""
+msgstr "提示"
 
 #: src/buddyreq.c:316 src/confirm.c:96 src/gtkutils.c:556 src/head.c:147
 msgid "OK"
@@ -443,232 +445,235 @@ msgstr ""
 
 #: lib/account.c:1125
 msgid "Offline"
-msgstr ""
+msgstr "离线"
 
 #: lib/account.c:1129
 msgid "Online"
-msgstr ""
+msgstr "在线"
 
 #: src/gtkaccount.c:626
 msgid "Password:"
-msgstr ""
+msgstr "密码:"
 
 #: modules/xmpp/xmpp.c:146
 msgid "Photo"
-msgstr ""
+msgstr "照片"
 
 #: src/conv.c:613
 msgid "Popup Current Page"
-msgstr ""
+msgstr "弹出当前页"
 
 #: modules/email/mail.c:226
 msgid "Port:"
-msgstr ""
+msgstr "端口:"
 
 #: src/preference.c:399
 msgid "Preference"
-msgstr ""
+msgstr "首选项"
 
 #: src/gtkaccount.c:166
 msgid "Protocol"
-msgstr ""
+msgstr "协议"
 
 #: src/gtkaccount.c:773
 msgid "Protocol:"
-msgstr ""
+msgstr "协议:"
 
 #: modules/fetion/fetion.c:494
 msgid "Province"
-msgstr ""
+msgstr "省"
 
 #: src/blist.c:570
 msgid "Remove Buddy"
-msgstr ""
+msgstr "移动联系人"
 
 #. we won't let users to remove group which is not empty.
 #: src/blist.c:608
 msgid "Remove Group"
-msgstr ""
+msgstr "删除组"
 
 #: src/blist.c:572
 msgid "Rename Buddy"
-msgstr ""
+msgstr "重命名联系人"
 
 #: src/blist.c:603
 msgid "Rename Group"
-msgstr ""
+msgstr "重命名组"
 
 #: modules/xmpp/xmpp.c:115
 msgid "Resource"
-msgstr ""
+msgstr "资源"
 
 #: src/preference.c:54
 msgid "Right"
-msgstr ""
+msgstr "右"
 
 #: modules/fetion/fetion.c:544 modules/fetion/fetion.c:920
 msgid "SMS To Me"
-msgstr ""
+msgstr "发短信给自己"
 
 #: src/groupadd.c:219 src/gtkaccount.c:818 src/preference.c:363
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #: src/conv.c:1130
 msgid "Screen jitter"
-msgstr ""
+msgstr "闪屏"
 
 #: modules/fetion/fetion.c:485
 msgid "Secrecy"
-msgstr ""
+msgstr "保密"
 
 #: src/conv.c:394
 msgid "Send"
-msgstr ""
+msgstr "发送"
 
 #: src/conv.c:1130
 msgid "Send a screen jitter"
-msgstr ""
+msgstr "发送闪屏"
 
 #: src/preference.c:215
 msgid "Show Messages In A Single Window With Tabs"
-msgstr ""
+msgstr "在同一标签窗口内显示信息"
 
 #. show buddy list buddy.
 #: src/statusicon.c:320
 msgid "Show buddy list"
-msgstr ""
+msgstr "现实联系人列表"
 
 #: src/preference.c:354
 msgid "Sound"
-msgstr ""
+msgstr "声音"
 
 #: modules/xmpp/xmpp.c:121
 msgid "Status"
-msgstr ""
+msgstr "状态"
 
 #: modules/xmpp/xmpp.c:299
 #, c-format
 msgid "Status (%s)"
-msgstr ""
+msgstr "状态 (%s)"
 
 #: modules/xmpp/xmpp.c:308
 msgid "Subscription"
-msgstr ""
+msgstr "订阅"
 
 #: modules/fetion/fetion.c:373 modules/xmpp/xmpp_account.c:199
 #: modules/xmpp/xmpp_account.c:243
 msgid "System Message"
-msgstr ""
+msgstr "系统消息"
 
 #: modules/xmpp/xmpp_stream.c:441
 msgid "TLS hand-shake failed."
-msgstr ""
+msgstr "TLS握手失败."
 
 #: src/preference.c:222
 msgid "Tab Position:"
-msgstr ""
+msgstr "标签位置:"
 
 #: src/preference.c:48
 msgid "Top"
-msgstr ""
+msgstr "顶部"
 
 #: src/conv.c:1142
 #, c-format
 msgid "Total %d character, left "
 msgstr ""
+#?
 
 #. *< add an "ungroup" group
 #: modules/fetion/fx_login.c:1534
 msgid "Ungrouped"
-msgstr ""
+msgstr "未分组"
 
 #: modules/fetion/fetion.c:467 modules/fetion/fetion.c:471
 msgid "Unknown"
-msgstr ""
+msgstr "未知"
 
 #: modules/email/mail.c:238
 msgid "Use TLS"
-msgstr ""
+msgstr "使用TLS"
 
 #: src/gtkaccount.c:154
 msgid "Username"
-msgstr ""
+msgstr "用户名"
 
 #: src/gtkaccount.c:616
 msgid "Username:"
-msgstr ""
+msgstr "用户名:"
 
 #: src/blist.c:574
 msgid "View Chat Logs"
-msgstr ""
+msgstr "查看聊天记录"
 
 #: src/conv.c:1123
 msgid "View chat logs"
-msgstr ""
+msgstr "查看聊天记录"
 
 #: modules/xmpp/xmpp_buddy.c:567 modules/xmpp/xmpp_buddy.c:610
 #: src/gtkutils.c:510
 msgid "Warning"
-msgstr ""
+msgstr "警告"
 
 #: modules/fetion/fetion.c:101
 msgid "Your account has logined elsewhere. You are forced to quit."
-msgstr ""
+msgstr "您的帐户已在其他地方登陆. 您被强迫登出."
 
 #: src/conv.c:841
 #, c-format
 msgid "[<span color='#0099ff'>%d</span>] character"
 msgstr ""
+#?
 
 #: src/conv.c:1149
 #, c-format
 msgid "[<span color='#0099ff'>%d</span>] characters"
 msgstr ""
+#?
 
 #: modules/fetion/fetion.c:226
 msgid "accepted"
-msgstr ""
+msgstr "接受"
 
 #: modules/fetion/fetion.c:226
 msgid "declined"
-msgstr ""
+msgstr "拒绝"
 
 #. *< name
 #. *< author
 #: modules/email/mail.c:253
 msgid "email notifier"
-msgstr ""
+msgstr "邮件提示"
 
 #. *< name
 #. *< author
 #: modules/fetion/fetion.c:955
 msgid "fetion client"
-msgstr ""
+msgstr "飞信客户端"
 
 #. *< summary
 #. description
 #: modules/fetion/fetion.c:957
 msgid "hybrid plugin implementing Fetion Protocol version 4"
-msgstr ""
+msgstr "hybrid的飞信协议4插件"
 
 #. *< summary
 #. description
 #: modules/email/mail.c:255
 msgid "hybrid plugin implementing IMAP protocol for email notification."
-msgstr ""
+msgstr "hybrid的IMAP邮件提示插件"
 
 #. *< summary
 #. description
 #: modules/xmpp/xmpp.c:503
 msgid "implement xmpp protocol"
-msgstr ""
+msgstr "实现了XMPP协议"
 
 #. *< name
 #. *< author
 #: modules/xmpp/xmpp.c:501
 msgid "jabber client"
-msgstr ""
+msgstr "jabber客户端"
 
 #: lib/account.c:1102
 msgid "login success!"
@@ -680,36 +685,36 @@ msgstr "读取配置文件失败"
 
 #: modules/xmpp/xmpp_buddy.c:209
 msgid "request roster failed."
-msgstr ""
+msgstr "请求名单失败."
 
 #: modules/xmpp/xmpp_stream.c:522
 msgid "resource bind error."
-msgstr ""
+msgstr "资源绑定错误."
 
 #: modules/xmpp/xmpp_stream.c:528
 msgid "resource bind error: no jabber id returned."
-msgstr ""
+msgstr "资源绑定错误: 没有返回jabber id."
 
 #: modules/fetion/fx_login.c:648
 msgid "sipc reg error."
-msgstr ""
+msgstr "SIPC注册错误."
 
 #: modules/fetion/fx_login.c:124
 msgid "ssi authencation"
-msgstr ""
+msgstr "ssi验证"
 
 #: modules/fetion/fx_login.c:567
 msgid "ssi authentication failed"
-msgstr ""
+msgstr "ssi验证失败"
 
 #: modules/fetion/fx_login.c:701
 msgid "start registering to the sipc server."
-msgstr ""
+msgstr "正在注册到SIPC服务器."
 
 #: modules/xmpp/xmpp_stream.c:549
 msgid "start session error."
-msgstr ""
+msgstr "启动会话错误."
 
 #: modules/fetion/fx_login.c:906
 msgid "start sipc authenticating..."
-msgstr ""
+msgstr "开始SIPC验证..."
