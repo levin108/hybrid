@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-26 14:45+0800\n"
+"POT-Creation-Date: 2011-12-26 11:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -378,7 +378,7 @@ msgstr ""
 msgid "Remove Group"
 msgstr ""
 
-#: src/blist.c:612 src/buddyadd.c:379
+#: src/blist.c:612 src/buddyadd.c:379 src/core.c:178 src/core.c:180
 msgid "Add Buddy"
 msgstr ""
 
@@ -440,7 +440,7 @@ msgstr ""
 msgid "Buddy-Add Request"
 msgstr ""
 
-#: src/chat-textview.c:84 src/chat-webkit.c:199
+#: src/chat-textview.c:84 src/chat-webkit.c:203
 msgid "%H:%M:%S"
 msgstr ""
 
@@ -532,7 +532,47 @@ msgstr ""
 msgid " %s is inputing"
 msgstr ""
 
-#: src/core.c:213
+#. account menu.
+#: src/core.c:148
+msgid "_Account"
+msgstr ""
+
+#. account menu.
+#: src/core.c:152 src/statusicon.c:334
+msgid "Manage Accounts"
+msgstr ""
+
+#: src/core.c:154 src/gtkaccount.c:259
+msgid "Manage Account"
+msgstr ""
+
+#: src/core.c:160 src/core.c:162
+msgid "Quit"
+msgstr ""
+
+#. tools menu.
+#: src/core.c:166
+msgid "_Tools"
+msgstr ""
+
+#: src/core.c:170 src/core.c:172 src/preference.c:399
+msgid "Preference"
+msgstr ""
+
+#: src/core.c:186 src/core.c:188 src/groupadd.c:237
+msgid "Add Group"
+msgstr ""
+
+#. help menu.
+#: src/core.c:192
+msgid "_Help"
+msgstr ""
+
+#: src/core.c:193
+msgid "About"
+msgstr ""
+
+#: src/core.c:222
 msgid "Hybrid"
 msgstr ""
 
@@ -548,10 +588,6 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: src/groupadd.c:237
-msgid "Add Group"
-msgstr ""
-
 #: src/gtkaccount.c:141
 msgid "Enabled"
 msgstr ""
@@ -562,10 +598,6 @@ msgstr ""
 
 #: src/gtkaccount.c:166
 msgid "Protocol"
-msgstr ""
-
-#: src/gtkaccount.c:259
-msgid "Manage Account"
 msgstr ""
 
 #: src/gtkaccount.c:305
@@ -714,18 +746,9 @@ msgstr ""
 msgid "Sound"
 msgstr ""
 
-#: src/preference.c:399
-msgid "Preference"
-msgstr ""
-
 #. show buddy list buddy.
 #: src/statusicon.c:320
 msgid "Show buddy list"
-msgstr ""
-
-#. account menu.
-#: src/statusicon.c:334
-msgid "Manage Accounts"
 msgstr ""
 
 #. notify menu

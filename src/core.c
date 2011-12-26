@@ -145,52 +145,52 @@ create_basic_menus(GtkBox *box)
 
     GtkActionEntry entries[] = {
         /* account menu. */
-        { "Account", NULL, "_Account" },
+        { "Account", NULL, _("_Account") },
         {
             "Manage Accounts",
             NULL,
-            "Manage Accounts",
+            _("Manage Accounts"),
             "<control>A",
-            "Manage Account",
+            _("Manage Account"),
             G_CALLBACK(manage_account_cb)
         },
         {
             "Quit",
             GTK_STOCK_QUIT,
-            "Quit",
+            _("Quit"),
             "<control>Q",
-            "Quit",
+            _("Quit"),
             G_CALLBACK(quit_cb)
         },
         /* tools menu. */
-        { "Tools", NULL, "_Tools" },
+        { "Tools", NULL, _("_Tools") },
         {
             "Preference",
             GTK_STOCK_PREFERENCES,
-            "Preference",
+            _("Preference"),
             "<control>P",
-            "Preference",
+            _("Preference"),
             G_CALLBACK(preference_cb)
         },
         {
             "Add Buddy",
             GTK_STOCK_ADD,
-            "Add Buddy",
+            _("Add Buddy"),
             "<control>B",
-            "Add Buddy",
+            _("Add Buddy"),
             G_CALLBACK(add_buddy_cb)
         },
         {
             "Add Group",
             GTK_STOCK_ADD,
-            "Add Group",
+            _("Add Group"),
             "<control>G",
-            "Add Group",
+            _("Add Group"),
             G_CALLBACK(add_group_cb)
         },
         /* help menu. */
-        { "Help", NULL, "_Help" },
-        { "About", GTK_STOCK_ABOUT, "About" },
+        { "Help", NULL, _("_Help") },
+        { "About", GTK_STOCK_ABOUT, _("About") },
     };
 
     actionGroup = gtk_action_group_new("Actions");
