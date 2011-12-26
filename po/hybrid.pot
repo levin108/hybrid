@@ -1,0 +1,734 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Hybrid\n"
+"Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
+"POT-Creation-Date: 2011-12-26 14:45+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: lib/account.c:1102
+msgid "login success!"
+msgstr ""
+
+#: lib/account.c:1125
+msgid "Offline"
+msgstr ""
+
+#: lib/account.c:1126
+msgid "Invisible"
+msgstr ""
+
+#: lib/account.c:1127
+msgid "Away"
+msgstr ""
+
+#: lib/account.c:1128
+msgid "Busy"
+msgstr ""
+
+#: lib/account.c:1129
+msgid "Online"
+msgstr ""
+
+#: lib/logs.c:155
+#, c-format
+msgid "Conversation with %s (%s) at %d-%d-%d"
+msgstr ""
+
+#: modules/email/imap.c:92
+msgid "New Mail."
+msgstr ""
+
+#: modules/email/imap.c:108
+msgid "I Know"
+msgstr ""
+
+#: modules/email/imap.c:174
+msgid "IMAP Connection Closed."
+msgstr ""
+
+#: modules/email/imap.c:225
+msgid "IMAP OK."
+msgstr ""
+
+#: modules/email/imap.c:238
+msgid "IMAP Authenticate Failed. Check your username and password."
+msgstr ""
+
+#: modules/email/mail.c:150
+msgid "IMAP Authenticating."
+msgstr ""
+
+#: modules/email/mail.c:157
+msgid "IMAP Authenticate failed."
+msgstr ""
+
+#: modules/email/mail.c:181
+msgid "Connecting to IMAP server."
+msgstr ""
+
+#: modules/email/mail.c:221
+msgid "IMAP Server:"
+msgstr ""
+
+#: modules/email/mail.c:226
+msgid "Port:"
+msgstr ""
+
+#: modules/email/mail.c:232
+msgid ""
+"Check Interval\n"
+"(seconds):"
+msgstr ""
+
+#: modules/email/mail.c:238
+msgid "Use TLS"
+msgstr ""
+
+#. *< name
+#. *< author
+#: modules/email/mail.c:253
+msgid "email notifier"
+msgstr ""
+
+#. *< summary
+#. description
+#: modules/email/mail.c:255
+msgid "hybrid plugin implementing IMAP protocol for email notification."
+msgstr ""
+
+#: modules/fetion/fetion.c:101
+msgid "Your account has logined elsewhere. You are forced to quit."
+msgstr ""
+
+#: modules/fetion/fetion.c:223
+#, c-format
+msgid "Buddy <b>%s</b> has %s your add-buddy request."
+msgstr ""
+
+#: modules/fetion/fetion.c:226
+msgid "accepted"
+msgstr ""
+
+#: modules/fetion/fetion.c:226
+msgid "declined"
+msgstr ""
+
+#: modules/fetion/fetion.c:373 modules/xmpp/xmpp_account.c:199
+#: modules/xmpp/xmpp_account.c:243
+msgid "System Message"
+msgstr ""
+
+#: modules/fetion/fetion.c:467 modules/fetion/fetion.c:471
+msgid "Unknown"
+msgstr ""
+
+#: modules/fetion/fetion.c:475
+msgid "Nickname"
+msgstr ""
+
+#: modules/fetion/fetion.c:477
+msgid "Localname"
+msgstr ""
+
+#: modules/fetion/fetion.c:479
+msgid "Fetion-no"
+msgstr ""
+
+#: modules/fetion/fetion.c:481
+msgid "Mobile-no"
+msgstr ""
+
+#: modules/fetion/fetion.c:483
+msgid "Gender"
+msgstr ""
+
+#: modules/fetion/fetion.c:484
+msgid "Male"
+msgstr ""
+
+#: modules/fetion/fetion.c:485
+msgid "Female"
+msgstr ""
+
+#: modules/fetion/fetion.c:485
+msgid "Secrecy"
+msgstr ""
+
+#: modules/fetion/fetion.c:488
+msgid "Mood"
+msgstr ""
+
+#: modules/fetion/fetion.c:491
+msgid "Country"
+msgstr ""
+
+#: modules/fetion/fetion.c:494
+msgid "Province"
+msgstr ""
+
+#: modules/fetion/fetion.c:495
+msgid "City"
+msgstr ""
+
+#: modules/fetion/fetion.c:544 modules/fetion/fetion.c:920
+msgid "SMS To Me"
+msgstr ""
+
+#. *< name
+#. *< author
+#: modules/fetion/fetion.c:955
+msgid "fetion client"
+msgstr ""
+
+#. *< summary
+#. description
+#: modules/fetion/fetion.c:957
+msgid "hybrid plugin implementing Fetion Protocol version 4"
+msgstr ""
+
+#: modules/fetion/fx_login.c:124
+msgid "ssi authencation"
+msgstr ""
+
+#: modules/fetion/fx_login.c:231 modules/fetion/fx_login.c:282
+msgid "read cfg failed"
+msgstr ""
+
+#: modules/fetion/fx_login.c:296
+msgid "Downloading configure file..."
+msgstr ""
+
+#: modules/fetion/fx_login.c:567
+msgid "ssi authentication failed"
+msgstr ""
+
+#: modules/fetion/fx_login.c:648
+msgid "sipc reg error."
+msgstr ""
+
+#: modules/fetion/fx_login.c:701
+msgid "start registering to the sipc server."
+msgstr ""
+
+#: modules/fetion/fx_login.c:860
+msgid "Fetion Protocol ERROR."
+msgstr ""
+
+#: modules/fetion/fx_login.c:906
+msgid "start sipc authenticating..."
+msgstr ""
+
+#. *< add an "ungroup" group
+#: modules/fetion/fx_login.c:1534
+msgid "Ungrouped"
+msgstr ""
+
+#: modules/xmpp/xmpp.c:115
+msgid "Resource"
+msgstr ""
+
+#: modules/xmpp/xmpp.c:121
+msgid "Status"
+msgstr ""
+
+#: modules/xmpp/xmpp.c:129
+msgid "Name"
+msgstr ""
+
+#: modules/xmpp/xmpp.c:146
+msgid "Photo"
+msgstr ""
+
+#: modules/xmpp/xmpp.c:299
+#, c-format
+msgid "Status (%s)"
+msgstr ""
+
+#: modules/xmpp/xmpp.c:308
+msgid "Subscription"
+msgstr ""
+
+#. *< name
+#. *< author
+#: modules/xmpp/xmpp.c:501
+msgid "jabber client"
+msgstr ""
+
+#. *< summary
+#. description
+#: modules/xmpp/xmpp.c:503
+msgid "implement xmpp protocol"
+msgstr ""
+
+#: modules/xmpp/xmpp_account.c:200
+msgid "Modify full name failed."
+msgstr ""
+
+#: modules/xmpp/xmpp_account.c:244
+msgid "Modify photo failed."
+msgstr ""
+
+#: modules/xmpp/xmpp_buddy.c:175
+msgid "Buddies"
+msgstr ""
+
+#: modules/xmpp/xmpp_buddy.c:209
+msgid "request roster failed."
+msgstr ""
+
+#: modules/xmpp/xmpp_buddy.c:567 modules/xmpp/xmpp_buddy.c:610
+#: src/gtkutils.c:510
+msgid "Warning"
+msgstr ""
+
+#: modules/xmpp/xmpp_buddy.c:568
+msgid ""
+"Add buddy failed.\n"
+"Invalid response message."
+msgstr ""
+
+#: modules/xmpp/xmpp_buddy.c:619
+msgid "Add buddy failed."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:326 modules/xmpp/xmpp_stream.c:375
+msgid "Connection Closed."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:441
+msgid "TLS hand-shake failed."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:522
+msgid "resource bind error."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:528
+msgid "resource bind error: no jabber id returned."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:549
+msgid "start session error."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:1124
+msgid "Account not authorized. Check Username and Password."
+msgstr ""
+
+#: src/blist.c:462
+#, c-format
+msgid "Are you sure to delete the buddy <b>%s</b> (%s)"
+msgstr ""
+
+#: src/blist.c:465 src/blist.c:519
+msgid "Confirm"
+msgstr ""
+
+#: src/blist.c:465 src/blist.c:519 src/gtkaccount.c:300
+msgid "Delete"
+msgstr ""
+
+#: src/blist.c:517
+#, c-format
+msgid "Are you sure to delete the group <b>%s</b>"
+msgstr ""
+
+#: src/blist.c:552
+msgid "Instant Message"
+msgstr ""
+
+#: src/blist.c:554
+msgid "Buddy Information"
+msgstr ""
+
+#: src/blist.c:557
+msgid "Move To"
+msgstr ""
+
+#: src/blist.c:570
+msgid "Remove Buddy"
+msgstr ""
+
+#: src/blist.c:572
+msgid "Rename Buddy"
+msgstr ""
+
+#: src/blist.c:574
+msgid "View Chat Logs"
+msgstr ""
+
+#: src/blist.c:603
+msgid "Rename Group"
+msgstr ""
+
+#. we won't let users to remove group which is not empty.
+#: src/blist.c:608
+msgid "Remove Group"
+msgstr ""
+
+#: src/blist.c:612 src/buddyadd.c:379
+msgid "Add Buddy"
+msgstr ""
+
+#: src/buddyadd.c:272
+msgid "<b>Account:</b>"
+msgstr ""
+
+#: src/buddyadd.c:296
+msgid "<b>Username:</b>"
+msgstr ""
+
+#: src/buddyadd.c:305
+msgid "<b>Alias(Optional):</b>"
+msgstr ""
+
+#: src/buddyadd.c:314
+msgid "<b>Add To Group:</b>"
+msgstr ""
+
+#: src/buddyadd.c:344
+msgid "<b>Tips(Optional):</b>"
+msgstr ""
+
+#: src/buddyadd.c:361 src/gtkaccount.c:295
+msgid "Add"
+msgstr ""
+
+#: src/buddyadd.c:366 src/buddyreq.c:321 src/confirm.c:101 src/groupadd.c:224
+#: src/gtkaccount.c:812 src/gtkutils.c:459 src/head.c:147 src/preference.c:368
+msgid "Cancel"
+msgstr ""
+
+#: src/buddyreq.c:234
+#, c-format
+msgid "%s(%s) wants to add you as a friend."
+msgstr ""
+
+#: src/buddyreq.c:263
+msgid "Accept"
+msgstr ""
+
+#: src/buddyreq.c:267
+msgid "Decline"
+msgstr ""
+
+#: src/buddyreq.c:280
+msgid "<span size='small'><b>Alias(Optional):</b></span>"
+msgstr ""
+
+#: src/buddyreq.c:295
+msgid "<span size='small'><b>Add To Group:</b></span>"
+msgstr ""
+
+#: src/buddyreq.c:316 src/confirm.c:96 src/gtkutils.c:556 src/head.c:147
+msgid "OK"
+msgstr ""
+
+#: src/buddyreq.c:344
+msgid "Buddy-Add Request"
+msgstr ""
+
+#: src/chat-textview.c:84 src/chat-webkit.c:199
+msgid "%H:%M:%S"
+msgstr ""
+
+#: src/chat-textview.c:127
+msgid " said:"
+msgstr ""
+
+#: src/confirm.c:60
+msgid "Confirm Code"
+msgstr ""
+
+#: src/confirm.c:74
+msgid "<i>Please input the following code in the picture:</i>"
+msgstr ""
+
+#: src/confirm.c:78
+msgid "<i>Code:</i>"
+msgstr ""
+
+#: src/conv.c:389 src/gtkaccount.c:310 src/info.c:209 src/notify.c:148
+msgid "Close"
+msgstr ""
+
+#: src/conv.c:394
+msgid "Send"
+msgstr ""
+
+#. create move menu
+#: src/conv.c:606
+msgid "Close Current Page"
+msgstr ""
+
+#: src/conv.c:613
+msgid "Popup Current Page"
+msgstr ""
+
+#: src/conv.c:620
+msgid "Close Other Pages"
+msgstr ""
+
+#: src/conv.c:627
+msgid "Close All Pages"
+msgstr ""
+
+#: src/conv.c:841
+#, c-format
+msgid "[<span color='#0099ff'>%d</span>] character"
+msgstr ""
+
+#: src/conv.c:1123
+msgid "Chat logs"
+msgstr ""
+
+#: src/conv.c:1123
+msgid "View chat logs"
+msgstr ""
+
+#: src/conv.c:1130
+msgid "Screen jitter"
+msgstr ""
+
+#: src/conv.c:1130
+msgid "Send a screen jitter"
+msgstr ""
+
+#: src/conv.c:1142
+#, c-format
+msgid "Total %d character, left "
+msgstr ""
+
+#: src/conv.c:1149
+#, c-format
+msgid "[<span color='#0099ff'>%d</span>] characters"
+msgstr ""
+
+#. notify.
+#: src/conv.c:1380
+#, c-format
+msgid "%s said:"
+msgstr ""
+
+#: src/conv.c:1458 src/conv.c:1526
+#, c-format
+msgid " %s stoped inputing"
+msgstr ""
+
+#: src/conv.c:1488
+#, c-format
+msgid " %s is inputing"
+msgstr ""
+
+#: src/core.c:213
+msgid "Hybrid"
+msgstr ""
+
+#: src/groupadd.c:187
+msgid "<b>Please choose an account:</b>"
+msgstr ""
+
+#: src/groupadd.c:209
+msgid "<b>Please input the group name:</b>"
+msgstr ""
+
+#: src/groupadd.c:219 src/gtkaccount.c:818 src/preference.c:363
+msgid "Save"
+msgstr ""
+
+#: src/groupadd.c:237
+msgid "Add Group"
+msgstr ""
+
+#: src/gtkaccount.c:141
+msgid "Enabled"
+msgstr ""
+
+#: src/gtkaccount.c:154
+msgid "Username"
+msgstr ""
+
+#: src/gtkaccount.c:166
+msgid "Protocol"
+msgstr ""
+
+#: src/gtkaccount.c:259
+msgid "Manage Account"
+msgstr ""
+
+#: src/gtkaccount.c:305
+msgid "Modify"
+msgstr ""
+
+#: src/gtkaccount.c:616
+msgid "Username:"
+msgstr ""
+
+#: src/gtkaccount.c:626
+msgid "Password:"
+msgstr ""
+
+#: src/gtkaccount.c:753
+msgid "Add a new account"
+msgstr ""
+
+#: src/gtkaccount.c:753
+msgid "Edit the account"
+msgstr ""
+
+#: src/gtkaccount.c:773
+msgid "Protocol:"
+msgstr ""
+
+#: src/gtkaccount.c:958 src/gtkaccount.c:1051
+msgid "Disable Account"
+msgstr ""
+
+#: src/gtkaccount.c:997
+msgid "Change State"
+msgstr ""
+
+#: src/gtkaccount.c:1055 src/gtkaccount.c:1130
+msgid "Enable Account"
+msgstr ""
+
+#: src/gtkutils.c:513
+msgid "Information"
+msgstr ""
+
+#: src/gtkutils.c:516
+msgid "Message"
+msgstr ""
+
+#: src/head.c:97
+msgid "<b>Please input the name:</b>"
+msgstr ""
+
+#: src/head.c:107
+msgid "<b>Please input the status:</b>"
+msgstr ""
+
+#: src/head.c:145
+msgid "Choose the avatar file to upload"
+msgstr ""
+
+#: src/head.c:203
+msgid "Modify Photo"
+msgstr ""
+
+#: src/head.c:206
+msgid "Modify Name"
+msgstr ""
+
+#: src/head.c:209
+msgid "Modify Status"
+msgstr ""
+
+#: src/head.c:349
+msgid "No account was enabled."
+msgstr ""
+
+#: src/head.c:355
+#, c-format
+msgid ""
+"<b>%s</b> [%s]\n"
+"<small>%s</small>"
+msgstr ""
+
+#: src/info.c:154
+#, c-format
+msgid "%s's information"
+msgstr ""
+
+#: src/info.c:177
+#, c-format
+msgid "<b>Information of %s</b>"
+msgstr ""
+
+#: src/notify.c:60
+msgid "Notification"
+msgstr ""
+
+#: src/preference.c:48
+msgid "Top"
+msgstr ""
+
+#: src/preference.c:54
+msgid "Right"
+msgstr ""
+
+#: src/preference.c:60
+msgid "Bottom"
+msgstr ""
+
+#: src/preference.c:66
+msgid "Left"
+msgstr ""
+
+#: src/preference.c:193
+msgid "<b>Chat Window:</b>"
+msgstr ""
+
+#: src/preference.c:198
+msgid "Hide Action Buttons"
+msgstr ""
+
+#: src/preference.c:203
+msgid "Chat Theme:"
+msgstr ""
+
+#: src/preference.c:211
+msgid "<b>Tabs:</b>"
+msgstr ""
+
+#: src/preference.c:215
+msgid "Show Messages In A Single Window With Tabs"
+msgstr ""
+
+#: src/preference.c:222
+msgid "Tab Position:"
+msgstr ""
+
+#. mute menu.
+#: src/preference.c:235 src/statusicon.c:364
+msgid "Mute"
+msgstr ""
+
+#: src/preference.c:347
+msgid "Basic Settings"
+msgstr ""
+
+#: src/preference.c:354
+msgid "Sound"
+msgstr ""
+
+#: src/preference.c:399
+msgid "Preference"
+msgstr ""
+
+#. show buddy list buddy.
+#: src/statusicon.c:320
+msgid "Show buddy list"
+msgstr ""
+
+#. account menu.
+#: src/statusicon.c:334
+msgid "Manage Accounts"
+msgstr ""
+
+#. notify menu
+#: src/statusicon.c:376
+msgid "Close Notify"
+msgstr ""

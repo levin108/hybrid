@@ -61,12 +61,13 @@ add_definitions(-DCCERT_DIR="${DATA_INSTALL_DIR}/c-cert")
 
 # compile option switch
 # option(NLS "Native language support" ON)
-option(WITH_LIBNOTIFY "Libnotify support" ON)
-option(WITH_GSTREAMER "GStreamer support" ON)
-option(WITH_LIBXSS "LibXScrnSaver support" ON)
-option(WITH_WEBKIT "Webkit support" ON)
-option(WITH_NETWORKMANAGER "NetworkManager support" ON)
-option(WITH_INDICATE "Ubuntu Indicator support" ON)
+option(WITH_LIBNOTIFY      "Libnotify support"        ON)
+option(WITH_GSTREAMER      "GStreamer support"        ON)
+option(WITH_LIBXSS         "LibXScrnSaver support"    ON)
+option(WITH_WEBKIT         "Webkit support"           ON)
+option(WITH_NETWORKMANAGER "NetworkManager support"   ON)
+option(WITH_INDICATE       "Ubuntu Indicator support" ON)
+option(NLS                 "Native language support"  ON)
 
 # im build requirements
 find_package(PkgConfig REQUIRED)
@@ -114,9 +115,9 @@ if(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
     set(USE_LIBNOTIFY 1)
     if(LIBNOTIFY_VERSION LESS 0.7)
     	set(LIBNOTIFY_OLD 1)
-    	message(STATUS "Libnotify support:        OLD" )
+    	message(STATUS "Libnotify support:        YES" )
     else(LIBNOTIFY_VERSION LESS 0.7)
-    	message(STATUS "Libnotify support:        NEW" )
+    	message(STATUS "Libnotify support:        YES" )
     endif(LIBNOTIFY_VERSION LESS 0.7)
 else(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
     message(STATUS "Libnotify support:        NO" )
@@ -161,20 +162,19 @@ else(WITH_INDICATE AND INDICATE_FOUND)
     message(STATUS "Ubuntu Indicator support: NO" )
 endif(WITH_INDICATE AND INDICATE_FOUND)
 
+if(NLS AND GETTEXT_FOUND)
+	add_definitions(-DGETTEXT_PACKAGE="${TARNAME}")
+	add_definitions(-DENABLE_NLS="1")
+	message(STATUS "Native language support:  YES" )
+else(NLS AND GETTEXT_FOUND)
+	message(STATUS "Native language support:  NO" )
+endif(NLS AND GETTEXT_FOUND)
+
 configure_file(config-hybrid.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 ##########################################################################
 
-
 add_definitions(-g -Wall)
-
-#if(NLS AND GETTEXT_FOUND)
-#	add_definitions(-DGETTEXT_PACKAGE="${PACKAGE_TARNAME}")
-#	add_definitions(-DENABLE_NLS="1")
-#	message(STATUS "Native language support:  YES" )
-#else(NLS AND GETTEXT_FOUND)
-#	message(STATUS "Native language support:  NO" )
-#endif(NLS AND GETTEXT_FOUND)
 
 add_definitions(-DLOCALE_DIR="${LOCALE_INSTALL_DIR}")
 add_definitions(-DMODULE_DIR="${MODULE_INSTALL_DIR}")
@@ -256,15 +256,15 @@ set(hybrid_SRC
 
 add_executable(hybrid ${hybrid_SRC})
 message(STATUS ${GLIB2_LIBRARIES})
-target_link_libraries(hybrid
-    ${GOBJECT2_LIBRARIES}
-    ${GMODULE2_LIBRARIES}
-    ${GTK2_LIBRARIES}
-    ${GLIB2_LIBRARIES}
-    ${GDKPIXBUF_LIBRARIES}
-    ${GTHREAD2_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-    ${LIBXML2_LIBRARIES})
+target_link_libraries(hybrid 
+	${GOBJECT2_LIBRARIES}
+	${GMODULE2_LIBRARIES}
+	${GTK2_LIBRARIES}
+	${GLIB2_LIBRARIES}
+	${GDKPIXBUF_LIBRARIES}
+	${GTHREAD2_LIBRARIES}
+	${OPENSSL_LIBRARIES}
+	${LIBXML2_LIBRARIES})
 
 if(WITH_LIBNOTIFY AND LIBNOTIFY_FOUND)
     target_link_libraries(hybrid ${LIBNOTIFY_LIBRARIES})
@@ -279,7 +279,7 @@ if(WITH_LIBXSS AND LIBXSS_FOUND)
 endif(WITH_LIBXSS AND LIBXSS_FOUND)
 
 if (WITH_WEBKIT AND WEBKIT_FOUND)
-    target_link_libraries(hybrid ${WEBKIT_LIBRARIES})
+	target_link_libraries(hybrid ${WEBKIT_LIBRARIES})
 endif(WITH_WEBKIT AND WEBKIT_FOUND)
 
 if(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
@@ -314,20 +314,13 @@ install(FILES ${HYBRID_STATUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/
 file(GLOB HYBRID_ICONS_PIXMAPS "share/pixmaps/icons/*.png")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/icons/")
 
-file(GLOB HYBRID_ICON "share/pixmaps/icons/icon.png")
-install(FILES ${HYBRID_ICON} DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pixmaps/" RENAME "hybrid.png")
+# install sound files 
+file(GLOB HYBRID_ICONS_PIXMAPS "share/sound/*.wav")
+install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/sound/")
 
-# install desktop file
-file(GLOB HYBRID_DESKTOP "share/applications/*.desktop")
-install(FILES ${HYBRID_DESKTOP} DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications/")
-
-# install sound files
-file(GLOB HYBRID_SOUND "share/sound/*.wav")
-install(FILES ${HYBRID_SOUND} DESTINATION "${DATA_INSTALL_DIR}/sound/")
-
-# install ui files
-file(GLOB HYBRID_UI "src/ui/*")
-install(FILES ${HYBRID_UI} DESTINATION "${UI_INSTALL_DIR}")
+# install ui files 
+file(GLOB HYBRID_ICONS_PIXMAPS "src/ui/*")
+install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${UI_INSTALL_DIR}")
 
 #install ca certs files
 file(GLOB HYBRID_CA_CERTS "share/ca-certs/*")
@@ -339,16 +332,16 @@ install(FILES ${HYBRID_CLIENT_CERT} DESTINATION "${DATA_INSTALL_DIR}/c-cert/")
 
 # source list of fetion module
 set(fetion_SRC
-    modules/fetion/fetion.c
-    modules/fetion/fx_login.c
-    modules/fetion/fx_account.c
-    modules/fetion/fx_sip.c
-    modules/fetion/fx_group.c
-    modules/fetion/fx_buddy.c
-    modules/fetion/fx_trans.c
-    modules/fetion/fx_util.c
-    modules/fetion/fx_msg.c
-    modules/fetion/fx_config.c
+	modules/fetion/fetion.c
+	modules/fetion/fx_login.c
+	modules/fetion/fx_account.c
+	modules/fetion/fx_sip.c
+	modules/fetion/fx_group.c
+	modules/fetion/fx_buddy.c
+	modules/fetion/fx_trans.c
+	modules/fetion/fx_util.c
+	modules/fetion/fx_msg.c
+	modules/fetion/fx_config.c
 )
 
 # install fetion resource xml files
@@ -386,7 +379,7 @@ install(TARGETS xmpp
 
 # source list of email module
 set(email_SRC
-    modules/email/mail.c
+	modules/email/mail.c
     modules/email/imap.c
 )
 
@@ -394,6 +387,11 @@ add_library(email SHARED ${email_SRC})
 
 # install email modules/xmpp/xmpp
 install(TARGETS email
-    LIBRARY DESTINATION ${MODULE_INSTALL_DIR}
-    ARCHIVE DESTINATION ${MODULE_INSTALL_DIR}
+	LIBRARY DESTINATION ${MODULE_INSTALL_DIR}
+	ARCHIVE DESTINATION ${MODULE_INSTALL_DIR}
 )
+
+if(NLS AND GETTEXT_FOUND)
+	file(GLOB POFILES "${CMAKE_CURRENT_SOURCE_DIR}/po/*.po")
+	gettext_create_translations("${CMAKE_CURRENT_SOURCE_DIR}/po/hybrid.pot" ALL ${POFILES})
+endif(NLS AND GETTEXT_FOUND)

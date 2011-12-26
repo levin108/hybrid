@@ -190,7 +190,7 @@ pref_basic_init(GtkFixed *fixed)
     GtkWidget *label;
 
     label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), _("<b>Chat Window：</b>"));
+    gtk_label_set_markup(GTK_LABEL(label), _("<b>Chat Window:</b>"));
 
     gtk_fixed_put(fixed, label, 20, 10);
 

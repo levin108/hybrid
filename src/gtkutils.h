@@ -25,6 +25,13 @@
 #include <gtk/gtk.h>
 #include "account.h"
 
+#ifdef ENABLE_NLS
+	#include "glib/gi18n.h"
+#else
+	#define  _(String) (String)
+	#define N_(String) (String)
+#endif
+
 typedef struct _HybridConfirm	 HybridConfirm;
 typedef struct _HybridMessageBox HybridMessageBox;
 typedef enum _HybridMessageType	 HybridMessageType;

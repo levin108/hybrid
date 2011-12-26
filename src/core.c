@@ -260,6 +260,13 @@ main(gint argc, gchar **argv)
 
     gtk_init(&argc, &argv);
 
+#ifdef ENABLE_NLS
+	setlocale(LC_ALL, "");
+	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+	bindtextdomain(GETTEXT_PACKAGE , LOCALE_DIR);
+	textdomain(GETTEXT_PACKAGE);
+#endif	
+
 #ifdef USE_LIBNOTIFY
     notify_init("Hybrid");
 #endif
