@@ -1,9 +1,13 @@
 [Desktop Entry]
 Name=Hybrid
-GenericName=Hybrid IM Client
-X-GNOME-FullName=Hybrid IM Client
+Name[zh_CN]=Hybrid
+GenericName=Hybrid IM Framework
+GenericName[zh_CN]=Hybrid即时通讯框架
+X-GNOME-FullName=Hybrid IM Framework
+X-GNOME-FullName[zh_CN]=Hybrid即时通讯框架
 Type=Application
-Comment=IM Client
+Comment=Lightweight IM framework, currently supports China Mobile Fetion protocol and XMPP protocol.
+Comment[zh_CN]=轻量级即时通讯框架, 目前支持中国移动飞信以及XMPP协议.
 Exec=hybrid
 Icon=hybrid
 Categories=GTK;GNOME;Network;
