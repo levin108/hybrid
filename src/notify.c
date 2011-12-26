@@ -157,7 +157,7 @@ hybrid_notify_create(HybridAccount *account, const gchar *title)
     gtk_container_add(GTK_CONTAINER(notify->window), vbox);
 
     gtk_widget_show_all(notify->window);
-    
+
     return notify;
 }
 

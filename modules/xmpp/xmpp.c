@@ -64,7 +64,7 @@ xmpp_login(HybridAccount *account)
 
     ac = xmpp_account_create(account, account->username,
                              account->password, "gmail.com");
-    
+
     stream = xmpp_stream_create(ac);
 
     hybrid_account_set_protocol_data(account, stream);
@@ -115,19 +115,17 @@ get_info_cb(XmppStream *stream, xmlnode *root, XmppBuddy *buddy)
         hybrid_info_add_pair(info, _("Resource"), resource);
         g_free(resource);
 
-        status = g_strdup_printf("[%s] %s", 
-                hybrid_get_presence_name(presence->show), 
+        status = g_strdup_printf("[%s] %s",
+                hybrid_get_presence_name(presence->show),
                 presence->status ? presence->status : "");
         hybrid_info_add_pair(info, _("Status"), status);
         g_free(status);
-
     }
 
     if ((node = xmlnode_find(root, "FN"))) {
         name = xmlnode_content(node);
 
         hybrid_info_add_pair(info, _("Name"), name);
-        
         g_free(name);
     }
 
