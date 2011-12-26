@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-26 14:45+0800\n"
-"PO-Revision-Date: 2011-12-26 10:00-0500\n"
+"POT-Creation-Date: 2011-12-26 11:44-0500\n"
+"PO-Revision-Date: 2011-12-26 11:58-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -31,7 +31,7 @@ msgstr "%s 停止输入"
 msgid " said:"
 msgstr " 说:"
 
-#: src/chat-textview.c:84 src/chat-webkit.c:199
+#: src/chat-textview.c:84 src/chat-webkit.c:203
 msgid "%H:%M:%S"
 msgstr ""
 
@@ -123,6 +123,10 @@ msgstr "<span size='small'><b>加入到组:</b></span>"
 msgid "<span size='small'><b>Alias(Optional):</b></span>"
 msgstr "<span size='small'><b>别名(可选):</b></span>"
 
+#: src/core.c:193
+msgid "About"
+msgstr "关于"
+
 #: src/buddyreq.c:263
 msgid "Accept"
 msgstr "接受"
@@ -135,11 +139,11 @@ msgstr "未通过验证, 请检查用户名和密码."
 msgid "Add"
 msgstr "添加"
 
-#: src/blist.c:612 src/buddyadd.c:379
+#: src/blist.c:612 src/buddyadd.c:379 src/core.c:178 src/core.c:180
 msgid "Add Buddy"
 msgstr "添加联系人"
 
-#: src/groupadd.c:237
+#: src/core.c:186 src/core.c:188 src/groupadd.c:237
 msgid "Add Group"
 msgstr "添加组"
 
@@ -155,7 +159,8 @@ msgstr "添加联系人失败."
 msgid ""
 "Add buddy failed.\n"
 "Invalid response message."
-msgstr "添加联系人失败.\n"
+msgstr ""
+"添加联系人失败.\n"
 "无效的回复信息."
 
 #: src/blist.c:462
@@ -222,7 +227,8 @@ msgstr "聊天记录"
 msgid ""
 "Check Interval\n"
 "(seconds):"
-msgstr "检查间隔\n"
+msgstr ""
+"检查间隔\n"
 "(秒)"
 
 #: src/head.c:145
@@ -328,7 +334,7 @@ msgstr "性别"
 msgid "Hide Action Buttons"
 msgstr "隐藏动作按钮"
 
-#: src/core.c:213
+#: src/core.c:222
 msgid "Hybrid"
 msgstr ""
 
@@ -384,12 +390,12 @@ msgstr "本地名称"
 msgid "Male"
 msgstr "男"
 
-#: src/gtkaccount.c:259
+#: src/core.c:154 src/gtkaccount.c:259
 msgid "Manage Account"
 msgstr "管理账户"
 
 #. account menu.
-#: src/statusicon.c:334
+#: src/core.c:152 src/statusicon.c:334
 msgid "Manage Accounts"
 msgstr "管理账户"
 
@@ -486,7 +492,7 @@ msgstr "弹出当前页"
 msgid "Port:"
 msgstr "端口:"
 
-#: src/preference.c:399
+#: src/core.c:170 src/core.c:172 src/preference.c:399
 msgid "Preference"
 msgstr "首选项"
 
@@ -501,6 +507,10 @@ msgstr "协议:"
 #: modules/fetion/fetion.c:494
 msgid "Province"
 msgstr "省"
+
+#: src/core.c:160 src/core.c:162
+msgid "Quit"
+msgstr "退出"
 
 #: src/blist.c:570
 msgid "Remove Buddy"
@@ -558,7 +568,7 @@ msgstr "在同一标签窗口内显示信息"
 #. show buddy list buddy.
 #: src/statusicon.c:320
 msgid "Show buddy list"
-msgstr "现实联系人列表"
+msgstr "显示联系人列表"
 
 #: src/preference.c:354
 msgid "Sound"
@@ -598,8 +608,8 @@ msgstr "顶部"
 #, c-format
 msgid "Total %d character, left "
 msgstr ""
-#?
 
+# ?
 #. *< add an "ungroup" group
 #: modules/fetion/fx_login.c:1534
 msgid "Ungrouped"
@@ -642,14 +652,30 @@ msgstr "您的帐户已在其他地方登陆. 您被强迫登出."
 #, c-format
 msgid "[<span color='#0099ff'>%d</span>] character"
 msgstr ""
-#?
 
+# ?
 #: src/conv.c:1149
 #, c-format
 msgid "[<span color='#0099ff'>%d</span>] characters"
 msgstr ""
-#?
 
+#. account menu.
+#: src/core.c:148
+#, fuzzy
+msgid "_Account"
+msgstr "帐户(_A)"
+
+#. help menu.
+#: src/core.c:192
+msgid "_Help"
+msgstr "帮助(_H)"
+
+#. tools menu.
+#: src/core.c:166
+msgid "_Tools"
+msgstr "工具(_T)"
+
+# ?
 #: modules/fetion/fetion.c:226
 msgid "accepted"
 msgstr "接受"
