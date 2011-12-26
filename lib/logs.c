@@ -35,7 +35,6 @@ hybrid_logs_init(void)
     e = mkdir(log_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
     if (e && access(log_path, R_OK|W_OK)) {
-
         hybrid_debug_error("logs", "%s,cannot create, read or write",
                             log_path);
         g_free(log_path);
@@ -80,7 +79,6 @@ hybrid_logs_create(HybridAccount *account, const gchar *id)
     e = mkdir(account_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
     if (e && access(account_path, R_OK|W_OK)) {
-
         hybrid_debug_error("logs", "%s,cannot create, read or write",
                             account_path);
         g_free(account_path);
@@ -107,7 +105,7 @@ hybrid_logs_create(HybridAccount *account, const gchar *id)
     /* create/get the log file for a specified chat id, with the name
      * in form of id_date.xml */
     local_time = localtime(&now);
-    
+
     log->log_path = g_strdup_printf("%s/%d_%d_%d.html",
                     final_path, local_time->tm_year + 1900,
                     local_time->tm_mon, local_time->tm_mday);

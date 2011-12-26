@@ -55,13 +55,11 @@ GtkWidget *hybrid_vbox;
 
 GtkUIManager *menu_ui_manager;
 
-//TODO add a preference entry
-gboolean close_main_win_quit = FALSE;
-
 static gboolean
 window_delete(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
-    if (close_main_win_quit) {
+/* TODO add a gui preference entry */
+    if (hybrid_pref_get_boolean("quit_when_close")) {
         gtk_widget_destroy(widget);
     } else {
         gtk_widget_hide(widget);
@@ -73,9 +71,7 @@ window_delete(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 static void
 window_destroy(GtkWidget *widget, gpointer user_date)
 {
-    /*
-     * Now free the memory.
-     */
+    /* Now free the memory. */
 #ifdef USE_WEBKIT
     hybrid_webkit_destroy();
 #endif
