@@ -96,7 +96,6 @@ hybrid_account_init(void)
                         "please try to remove ~/.config/hybrid/accounts.xml,"
                         "and then restart hybrid :)");
                 xmlnode_free(root);
-                g_free(config_path);
                 return;
             }
 
@@ -235,7 +234,6 @@ hybrid_account_init(void)
         xmlnode_save_file(root, account_file);
     }
 
-    g_free(config_path);
     xmlnode_free(root);
 }
 
@@ -265,7 +263,7 @@ hybrid_account_get(const gchar *proto_name,    const gchar *username)
     }
 
     account    = hybrid_account_create(module);
-    
+
     hybrid_account_set_username(account, username);
 
     account_list = g_slist_append(account_list, account);
@@ -288,7 +286,6 @@ hybrid_account_update(HybridAccount *account)
 
     config_path = hybrid_config_get_path();
     account_file = g_strdup_printf("%s/accounts.xml", config_path);
-    g_free(config_path);
 
     if (!(root = xmlnode_root_from_file(account_file))) {
         hybrid_debug_error("account", "save account information failed,"
@@ -303,7 +300,7 @@ hybrid_account_update(HybridAccount *account)
             if (g_strcmp0(node->name, "account") ||
                 !xmlnode_has_prop(node, "user") ||
                 !xmlnode_has_prop(node, "proto")) {
-                hybrid_debug_error("account", 
+                hybrid_debug_error("account",
                         "invalid node found in accounts.xml");
                 node = xmlnode_next(node);
 
@@ -445,7 +442,6 @@ hybrid_account_remove(const gchar *protoname, const gchar *username)
     /* Remove the revelent node from accounts.xml */
     config_path = hybrid_config_get_path();
     account_file = g_strdup_printf("%s/accounts.xml", config_path);
-    g_free(config_path);
 
     if (!(root = xmlnode_root_from_file(account_file))) {
         hybrid_debug_error("account", "remove account information failed,"
@@ -460,7 +456,7 @@ hybrid_account_remove(const gchar *protoname, const gchar *username)
             if (g_strcmp0(node->name, "account") ||
                 !xmlnode_has_prop(node, "user") ||
                 !xmlnode_has_prop(node, "proto")) {
-                hybrid_debug_error("account", 
+                hybrid_debug_error("account",
                         "invalid node found in accounts.xml");
                 node = xmlnode_next(node);
 
@@ -503,11 +499,11 @@ HybridAccount*
 hybrid_account_create(HybridModule *proto)
 {
     extern HybridConfig *global_config;
-    
+
     g_return_val_if_fail(proto != NULL, NULL);
 
     HybridAccount *ac = g_new0(HybridAccount, 1);
-    
+
     ac->buddy_list  = g_hash_table_new_full(g_str_hash, g_str_equal,
             NULL, (GDestroyNotify)hybrid_blist_buddy_destroy);
     ac->group_list  = g_hash_table_new_full(g_str_hash, g_str_equal,
@@ -515,7 +511,7 @@ hybrid_account_create(HybridModule *proto)
     ac->config      = global_config;
     ac->proto       = proto;
     ac->status_text = NULL;
-    
+
     if (proto->info->options) {
         ac->option_list = proto->info->options();
     }

@@ -32,15 +32,11 @@ hybrid_pref_init(void)
     hybrid_pref = g_new0(HybridPref, 1);
 
     if (!(config_path = hybrid_config_get_path())) {
-
         hybrid_debug_error("pref", "get config path error.");
-
         return HYBRID_ERROR;
     }
 
     hybrid_pref->filename = g_strdup_printf("%s/pref.xml", config_path);
-
-    g_free(config_path);
 
     if (!(hybrid_pref->root =
                 xmlnode_root_from_file(hybrid_pref->filename))) {

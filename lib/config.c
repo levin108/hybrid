@@ -28,6 +28,9 @@ static gint hybrid_blist_cache_init(HybridConfig *config);
 
 HybridConfig *global_config;
 
+/* The return value is owned by the function, don't free or modify. */
+/* Add lock if it might be access concurrently. */
+
 gchar*
 hybrid_config_get_path(void)
 {
@@ -41,14 +44,14 @@ hybrid_config_get_path(void)
     if (config_path)
         goto check_conf;
     if (!(config_path = getenv("XDG_CONFIG_HOME"))) {
-            if (!(home = getenv("HOME"))) {
-                    hybrid_debug_error("config", "No environment variable "
-                                       "named HOME\n");
-                    return NULL;
-            }
-            config_path = g_strdup_printf("%s/.config", home);
+        if (!(home = getenv("HOME"))) {
+            hybrid_debug_error("config", "No environment variable "
+                               "named HOME\n");
+            return NULL;
+        }
+        config_path = g_strdup_printf("%s/.config", home);
     } else {
-            config_path = g_strdup_printf("%s", config_path);
+        config_path = g_strdup_printf("%s", config_path);
     }
 
 check_conf:
@@ -73,7 +76,7 @@ check_hybrid:
         return NULL;
     }
 
-    return g_strdup(hybrid_path);
+    return hybrid_path;
 }
 
 gchar*
@@ -85,7 +88,6 @@ hybrid_config_get_cert_path(void)
 
     config_path = hybrid_config_get_path();
     cert_path   = g_strdup_printf("%s/certificates", config_path);
-    g_free(config_path);
 
     e = mkdir(cert_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
@@ -107,7 +109,7 @@ hybrid_config_create()
 
     config = g_new0(HybridConfig, 1);
 
-    config->config_path = hybrid_config_get_path();
+    config->config_path = g_strdup(hybrid_config_get_path());
 
     return config;
 }

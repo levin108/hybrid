@@ -32,8 +32,6 @@ hybrid_logs_init(void)
 
     log_path = g_strdup_printf("%s/logs/", config_path);
 
-    g_free(config_path);
-
     e = mkdir(log_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
     if (e && access(log_path, R_OK|W_OK)) {
@@ -74,7 +72,6 @@ hybrid_logs_create(HybridAccount *account, const gchar *id)
 
     config_path = hybrid_config_get_path();
     log_path = g_strdup_printf("%s/logs", config_path);
-    g_free(config_path);
 
     /* create log directory for a specified account. */
     account_path = g_strdup_printf("%s/%s", log_path, account->username);

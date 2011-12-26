@@ -195,7 +195,6 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
     gchar                *icon_name;
     gchar                 time[128];
     struct tm            *tm_time;
-    
 
     g_return_if_fail(textview != NULL);
 
@@ -214,13 +213,12 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
             icon_name = g_strdup_printf("file://%sicons/icon.png",
                                         PIXMAPS_DIR);
         }
-        
-        html = g_strdup_printf(content_recv, 
+
+        html = g_strdup_printf(content_recv,
                 icon_name,
                 buddy->name && *buddy->name ? buddy->name : buddy->id,
                 time,
                 escaped_message);
-        
     } else {
         if (account->icon_name) {
             icon_name = g_strdup_printf("file://%s/icons/%s",
@@ -229,16 +227,15 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
             icon_name = g_strdup_printf("file://%sicons/icon.png",
                                         PIXMAPS_DIR);
         }
-        
-        html = g_strdup_printf(content_send, 
-                account->nickname && *account->nickname ? 
+
+        html = g_strdup_printf(content_send,
+                account->nickname && *account->nickname ?
                 account->nickname : account->username,
                 time,
                 escaped_message,
                 icon_name);
     }
 
-    g_free(icon_path);
     g_free(icon_name);
 
     escaped_html = escape_html(html);
@@ -252,7 +249,7 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
         data                                         = g_new0(struct timeout_data, 1);
         data->webkit                                 = textview;
         data->script                                 = script;
-        
+
         g_timeout_add_seconds(0, (GSourceFunc)timeout_cb, data);
 
     } else {

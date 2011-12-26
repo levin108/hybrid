@@ -21,7 +21,7 @@
 #include "debug.h"
 #include "util.h"
 
-void 
+void
 hybrid_debug_info(const gchar *relm, const gchar *format, ...)
 {
     gchar   fmt[4096];
@@ -33,7 +33,7 @@ hybrid_debug_info(const gchar *relm, const gchar *format, ...)
     va_end(ap);
 }
 
-void 
+void
 hybrid_debug_error(const gchar *relm, const gchar *format, ...)
 {
     gchar   fmt[4096];
