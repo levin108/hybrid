@@ -39,19 +39,19 @@ typedef enum _HybridMessageType	 HybridMessageType;
 typedef	void (*confirm_cb)(gpointer user_data);
 
 struct _HybridConfirm {
-	GtkWidget  *window;
-	confirm_cb	btn_callback;
-	gpointer	user_data;
+    GtkWidget   *window;
+    confirm_cb  btn_callback;
+    gpointer    user_data;
 };
 
 enum _HybridMessageType{
-	HYBRID_MESSAGE_INFO,
-	HYBRID_MESSAGE_WARNING
+    HYBRID_MESSAGE_INFO,
+    HYBRID_MESSAGE_WARNING
 };
 
 struct _HybridMessageBox {
-	GtkWidget		  *window;
-	HybridMessageType  type;
+    GtkWidget          *window;
+    HybridMessageType  type;
 };
 
 #ifdef __cplusplus

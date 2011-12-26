@@ -55,17 +55,26 @@ GtkWidget *hybrid_vbox;
 
 GtkUIManager *menu_ui_manager;
 
-static void
-window_destroy(GtkWidget *widget, gpointer user_data)
-{
-    /*
-     * Now free the memory.
-     */
-#ifdef USE_WEBKIT
-    hybrid_webkit_destroy();
-#endif
+//TODO add a preference entry
+gboolean close_main_win_quit = FALSE;
 
-    gtk_main_quit();
+static gboolean
+window_destroy(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    if (close_main_win_quit) {
+        gtk_widget_destroy(widget);
+        /*
+         * Now free the memory.
+         */
+#ifdef USE_WEBKIT
+        hybrid_webkit_destroy();
+#endif
+        gtk_main_quit();
+    } else {
+        gtk_widget_hide(widget);
+    }
+
+    return TRUE;
 }
 
 static void
@@ -137,19 +146,19 @@ create_basic_menus(GtkBox *box)
     GtkActionEntry entries[] = {
         /* account menu. */
         { "Account", NULL, "_Account" },
-        {    
+        {
             "Manage Accounts",
             NULL,
             "Manage Accounts",
             "<control>A",
-            "Manage Account", 
+            "Manage Account",
             G_CALLBACK(manage_account_cb)
         },
-        {    
+        {
             "Quit",
             GTK_STOCK_QUIT,
             "Quit",
-            "<control>Q", 
+            "<control>Q",
             "Quit",
             G_CALLBACK(quit_cb)
         },
@@ -171,9 +180,9 @@ create_basic_menus(GtkBox *box)
             "Add Buddy",
             G_CALLBACK(add_buddy_cb)
         },
-        { 
+        {
             "Add Group",
-            GTK_STOCK_ADD, 
+            GTK_STOCK_ADD,
             "Add Group",
             "<control>G",
             "Add Group",
@@ -218,7 +227,7 @@ ui_init(void)
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_container_add(GTK_CONTAINER(window), vbox);
 
-    g_signal_connect(window, "destroy", G_CALLBACK(window_destroy), NULL);
+    g_signal_connect(window, "delete_event", G_CALLBACK(window_destroy), NULL);
 
     /* head area */
     hybrid_head_init();
