@@ -48,6 +48,7 @@ hybrid_chat_set_webkit_ops(void)
     hybrid_conv_set_chat_text_ops(&webkit_ops);
 }
 
+#ifdef USE_WEBKIT
 static gchar*
 escape_string(const gchar *str)
 {
@@ -96,6 +97,7 @@ escape_html(const gchar *str)
 
     return g_string_free(res, FALSE);
 }
+#endif
 
 /**
  * Initialize the webkit context.
@@ -164,6 +166,7 @@ hybrid_chat_webkit_create(void)
 gboolean
 timeout_cb(struct timeout_data *data)
 {
+#ifdef USE_WEBKIT   
     WebKitLoadStatus status;
 
     g_object_get(data->webkit, "load-status", &status, NULL);
@@ -175,7 +178,7 @@ timeout_cb(struct timeout_data *data)
     webkit_web_view_execute_script(WEBKIT_WEB_VIEW(data->webkit), data->script);
     g_free(data->script);
     g_free(data);
-
+#endif
     return FALSE;
 }
 
@@ -183,6 +186,7 @@ void
 hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
                             HybridBuddy *buddy,    const gchar *message, time_t msg_time)
 {
+#ifdef USE_WEBKIT
     gchar                *html, *escaped_html, *escaped_message;
     gchar                *script;
     WebKitLoadStatus     status;
@@ -259,12 +263,13 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
     g_free(escaped_html);
     g_free(escaped_message);
     g_free(html);
-    return;
+#endif
 }
 
 void
 hybrid_chat_webkit_notify(GtkWidget *textview, const gchar *text, gint type)
 {
+#ifdef USE_WEBKIT
     WebKitLoadStatus     status;
     gchar                *script;
     struct timeout_data *data;
@@ -285,6 +290,5 @@ hybrid_chat_webkit_notify(GtkWidget *textview, const gchar *text, gint type)
         webkit_web_view_execute_script(WEBKIT_WEB_VIEW(textview), script);
         g_free(script);
     }
-    
-    return;
+#endif    
 }
