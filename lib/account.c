@@ -844,7 +844,7 @@ hybrid_account_enable(HybridAccount *account)
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), cellview, FALSE, FALSE,0);
 
-    account->login_tips = gtk_label_new("Authenticating...");
+    account->login_tips = gtk_label_new(_("Authenticating..."));
     align = gtk_alignment_new(0, 0, 0, 0);
     gtk_container_add(GTK_CONTAINER(align), account->login_tips);
     gtk_box_pack_start(GTK_BOX(vbox), align, FALSE, FALSE,0);
@@ -852,7 +852,7 @@ hybrid_account_enable(HybridAccount *account)
     gtk_container_add(GTK_CONTAINER(account->login_panel), vbox);
     gtk_container_set_border_width(GTK_CONTAINER(align), 2);
 
-    gtk_box_pack_start(GTK_BOX(hybrid_vbox), 
+    gtk_box_pack_start(GTK_BOX(hybrid_vbox),
                        account->login_panel, FALSE, FALSE, 0);
 
     gtk_widget_show_all(account->login_panel);
@@ -861,7 +861,7 @@ hybrid_account_enable(HybridAccount *account)
     case MODULE_TYPE_IM:
         account->proto->info->im_ops->login(account);
         break;
-        
+
     case MODULE_TYPE_EMAIL:
         account->proto->info->email_ops->login(account);
         break;
