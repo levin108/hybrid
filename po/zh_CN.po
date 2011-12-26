@@ -136,7 +136,8 @@ msgstr "添加联系人失败."
 msgid ""
 "Add buddy failed.\n"
 "Invalid response message."
-msgstr "添加联系人失败.\n无效的回复信息."
+msgstr "添加联系人失败.\n"
+"无效的回复信息."
 
 #: src/blist.c:462
 #, c-format
@@ -168,7 +169,6 @@ msgstr "联系人"
 #, c-format
 msgid "Buddy <b>%s</b> has %s your add-buddy request."
 msgstr "<b>%s</b> %s了 您的添加好友请求."
-#?
 
 #: src/blist.c:554
 msgid "Buddy Information"
@@ -315,7 +315,7 @@ msgstr ""
 
 #: modules/email/imap.c:108
 msgid "I Know"
-msgstr ""
+msgstr "知道了"
 
 #: modules/email/imap.c:238
 msgid "IMAP Authenticate Failed. Check your username and password."
@@ -510,8 +510,7 @@ msgstr "右"
 
 #: modules/fetion/fetion.c:544 modules/fetion/fetion.c:920
 msgid "SMS To Me"
-msgstr ""
-#?myself
+msgstr "发短信给自己"
 
 #: src/groupadd.c:219 src/gtkaccount.c:818 src/preference.c:363
 msgid "Save"
