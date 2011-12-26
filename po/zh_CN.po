@@ -672,11 +672,11 @@ msgstr ""
 
 #: lib/account.c:1102
 msgid "login success!"
-msgstr ""
+msgstr "登录成功"
 
 #: modules/fetion/fx_login.c:231 modules/fetion/fx_login.c:282
 msgid "read cfg failed"
-msgstr ""
+msgstr "读取配置文件失败"
 
 #: modules/xmpp/xmpp_buddy.c:209
 msgid "request roster failed."
