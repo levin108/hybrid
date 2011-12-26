@@ -209,7 +209,7 @@ ui_init(void)
 
     /* initialize the status icon. */
     hybrid_status_icon_init();
-    
+
     window = hybrid_create_window(_("Hybrid"), NULL, GTK_WIN_POS_CENTER, TRUE);
     gtk_window_set_default_size(GTK_WINDOW(window), 250, 500);
 
@@ -250,7 +250,7 @@ ui_init(void)
     gtk_widget_hide(hybrid_head->editbox);
 }
 
-gint 
+gint
 main(gint argc, gchar **argv)
 {
 
@@ -261,11 +261,11 @@ main(gint argc, gchar **argv)
     gtk_init(&argc, &argv);
 
 #ifdef ENABLE_NLS
-	setlocale(LC_ALL, "");
-	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
-	bindtextdomain(GETTEXT_PACKAGE, LOCALE_DIR);
-	textdomain(GETTEXT_PACKAGE);
-#endif	
+    setlocale(LC_ALL, "");
+    bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+    bindtextdomain(GETTEXT_PACKAGE, LOCALE_DIR);
+    textdomain(GETTEXT_PACKAGE);
+#endif
 
 #ifdef USE_LIBNOTIFY
     notify_init("Hybrid");

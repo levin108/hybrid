@@ -87,7 +87,7 @@ hybrid_account_init(void)
             /*
              * The name of the current node must be 'account', and
              * it must has two nodes with the name 'user' and 'proto'
-             * respectively, otherwise the node is invalid. 
+             * respectively, otherwise the node is invalid.
              */
             if (g_strcmp0(node->name, "account") ||
                 !xmlnode_has_prop(node, "user") ||
@@ -166,14 +166,14 @@ hybrid_account_init(void)
 
                 g_free(value);
             }
-            
+
             /* load protocol-defined variables. */
             for (pos = module->option_list; pos; pos = pos->next) {
                 var = (HybridAccountVariable*)pos->data;
                 if (!xmlnode_has_prop(node, var->name)) {
                     continue;
                 }
-                
+
                 value = xmlnode_prop(node, var->name);
 
                 switch (var->type) {
@@ -194,14 +194,14 @@ hybrid_account_init(void)
                                       var->name,
                                       g_strcmp0(value, "TRUE") == 0 ? TRUE: FALSE);
                     break;
-                    
+
                 default:
                     break;
                 }
-                
+
                 g_free(value);
             }
-            
+
             /* load the nickname */
             if (xmlnode_has_prop(node, "name")) {
                 value = xmlnode_prop(node, "name");
@@ -226,7 +226,7 @@ hybrid_account_init(void)
             }
 
             account_list = g_slist_append(account_list, account);
-                
+
             node = node->next;
         }
     }

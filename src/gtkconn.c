@@ -37,19 +37,19 @@ nm_state_change_cb(DBusGProxy *proxy, NMState state, gpointer data)
       hybrid_debug_info("conn", "network is connected");
       hybrid_account_enable_all();
       break;
-      
+
     case NM_STATE_ASLEEP:
       hybrid_debug_info("conn", "network is sleeping...");
       break;
-      
+
     case NM_STATE_CONNECTING:
       break;
-      
+
     case NM_STATE_DISCONNECTED:
       hybrid_account_close_all();
       hybrid_debug_info("conn", "network is disconnected");
       break;
-      
+
     case NM_STATE_UNKNOWN:
       hybrid_debug_info("conn", "unknown network state");
     default:
@@ -67,7 +67,7 @@ hybrid_conn_init(void)
     if (!nm_conn) {
 
         hybrid_debug_error("conn",
-                "Error connecting to DBus System service: %s.\n", 
+                "Error connecting to DBus System service: %s.\n",
                 error->message);
 
     } else {
