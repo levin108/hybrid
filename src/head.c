@@ -35,7 +35,7 @@ tooltip_init(HybridTooltipData *tip_data)
     HybridAccount        *account;
     HybridModule        *module;
     HybridIMOps            *ops;
-    
+
     if ((account = hybrid_blist_get_current_account())) {
 
         module = account->proto;
@@ -105,7 +105,7 @@ show_edit_box(gint edit_type)
         case HYBRID_HEAD_EDIT_STATUS:
 
             markup = _("<b>Please input the status:</b>");
-            
+
             if (account->status_text) {
                 gtk_entry_set_text(GTK_ENTRY(hybrid_head->edit_entry),
                         account->status_text);
@@ -158,13 +158,13 @@ modify_photo_menu_cb(GtkWidget *widget, gpointer user_data)
         if (filename) {
             module = account->proto;
             ops       = module->info->im_ops;
-            
+
             if (ops->modify_photo) {
                 ops->modify_photo(account, filename);
             }
         }
     }
-    
+
     gtk_widget_destroy(filechooser);
 }
 
@@ -210,7 +210,7 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
                         G_CALLBACK(modify_status_menu_cb), NULL);
 
         gtk_widget_show_all(menu);
-        
+
         gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
                 (event != NULL) ? event->button : 0,
                 gdk_event_get_time((GdkEvent*)event));
@@ -352,7 +352,7 @@ hybrid_head_bind_to_account(HybridAccount *account)
     } else {
         pixbuf = hybrid_create_round_pixbuf(account->icon_data,
                                             account->icon_data_len, 32);
-        text = g_strdup_printf(_("<b>%s</b> [%s]\n<small>%s</small>"), 
+        text = g_strdup_printf("<b>%s</b> [%s]\n<small>%s</small>",
                                account->nickname,
                                hybrid_get_presence_name(account->state),
                                account->status_text ? account->status_text : "");

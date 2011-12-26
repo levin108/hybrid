@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-26 15:29-0500\n"
+"POT-Creation-Date: 2011-12-26 16:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,35 +17,35 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/account.c:847
+#: lib/account.c:843
 msgid "Authenticating..."
 msgstr ""
 
-#: lib/account.c:1102
+#: lib/account.c:1098
 msgid "login success!"
 msgstr ""
 
-#: lib/account.c:1125
+#: lib/account.c:1121
 msgid "Offline"
 msgstr ""
 
-#: lib/account.c:1126
+#: lib/account.c:1122
 msgid "Invisible"
 msgstr ""
 
-#: lib/account.c:1127
+#: lib/account.c:1123
 msgid "Away"
 msgstr ""
 
-#: lib/account.c:1128
+#: lib/account.c:1124
 msgid "Busy"
 msgstr ""
 
-#: lib/account.c:1129
+#: lib/account.c:1125
 msgid "Online"
 msgstr ""
 
-#: lib/logs.c:155
+#: lib/logs.c:150
 #, c-format
 msgid "Conversation with %s (%s) at %d-%d-%d"
 msgstr ""
@@ -170,7 +170,8 @@ msgstr ""
 msgid "Secrecy"
 msgstr ""
 
-#: modules/fetion/fetion.c:489
+#: modules/fetion/fetion.c:489 modules/fetion/fetion.c:620
+#: modules/fetion/fetion.c:660
 msgid "Mood"
 msgstr ""
 
@@ -188,6 +189,28 @@ msgstr ""
 
 #: modules/fetion/fetion.c:545 modules/fetion/fetion.c:921
 msgid "SMS To Me"
+msgstr ""
+
+#: modules/fetion/fetion.c:610 modules/fetion/fetion.c:644
+#: modules/xmpp/xmpp.c:128 modules/xmpp/xmpp.c:259 modules/xmpp/xmpp.c:287
+msgid "Name"
+msgstr ""
+
+#: modules/fetion/fetion.c:611 modules/fetion/fetion.c:649
+#: modules/xmpp/xmpp.c:121 modules/xmpp/xmpp.c:261
+msgid "Status"
+msgstr ""
+
+#: modules/fetion/fetion.c:615 modules/fetion/fetion.c:653
+msgid "Fetion Number"
+msgstr ""
+
+#: modules/fetion/fetion.c:617 modules/fetion/fetion.c:655
+msgid "Mobile Number"
+msgstr ""
+
+#: modules/fetion/fetion.c:647
+msgid "Alias"
 msgstr ""
 
 #. *< name
@@ -263,24 +286,16 @@ msgstr ""
 msgid "Resource"
 msgstr ""
 
-#: modules/xmpp/xmpp.c:121
-msgid "Status"
-msgstr ""
-
-#: modules/xmpp/xmpp.c:128
-msgid "Name"
-msgstr ""
-
 #: modules/xmpp/xmpp.c:144
 msgid "Photo"
 msgstr ""
 
-#: modules/xmpp/xmpp.c:297
+#: modules/xmpp/xmpp.c:298
 #, c-format
 msgid "Status (%s)"
 msgstr ""
 
-#: modules/xmpp/xmpp.c:306
+#: modules/xmpp/xmpp.c:307
 msgid "Subscription"
 msgstr ""
 
@@ -447,7 +462,7 @@ msgstr ""
 msgid "Remove Group"
 msgstr ""
 
-#: src/blist.c:612 src/buddyadd.c:379 src/core.c:183 src/core.c:185
+#: src/blist.c:612 src/buddyadd.c:379 src/core.c:179 src/core.c:181
 msgid "Add Buddy"
 msgstr ""
 
@@ -509,7 +524,7 @@ msgstr ""
 msgid "Buddy-Add Request"
 msgstr ""
 
-#: src/chat-textview.c:84 src/chat-webkit.c:203
+#: src/chat-textview.c:84 src/chat-webkit.c:202
 msgid "%H:%M:%S"
 msgstr ""
 
@@ -602,46 +617,46 @@ msgid " %s is inputing"
 msgstr ""
 
 #. account menu.
-#: src/core.c:153
+#: src/core.c:149
 msgid "_Account"
 msgstr ""
 
 #. account menu.
-#: src/core.c:157 src/statusicon.c:334
+#: src/core.c:153 src/statusicon.c:334
 msgid "Manage Accounts"
 msgstr ""
 
-#: src/core.c:159 src/gtkaccount.c:259
+#: src/core.c:155 src/gtkaccount.c:259
 msgid "Manage Account"
 msgstr ""
 
-#: src/core.c:165 src/core.c:167
+#: src/core.c:161 src/core.c:163
 msgid "Quit"
 msgstr ""
 
 #. tools menu.
-#: src/core.c:171
+#: src/core.c:167
 msgid "_Tools"
 msgstr ""
 
-#: src/core.c:175 src/core.c:177 src/preference.c:399
+#: src/core.c:171 src/core.c:173 src/preference.c:399
 msgid "Preference"
 msgstr ""
 
-#: src/core.c:191 src/core.c:193 src/groupadd.c:237
+#: src/core.c:187 src/core.c:189 src/groupadd.c:237
 msgid "Add Group"
 msgstr ""
 
 #. help menu.
-#: src/core.c:197
+#: src/core.c:193
 msgid "_Help"
 msgstr ""
 
-#: src/core.c:198
+#: src/core.c:194
 msgid "About"
 msgstr ""
 
-#: src/core.c:227
+#: src/core.c:223
 msgid "Hybrid"
 msgstr ""
 
@@ -739,13 +754,6 @@ msgstr ""
 
 #: src/head.c:349
 msgid "No account was enabled."
-msgstr ""
-
-#: src/head.c:355
-#, c-format
-msgid ""
-"<b>%s</b> [%s]\n"
-"<small>%s</small>"
 msgstr ""
 
 #: src/info.c:154

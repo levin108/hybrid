@@ -434,7 +434,7 @@ hybrid_tooltip_data_add_title(HybridTooltipData *data, const gchar *title)
 
 void
 hybrid_tooltip_data_add_pair(HybridTooltipData *data, const gchar *name,
-                                  const gchar *value)
+                             const gchar *value)
 {
     PangoLayout *layout;
     gchar *markup;
@@ -448,7 +448,6 @@ hybrid_tooltip_data_add_pair(HybridTooltipData *data, const gchar *name,
 
     if (value) {
         escaped_value = g_markup_escape_text(value, -1);
-
     } else {
         escaped_value = g_strdup("");
     }

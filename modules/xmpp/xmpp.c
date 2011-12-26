@@ -116,8 +116,8 @@ get_info_cb(XmppStream *stream, xmlnode *root, XmppBuddy *buddy)
         g_free(resource);
 
         status = g_strdup_printf("[%s] %s",
-                hybrid_get_presence_name(presence->show),
-                presence->status ? presence->status : "");
+                                 hybrid_get_presence_name(presence->show),
+                                 presence->status ? presence->status : "");
         hybrid_info_add_pair(info, _("Status"), status);
         g_free(status);
     }
@@ -250,16 +250,17 @@ xmpp_account_tooltip(HybridAccount *account, HybridTooltipData *tip_data)
 
     stream = hybrid_account_get_protocol_data(account);
 
-    status = g_strdup_printf("[%s] %s", 
-            hybrid_get_presence_name(account->state),
-            account->status_text ? account->status_text : "");
+    status = g_strdup_printf("[%s] %s",
+                             hybrid_get_presence_name(account->state),
+                             account->status_text ? account->status_text : "");
 
     hybrid_tooltip_data_add_title(tip_data, account->username);
     if (account->nickname) {
-        hybrid_tooltip_data_add_pair(tip_data, "Name", account->nickname);
+        hybrid_tooltip_data_add_pair(tip_data, _("Name"), account->nickname);
     }
-    hybrid_tooltip_data_add_pair(tip_data, "Status", status);
-    //hybrid_tooltip_data_add_pair(tip_data, "Resource", bd->resource);
+    hybrid_tooltip_data_add_pair(tip_data, _("Status"), status);
+    /* add _() anyway LOL */
+    //hybrid_tooltip_data_add_pair(tip_data, _("Resource"), bd->resource);
 
     return TRUE;
 }
@@ -283,15 +284,15 @@ xmpp_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy,
     }
 
     hybrid_tooltip_data_add_title(tip_data, bd->jid);
-    hybrid_tooltip_data_add_pair(tip_data, "Name", bd->name);
+    hybrid_tooltip_data_add_pair(tip_data, _("Name"), bd->name);
 
     for (pos = bd->presence_list; pos; pos = pos->next) {
         presence = (XmppPresence *)pos->data;
 
         resource = get_resource(presence->full_jid);
-        status = g_strdup_printf("[<b>%s</b>] %s", 
-                hybrid_get_presence_name(presence->show),
-                presence->status ? presence->status : "");
+        status = g_strdup_printf("[<b>%s</b>] %s",
+                                 hybrid_get_presence_name(presence->show),
+                                 presence->status ? presence->status : "");
 
 
         name = g_strdup_printf(_("Status (%s)"), resource);
@@ -304,7 +305,6 @@ xmpp_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy,
     }
 
     hybrid_tooltip_data_add_pair(tip_data, _("Subscription"), bd->subscription);
-
     return TRUE;
 }
 

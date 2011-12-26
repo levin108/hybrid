@@ -1010,8 +1010,8 @@ create_account_child_menus(HybridAccount *account)
 
         presence_pixbuf = hybrid_create_presence_pixbuf(state, 16);
         child_menu_item = hybrid_create_menu(child_menu,
-                                hybrid_get_presence_name(state),
-                                NULL, TRUE, NULL, NULL);
+                                             hybrid_get_presence_name(state),
+                                             NULL, TRUE, NULL, NULL);
         presence_image  = gtk_image_new_from_pixbuf(presence_pixbuf);
         gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(child_menu_item),
                 presence_image);
@@ -1080,7 +1080,7 @@ hybrid_account_create_menu(HybridAccount *account)
     presence_image  = gtk_image_new_from_pixbuf(presence_pixbuf);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(account->account_menu),
                                   presence_image);
-    
+
     if (presence_pixbuf) {
         g_object_unref(presence_pixbuf);
     }

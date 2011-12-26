@@ -590,7 +590,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
             /* set the default name. */
             gchar *name;
             gchar *pos;
-            
+
             for (pos = xbuddy->jid; *pos && *pos != '@'; pos ++);
             name = g_strndup(xbuddy->jid, pos - xbuddy->jid);
             xmpp_buddy_set_name(xbuddy, name);
@@ -603,7 +603,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
 
         /* OK, add buddy success, subscribe buddy's presence. */
         xmpp_buddy_send_presence(stream, xbuddy->jid, XMPP_PRESENCE_SUBSCRIBE);
-        
+
     } else {
 
         if ((node = xmlnode_find(root, "error"))) {

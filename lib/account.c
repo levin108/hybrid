@@ -695,12 +695,12 @@ hybrid_account_set_state(HybridAccount *account, gint state)
 
     account->state = state;
 
-    /* 
+    /*
      * This function will do something more, that is to set
-     * the icon and name of the account menu to make to 
+     * the icon and name of the account menu to make to
      * show the current state .
      */
-    menu_name = g_strdup_printf("%s (%s) -> (%s)", account->username, 
+    menu_name = g_strdup_printf("%s (%s) -> (%s)", account->username,
                                 hybrid_get_presence_name(state),
                                 account->proto->info->name);
     presence_pixbuf = hybrid_create_presence_pixbuf(state, 16);
@@ -1118,11 +1118,11 @@ hybrid_get_presence_name(gint presence_state)
 {
     /* The human readable presence names. */
     const gchar *presence_names[] = {
-        N_("Offline"),
-        N_("Invisible"),
-        N_("Away"),
-        N_("Busy"),
-        N_("Online")
+        _("Offline"),
+        _("Invisible"),
+        _("Away"),
+        _("Busy"),
+        _("Online")
     };
 
     return presence_names[presence_state];
