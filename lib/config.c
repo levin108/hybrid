@@ -31,14 +31,19 @@ HybridConfig *global_config;
 gchar*
 hybrid_config_get_path(void)
 {
-    gchar *home;
-    gchar *config_path;
-    gchar *hybrid_path;
-    gint   e;
+    gchar        *home;
+    static gchar *config_path = NULL;
+    static gchar *hybrid_path = NULL;
+    gint         e;
 
+    if (hybrid_path)
+        goto check_hybrid;
+    if (config_path)
+        goto check_conf;
     if (!(config_path = getenv("XDG_CONFIG_HOME"))) {
             if (!(home = getenv("HOME"))) {
-                    hybrid_debug_error("config", "No environment variable named HOME\n");
+                    hybrid_debug_error("config", "No environment variable "
+                                       "named HOME\n");
                     return NULL;
             }
             config_path = g_strdup_printf("%s/.config", home);
@@ -46,32 +51,29 @@ hybrid_config_get_path(void)
             config_path = g_strdup_printf("%s", config_path);
     }
 
+check_conf:
     e = mkdir(config_path, S_IRWXU|S_IRWXO|S_IRWXG);
-
     if (e && access(config_path, R_OK|W_OK)) {
-        hybrid_debug_error("config", "%s,cannot create, read or write",
-                config_path);
+        hybrid_debug_error("config", "cannot create, read from or write to %s",
+                           config_path);
         g_free(config_path);
-
+        config_path = NULL;
         return NULL;
     }
 
     hybrid_path = g_strdup_printf("%s/hybrid", config_path);
 
+check_hybrid:
     e = mkdir(hybrid_path, S_IRWXU|S_IRWXO|S_IRWXG);
-
     if (e && access(hybrid_path, R_OK|W_OK)) {
-        hybrid_debug_error("config", "%s,cannot create, read or write",
-                hybrid_path);
-        g_free(config_path);
+        hybrid_debug_error("config", "cannot create, read from or write to %s",
+                           hybrid_path);
         g_free(hybrid_path);
-
+        hybrid_path = NULL;
         return NULL;
     }
 
-    g_free(config_path);
-
-    return hybrid_path;
+    return g_strdup(hybrid_path);
 }
 
 gchar*
@@ -80,7 +82,7 @@ hybrid_config_get_cert_path(void)
     gchar *config_path;
     gchar *cert_path;
     gint   e;
-    
+
     config_path = hybrid_config_get_path();
     cert_path   = g_strdup_printf("%s/certificates", config_path);
     g_free(config_path);

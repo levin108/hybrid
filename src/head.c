@@ -369,7 +369,7 @@ hybrid_head_bind_to_account(HybridAccount *account)
     path = gtk_tree_path_new_from_string("0");
     gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(hybrid_head->cellview), path);
     gtk_tree_path_free(path);
-    
+
     g_object_unref(pixbuf);
     if (status_icon) {
         g_object_unref(status_icon);
@@ -387,7 +387,7 @@ void hybrid_head_init()
     hybrid_head->editbox  = gtk_vbox_new(TRUE, 4);
 
     hybrid_head->cellview = gtk_cell_view_new();
-    gtk_container_add(GTK_CONTAINER(hybrid_head->eventbox), 
+    gtk_container_add(GTK_CONTAINER(hybrid_head->eventbox),
                       hybrid_head->cellview);
 
     hybrid_head->edit_label = gtk_label_new(NULL);

@@ -42,7 +42,7 @@ hybrid_pref_init(void)
 
     g_free(config_path);
 
-    if (!(hybrid_pref->root = 
+    if (!(hybrid_pref->root =
                 xmlnode_root_from_file(hybrid_pref->filename))) {
 
         body = "<pref></pref>";
