@@ -55,16 +55,26 @@ GtkWidget *hybrid_vbox;
 
 GtkUIManager *menu_ui_manager;
 
-static void
-window_destroy(GtkWidget *widget, gpointer user_data)
+static gboolean
+window_delete(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
-    /*
-     * Now free the memory.
-     */
+/* TODO add a gui preference entry */
+    if (hybrid_pref_get_boolean("quit_when_close")) {
+        gtk_widget_destroy(widget);
+    } else {
+        gtk_widget_hide(widget);
+    }
+
+    return TRUE;
+}
+
+static void
+window_destroy(GtkWidget *widget, gpointer user_date)
+{
+    /* Now free the memory. */
 #ifdef USE_WEBKIT
     hybrid_webkit_destroy();
 #endif
-
     gtk_main_quit();
 }
 
@@ -136,52 +146,52 @@ create_basic_menus(GtkBox *box)
 
     GtkActionEntry entries[] = {
         /* account menu. */
-        { "Account", NULL, "_Account" },
-        {    
+        { "Account", NULL, _("_Account") },
+        {
             "Manage Accounts",
             NULL,
-            "Manage Accounts",
+            _("Manage Accounts"),
             "<control>A",
-            "Manage Account", 
+            _("Manage Account"),
             G_CALLBACK(manage_account_cb)
         },
-        {    
+        {
             "Quit",
             GTK_STOCK_QUIT,
-            "Quit",
-            "<control>Q", 
-            "Quit",
+            _("Quit"),
+            "<control>Q",
+            _("Quit"),
             G_CALLBACK(quit_cb)
         },
         /* tools menu. */
-        { "Tools", NULL, "_Tools" },
+        { "Tools", NULL, _("_Tools") },
         {
             "Preference",
             GTK_STOCK_PREFERENCES,
-            "Preference",
+            _("Preference"),
             "<control>P",
-            "Preference",
+            _("Preference"),
             G_CALLBACK(preference_cb)
         },
         {
             "Add Buddy",
             GTK_STOCK_ADD,
-            "Add Buddy",
+            _("Add Buddy"),
             "<control>B",
-            "Add Buddy",
+            _("Add Buddy"),
             G_CALLBACK(add_buddy_cb)
         },
-        { 
+        {
             "Add Group",
-            GTK_STOCK_ADD, 
-            "Add Group",
+            GTK_STOCK_ADD,
+            _("Add Group"),
             "<control>G",
-            "Add Group",
+            _("Add Group"),
             G_CALLBACK(add_group_cb)
         },
         /* help menu. */
-        { "Help", NULL, "_Help" },
-        { "About", GTK_STOCK_ABOUT, "About" },
+        { "Help", NULL, _("_Help") },
+        { "About", GTK_STOCK_ABOUT, _("About") },
     };
 
     actionGroup = gtk_action_group_new("Actions");
@@ -209,7 +219,7 @@ ui_init(void)
 
     /* initialize the status icon. */
     hybrid_status_icon_init();
-    
+
     window = hybrid_create_window(_("Hybrid"), NULL, GTK_WIN_POS_CENTER, TRUE);
     gtk_window_set_default_size(GTK_WINDOW(window), 250, 500);
 
@@ -218,6 +228,7 @@ ui_init(void)
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_container_add(GTK_CONTAINER(window), vbox);
 
+    g_signal_connect(window, "delete_event", G_CALLBACK(window_delete), NULL);
     g_signal_connect(window, "destroy", G_CALLBACK(window_destroy), NULL);
 
     /* head area */
@@ -250,7 +261,7 @@ ui_init(void)
     gtk_widget_hide(hybrid_head->editbox);
 }
 
-gint 
+gint
 main(gint argc, gchar **argv)
 {
 
@@ -261,11 +272,11 @@ main(gint argc, gchar **argv)
     gtk_init(&argc, &argv);
 
 #ifdef ENABLE_NLS
-	setlocale(LC_ALL, "");
-	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
-	bindtextdomain(GETTEXT_PACKAGE, LOCALE_DIR);
-	textdomain(GETTEXT_PACKAGE);
-#endif	
+    setlocale(LC_ALL, "");
+    bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+    bindtextdomain(GETTEXT_PACKAGE, LOCALE_DIR);
+    textdomain(GETTEXT_PACKAGE);
+#endif
 
 #ifdef USE_LIBNOTIFY
     notify_init("Hybrid");

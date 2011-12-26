@@ -131,7 +131,7 @@ parse_sipc_verification(fetion_account *ac, const gchar *resp)
     gchar *w;
     gchar *start;
     gchar *end;
-    
+
     ac->verification = fetion_verification_create();
 
     w = sip_header_get_attr(resp, "W");
@@ -308,7 +308,7 @@ cfg_connect_cb(gint sk, gpointer user_data)
     hybrid_debug_info("fetion", "send:\n%s", http);
 
     if (send(sk, http, strlen(http), 0) == -1) {
-        hybrid_account_error_reason(ac->account, "downloading cfg error");
+        hybrid_account_error_reason(ac->account, _("downloading cfg error"));
         g_free(http);
 
         return FALSE;
@@ -424,14 +424,12 @@ pic_read_cb(gint sk, gpointer user_data)
     return TRUE;
 
  read_pic_err:
-    
     hybrid_debug_error("fetion", "read pic code error.");
 
     g_free(ac->buffer);
     ac->buffer = (gchar *)0;
 
-    hybrid_account_error_reason(ac->account, "read pic code error.");
-    
+    hybrid_account_error_reason(ac->account, _("read pic code error."));
     return FALSE;
 }
 
@@ -563,13 +561,13 @@ ssi_auth_cb(HybridSslConnection *ssl, gpointer user_data)
     return FALSE;
 
 ssi_auth_err:
-    
+
     hybrid_account_error_reason(ac->account, _("ssi authentication failed"));
 
     return FALSE;
 }
 
-gboolean 
+gboolean
 ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
 {
     gchar *password;
@@ -577,11 +575,11 @@ ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
     gchar  verify_url[URL_LENGTH];
     gchar  ssl_buf[BUF_LENGTH];
     gint   pass_type;
-    
+
     fetion_account *ac = (fetion_account*)user_data;
 
-    hybrid_account_set_connection_string(ac->account, "Start SSI authenticating...");
-    
+    hybrid_account_set_connection_string(ac->account, _("Start SSI authenticating..."));
+
     hybrid_debug_info("fetion", "ssi authencating");
     password = hash_password_v4(ac->userid, ac->password);
 
@@ -641,7 +639,7 @@ sipc_reg_cb(gint sk, gpointer user_data)
     gchar *nonce, *key, *aeskey;
     gchar *response;
     gint   n;
-    
+
     fetion_account *ac = (fetion_account*)user_data;
 
     if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
@@ -706,7 +704,7 @@ sipc_reg_action(gint sk, gpointer user_data)
     sip_header *cheader = sip_header_create("CN", cnouce);
     sip_header *client  = sip_header_create("CL", "type=\"pc\""
                                             " ,version=\""PROTO_VERSION"\"");
-    
+
     fetion_sip_add_header(sip, cheader);
     fetion_sip_add_header(sip, client);
 
@@ -720,7 +718,7 @@ sipc_reg_action(gint sk, gpointer user_data)
     hybrid_debug_info("fetion", "send:\n%s", sipmsg);
 
     if (send(sk, sipmsg, strlen(sipmsg), 0) == -1) {
-        hybrid_account_error_reason(ac->account, "sipc reg error");
+        hybrid_account_error_reason(ac->account, _("sipc reg error"));
         g_free(sipmsg);
         return FALSE;
     }
@@ -747,7 +745,7 @@ hybrid_push_cb(gint sk, gpointer user_data)
     guint           len, data_len;
 
     if ((n = recv(sk, sipmsg, sizeof(sipmsg), 0)) == -1) {
-        hybrid_account_error_reason(ac->account, "connection terminated");
+        hybrid_account_error_reason(ac->account, _("connection terminated"));
         return FALSE;
     }
 
@@ -862,12 +860,12 @@ sipc_auth_cb(fetion_account *ac, const gchar *sipmsg,
         }
 
         hybrid_debug_error("fetion", "sipc authentication need Verification.");
-        
+
         verify_data.sipc_conn = ac->sk;
         verify_data.type      = VERIFY_TYPE_SIP;
 
         hybrid_proxy_connect(NAV_SERVER, 80, pic_download_cb, ac);
-    
+
         g_free(ac->buffer);
         ac->buffer = NULL;
 

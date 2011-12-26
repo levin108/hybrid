@@ -97,8 +97,9 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 static void
 process_dereg_cb(fetion_account *ac, const gchar *sipmsg)
 {
-    hybrid_account_error_reason(ac->account, 
-            _("Your account has logined elsewhere. You are forced to quit."));
+    hybrid_account_error_reason(ac->account,
+                                _("Your account has logined elsewhere."
+                                  "You are forced to quit."));
 }
 
 /**
@@ -606,17 +607,17 @@ fx_account_tooltip(HybridAccount *account, HybridTooltipData *tip_data)
         hybrid_tooltip_data_add_title(tip_data, ac->sid);
     }
 
-    hybrid_tooltip_data_add_pair(tip_data, "Name", ac->nickname);
-    hybrid_tooltip_data_add_pair(tip_data, "Status",
+    hybrid_tooltip_data_add_pair(tip_data, _("Name"), ac->nickname);
+    hybrid_tooltip_data_add_pair(tip_data, _("Status"),
                                  hybrid_get_presence_name(account->state));
 
     if (ac->mobileno && *ac->mobileno) {
-        hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", ac->sid);
-
+        hybrid_tooltip_data_add_pair(tip_data, _("Fetion Number"), ac->sid);
     } else {
-        hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", ac->mobileno);
+        hybrid_tooltip_data_add_pair(tip_data, _("Mobile Number"),
+                                     ac->mobileno);
     }
-    hybrid_tooltip_data_add_pair(tip_data, "Mood", ac->mood_phrase);
+    hybrid_tooltip_data_add_pair(tip_data, _("Mood"), ac->mood_phrase);
 
     return TRUE;
 }
@@ -640,25 +641,25 @@ fx_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy, HybridTooltipData *
         hybrid_tooltip_data_add_title(tip_data, bd->sid);
     }
 
-    hybrid_tooltip_data_add_pair(tip_data, "Name", bd->nickname);
+    hybrid_tooltip_data_add_pair(tip_data, _("Name"), bd->nickname);
 
     if (bd->localname && *bd->localname) {
-        hybrid_tooltip_data_add_pair(tip_data, "Alias", bd->localname);
+        hybrid_tooltip_data_add_pair(tip_data, _("Alias"), bd->localname);
     }
-    hybrid_tooltip_data_add_pair(tip_data, "Status",
+    hybrid_tooltip_data_add_pair(tip_data, _("Status"),
                                  hybrid_get_presence_name(buddy->state));
 
     if (bd->mobileno && *bd->mobileno) {
-        hybrid_tooltip_data_add_pair(tip_data, "Fetion Number", bd->sid);
-
+        hybrid_tooltip_data_add_pair(tip_data, _("Fetion Number"), bd->sid);
     } else {
-        hybrid_tooltip_data_add_pair(tip_data, "Mobile Number", bd->mobileno);
+        hybrid_tooltip_data_add_pair(tip_data, _("Mobile Number"),
+                                     bd->mobileno);
     }
 
     if (bd->mood_phrase && *bd->mood_phrase) {
-        hybrid_tooltip_data_add_pair(tip_data, "Mood", bd->mood_phrase);
+        hybrid_tooltip_data_add_pair(tip_data, _("Mood"), bd->mood_phrase);
     }
-    
+
     return TRUE;
 }
 

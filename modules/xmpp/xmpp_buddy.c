@@ -98,13 +98,13 @@ xmpp_buddy_presence(XmppStream *stream)
     node = xmlnode_create("presence");
 
     xml_string = xmlnode_to_string(node);
-    
+
     hybrid_debug_info("xmpp", "subscribe presence,send:\n%s", xml_string);
 
     if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
 
         hybrid_account_error_reason(stream->account->account,
-                "subscribe presence failed");
+                                    _("subscribe presence failed"));
         g_free(xml_string);
 
         return;
@@ -112,8 +112,8 @@ xmpp_buddy_presence(XmppStream *stream)
 
     g_free(xml_string);
 
-    xmpp_account_modify_status(stream, account->state, 
-            account->status_text);
+    xmpp_account_modify_status(stream, account->state,
+                               account->status_text);
 }
 
 void
@@ -206,7 +206,7 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 
 roster_err:
     hybrid_account_error_reason(stream->account->account,
-            _("request roster failed."));
+                                _("request roster failed."));
 }
 
 XmppBuddy*
@@ -590,7 +590,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
             /* set the default name. */
             gchar *name;
             gchar *pos;
-            
+
             for (pos = xbuddy->jid; *pos && *pos != '@'; pos ++);
             name = g_strndup(xbuddy->jid, pos - xbuddy->jid);
             xmpp_buddy_set_name(xbuddy, name);
@@ -603,7 +603,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
 
         /* OK, add buddy success, subscribe buddy's presence. */
         xmpp_buddy_send_presence(stream, xbuddy->jid, XMPP_PRESENCE_SUBSCRIBE);
-        
+
     } else {
 
         if ((node = xmlnode_find(root, "error"))) {
@@ -672,7 +672,7 @@ xmpp_roster_add_item(XmppStream *stream, const gchar *jid, const gchar *name,
 
     if (iq_request_send(iq) != HYBRID_OK) {
         iq_request_destroy(iq);
-        hybrid_account_error_reason(account, "Connection Error.");
+        hybrid_account_error_reason(account, _("Connection Error."));
         return HYBRID_ERROR;
     }
 
