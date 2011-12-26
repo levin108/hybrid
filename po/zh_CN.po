@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-26 15:12-0500\n"
-"PO-Revision-Date: 2011-12-26 15:25-0500\n"
+"POT-Creation-Date: 2011-12-26 15:29-0500\n"
+"PO-Revision-Date: 2011-12-26 15:30-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -172,6 +172,10 @@ msgstr "您确定要删除联系人 <b>%s</b> (%s)"
 #, c-format
 msgid "Are you sure to delete the group <b>%s</b>"
 msgstr "您确定要删除组 <b>%s</b>"
+
+#: lib/account.c:847
+msgid "Authenticating..."
+msgstr "验证中..."
 
 #: lib/account.c:1127
 msgid "Away"
