@@ -125,6 +125,34 @@ hybrid_status_icon_blinker(HybridStatusIcon *status_icon)
 }
 
 static void
+hybrid_status_icon_set_blank(HybridStatusIcon *status_icon)
+{
+    struct HybridBlinker *blinker = &status_icon->blinker;
+
+    if (blinker->blank)
+        return;
+
+    gint width = gdk_pixbuf_get_width(default_icon);
+    gint height = gdk_pixbuf_get_height(default_icon);
+
+    blinker->blank = gdk_pixbuf_copy(default_icon);
+    gdk_pixbuf_fill(blinker->blank, 0x00000000);
+    //g_object_ref(blinker->blank);
+}
+
+static void
+hybrid_status_icon_clear_blank(HybridStatusIcon *status_icon)
+{
+    struct HybridBlinker *blinker = &status_icon->blinker;
+
+    if (blinker->blank)
+        return;
+
+    g_object_unref(blinker->blank);
+    blinker->blank = NULL;
+}
+
+static void
 hybrid_status_icon_set_blinking(HybridStatusIcon *status_icon, gboolean blink)
 {
     struct HybridBlinker *blinker = &status_icon->blinker;
@@ -132,8 +160,7 @@ hybrid_status_icon_set_blinking(HybridStatusIcon *status_icon, gboolean blink)
     if (blink) {
         if (blinker->timeout)
             return;
-        blinker->blank = default_icon;
-        g_object_ref(blinker->blank);
+        hybrid_status_icon_set_blank(status_icon);
         hybrid_status_icon_backup(status_icon);
         blinker->timeout =
             gdk_threads_add_timeout(HYBRID_BLINK_TIMEOUT,
@@ -147,8 +174,7 @@ hybrid_status_icon_set_blinking(HybridStatusIcon *status_icon, gboolean blink)
         blinker->off = FALSE;
         hybrid_status_icon_restore(status_icon);
         hybrid_status_icon_clear_back(status_icon);
-        g_object_unref(blinker->blank);
-        blinker->blank = NULL;
+        hybrid_status_icon_clear_blank(status_icon);
     }
 }
 
