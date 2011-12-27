@@ -87,7 +87,7 @@ hybrid_account_init(void)
             /*
              * The name of the current node must be 'account', and
              * it must has two nodes with the name 'user' and 'proto'
-             * respectively, otherwise the node is invalid. 
+             * respectively, otherwise the node is invalid.
              */
             if (g_strcmp0(node->name, "account") ||
                 !xmlnode_has_prop(node, "user") ||
@@ -96,7 +96,6 @@ hybrid_account_init(void)
                         "please try to remove ~/.config/hybrid/accounts.xml,"
                         "and then restart hybrid :)");
                 xmlnode_free(root);
-                g_free(config_path);
                 return;
             }
 
@@ -166,14 +165,14 @@ hybrid_account_init(void)
 
                 g_free(value);
             }
-            
+
             /* load protocol-defined variables. */
             for (pos = module->option_list; pos; pos = pos->next) {
                 var = (HybridAccountVariable*)pos->data;
                 if (!xmlnode_has_prop(node, var->name)) {
                     continue;
                 }
-                
+
                 value = xmlnode_prop(node, var->name);
 
                 switch (var->type) {
@@ -194,14 +193,14 @@ hybrid_account_init(void)
                                       var->name,
                                       g_strcmp0(value, "TRUE") == 0 ? TRUE: FALSE);
                     break;
-                    
+
                 default:
                     break;
                 }
-                
+
                 g_free(value);
             }
-            
+
             /* load the nickname */
             if (xmlnode_has_prop(node, "name")) {
                 value = xmlnode_prop(node, "name");
@@ -226,7 +225,7 @@ hybrid_account_init(void)
             }
 
             account_list = g_slist_append(account_list, account);
-                
+
             node = node->next;
         }
     }
@@ -235,7 +234,6 @@ hybrid_account_init(void)
         xmlnode_save_file(root, account_file);
     }
 
-    g_free(config_path);
     xmlnode_free(root);
 }
 
@@ -265,7 +263,7 @@ hybrid_account_get(const gchar *proto_name,    const gchar *username)
     }
 
     account    = hybrid_account_create(module);
-    
+
     hybrid_account_set_username(account, username);
 
     account_list = g_slist_append(account_list, account);
@@ -288,7 +286,6 @@ hybrid_account_update(HybridAccount *account)
 
     config_path = hybrid_config_get_path();
     account_file = g_strdup_printf("%s/accounts.xml", config_path);
-    g_free(config_path);
 
     if (!(root = xmlnode_root_from_file(account_file))) {
         hybrid_debug_error("account", "save account information failed,"
@@ -303,7 +300,7 @@ hybrid_account_update(HybridAccount *account)
             if (g_strcmp0(node->name, "account") ||
                 !xmlnode_has_prop(node, "user") ||
                 !xmlnode_has_prop(node, "proto")) {
-                hybrid_debug_error("account", 
+                hybrid_debug_error("account",
                         "invalid node found in accounts.xml");
                 node = xmlnode_next(node);
 
@@ -445,7 +442,6 @@ hybrid_account_remove(const gchar *protoname, const gchar *username)
     /* Remove the revelent node from accounts.xml */
     config_path = hybrid_config_get_path();
     account_file = g_strdup_printf("%s/accounts.xml", config_path);
-    g_free(config_path);
 
     if (!(root = xmlnode_root_from_file(account_file))) {
         hybrid_debug_error("account", "remove account information failed,"
@@ -460,7 +456,7 @@ hybrid_account_remove(const gchar *protoname, const gchar *username)
             if (g_strcmp0(node->name, "account") ||
                 !xmlnode_has_prop(node, "user") ||
                 !xmlnode_has_prop(node, "proto")) {
-                hybrid_debug_error("account", 
+                hybrid_debug_error("account",
                         "invalid node found in accounts.xml");
                 node = xmlnode_next(node);
 
@@ -503,11 +499,11 @@ HybridAccount*
 hybrid_account_create(HybridModule *proto)
 {
     extern HybridConfig *global_config;
-    
+
     g_return_val_if_fail(proto != NULL, NULL);
 
     HybridAccount *ac = g_new0(HybridAccount, 1);
-    
+
     ac->buddy_list  = g_hash_table_new_full(g_str_hash, g_str_equal,
             NULL, (GDestroyNotify)hybrid_blist_buddy_destroy);
     ac->group_list  = g_hash_table_new_full(g_str_hash, g_str_equal,
@@ -515,7 +511,7 @@ hybrid_account_create(HybridModule *proto)
     ac->config      = global_config;
     ac->proto       = proto;
     ac->status_text = NULL;
-    
+
     if (proto->info->options) {
         ac->option_list = proto->info->options();
     }
@@ -699,12 +695,12 @@ hybrid_account_set_state(HybridAccount *account, gint state)
 
     account->state = state;
 
-    /* 
+    /*
      * This function will do something more, that is to set
-     * the icon and name of the account menu to make to 
+     * the icon and name of the account menu to make to
      * show the current state .
      */
-    menu_name = g_strdup_printf("%s (%s) -> (%s)", account->username, 
+    menu_name = g_strdup_printf("%s (%s) -> (%s)", account->username,
                                 hybrid_get_presence_name(state),
                                 account->proto->info->name);
     presence_pixbuf = hybrid_create_presence_pixbuf(state, 16);
@@ -844,7 +840,7 @@ hybrid_account_enable(HybridAccount *account)
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), cellview, FALSE, FALSE,0);
 
-    account->login_tips = gtk_label_new("Authenticating...");
+    account->login_tips = gtk_label_new(_("Authenticating..."));
     align = gtk_alignment_new(0, 0, 0, 0);
     gtk_container_add(GTK_CONTAINER(align), account->login_tips);
     gtk_box_pack_start(GTK_BOX(vbox), align, FALSE, FALSE,0);
@@ -852,7 +848,7 @@ hybrid_account_enable(HybridAccount *account)
     gtk_container_add(GTK_CONTAINER(account->login_panel), vbox);
     gtk_container_set_border_width(GTK_CONTAINER(align), 2);
 
-    gtk_box_pack_start(GTK_BOX(hybrid_vbox), 
+    gtk_box_pack_start(GTK_BOX(hybrid_vbox),
                        account->login_panel, FALSE, FALSE, 0);
 
     gtk_widget_show_all(account->login_panel);
@@ -861,7 +857,7 @@ hybrid_account_enable(HybridAccount *account)
     case MODULE_TYPE_IM:
         account->proto->info->im_ops->login(account);
         break;
-        
+
     case MODULE_TYPE_EMAIL:
         account->proto->info->email_ops->login(account);
         break;
@@ -1122,11 +1118,11 @@ hybrid_get_presence_name(gint presence_state)
 {
     /* The human readable presence names. */
     const gchar *presence_names[] = {
-        N_("Offline"),
-        N_("Invisible"),
-        N_("Away"),
-        N_("Busy"),
-        N_("Online")
+        _("Offline"),
+        _("Invisible"),
+        _("Away"),
+        _("Busy"),
+        _("Online")
     };
 
     return presence_names[presence_state];

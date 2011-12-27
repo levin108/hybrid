@@ -41,7 +41,6 @@ fetion_get_config_dir(fetion_account *account)
 
     fetion_dir = g_strdup_printf("%s/%s",
             hybrid_dir, account->account->proto->info->name);
-    g_free(hybrid_dir);
 
     e = mkdir(fetion_dir, S_IRWXU|S_IRWXO|S_IRWXG);
 

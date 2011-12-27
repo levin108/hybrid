@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-26 14:45+0800\n"
+"POT-Creation-Date: 2011-12-26 16:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,31 +17,35 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/account.c:1102
+#: lib/account.c:843
+msgid "Authenticating..."
+msgstr ""
+
+#: lib/account.c:1098
 msgid "login success!"
 msgstr ""
 
-#: lib/account.c:1125
+#: lib/account.c:1121
 msgid "Offline"
 msgstr ""
 
-#: lib/account.c:1126
+#: lib/account.c:1122
 msgid "Invisible"
 msgstr ""
 
-#: lib/account.c:1127
+#: lib/account.c:1123
 msgid "Away"
 msgstr ""
 
-#: lib/account.c:1128
+#: lib/account.c:1124
 msgid "Busy"
 msgstr ""
 
-#: lib/account.c:1129
+#: lib/account.c:1125
 msgid "Online"
 msgstr ""
 
-#: lib/logs.c:155
+#: lib/logs.c:150
 #, c-format
 msgid "Conversation with %s (%s) at %d-%d-%d"
 msgstr ""
@@ -109,92 +113,115 @@ msgid "hybrid plugin implementing IMAP protocol for email notification."
 msgstr ""
 
 #: modules/fetion/fetion.c:101
-msgid "Your account has logined elsewhere. You are forced to quit."
+msgid "Your account has logined elsewhere.You are forced to quit."
 msgstr ""
 
-#: modules/fetion/fetion.c:223
+#: modules/fetion/fetion.c:224
 #, c-format
 msgid "Buddy <b>%s</b> has %s your add-buddy request."
 msgstr ""
 
-#: modules/fetion/fetion.c:226
+#: modules/fetion/fetion.c:227
 msgid "accepted"
 msgstr ""
 
-#: modules/fetion/fetion.c:226
+#: modules/fetion/fetion.c:227
 msgid "declined"
 msgstr ""
 
-#: modules/fetion/fetion.c:373 modules/xmpp/xmpp_account.c:199
+#: modules/fetion/fetion.c:374 modules/xmpp/xmpp_account.c:199
 #: modules/xmpp/xmpp_account.c:243
 msgid "System Message"
 msgstr ""
 
-#: modules/fetion/fetion.c:467 modules/fetion/fetion.c:471
+#: modules/fetion/fetion.c:468 modules/fetion/fetion.c:472
 msgid "Unknown"
 msgstr ""
 
-#: modules/fetion/fetion.c:475
+#: modules/fetion/fetion.c:476
 msgid "Nickname"
 msgstr ""
 
-#: modules/fetion/fetion.c:477
+#: modules/fetion/fetion.c:478
 msgid "Localname"
 msgstr ""
 
-#: modules/fetion/fetion.c:479
+#: modules/fetion/fetion.c:480
 msgid "Fetion-no"
 msgstr ""
 
-#: modules/fetion/fetion.c:481
+#: modules/fetion/fetion.c:482
 msgid "Mobile-no"
 msgstr ""
 
-#: modules/fetion/fetion.c:483
+#: modules/fetion/fetion.c:484
 msgid "Gender"
 msgstr ""
 
-#: modules/fetion/fetion.c:484
+#: modules/fetion/fetion.c:485
 msgid "Male"
 msgstr ""
 
-#: modules/fetion/fetion.c:485
+#: modules/fetion/fetion.c:486
 msgid "Female"
 msgstr ""
 
-#: modules/fetion/fetion.c:485
+#: modules/fetion/fetion.c:486
 msgid "Secrecy"
 msgstr ""
 
-#: modules/fetion/fetion.c:488
+#: modules/fetion/fetion.c:489 modules/fetion/fetion.c:620
+#: modules/fetion/fetion.c:660
 msgid "Mood"
 msgstr ""
 
-#: modules/fetion/fetion.c:491
+#: modules/fetion/fetion.c:492
 msgid "Country"
 msgstr ""
 
-#: modules/fetion/fetion.c:494
+#: modules/fetion/fetion.c:495
 msgid "Province"
 msgstr ""
 
-#: modules/fetion/fetion.c:495
+#: modules/fetion/fetion.c:496
 msgid "City"
 msgstr ""
 
-#: modules/fetion/fetion.c:544 modules/fetion/fetion.c:920
+#: modules/fetion/fetion.c:545 modules/fetion/fetion.c:921
 msgid "SMS To Me"
+msgstr ""
+
+#: modules/fetion/fetion.c:610 modules/fetion/fetion.c:644
+#: modules/xmpp/xmpp.c:128 modules/xmpp/xmpp.c:259 modules/xmpp/xmpp.c:287
+msgid "Name"
+msgstr ""
+
+#: modules/fetion/fetion.c:611 modules/fetion/fetion.c:649
+#: modules/xmpp/xmpp.c:121 modules/xmpp/xmpp.c:261
+msgid "Status"
+msgstr ""
+
+#: modules/fetion/fetion.c:615 modules/fetion/fetion.c:653
+msgid "Fetion Number"
+msgstr ""
+
+#: modules/fetion/fetion.c:617 modules/fetion/fetion.c:655
+msgid "Mobile Number"
+msgstr ""
+
+#: modules/fetion/fetion.c:647
+msgid "Alias"
 msgstr ""
 
 #. *< name
 #. *< author
-#: modules/fetion/fetion.c:955
+#: modules/fetion/fetion.c:956
 msgid "fetion client"
 msgstr ""
 
 #. *< summary
 #. description
-#: modules/fetion/fetion.c:957
+#: modules/fetion/fetion.c:958
 msgid "hybrid plugin implementing Fetion Protocol version 4"
 msgstr ""
 
@@ -210,28 +237,48 @@ msgstr ""
 msgid "Downloading configure file..."
 msgstr ""
 
-#: modules/fetion/fx_login.c:567
+#: modules/fetion/fx_login.c:311
+msgid "downloading cfg error"
+msgstr ""
+
+#: modules/fetion/fx_login.c:432
+msgid "read pic code error."
+msgstr ""
+
+#: modules/fetion/fx_login.c:565
 msgid "ssi authentication failed"
 msgstr ""
 
-#: modules/fetion/fx_login.c:648
+#: modules/fetion/fx_login.c:581
+msgid "Start SSI authenticating..."
+msgstr ""
+
+#: modules/fetion/fx_login.c:646
 msgid "sipc reg error."
 msgstr ""
 
-#: modules/fetion/fx_login.c:701
+#: modules/fetion/fx_login.c:699
 msgid "start registering to the sipc server."
 msgstr ""
 
-#: modules/fetion/fx_login.c:860
+#: modules/fetion/fx_login.c:721
+msgid "sipc reg error"
+msgstr ""
+
+#: modules/fetion/fx_login.c:748
+msgid "connection terminated"
+msgstr ""
+
+#: modules/fetion/fx_login.c:858
 msgid "Fetion Protocol ERROR."
 msgstr ""
 
-#: modules/fetion/fx_login.c:906
+#: modules/fetion/fx_login.c:904
 msgid "start sipc authenticating..."
 msgstr ""
 
 #. *< add an "ungroup" group
-#: modules/fetion/fx_login.c:1534
+#: modules/fetion/fx_login.c:1532
 msgid "Ungrouped"
 msgstr ""
 
@@ -239,36 +286,28 @@ msgstr ""
 msgid "Resource"
 msgstr ""
 
-#: modules/xmpp/xmpp.c:121
-msgid "Status"
-msgstr ""
-
-#: modules/xmpp/xmpp.c:129
-msgid "Name"
-msgstr ""
-
-#: modules/xmpp/xmpp.c:146
+#: modules/xmpp/xmpp.c:144
 msgid "Photo"
 msgstr ""
 
-#: modules/xmpp/xmpp.c:299
+#: modules/xmpp/xmpp.c:298
 #, c-format
 msgid "Status (%s)"
 msgstr ""
 
-#: modules/xmpp/xmpp.c:308
+#: modules/xmpp/xmpp.c:307
 msgid "Subscription"
 msgstr ""
 
 #. *< name
 #. *< author
-#: modules/xmpp/xmpp.c:501
+#: modules/xmpp/xmpp.c:499
 msgid "jabber client"
 msgstr ""
 
 #. *< summary
 #. description
-#: modules/xmpp/xmpp.c:503
+#: modules/xmpp/xmpp.c:501
 msgid "implement xmpp protocol"
 msgstr ""
 
@@ -278,6 +317,10 @@ msgstr ""
 
 #: modules/xmpp/xmpp_account.c:244
 msgid "Modify photo failed."
+msgstr ""
+
+#: modules/xmpp/xmpp_buddy.c:107
+msgid "subscribe presence failed"
 msgstr ""
 
 #: modules/xmpp/xmpp_buddy.c:175
@@ -303,19 +346,44 @@ msgstr ""
 msgid "Add buddy failed."
 msgstr ""
 
-#: modules/xmpp/xmpp_stream.c:326 modules/xmpp/xmpp_stream.c:375
+#: modules/xmpp/xmpp_buddy.c:675
+msgid "Connection Error."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:183
+msgid "Start sasl authentication."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:230
+msgid "SASL authentication error."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:285 modules/xmpp/xmpp_stream.c:298
+#: modules/xmpp/xmpp_stream.c:411
+msgid "send initial jabber request failed"
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:325 modules/xmpp/xmpp_stream.c:374
 msgid "Connection Closed."
 msgstr ""
 
-#: modules/xmpp/xmpp_stream.c:441
+#: modules/xmpp/xmpp_stream.c:394
+msgid "TLS connection established."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:434
+msgid "Start performing tls"
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:440
 msgid "TLS hand-shake failed."
 msgstr ""
 
-#: modules/xmpp/xmpp_stream.c:522
+#: modules/xmpp/xmpp_stream.c:521
 msgid "resource bind error."
 msgstr ""
 
-#: modules/xmpp/xmpp_stream.c:528
+#: modules/xmpp/xmpp_stream.c:527
 msgid "resource bind error: no jabber id returned."
 msgstr ""
 
@@ -323,7 +391,23 @@ msgstr ""
 msgid "start session error."
 msgstr ""
 
-#: modules/xmpp/xmpp_stream.c:1124
+#: modules/xmpp/xmpp_stream.c:585
+msgid "binds a resource error."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:632
+msgid "request roster error."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:662
+msgid "request vcard error."
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:725
+msgid "start new stream on sasl layer error"
+msgstr ""
+
+#: modules/xmpp/xmpp_stream.c:1120
 msgid "Account not authorized. Check Username and Password."
 msgstr ""
 
@@ -378,7 +462,7 @@ msgstr ""
 msgid "Remove Group"
 msgstr ""
 
-#: src/blist.c:612 src/buddyadd.c:379
+#: src/blist.c:612 src/buddyadd.c:379 src/core.c:179 src/core.c:181
 msgid "Add Buddy"
 msgstr ""
 
@@ -440,7 +524,7 @@ msgstr ""
 msgid "Buddy-Add Request"
 msgstr ""
 
-#: src/chat-textview.c:84 src/chat-webkit.c:199
+#: src/chat-textview.c:84 src/chat-webkit.c:202
 msgid "%H:%M:%S"
 msgstr ""
 
@@ -532,7 +616,47 @@ msgstr ""
 msgid " %s is inputing"
 msgstr ""
 
-#: src/core.c:213
+#. account menu.
+#: src/core.c:149
+msgid "_Account"
+msgstr ""
+
+#. account menu.
+#: src/core.c:153 src/statusicon.c:334
+msgid "Manage Accounts"
+msgstr ""
+
+#: src/core.c:155 src/gtkaccount.c:259
+msgid "Manage Account"
+msgstr ""
+
+#: src/core.c:161 src/core.c:163
+msgid "Quit"
+msgstr ""
+
+#. tools menu.
+#: src/core.c:167
+msgid "_Tools"
+msgstr ""
+
+#: src/core.c:171 src/core.c:173 src/preference.c:399
+msgid "Preference"
+msgstr ""
+
+#: src/core.c:187 src/core.c:189 src/groupadd.c:237
+msgid "Add Group"
+msgstr ""
+
+#. help menu.
+#: src/core.c:193
+msgid "_Help"
+msgstr ""
+
+#: src/core.c:194
+msgid "About"
+msgstr ""
+
+#: src/core.c:223
 msgid "Hybrid"
 msgstr ""
 
@@ -548,10 +672,6 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: src/groupadd.c:237
-msgid "Add Group"
-msgstr ""
-
 #: src/gtkaccount.c:141
 msgid "Enabled"
 msgstr ""
@@ -562,10 +682,6 @@ msgstr ""
 
 #: src/gtkaccount.c:166
 msgid "Protocol"
-msgstr ""
-
-#: src/gtkaccount.c:259
-msgid "Manage Account"
 msgstr ""
 
 #: src/gtkaccount.c:305
@@ -640,13 +756,6 @@ msgstr ""
 msgid "No account was enabled."
 msgstr ""
 
-#: src/head.c:355
-#, c-format
-msgid ""
-"<b>%s</b> [%s]\n"
-"<small>%s</small>"
-msgstr ""
-
 #: src/info.c:154
 #, c-format
 msgid "%s's information"
@@ -714,18 +823,9 @@ msgstr ""
 msgid "Sound"
 msgstr ""
 
-#: src/preference.c:399
-msgid "Preference"
-msgstr ""
-
 #. show buddy list buddy.
 #: src/statusicon.c:320
 msgid "Show buddy list"
-msgstr ""
-
-#. account menu.
-#: src/statusicon.c:334
-msgid "Manage Accounts"
 msgstr ""
 
 #. notify menu

@@ -9,7 +9,7 @@
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+nn *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
  *   GNU General Public License for more details.                          *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
@@ -95,7 +95,7 @@ xmpp_stream_get_iqid(XmppStream *stream)
     gchar *id;
 
     g_return_val_if_fail(stream != NULL, NULL);
-    
+
     id = g_strdup_printf("%d", stream->current_iq_id);
 
     return id;
@@ -118,9 +118,9 @@ xmpp_stream_destroy(XmppStream *stream)
 
         g_free(stream->jid);
         g_free(stream->stream_id);
-        
+
         xmpp_account_destroy(stream->account);
-        
+
         while (stream->pending_trans) {
             trans = (IqTransaction*)stream->pending_trans->data;
             iq_transaction_remove(stream, trans);
@@ -131,7 +131,7 @@ xmpp_stream_destroy(XmppStream *stream)
 
         xmlnode_free(stream->node);
         stream->node = NULL;
-        
+
         g_free(stream);
         stream = NULL;
     }
@@ -180,7 +180,7 @@ xmpp_stream_startsasl(XmppStream *stream)
     hybrid_debug_info("xmpp", "start sasl authentication.");
 
     hybrid_account_set_connection_string(stream->account->account,
-                                         "Start sasl authentication.");
+                                         _("Start sasl authentication."));
 
     xmpp_stream_set_state(stream, XMPP_STATE_SASL_AUTHENTICATING);
     /*
@@ -205,8 +205,8 @@ xmpp_stream_startsasl(XmppStream *stream)
 
     /* construct the xml string, which is in form of:
      *
-     * <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" 
-     * mechanism="PLAIN">encoded sasl string</auth> 
+     * <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl"
+     * mechanism="PLAIN">encoded sasl string</auth>
      */
     node = xmlnode_create("auth");
 
@@ -217,17 +217,17 @@ xmpp_stream_startsasl(XmppStream *stream)
     xmlnode_set_content(node, auth_encoded);
 
     g_free(auth_encoded);
-    
+
     xml_string = xmlnode_to_string(node);
     xmlnode_free(node);
 
     hybrid_debug_info("xmpp", "sasl send:\n%s", xml_string);
 
     if (hybrid_ssl_write(stream->ssl, xml_string,
-                strlen(xml_string)) == -1) {
+                         strlen(xml_string)) == -1) {
 
         hybrid_account_error_reason(stream->account->account,
-                "SASL authentication error.");
+                                    _("SASL authentication error."));
 
         return;
     }
@@ -244,18 +244,18 @@ stream_recv_cb(gint sk, XmppStream *stream)
 
     if (!stream->ssl) {
         if ((n = recv(sk, buf, sizeof(buf) - 1, 0)) == -1) {
-            
+
             hybrid_debug_error("xmpp", "init stream error.");
             return FALSE;
         }
     } else {
 
         if ((n = hybrid_ssl_read(stream->ssl, buf, sizeof(buf) - 1)) == -1) {
-            
+
             hybrid_debug_error("xmpp", "stream read io error.");
             return TRUE;
         } else if (0 == n) {
-            
+
             hybrid_debug_error("xmpp", "connection closed by server.");
             return FALSE;
         }
@@ -265,8 +265,7 @@ stream_recv_cb(gint sk, XmppStream *stream)
 
     if (n > 0) {
         xmpp_process_pushed(stream, buf, n);
-    } 
-
+    }
     return TRUE;
 }
 
@@ -283,7 +282,7 @@ xmpp_stream_init(gint sk, XmppStream *stream)
     if (send(sk, msg, strlen(msg), 0) == -1) {
 
         hybrid_account_error_reason(stream->account->account,
-                                    "send initial jabber request failed");
+                                    _("send initial jabber request failed"));
 
         return FALSE;
     }
@@ -296,7 +295,7 @@ xmpp_stream_init(gint sk, XmppStream *stream)
     if (send(sk, msg, strlen(msg), 0) == -1) {
 
         hybrid_account_error_reason(stream->account->account,
-                                    "send initial jabber request failed");
+                                    _("send initial jabber request failed"));
         g_free(msg);
 
         return FALSE;
@@ -323,7 +322,7 @@ ping_cb(XmppStream *stream, xmlnode *node, gpointer user_data)
             hybrid_debug_error("xmpp", "ping xmpp server refused.");
 
             hybrid_account_error_reason(stream->account->account,
-                    _("Connection Closed."));
+                                        _("Connection Closed."));
         }
     }
 
@@ -357,12 +356,12 @@ xmpp_stream_ping(XmppStream *stream)
     xmlnode_new_namespace(node, NULL, NS_XMPP_PING);
 
     iq_request_set_callback(iq, ping_cb, NULL);
-    
+
     if (stream->keepalive_source) {
         g_source_remove(stream->keepalive_source);
     }
 
-    stream->keepalive_source = 
+    stream->keepalive_source =
         g_timeout_add_seconds(60, (GSourceFunc)ping_timeout_cb, stream);
 
     if (iq_request_send(iq) != HYBRID_OK) {
@@ -372,7 +371,7 @@ xmpp_stream_ping(XmppStream *stream)
         iq_request_destroy(iq);
 
         hybrid_account_error_reason(stream->account->account,
-                _("Connection Closed."));
+                                    _("Connection Closed."));
 
         return HYBRID_ERROR;
     }
@@ -392,13 +391,13 @@ tls_conn_cb(HybridSslConnection *ssl, XmppStream *stream)
     gchar *msg;
 
     hybrid_account_set_connection_string(stream->account->account,
-                                         "TLS connection established.");
+                                         _("TLS connection established."));
 
     msg = create_initiate_stream(stream);
 
     /*
-     * Reset the stream id, we will start a new stream through 
-     * the TLS channel, whether stream id is NULL is the flag 
+     * Reset the stream id, we will start a new stream through
+     * the TLS channel, whether stream id is NULL is the flag
      * of a new stream.
      */
     xmpp_stream_set_id(stream, NULL);
@@ -409,7 +408,7 @@ tls_conn_cb(HybridSslConnection *ssl, XmppStream *stream)
     if (hybrid_ssl_write(ssl, msg, strlen(msg)) == -1) {
 
         hybrid_account_error_reason(stream->account->account,
-                "send initial jabber request failed");
+                                    _("send initial jabber request failed"));
         g_free(msg);
 
         return FALSE;
@@ -421,8 +420,8 @@ tls_conn_cb(HybridSslConnection *ssl, XmppStream *stream)
 }
 
 /**
- * Start the TLS handshake, if success, jump to the 
- * tls_conn_cb() callback function to send the 
+ * Start the TLS handshake, if success, jump to the
+ * tls_conn_cb() callback function to send the
  * stream start request through the TLS channel.
  */
 static void
@@ -432,13 +431,13 @@ xmpp_stream_performtls(XmppStream *stream)
     g_return_if_fail(stream != NULL);
 
     hybrid_account_set_connection_string(stream->account->account,
-                                         "Start performing tls");
+                                         _("Start performing tls"));
 
-    if (!(stream->ssl = hybrid_ssl_connect_with_fd(stream->sk,
-                    (ssl_callback)tls_conn_cb, stream))) {
+    if (!(stream->ssl = hybrid_ssl_connect_with_fd(
+              stream->sk, (ssl_callback)tls_conn_cb, stream))) {
 
-        hybrid_account_error_reason(stream->account->account, 
-                _("TLS hand-shake failed."));
+        hybrid_account_error_reason(stream->account->account,
+                                    _("TLS hand-shake failed."));
 
         return;
     }
@@ -519,13 +518,14 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 
     if (g_strcmp0(type, "result")) {
         hybrid_account_error_reason(stream->account->account,
-                _("resource bind error."));
+                                    _("resource bind error."));
         return FALSE;
     }
 
     if (!(node = xmlnode_find(root, "jid"))) {
         hybrid_account_error_reason(stream->account->account,
-                _("resource bind error: no jabber id returned."));
+                                    _("resource bind error: "
+                                      "no jabber id returned."));
         return FALSE;
     }
 
@@ -546,7 +546,7 @@ resource_bind_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
     if (iq_request_send(iq) != HYBRID_OK) {
 
         hybrid_account_error_reason(stream->account->account,
-                _("start session error."));
+                                    _("start session error."));
 
         iq_request_destroy(iq);
 
@@ -581,15 +581,14 @@ xmpp_stream_bind(XmppStream *stream)
 
     if (iq_request_send(iq) != HYBRID_OK) {
 
-        hybrid_account_error_reason(
-                stream->account->account,
-                "binds a resource error.");
+        hybrid_account_error_reason(stream->account->account,
+                                    _("binds a resource error."));
 
         iq_request_destroy(iq);
 
         return;
     }
-    
+
     iq_request_destroy(iq);
 }
 
@@ -629,9 +628,8 @@ xmpp_stream_get_roster(XmppStream *stream)
 
     if (iq_request_send(iq) != HYBRID_OK) {
 
-        hybrid_account_error_reason(
-                stream->account->account,
-                "request roster error.");
+        hybrid_account_error_reason(stream->account->account,
+                                    _("request roster error."));
         iq_request_destroy(iq);
 
         return;
@@ -660,9 +658,8 @@ xmpp_stream_get_vcard(XmppStream *stream)
 
     if (iq_request_send(iq) != HYBRID_OK) {
 
-        hybrid_account_error_reason(
-                stream->account->account,
-                "request vcard error.");
+        hybrid_account_error_reason(stream->account->account,
+                                    _("request vcard error."));
         iq_request_destroy(iq);
 
         return;
@@ -724,9 +721,8 @@ xmpp_stream_new_on_sasl(XmppStream *stream)
     hybrid_debug_info("xmpp", "new stream on sasl,send:\n%s", msg);
 
     if (hybrid_ssl_write(stream->ssl, msg, strlen(msg)) == -1) {
-        
         hybrid_account_error_reason(stream->account->account,
-                "start new stream on sasl layer error.");
+                                    _("start new stream on sasl layer error"));
         return;
     }
 
@@ -1118,7 +1114,7 @@ xmpp_stream_process_failure(XmppStream *stream, xmlnode *root)
     HybridAccount *account;
 
     account = stream->account->account;
-    
+
     if ((node = xmlnode_find(root, "not-authorized"))) {
         hybrid_account_error_reason(account,
                                     _("Account not authorized."

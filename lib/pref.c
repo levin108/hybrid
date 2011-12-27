@@ -32,23 +32,16 @@ hybrid_pref_init(void)
     hybrid_pref = g_new0(HybridPref, 1);
 
     if (!(config_path = hybrid_config_get_path())) {
-
         hybrid_debug_error("pref", "get config path error.");
-
         return HYBRID_ERROR;
     }
 
     hybrid_pref->filename = g_strdup_printf("%s/pref.xml", config_path);
 
-    g_free(config_path);
-
-    if (!(hybrid_pref->root = 
-                xmlnode_root_from_file(hybrid_pref->filename))) {
-
+    if (!(hybrid_pref->root =
+          xmlnode_root_from_file(hybrid_pref->filename))) {
         body = "<pref></pref>";
-
         hybrid_pref->root = xmlnode_root(body, strlen(body));
-
         hybrid_pref_save();
     }
 
@@ -64,21 +57,17 @@ hybrid_pref_set_boolean(const gchar *name, const gboolean value)
     g_return_if_fail(hybrid_pref->root != NULL);
 
     if (!(node = xmlnode_find(hybrid_pref->root, name))) {
-
         node = xmlnode_new_child(hybrid_pref->root, name);
-
     }
 
     if (xmlnode_has_prop(node, "type")) {
         xmlnode_set_prop(node, "type", "bool");
-
     } else {
         xmlnode_new_prop(node, "type", "bool");
     }
 
     if (value) {
         xmlnode_set_content(node, "1");
-
     } else {
         xmlnode_set_content(node, "0");
     }
@@ -99,31 +88,24 @@ hybrid_pref_get_boolean(const gchar *name)
     }
 
     if (!xmlnode_has_prop(node, "type")) {
-
         hybrid_debug_info("pref", "invalid pref node.");
-        
         return FALSE;
     }
 
     type = xmlnode_prop(node, "type");
 
     if (g_strcmp0(type, "bool") != 0) {
-
         hybrid_debug_error("pref",
                 "bool pref node with a type which is not bool.");
-
         return FALSE;
     }
 
     value = xmlnode_content(node);
 
     if (g_strcmp0(value, "0") == 0) {
-
         g_free(value);
         return FALSE;
-
     } else {
-
         g_free(value);
         return TRUE;
     }
