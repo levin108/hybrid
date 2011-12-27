@@ -20,7 +20,7 @@ msgstr ""
 #: src/conv.c:1488
 #, c-format
 msgid " %s is inputing"
-msgstr " %s 正在输入"
+msgstr " %s 正在输入..."
 
 #: src/conv.c:1458 src/conv.c:1526
 #, c-format
