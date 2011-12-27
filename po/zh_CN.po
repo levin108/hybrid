@@ -33,7 +33,7 @@ msgstr " 说:"
 
 #: src/chat-textview.c:84 src/chat-webkit.c:202
 msgid "%H:%M:%S"
-msgstr ""
+msgstr "%H:%M:%S"
 
 #. notify.
 #: src/conv.c:1380
@@ -57,11 +57,11 @@ msgstr "<b>帐户:</b>"
 
 #: src/buddyadd.c:314
 msgid "<b>Add To Group:</b>"
-msgstr "<b>加到组</b>"
+msgstr "<b>添加到组：</b>"
 
 #: src/buddyadd.c:305
 msgid "<b>Alias(Optional):</b>"
-msgstr "<b>别名(可选)</b>"
+msgstr "<b>别名(可选)：</b>"
 
 #: src/preference.c:193
 msgid "<b>Chat Window:</b>"
@@ -172,7 +172,7 @@ msgstr "您确定要删除组 <b>%s</b>"
 
 #: lib/account.c:843
 msgid "Authenticating..."
-msgstr "验证中..."
+msgstr "正在进行身份认证..."
 
 #: lib/account.c:1123
 msgid "Away"
@@ -188,7 +188,7 @@ msgstr "底部"
 
 #: modules/xmpp/xmpp_buddy.c:175
 msgid "Buddies"
-msgstr "联系人"
+msgstr "好友"
 
 #: modules/fetion/fetion.c:224
 #, c-format
@@ -369,7 +369,7 @@ msgstr "IMAP连结关闭."
 
 #: modules/email/imap.c:225
 msgid "IMAP OK."
-msgstr ""
+msgstr "IMAP认证完成."
 
 #: modules/email/mail.c:221
 msgid "IMAP Server:"
@@ -389,7 +389,7 @@ msgstr "不可见"
 
 #: src/preference.c:66
 msgid "Left"
-msgstr "左"
+msgstr "左侧"
 
 #: modules/fetion/fetion.c:478
 msgid "Localname"
@@ -481,7 +481,7 @@ msgstr "提示"
 
 #: src/buddyreq.c:316 src/confirm.c:96 src/gtkutils.c:556 src/head.c:147
 msgid "OK"
-msgstr ""
+msgstr "确定"
 
 #: lib/account.c:1121
 msgid "Offline"
@@ -521,7 +521,7 @@ msgstr "协议:"
 
 #: modules/fetion/fetion.c:495
 msgid "Province"
-msgstr "省"
+msgstr "省份"
 
 #: src/core.c:161 src/core.c:163
 msgid "Quit"
@@ -550,11 +550,11 @@ msgstr "资源"
 
 #: src/preference.c:54
 msgid "Right"
-msgstr "右"
+msgstr "右侧"
 
 #: modules/xmpp/xmpp_stream.c:230
 msgid "SASL authentication error."
-msgstr "ssi验证错误."
+msgstr "SASL认证失败."
 
 #: modules/fetion/fetion.c:545 modules/fetion/fetion.c:921
 msgid "SMS To Me"
@@ -595,15 +595,15 @@ msgstr "声音"
 
 #: modules/fetion/fx_login.c:581
 msgid "Start SSI authenticating..."
-msgstr "开始SSI验证..."
+msgstr "正在进行SSI验证..."
 
 #: modules/xmpp/xmpp_stream.c:434
 msgid "Start performing tls"
-msgstr "开始TLS"
+msgstr "正在进行TLS握手"
 
 #: modules/xmpp/xmpp_stream.c:183
 msgid "Start sasl authentication."
-msgstr "开始sasl验证..."
+msgstr "正在进行SASL验证..."
 
 #: modules/fetion/fetion.c:611 modules/fetion/fetion.c:649
 #: modules/xmpp/xmpp.c:121 modules/xmpp/xmpp.c:261
@@ -643,7 +643,7 @@ msgstr "顶部"
 #: src/conv.c:1142
 #, c-format
 msgid "Total %d character, left "
-msgstr ""
+msgstr "共可输入%d个字符，剩余"
 
 #. *< add an "ungroup" group
 #: modules/fetion/fx_login.c:1532
@@ -686,12 +686,12 @@ msgstr "您的帐户已在其他地方登陆. 您被强迫登出."
 #: src/conv.c:841
 #, c-format
 msgid "[<span color='#0099ff'>%d</span>] character"
-msgstr ""
+msgstr "[<span color='#0099ff'>%d</span>]个字符"
 
 #: src/conv.c:1149
 #, c-format
 msgid "[<span color='#0099ff'>%d</span>] characters"
-msgstr ""
+msgstr "[<span color='#0099ff'>%d</span>]个字符"
 
 #. account menu.
 #: src/core.c:149
@@ -726,7 +726,7 @@ msgstr "拒绝"
 
 #: modules/fetion/fx_login.c:311
 msgid "downloading cfg error"
-msgstr "下载cfg错误"
+msgstr "下载配置文件失败"
 
 #. *< name
 #. *< author
@@ -744,7 +744,7 @@ msgstr "飞信客户端"
 #. description
 #: modules/fetion/fetion.c:958
 msgid "hybrid plugin implementing Fetion Protocol version 4"
-msgstr "hybrid的飞信协议4插件"
+msgstr "hybrid的飞信协议插件"
 
 #. *< summary
 #. description
@@ -835,4 +835,4 @@ msgstr "开始SIPC验证..."
 
 #: modules/xmpp/xmpp_buddy.c:107
 msgid "subscribe presence failed"
-msgstr "订阅现场失败"
+msgstr "订阅好友状态失败"
