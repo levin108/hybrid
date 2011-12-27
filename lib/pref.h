@@ -27,12 +27,12 @@
 typedef struct _HybridPref HybridPref;
 
 struct _HybridPref {
-	gchar *filename;
-	xmlnode *root;
+    gchar *filename;
+    xmlnode *root;
 
-	gboolean mute;
-	gboolean hide_chat_buttons;
-	gboolean disable_chat_tabs;
+    gboolean mute;
+    gboolean hide_chat_buttons;
+    gboolean disable_chat_tabs;
 };
 
 #ifdef __cplusplus

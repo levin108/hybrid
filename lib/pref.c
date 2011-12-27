@@ -149,19 +149,15 @@ hybrid_pref_get_string(const gchar *name)
     }
 
     if (!xmlnode_has_prop(node, "type")) {
-
         hybrid_debug_info("pref", "invalid pref node.");
-        
         return NULL;
     }
 
     type = xmlnode_prop(node, "type");
 
     if (g_strcmp0(type, "string") != 0) {
-
         hybrid_debug_error("pref",
-                "string pref node with a type which is not string.");
-
+                           "string pref node with a type which is not string.");
         return NULL;
     }
 
@@ -180,7 +176,6 @@ hybrid_pref_set_int(const gchar *name, gint value)
     g_return_if_fail(hybrid_pref->root != NULL);
 
     if (!(node = xmlnode_find(hybrid_pref->root, name))) {
-
         node = xmlnode_new_child(hybrid_pref->root, name);
     }
 
@@ -216,7 +211,7 @@ hybrid_pref_get_int(const gchar *name)
     if (!xmlnode_has_prop(node, "type")) {
 
         hybrid_debug_info("pref", "invalid pref node.");
-        
+
         return -1;
     }
 
