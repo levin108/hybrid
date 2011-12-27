@@ -385,7 +385,7 @@ msgstr "即时信息"
 
 #: lib/account.c:1122
 msgid "Invisible"
-msgstr "不可见"
+msgstr "隐身"
 
 #: src/preference.c:66
 msgid "Left"
