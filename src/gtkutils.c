@@ -25,7 +25,7 @@
  * We copied the following two functions from pidgin,
  * hoping pidgin wouldn't angry,for we follow GPL...
  */
-static gboolean 
+static gboolean
 pixbuf_is_opaque(GdkPixbuf *pixbuf)
 {
     int            height, rowstride, i;

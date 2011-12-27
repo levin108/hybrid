@@ -154,7 +154,7 @@ account_changed_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
     }
 
     model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-    
+
     gtk_tree_model_get(model, &iter,
                        BUDDYADD_ACCOUNT_COLUMN, &account,
                        -1);

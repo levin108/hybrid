@@ -25,7 +25,7 @@
 #include "preference.h"
 #include "gtkutils.h"
 
-static HybridPreference *pref_window = NULL;
+static HybridPrefWin *main_pref_window = NULL;
 
 enum {
     TAB_POS_NAME_COL,
@@ -99,7 +99,7 @@ chat_theme_combo_create()
     /*
      * Set the active item with the local data.
      */
-    if ((chat_theme_name = hybrid_pref_get_string("chat_theme")) != NULL) {
+    if ((chat_theme_name = hybrid_pref_get_string(NULL, "chat_theme"))) {
         if(gtk_tree_model_get_iter_root(GTK_TREE_MODEL(store), &iter)) {
             do {
                 gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
@@ -146,7 +146,7 @@ tab_pos_combo_create()
     /*
      * Set the active item with the local data.
      */
-    if ((tab_pos = hybrid_pref_get_int("tab_pos")) != -1) {
+    if ((tab_pos = hybrid_pref_get_int(NULL, "tab_pos")) != -1) {
 
         if(gtk_tree_model_get_iter_root(model, &iter)) {
 
@@ -185,7 +185,8 @@ pref_basic_init(GtkFixed *fixed)
     pref_window->hcb_check =
         gtk_check_button_new_with_label(_("Hide Action Buttons"));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->hcb_check),
-            hybrid_pref_get_boolean("hide_chat_buttons"));
+                                 hybrid_pref_get_boolean(NULL,
+                                                         "hide_chat_buttons"));
     gtk_fixed_put(fixed, pref_window->hcb_check, 20, 35);
 
     label = gtk_label_new(_("Chat Theme:"));
@@ -204,7 +205,7 @@ pref_basic_init(GtkFixed *fixed)
 
     gtk_toggle_button_set_active(
             GTK_TOGGLE_BUTTON(pref_window->single_cw_check),
-            hybrid_pref_get_boolean("single_chat_window"));
+            hybrid_pref_get_boolean(NULL, "single_chat_window"));
     gtk_fixed_put(fixed, pref_window->single_cw_check, 20, 125);
 
     label = gtk_label_new(_("Tab Position:"));
@@ -222,7 +223,7 @@ pref_sound_init(GtkFixed *fixed)
 {
     pref_window->mute_check = gtk_check_button_new_with_label(_("Mute"));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->mute_check),
-            hybrid_pref_get_boolean("mute"));
+                                 hybrid_pref_get_boolean(NULL, "mute"));
     gtk_fixed_put(fixed, pref_window->mute_check, 20, 15);
 }
 
@@ -287,7 +288,7 @@ save_cb(GtkWidget *widget, gpointer user_data)
 
     gtk_tree_model_get(model, &iter, TAB_POS_VALUE_COL, &tab_pos, -1);
 
-    hybrid_pref_set_int("tab_pos", tab_pos);
+    hybrid_pref_set_int(NULL, "tab_pos", tab_pos);
 
     /*
      * Chat theme settings.
@@ -299,9 +300,9 @@ save_cb(GtkWidget *widget, gpointer user_data)
 
     gtk_tree_model_get(model, &iter, TAB_POS_NAME_COL, &chat_theme, -1);
 
-    hybrid_pref_set_string("chat_theme", chat_theme);
+    hybrid_pref_set_string(NULL, "chat_theme", chat_theme);
 
-    hybrid_pref_save();
+    hybrid_pref_save(NULL);
 
     gtk_widget_destroy(pref_window->window);
 }
@@ -363,30 +364,74 @@ pref_window_init(void)
 /**
  * Callback function for destroying the preference window.
  */
-void
-destroy_cb(GtkWidget *widget, gpointer user_data)
+static void
+destroy_cb(GtkWidget *widget, gpointer pref_win)
 {
-    if (pref_window) {
-        g_free(pref_window);
-        pref_window = NULL;
-    }
+    g_free(pref_win);
+}
+
+static void
+main_destroy_cb(GtkWidget *widget, gpointer p)
+{
+    g_free(pref_win);
+}
+
+HybridPrefWin*
+hybrid_pref_win_new(const gchar *title)
+{
+    HybridPrefWin *pref_win;
+    GtkWidget *content_area;
+    GdkPixbuf *icon;
+    title = title ? title : _("Preference");
+    pref_win = g_new0(HybridPrefWin, 1);
+
+    /* Use dialog window in order to be tiling wm/filter friendly. */
+    /* TODO put this into hybrid_create_window */
+    pref_win->window = gtk_dialog_new_with_buttons(title, NULL, 0,
+                                                   GTK_STOCK_OK,
+                                                   GTK_RESPONSE_ACCEPT,
+                                                   GTK_STOCK_CANCEL,
+                                                   GTK_RESPONSE_REJECT,
+                                                   NULL);
+    icon = hybrid_create_default_icon(0);
+    gtk_window_set_icon(GTK_WINDOW(pref_win->window), icon);
+    gtk_window_set_resizable(GTK_WINDOW(pref_win->window), FALSE);
+    gtk_window_set_position(GTK_WINDOW(pref_win->window), GTK_WIN_POS_CENTER);
+
+    /* doesn't set the pointer to NULL, need to be handled elsewhere */
+    /* by connect_after to the same signal? */
+    g_signal_connect(pref_win->window, "destroy",
+                     G_CALLBACK(destroy_cb), pref_win);
+    g_signal_connect_swapped(pref_win->window, "response",
+                             G_CALLBACK(gtk_widget_destroy), pref_win->window);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(pref_win->window));
+
+    /* let's see how it looks */
+    //gtk_container_set_border_width(GTK_CONTAINER(content_area), 8);
+
+    pref_win->notebook = gtk_notebook_new();
+    gtk_container_add(GTK_CONTAINER(content_area), pref_win->notebook);
+
+    gtk_notebook_set_tab_pos(GTK_NOTEBOOK(pref_window->notebook), GTK_POS_TOP);
+    gtk_notebook_set_scrollable(GTK_NOTEBOOK(pref_window->notebook), TRUE);
+    gtk_notebook_set_show_border(GTK_NOTEBOOK(pref_window->notebook), TRUE);
+
+    return pref_win;
 }
 
 void
 hybrid_pref_create(void)
 {
-    if (pref_window) {
-        gtk_window_present(GTK_WINDOW(pref_window->window));
+    if (main_pref_window) {
+        gtk_window_present(GTK_WINDOW(main_pref_window->window));
         return;
     }
 
-    pref_window = g_new0(HybridPreference, 1);
+    main_pref_window = hybrid_pref_win_new(NULL);
 
-    pref_window->window = hybrid_create_window(_("Preference"), NULL,
-                                               GTK_WIN_POS_CENTER, FALSE);
-
-    g_signal_connect(pref_window->window, "destroy",
-                     G_CALLBACK(destroy_cb), NULL);
+    g_signal_connect_after(main_pref_window->window, "destroy",
+                           G_CALLBACK(main_destroy_cb), NULL);
 
     gtk_widget_set_size_request(pref_window->window, 450, 300);
     gtk_container_set_border_width(GTK_CONTAINER(pref_window->window), 8);

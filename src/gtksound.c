@@ -38,13 +38,13 @@ add_pad(GstElement *element , GstPad *pad , gpointer data)
 }
 
 void
-hybrid_sound_play_file(const gchar *filename) 
+hybrid_sound_play_file(const gchar *filename)
 {
 
     GstElement *pipeline;
     GstElement *source, *parser, *sink;
 
-    if (hybrid_pref_get_boolean("mute")) {
+    if (hybrid_pref_get_boolean(NULL, "mute")) {
         return;
     }
 

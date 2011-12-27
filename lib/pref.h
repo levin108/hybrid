@@ -29,27 +29,26 @@ typedef struct _HybridPref HybridPref;
 struct _HybridPref {
     gchar *filename;
     xmlnode *root;
-
-    gboolean mute;
-    gboolean hide_chat_buttons;
-    gboolean disable_chat_tabs;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+    HybridPref *hybrid_pref_new(const gchar *name);
+    void hybrid_pref_destroy(HybridPref *pref);
+
 /**
  * Initialize the preference context.
  *
  * HYBRID_OK or HYBRID_ERROR in case of an error.
  */
-gint hybrid_pref_init(void);
+    gint hybrid_pref_init(void);
 
 /**
  * Save the context of the preference to the local disk.
  */
-void hybrid_pref_save(void);
+    void hybrid_pref_save(HybridPref *pref);
 
 /**
  * Set the string value for a property.
@@ -57,17 +56,17 @@ void hybrid_pref_save(void);
  * @param name  The name of the property.
  * @param value The string value of the property;
  */
-void hybrid_pref_set_string(const gchar *name, const gchar *value);
+    void hybrid_pref_set_string(HybridPref *pref, const gchar *name,
+                                const gchar *value);
 
 /**
  * Get the string value of a given property.
  *
  * @param name The name of the property.
- *
  * @return The value of the property, NULL if not found,
  *         need to be freed with g_free() when no longer needed.
  */
-gchar *hybrid_pref_get_string(const gchar *name);
+    gchar *hybrid_pref_get_string(HybridPref *pref, const gchar *name);
 
 /**
  * Set the gboolean value for a property.
@@ -75,16 +74,16 @@ gchar *hybrid_pref_get_string(const gchar *name);
  * @param name  The name of the property.
  * @param value The string value of the property;
  */
-void hybrid_pref_set_boolean(const gchar *name, const gboolean value);
+    void hybrid_pref_set_boolean(HybridPref *pref, const gchar *name,
+                                 const gboolean value);
 
 /**
  * Get the bool value of a given property.
  *
  * @param name The name of the property.
- *
  * @return The value of the property.
  */
-gboolean hybrid_pref_get_boolean(const gchar *name);
+    gboolean hybrid_pref_get_boolean(HybridPref *pref, const gchar *name);
 
 /**
  * Set the integer value for a property.
@@ -92,14 +91,14 @@ gboolean hybrid_pref_get_boolean(const gchar *name);
  * @param name  The name of the property.
  * @param value The integer value of the property.
  */
-void hybrid_pref_set_int(const gchar *name, gint value);
+    void hybrid_pref_set_int(HybridPref *pref, const gchar *name, gint value);
 
 /**
  * Get the integer value of a given property.
  *
  * @return The value of the property.
  */
-gint hybrid_pref_get_int(const gchar *name);
+    gint hybrid_pref_get_int(HybridPref *pref, const gchar *name);
 
 #ifdef __cplusplus
 }

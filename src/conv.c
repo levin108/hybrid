@@ -334,7 +334,7 @@ hybrid_conv_create()
 
     theme_list[0].func();
 
-    if ((chat_theme = hybrid_pref_get_string("chat_theme")) != NULL) {
+    if ((chat_theme = hybrid_pref_get_string(NULL, "chat_theme")) != NULL) {
         gint i;
         for (i = 0; theme_list[i].name; i ++) {
             if (g_strcmp0(theme_list[i].name, chat_theme) == 0) {
@@ -363,8 +363,8 @@ hybrid_conv_create()
 
     /* create notebook */
     imconv->notebook = gtk_notebook_new();
-    
-    if ((tab_pos = hybrid_pref_get_int("tab_pos")) != -1) {
+
+    if ((tab_pos = hybrid_pref_get_int(NULL, "tab_pos")) != -1) {
         gtk_notebook_set_tab_pos(GTK_NOTEBOOK(imconv->notebook), tab_pos);
 
     } else {
@@ -378,7 +378,7 @@ hybrid_conv_create()
     g_signal_connect(imconv->notebook, "switch-page",
             G_CALLBACK(switch_page_cb), imconv);
 
-    if (!hybrid_pref_get_boolean("hide_chat_buttons")) {
+    if (!hybrid_pref_get_boolean(NULL, "hide_chat_buttons")) {
         /* create action area, "Close" button and "Send" button */
         action_area = gtk_hbox_new(FALSE, 0);
 
@@ -1267,7 +1267,6 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 
         /* we will check whether the protocol allows this buddy to be activated. */
         if (ops->chat_start) {
-            
             if (!ops->chat_start(account, buddy)) {
                 return NULL;
             }
@@ -1282,7 +1281,7 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
     /*
      * Whether to show the chat dialog in a single window.
      */
-    if (hybrid_pref_get_boolean("single_chat_window")) {
+    if (hybrid_pref_get_boolean(NULL, "single_chat_window")) {
 
         if (!conv_list) {
             conv = hybrid_conv_create();

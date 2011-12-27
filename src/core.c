@@ -59,7 +59,7 @@ static gboolean
 window_delete(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
 /* TODO add a gui preference entry */
-    if (hybrid_pref_get_boolean("quit_when_close")) {
+    if (hybrid_pref_get_boolean(NULL, "quit_when_close")) {
         gtk_widget_destroy(widget);
     } else {
         gtk_widget_hide(widget);
