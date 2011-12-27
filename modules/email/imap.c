@@ -92,9 +92,9 @@ process_unread_mails(hybrid_imap *imap, gint unread)
     const gchar *title = _("New Mail.");
     NotifyNotification *notification = NULL;
 
-    summary = g_strdup_printf("<b>%s</b>\n<span size='xx-large' "
+    summary = g_strdup_printf(_("<b>%s</b>\n<span size='xx-large' "
                               "foreground='red'><b>%d</b></span> "
-                              "<span size='large'>unread mails.</span>",
+                                "<span size='large'>unread mails.</span>"),
                               imap->email_addr, unread);
 #ifdef LIBNOTIFY_OLD
     notification = notify_notification_new(title, summary, NULL, NULL);
