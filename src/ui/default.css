@@ -1,3 +1,12 @@
+hr{
+    color:   #D5D5D5;
+    height:  1px;
+    border:  0px;
+    border-top:1px solid #D5D5D5;
+    margin:  5px 0px 2px 0px;
+    padding: 0px;
+    overflow:hidden;
+}
 .chat {
 	width: 100%;
 	margin: 0px 0px 5px 0px;
