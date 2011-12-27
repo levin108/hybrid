@@ -373,11 +373,11 @@ HybridBuddyAddWindow*
 hybrid_buddyadd_window_create()
 {
     HybridBuddyAddWindow *buddy;
-    
+
     buddy = g_new0(HybridBuddyAddWindow, 1);
 
     buddy->window = hybrid_create_window(_("Add Buddy"), NULL,
-                GTK_WIN_POS_CENTER, FALSE);
+                                         GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(buddy->window, 420, 300);
     gtk_container_set_border_width(GTK_CONTAINER(buddy->window), 8);
     g_signal_connect(buddy->window, "destroy", G_CALLBACK(destroy_cb), buddy);

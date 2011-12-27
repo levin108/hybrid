@@ -234,8 +234,8 @@ hybrid_groupadd_window_create()
 
     group = g_new0(HybridGroupAddWindow, 1);
 
-    group->window = hybrid_create_window(_("Add Group"), NULL, 
-                        GTK_WIN_POS_CENTER, FALSE);
+    group->window = hybrid_create_window(_("Add Group"), NULL,
+                                         GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(group->window, 420, 200);
     gtk_container_set_border_width(GTK_CONTAINER(group->window), 5);
     g_signal_connect(group->window, "destroy", G_CALLBACK(destroy_cb), group);

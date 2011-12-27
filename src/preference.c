@@ -40,32 +40,24 @@ create_tab_pos_model(void)
     GtkTreeIter iter;
 
     store = gtk_tree_store_new(TAB_POS_COLS,
-                G_TYPE_STRING,
-                G_TYPE_INT);
+                               G_TYPE_STRING,
+                               G_TYPE_INT);
 
     gtk_tree_store_append(store, &iter, NULL);
-    gtk_tree_store_set(store, &iter,
-            TAB_POS_NAME_COL, _("Top"),
-            TAB_POS_VALUE_COL, GTK_POS_TOP,
-            -1);
+    gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Top"),
+                       TAB_POS_VALUE_COL, GTK_POS_TOP, -1);
 
     gtk_tree_store_append(store, &iter, NULL);
-    gtk_tree_store_set(store, &iter,
-            TAB_POS_NAME_COL, _("Right"),
-            TAB_POS_VALUE_COL, GTK_POS_RIGHT,
-            -1);
+    gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Right"),
+                       TAB_POS_VALUE_COL, GTK_POS_RIGHT, -1);
 
     gtk_tree_store_append(store, &iter, NULL);
-    gtk_tree_store_set(store, &iter,
-            TAB_POS_NAME_COL, _("Bottom"),
-            TAB_POS_VALUE_COL, GTK_POS_BOTTOM,
-            -1);
+    gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Bottom"),
+                       TAB_POS_VALUE_COL, GTK_POS_BOTTOM, -1);
 
     gtk_tree_store_append(store, &iter, NULL);
-    gtk_tree_store_set(store, &iter,
-            TAB_POS_NAME_COL, _("Left"),
-            TAB_POS_VALUE_COL, GTK_POS_LEFT,
-            -1);
+    gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Left"),
+                       TAB_POS_VALUE_COL, GTK_POS_LEFT, -1);
 
     return GTK_TREE_MODEL(store);
 }
@@ -99,20 +91,16 @@ chat_theme_combo_create()
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(
-            GTK_CELL_LAYOUT(combo), renderer, FALSE);
-    gtk_cell_layout_set_attributes(
-            GTK_CELL_LAYOUT(combo), renderer,
-            "text", TAB_POS_NAME_COL, NULL);
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, FALSE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer,
+                                   "text", TAB_POS_NAME_COL, NULL);
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
 
     /*
      * Set the active item with the local data.
      */
     if ((chat_theme_name = hybrid_pref_get_string("chat_theme")) != NULL) {
-        
         if(gtk_tree_model_get_iter_root(GTK_TREE_MODEL(store), &iter)) {
-
             do {
                 gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
                         TAB_POS_NAME_COL, &name, -1);
@@ -130,7 +118,7 @@ chat_theme_combo_create()
 
     g_free(chat_theme_name);
     g_object_unref(store);
-    
+
     return combo;
 }
 
@@ -159,7 +147,7 @@ tab_pos_combo_create()
      * Set the active item with the local data.
      */
     if ((tab_pos = hybrid_pref_get_int("tab_pos")) != -1) {
-        
+
         if(gtk_tree_model_get_iter_root(model, &iter)) {
 
             do {
@@ -177,7 +165,7 @@ tab_pos_combo_create()
     }
 
     g_object_unref(model);
-    
+
     return combo;
 }
 
@@ -194,7 +182,7 @@ pref_basic_init(GtkFixed *fixed)
 
     gtk_fixed_put(fixed, label, 20, 10);
 
-    pref_window->hcb_check = 
+    pref_window->hcb_check =
         gtk_check_button_new_with_label(_("Hide Action Buttons"));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->hcb_check),
             hybrid_pref_get_boolean("hide_chat_buttons"));
@@ -388,16 +376,14 @@ void
 hybrid_pref_create(void)
 {
     if (pref_window) {
-
         gtk_window_present(GTK_WINDOW(pref_window->window));
-
         return;
     }
 
     pref_window = g_new0(HybridPreference, 1);
 
     pref_window->window = hybrid_create_window(_("Preference"), NULL,
-                                        GTK_WIN_POS_CENTER, FALSE);
+                                               GTK_WIN_POS_CENTER, FALSE);
 
     g_signal_connect(pref_window->window, "destroy",
                      G_CALLBACK(destroy_cb), NULL);

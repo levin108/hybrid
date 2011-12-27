@@ -334,7 +334,7 @@ hybrid_buddy_request_window_create(HybridAccount *account, const gchar *id,
 
     g_return_val_if_fail(account != NULL, NULL);
     g_return_val_if_fail(id != NULL, NULL);
-    
+
     req             = g_new0(HybridBuddyReqWindow, 1);
     req->buddy_id   = g_strdup(id);
     req->buddy_name = g_strdup(name);
@@ -342,9 +342,9 @@ hybrid_buddy_request_window_create(HybridAccount *account, const gchar *id,
     req->accept     = TRUE;
 
     req->window = hybrid_create_window(_("Buddy-Add Request"), NULL,
-                    GTK_WIN_POS_CENTER, FALSE);
+                                       GTK_WIN_POS_CENTER, FALSE);
     gtk_container_set_border_width(GTK_CONTAINER(req->window), 5);
-    gtk_widget_set_size_request(req->window, 400, 250);    
+    gtk_widget_set_size_request(req->window, 400, 250);
     g_signal_connect(req->window, "destroy", G_CALLBACK(destroy_cb), req);
 
     req_window_init(req);
@@ -359,7 +359,7 @@ hybrid_buddy_request_set_user_data(HybridBuddyReqWindow *req, gpointer user_data
         DestroyNotify notify)
 {
     g_return_if_fail(req != NULL);
-    
+
     req->user_data = user_data;
     req->notify    = notify;
 }

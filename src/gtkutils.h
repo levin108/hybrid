@@ -158,7 +158,7 @@ void hybrid_create_menu_seperator(GtkWidget *parent);
  * @return The GtkWindow created.
  */
 GtkWidget *hybrid_create_window(const gchar *title,	GdkPixbuf *icon,
-		GtkWindowPosition pos, gboolean resizable);
+                                GtkWindowPosition pos, gboolean resizable);
 
 /**
  * Create a confirm window.

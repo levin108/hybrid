@@ -346,7 +346,7 @@ hybrid_create_menu_seperator(GtkWidget *parent)
 
 GtkWidget*
 hybrid_create_window(const gchar *title, GdkPixbuf *icon,
-        GtkWindowPosition pos, gboolean resizable)
+                     GtkWindowPosition pos, gboolean resizable)
 {
     GtkWidget *window;
 
@@ -354,6 +354,8 @@ hybrid_create_window(const gchar *title, GdkPixbuf *icon,
 
     if (!icon) {
         icon = hybrid_create_default_icon(0);
+    } else {
+        g_object_ref(icon);
     }
 
     gtk_window_set_icon(GTK_WINDOW(window), icon);

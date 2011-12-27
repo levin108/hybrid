@@ -257,7 +257,7 @@ hybrid_account_panel_create()
     account_panel = panel;
 
     panel->window = hybrid_create_window(_("Manage Account"), NULL,
-                    GTK_WIN_POS_CENTER, FALSE);
+                                         GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(panel->window, 500, 300);
     g_object_set(panel->window, "border-width", 8, NULL);
     g_signal_connect(panel->window, "destroy",
@@ -743,15 +743,15 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
         gtk_window_present(GTK_WINDOW(panel->window));
         return panel;
     }
-    
+
     panel = g_new0(HybridAccountEditPanel, 1);
 
     panel->is_add      = is_add;
     panel->parent      = parent;
     parent->edit_panel = panel;
     panel->window      = hybrid_create_window(
-                is_add ? _("Add a new account") : _("Edit the account"),
-                NULL, GTK_WIN_POS_CENTER, TRUE);
+        is_add ? _("Add a new account") : _("Edit the account"),
+        NULL, GTK_WIN_POS_CENTER, TRUE);
     gtk_container_set_border_width(GTK_CONTAINER(panel->window), 8);
     gtk_widget_set_size_request(panel->window, 300, 400);
     g_signal_connect(panel->window, "destroy", G_CALLBACK(edit_destroy), panel);
