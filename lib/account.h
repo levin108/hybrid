@@ -23,49 +23,49 @@
 
 #include <glib.h>
 
-typedef struct _HybridAccountVariable	 HybridAccountVariable;
-typedef struct _HybridAccount			 HybridAccount;
+typedef struct _HybridAccountVariable    HybridAccountVariable;
+typedef struct _HybridAccount            HybridAccount;
 typedef enum _HybridConnectionStatusType HybridConnectionStatusType;
-typedef enum _HybridAccountVariableType	 HybridAccountVariableType;
+typedef enum _HybridAccountVariableType  HybridAccountVariableType;
 
 #include "util.h"
 #include "config.h"
 #include "module.h"
 
 struct _HybridAccount {
-	gchar *username;
-	gchar *password;
-	gchar *nickname;
-	gchar *status_text;
-	gint   state;               /**< online status. */
-	gint   connect_state;       /**< connection status. */
-	gint   keep_alive_source;   /**< source id of the keep alive. */
+    gchar *username;
+    gchar *password;
+    gchar *nickname;
+    gchar *status_text;
+    gint   state;               /**< online status. */
+    gint   connect_state;       /**< connection status. */
+    gint   keep_alive_source;   /**< source id of the keep alive. */
 
-	gint enabled;               /**< whether the account is enabled. */
+    gint enabled;               /**< whether the account is enabled. */
 
-	guchar *icon_data;          /**< binary data of the icon. */
-	gint    icon_data_len;      /**< size of the binary data. */
-	gchar  *icon_crc;           /**< checksum of the icon */
-	gchar  *icon_name;          /**< file name of the local file. */
+    guchar *icon_data;          /**< binary data of the icon. */
+    gint    icon_data_len;      /**< size of the binary data. */
+    gchar  *icon_crc;           /**< checksum of the icon */
+    gchar  *icon_name;          /**< file name of the local file. */
 
-	GtkWidget   *account_menu;
-	GtkWidget   *enable_menu;
-	GtkWidget   *enable_menu_id;
+    GtkWidget   *account_menu;
+    GtkWidget   *enable_menu;
+    GtkWidget   *enable_menu_id;
     GtkWidget   *change_state_menu;
     GtkWidget   *login_panel;
-	GtkWidget   *login_tips;
-	GtkTreeIter  login_iter;
+    GtkWidget   *login_tips;
+    GtkTreeIter  login_iter;
 
-	gpointer protocol_data;
+    gpointer protocol_data;
 
-	GSList *action_list;        /* list of action menus. */
-	GSList *option_list;        /* list of login options. */
+    GSList *action_list;        /* list of action menus. */
+    GSList *option_list;        /* list of login options. */
 
-	GHashTable *buddy_list;
-	GHashTable *group_list;
+    GHashTable *buddy_list;
+    GHashTable *group_list;
 
     HybridConfig *config;
-	HybridModule *proto;
+    HybridModule *proto;
 };
 
 enum _HybridAccountVariableType {

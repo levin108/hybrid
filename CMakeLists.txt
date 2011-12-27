@@ -256,7 +256,7 @@ set(hybrid_SRC
 
 add_executable(hybrid ${hybrid_SRC})
 message(STATUS ${GLIB2_LIBRARIES})
-target_link_libraries(hybrid 
+target_link_libraries(hybrid
   ${GOBJECT2_LIBRARIES}
   ${GMODULE2_LIBRARIES}
   ${GTK2_LIBRARIES}
@@ -314,11 +314,11 @@ install(FILES ${HYBRID_STATUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/
 file(GLOB HYBRID_ICONS_PIXMAPS "share/pixmaps/icons/*.png")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/icons/")
 
-# install sound files 
+# install sound files
 file(GLOB HYBRID_ICONS_PIXMAPS "share/sound/*.wav")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/sound/")
 
-# install ui files 
+# install ui files
 file(GLOB HYBRID_ICONS_PIXMAPS "src/ui/*")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${UI_INSTALL_DIR}")
 

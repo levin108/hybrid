@@ -12,7 +12,7 @@
 static gint check_resp_ok(const gchar *msg);
 static gboolean check_mail(gpointer user_data);
 static void process_unread_mails(hybrid_imap *imap, gint unread);
-    
+
 hybrid_imap*
 hybrid_imap_create(HybridAccount *account)
 {
@@ -26,7 +26,7 @@ hybrid_imap_create(HybridAccount *account)
     const gchar *pos;
 
     g_return_val_if_fail(account != NULL, NULL);
-    
+
     username       = account->username;
     password       = account->password;
     imap_server    = hybrid_account_get_string_variable(account,

@@ -403,11 +403,11 @@ void
 process_pushed(fetion_account *ac, const gchar *sipmsg)
 {
     gint type;
-    
+
     type = fetion_sip_get_msg_type(sipmsg);
 
     switch (type) {
-        case SIP_NOTIFICATION :    
+        case SIP_NOTIFICATION :
             process_notify_cb(ac, sipmsg);
             break;
         case SIP_MESSAGE:
@@ -417,10 +417,10 @@ process_pushed(fetion_account *ac, const gchar *sipmsg)
             process_invite_cb(ac, sipmsg);
             break;
         case SIP_INFO:
-            //process_info_cb(ac, sipmsg);        
+            //process_info_cb(ac, sipmsg);
             break;
         case SIP_SIPC_4_0:
-            process_sipc_cb(ac, sipmsg);    
+            process_sipc_cb(ac, sipmsg);
             break;
         default:
             hybrid_debug_info("fetion", "recevie unknown msg:\n%s", sipmsg);
@@ -433,7 +433,7 @@ fx_login(HybridAccount *imac)
 {
     HybridSslConnection *conn;
 
-    hybrid_debug_info("fetion", "fetion is now logining...");
+    hybrid_debug_info("fetion", "fetion is now logging in...");
 
     ac = fetion_account_create(imac, imac->username, imac->password);
 
@@ -447,7 +447,7 @@ fx_login(HybridAccount *imac)
 /**
  * Callback function for the get_info transaction.
  */
-static gint 
+static gint
 get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 {
     HybridNotifyInfo *info;
@@ -890,7 +890,7 @@ fx_close(HybridAccount *account)
     if (ac->source) {
         hybrid_event_remove(ac->source);
     }
-    
+
     if (ac->sk) {
         close(ac->sk);
     }
@@ -925,7 +925,6 @@ fetion_actions(HybridAccount *account)
 }
 
 HybridIMOps im_ops = {
-
     fx_login,                   /**< login */
     fx_get_info,                /**< get_info */
     fx_modify_name,             /**< modify_name */
@@ -955,7 +954,7 @@ HybridModuleInfo module_info = {
     "levin108",                 /**< author */
     N_("fetion client"),        /**< summary */
     /* description */
-    N_("hybrid plugin implementing Fetion Protocol version 4"), 
+    N_("hybrid plugin implementing Fetion Protocol version 4"),
     "http://basiccoder.com",      /**< homepage */
     "0","1",                    /**< major version, minor version */
     "fetion",                   /**< icon name */
@@ -966,7 +965,7 @@ HybridModuleInfo module_info = {
     NULL,
 };
 
-void 
+void
 fetion_module_init(HybridModule *module)
 {
 

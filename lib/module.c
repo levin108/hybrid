@@ -37,13 +37,13 @@ hybrid_module_create(const gchar *path)
     return module;
 }
 
-void 
+void
 hybrid_module_destroy(HybridModule *module)
 {
     g_return_if_fail(module != NULL);
-    
+
     hybrid_module_deregister(module);
-    
+
     if (module) {
         g_free(module->path);
     }
@@ -51,7 +51,7 @@ hybrid_module_destroy(HybridModule *module)
     g_free(module);
 }
 
-gint 
+gint
 hybrid_module_load(HybridModule *module)
 {
     GModule        *gm;
@@ -60,19 +60,14 @@ hybrid_module_load(HybridModule *module)
     g_return_val_if_fail(module != NULL, HYBRID_ERROR);
 
     if (!(gm = g_module_open(module->path, G_MODULE_BIND_LOCAL))) {
-
         hybrid_debug_error("module", g_module_error());
-
         return HYBRID_ERROR;
     }
 
-    if (!g_module_symbol(gm, "proto_module_init", 
-                (gpointer*)&module_init))    {
-
+    if (!g_module_symbol(gm, "proto_module_init",
+                         (gpointer*)&module_init)) {
         hybrid_debug_error("module", g_module_error());
-
         return HYBRID_ERROR;
-
     }
 
     module_init(module);
@@ -85,13 +80,12 @@ hybrid_module_load(HybridModule *module)
     return HYBRID_OK;
 }
 
-void 
+void
 hybrid_module_register(HybridModule *module)
 {
     GSList *iter;
 
     for (iter = modules; iter; iter = iter->next) {
-
         if (iter->data == module) {
             return;
         }

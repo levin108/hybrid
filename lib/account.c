@@ -633,7 +633,7 @@ hybrid_account_clear_buddy(HybridAccount *account)
 rm_blist_err:
 
     hybrid_debug_error("account", "remove buddies of account error,"
-                                " maybe xml in bad format.");
+                       " maybe xml in bad format.");
 
 }
 
@@ -645,12 +645,12 @@ hybrid_account_get_protocol_data(HybridAccount *account)
 
 void
 hybrid_account_set_protocol_data(HybridAccount *account,
-        gpointer protocol_data)
+                                 gpointer protocol_data)
 {
     account->protocol_data = protocol_data;
 }
 
-void 
+void
 hybrid_account_set_username(HybridAccount *account, const gchar *username)
 {
     g_return_if_fail(account != NULL);
@@ -660,7 +660,7 @@ hybrid_account_set_username(HybridAccount *account, const gchar *username)
     account->username = g_strdup(username);
 }
 
-void 
+void
 hybrid_account_set_password(HybridAccount *account, const gchar *password)
 {
     g_return_if_fail(account != NULL);

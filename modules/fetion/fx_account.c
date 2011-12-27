@@ -54,7 +54,6 @@ fetion_account_create(HybridAccount *account, const gchar *no, const gchar *pass
 
     if (strlen(no) == 11) { /* mobile no */
         ac->mobileno = g_strdup(no);
-
     } else {
         ac->sid = g_strdup(no);
     }

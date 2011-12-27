@@ -262,14 +262,14 @@ ssl_verify_certs(SSL *ssl)
             } else {
                 cert_file = g_strdup_printf("%s/%s", cert_path, buf);
             }
-            
+
             g_free(cert_path);
-            
+
             f = fopen(cert_file, "w+");
             PEM_write_X509(f, x);
             fclose(f);
             g_free(cert_file);
-            
+
         } else {
             hybrid_debug_error("ssl", "client verification failed.");
             return HYBRID_OK;
@@ -281,9 +281,9 @@ ssl_verify_certs(SSL *ssl)
     return HYBRID_OK;
 }
 
-HybridSslConnection* 
+HybridSslConnection*
 hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
-        gpointer user_data)
+                   gpointer user_data)
 {
     BIO                 *buf_io;
     BIO                 *ssl_bio;
@@ -313,12 +313,12 @@ hybrid_ssl_connect(const gchar *hostname, gint port, ssl_callback func,
 
     SSL_set_mode(conn->ssl, SSL_MODE_AUTO_RETRY);
 
-    buf_io    = BIO_new(BIO_f_buffer());
+    buf_io  = BIO_new(BIO_f_buffer());
     ssl_bio = BIO_new(BIO_f_ssl());
 
     BIO_set_ssl(ssl_bio, conn->ssl, BIO_NOCLOSE);
     BIO_push(buf_io, ssl_bio);
-    
+
     conn->conn_cb   = func;
     conn->conn_data = user_data;
     conn->rbio      = buf_io;

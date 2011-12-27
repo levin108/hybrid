@@ -27,18 +27,18 @@
 typedef struct _HybridNotify HybridNotify;
 
 struct _HybridNotify {
-	GtkWidget *window;
-	GtkWidget *cellview;
-	GtkTreeIter iter;
-	GtkWidget *textview;
-	GtkWidget *action_area;
-	HybridAccount *account;
+    GtkWidget *window;
+    GtkWidget *cellview;
+    GtkTreeIter iter;
+    GtkWidget *textview;
+    GtkWidget *action_area;
+    HybridAccount *account;
 };
 
 enum {
-	NOTIFY_ICON_COLUMN,
-	NOTIFY_NAME_COLUMN,
-	NOTIFY_COLUMNS
+    NOTIFY_ICON_COLUMN,
+    NOTIFY_NAME_COLUMN,
+    NOTIFY_COLUMNS
 };
 
 #ifdef __cplusplus

@@ -24,22 +24,22 @@
 #include <glib.h>
 #include <gmodule.h>
 
-typedef struct _HybridModule	 HybridModule;
+typedef struct _HybridModule     HybridModule;
 typedef struct _HybridModuleInfo HybridModuleInfo;
-typedef struct _HybridIMOps		 HybridIMOps;
-typedef struct _HybridEmailOps	 HybridEmailOps;
-typedef enum _HybridInputState	 HybridInputState;
-typedef enum _HybridModuleType	 HybridModuleType;
+typedef struct _HybridIMOps      HybridIMOps;
+typedef struct _HybridEmailOps   HybridEmailOps;
+typedef enum _HybridInputState   HybridInputState;
+typedef enum _HybridModuleType   HybridModuleType;
 
 enum _HybridInputState {
-	INPUT_STATE_TYPING,
-	INPUT_STATE_PAUSED,
-	INPUT_STATE_ACTIVE,
+    INPUT_STATE_TYPING,
+    INPUT_STATE_PAUSED,
+    INPUT_STATE_ACTIVE,
 };
 
 enum _HybridModuleType {
-	MODULE_TYPE_IM,
-	MODULE_TYPE_EMAIL,
+    MODULE_TYPE_IM,
+    MODULE_TYPE_EMAIL,
 };
 
 
@@ -182,43 +182,42 @@ struct _HybridEmailOps {
 };
 
 struct _HybridModuleInfo {
-	gchar *name;
-	gchar *author;
-	gchar *summary;
-	gchar *description;
-	gchar *homepage;
-	gchar *major_version;
-	gchar *minor_version;
-	gchar *icon; /**< The name of the protocol icon, ie,
-				   "msn" for "msn.png", the protocol icon must
-				   be in "png" format, and stored in 
-				   HYBRID_INSTALL_DIR/share/hybrid/protocols
-					   */
-  
-	HybridModuleType  module_type;
-	HybridIMOps		 *im_ops;
-	HybridEmailOps	 *email_ops;
-  
-	
-	/*
-	 * To tell the plugin which menus this account has.
-	 */
-	GSList* (*actions)(HybridAccount *account);
-	
-	/*
-	 * To tell the plugin which login options this account has;
-	 */
-	GSList* (*options)();
+    gchar *name;
+    gchar *author;
+    gchar *summary;
+    gchar *description;
+    gchar *homepage;
+    gchar *major_version;
+    gchar *minor_version;
+    gchar *icon; /**< The name of the protocol icon, ie,
+                    "msn" for "msn.png", the protocol icon must
+                    be in "png" format, and stored in
+                    HYBRID_INSTALL_DIR/share/hybrid/protocols
+                 */
+
+    HybridModuleType module_type;
+    HybridIMOps      *im_ops;
+    HybridEmailOps   *email_ops;
+
+
+    /*
+     * To tell the plugin which menus this account has.
+     */
+    GSList* (*actions)(HybridAccount *account);
+
+    /*
+     * To tell the plugin which login options this account has;
+     */
+    GSList* (*options)();
 };
 
 struct _HybridModule {
-	/* full path of the library file */
-	gchar            *path;
-	gboolean          loaded;
-	GSList           *option_list;
-	/* plugin info */
-	HybridModuleInfo *info;
-  
+    /* full path of the library file */
+    gchar            *path;
+    gboolean          loaded;
+    GSList           *option_list;
+    /* plugin info */
+    HybridModuleInfo *info;
 };
 
 #ifdef __cplusplus
@@ -226,17 +225,17 @@ extern "C" {
 #endif
 
 #define HYBRID_MODULE_INIT(func, moduleinfo) \
-	G_MODULE_EXPORT gboolean proto_module_init(HybridModule *module); \
-	G_MODULE_EXPORT gboolean proto_module_init(HybridModule *module) { \
-		module->info = (moduleinfo); \
-		func(module); \
-		hybrid_module_register(module); \
-		return TRUE; \
-	}
+    G_MODULE_EXPORT gboolean proto_module_init(HybridModule *module);   \
+    G_MODULE_EXPORT gboolean proto_module_init(HybridModule *module) {  \
+        module->info = (moduleinfo);                                    \
+        func(module);                                                   \
+        hybrid_module_register(module);                                 \
+        return TRUE;                                                    \
+    }
 
 
 /**
- * Initialize the module function, load all the 
+ * Initialize the module function, load all the
  * protocol modules in MODULE_DIR directory.
  *
  * @return HYBRID_OK if success, orelse HYBRID_ERROR.
