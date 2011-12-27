@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-27 11:22+0800\n"
+"POT-Creation-Date: 2011-12-27 12:54+0800\n"
 "PO-Revision-Date: 2011-12-26 16:06-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,8 +59,8 @@ msgid ""
 "size='large'>unread mails.</span>"
 msgstr ""
 "<b>%s</b>\n"
-"<span size='xx-large' foreground='red'><b>%d</b></span> <span "
-"size='large'>封未读邮件.</span>"
+"<span size='xx-large' foreground='red'><b>%d</b></span> <span size='large'>封"
+"未读邮件.</span>"
 
 #: src/buddyadd.c:272
 msgid "<b>Account:</b>"
@@ -506,7 +506,7 @@ msgstr "在线"
 msgid "Password:"
 msgstr "密码:"
 
-#: modules/xmpp/xmpp.c:144
+#: modules/fetion/fetion.c:503 modules/xmpp/xmpp.c:144
 msgid "Photo"
 msgstr "照片"
 

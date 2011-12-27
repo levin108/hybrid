@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-27 11:22+0800\n"
+"POT-Creation-Date: 2011-12-27 12:54+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -195,6 +195,10 @@ msgstr ""
 msgid "City"
 msgstr ""
 
+#: modules/fetion/fetion.c:503 modules/xmpp/xmpp.c:144
+msgid "Photo"
+msgstr ""
+
 #: modules/fetion/fetion.c:545 modules/fetion/fetion.c:921
 msgid "SMS To Me"
 msgstr ""
@@ -292,10 +296,6 @@ msgstr ""
 
 #: modules/xmpp/xmpp.c:115
 msgid "Resource"
-msgstr ""
-
-#: modules/xmpp/xmpp.c:144
-msgid "Photo"
 msgstr ""
 
 #: modules/xmpp/xmpp.c:298
