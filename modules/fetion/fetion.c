@@ -500,7 +500,7 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
         if (hybrid_buddy->icon_data) { 
             pixbuf = hybrid_create_pixbuf(hybrid_buddy->icon_data,
                     hybrid_buddy->icon_data_length);
-            hybrid_info_add_pixbuf_pair(info, "Photo", pixbuf);
+            hybrid_info_add_pixbuf_pair(info, _("Photo"), pixbuf);
 
             if (pixbuf) {
                 g_object_unref(pixbuf);
