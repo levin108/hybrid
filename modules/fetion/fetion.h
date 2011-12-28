@@ -31,7 +31,7 @@
 
 
 enum {
-	P_ONLINE       = 400, 
+	P_ONLINE       = 400,
 	P_RIGHTBACK    = 300,
 	P_AWAY         = 100,
 	P_BUSY         = 600,

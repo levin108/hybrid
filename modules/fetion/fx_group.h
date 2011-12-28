@@ -60,7 +60,7 @@ void fetion_group_destroy(fetion_group *group);
  * Q: 2 S
  * N: SetBuddyListInfo
  * L: 132
- * 
+ *
  * <args><contacts><buddy-lists>
  * <buddy-list id="2" name="text"/>
  * </buddy-lists></contacts></args>

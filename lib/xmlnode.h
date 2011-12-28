@@ -101,7 +101,7 @@ xmlnode *xmlnode_child(xmlnode *node);
  * @param node The start node.
  * @param name The name of the node to find.
  *
- * @return The node if found. NULL if there was an error. 
+ * @return The node if found. NULL if there was an error.
  */
 xmlnode *xmlnode_find(xmlnode *node, const gchar *name);
 
@@ -119,7 +119,7 @@ gchar *xmlnode_prop(xmlnode *node, const gchar *prop);
  * Get namespace href string of an given xml node.
  *
  * @param node The node.
- * 
+ *
  * @return The namespace value, should be freed with
  *         g_free() when no longer needed.
  */
@@ -217,7 +217,7 @@ gchar *xmlnode_to_string(xmlnode *root);
 
 /**
  * Create a new attribute for a specified node.
- * 
+ *
  * @param node The node.
  * @param name The attribute name.
  * @param value The attribte value.

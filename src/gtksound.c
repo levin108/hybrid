@@ -43,7 +43,7 @@ bus_call (GstBus     *bus,
           gpointer    data)
 {
     GstElement *pipeline = data;
-    
+
     switch (GST_MESSAGE_TYPE (msg)) {
     case GST_MESSAGE_EOS:
         gst_element_set_state(pipeline, GST_STATE_NULL);

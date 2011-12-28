@@ -114,7 +114,7 @@ void hybrid_account_init(void);
 
 /**
  * Get an account from the account list, if there's
- * no matching node found, create one in the memory, 
+ * no matching node found, create one in the memory,
  * and append it to the account count.
  *
  * @param proto_name The name of the protocol.
@@ -126,7 +126,7 @@ HybridAccount *hybrid_account_get(const gchar *proto_name,
                                   const gchar *username);
 
 /**
- * Synchronize the account information in the memory with 
+ * Synchronize the account information in the memory with
  * that in the local cache file which is in fact a XML file.
  * The function first find the matching 'account' node, if found,
  * update it, orelse create a new one.
@@ -237,7 +237,7 @@ void hybrid_account_set_enabled(HybridAccount *account, gboolean enabled);
 
 /**
  * Get the checksum of the account's icon.
- * 
+ *
  * @param account The account.
  *
  * @return The checksum.
@@ -256,7 +256,7 @@ void hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
                              gint icon_data_len, const gchar *icon_crc);
 
 /**
- * Enable an account, it will create a login tips panel in the 
+ * Enable an account, it will create a login tips panel in the
  * bottom of the buddy list, and then call the protocol login function.
  *
  * @param account The account.
@@ -264,8 +264,8 @@ void hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 void hybrid_account_enable(HybridAccount *account);
 
 /**
- * Close an account. Remove it from the blist panel. Free the 
- * memory of the buddis and groups. But dont free the memory of 
+ * Close an account. Remove it from the blist panel. Free the
+ * memory of the buddis and groups. But dont free the memory of
  * the account. The call the protocol close callback function.
  *
  * @param account The account the close.
@@ -284,7 +284,7 @@ void hybrid_account_enable_all();
 
 /**
  * Close an account and give an error notification.
- * 
+ *
  * @param account The account to close.
  * @param reason The error reason message.
  */
@@ -295,7 +295,7 @@ void hybrid_account_error_reason(HybridAccount *account, const gchar *reason);
  * then the local buddy list stored on the disk would be loaded. Make sure
  * to set the status to CONNECTED after logining successfully, orelse you can
  * not add buddies using hybrid_blist_add_buddy().
- * 
+ *
  * Note that before calling this function, you should make sure that you have
  * set nickname,mood phrase, and state for the account.
  *
@@ -340,7 +340,7 @@ HybridAccountVariable *hybrid_variable_create(HybridAccountVariableType	 type,
  * @param variable The variable object to destroy.
  */
 void hybrid_variable_destroy(HybridAccountVariable *variable);
-    
+
 /**
  * Set the default value for a string variable.
  *
@@ -368,7 +368,7 @@ void hybrid_variable_set_bool_default(HybridAccountVariable *var,
                                       gboolean               defalut_value);
 
 /**
- * Set the string value for a user-defined variable. 
+ * Set the string value for a user-defined variable.
  *
  * @param account The account context.
  * @param name    The name of the string variable.
@@ -390,7 +390,7 @@ const gchar* hybrid_account_get_string_variable(HybridAccount *account,
 												const gchar	  *name);
 
 /**
- * Set the boolean value for a user-defined variable. 
+ * Set the boolean value for a user-defined variable.
  *
  * @param account The account context.
  * @param name    The name of the boolean variable.
@@ -410,10 +410,10 @@ void hybrid_account_set_bool_variable(HybridAccount	*account,
  */
 gboolean hybrid_account_get_bool_variable(HybridAccount	*account,
 										  const gchar	*name);
-	
-	
+
+
 /**
- * Set the integer value for a user-defined variable. 
+ * Set the integer value for a user-defined variable.
  *
  * @param account The account context.
  * @param name    The name of the integer variable.
@@ -422,7 +422,7 @@ gboolean hybrid_account_get_bool_variable(HybridAccount	*account,
 void hybrid_account_set_int_variable(HybridAccount *account,
 									 const gchar   *name,
 									 gint			value);
-	
+
  /**
  * Get the value of an user-defined integer variable.
  *

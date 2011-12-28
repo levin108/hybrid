@@ -56,7 +56,7 @@ extern "C" {
  *
  * @return The request window created.
  */
-HybridBuddyReqWindow *hybrid_buddy_request_window_create(HybridAccount *account, 
+HybridBuddyReqWindow *hybrid_buddy_request_window_create(HybridAccount *account,
 		const gchar *id, const gchar *name);
 
 /**

@@ -71,7 +71,7 @@ GdkPixbuf *hybrid_create_pixbuf(const guchar *pixbuf_data, gint pixbuf_len);
 /**
  * Create a pixbuf of the default icon with the specified size.
  *
- * @param scale_size The size of the created pixbuf image, if 0, the image 
+ * @param scale_size The size of the created pixbuf image, if 0, the image
  *                   will not be scaled.
  *
  * @return The pixbuf created.
@@ -126,7 +126,7 @@ GdkPixbuf *hybrid_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len
 GdkPixbuf *hybrid_create_presence_pixbuf(gint presence, gint scale_size);
 
 /**
- * Create a child menu for the @parent menu. Create an image menu if 
+ * Create a child menu for the @parent menu. Create an image menu if
  * icon_path is not NULL, orelse create a text menu.
  *
  * @param parent    The parent menu of the menu to create.

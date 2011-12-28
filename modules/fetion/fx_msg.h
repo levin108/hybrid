@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 /**
- * Parse the system message. The output is the content 
+ * Parse the system message. The output is the content
  * and a url to the website the message refered to.
  *
  * @param sipmsg  The sip message of the system message.

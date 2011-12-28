@@ -31,11 +31,11 @@ enum {
 enum {
 	SIP_REGISTER = 1,
 	SIP_SERVICE,
- 	SIP_SUBSCRIPTION, 
+ 	SIP_SUBSCRIPTION,
 	SIP_NOTIFICATION,
-	SIP_INVITATION, 
-	SIP_INFO, 
-	SIP_OPTION, 
+	SIP_INVITATION,
+	SIP_INFO,
+	SIP_OPTION,
 	SIP_MESSAGE,
 	SIP_SIPC_4_0,
 	SIP_ACKNOWLEDGE,
@@ -63,9 +63,9 @@ enum {
 	NOTIFICATION_EVENT_ADDBUDDYAPPLICATION,
 	NOTIFICATION_EVENT_USERENTER,
 	NOTIFICATION_EVENT_USERLEFT,
-	NOTIFICATION_EVENT_DEREGISTRATION, 
+	NOTIFICATION_EVENT_DEREGISTRATION,
 	NOTIFICATION_EVENT_SYNCUSERINFO,
-	NOTIFICATION_EVENT_PGGETGROUPINFO, 
+	NOTIFICATION_EVENT_PGGETGROUPINFO,
 	NOTIFICATION_EVENT_UNKNOWN
 };
 
@@ -94,11 +94,11 @@ enum {
 	SIP_EVENT_SENDDIRECTCATSMS,
 	SIP_EVENT_HANDLECONTACTREQUEST,
 	SIP_EVENT_PGGETGROUPLIST,
-	SIP_EVENT_PGGETGROUPINFO, 
+	SIP_EVENT_PGGETGROUPINFO,
 	SIP_EVENT_PGGETGROUPMEMBERS,
-	SIP_EVENT_PGSENDCATSMS, 
+	SIP_EVENT_PGSENDCATSMS,
 	SIP_EVENT_PGPRESENCE
-}; 
+};
 
 typedef struct _fetion_sip fetion_sip;
 typedef struct _sip_header sip_header;
@@ -142,7 +142,7 @@ fetion_sip *fetion_sip_create(fetion_account *ac);
 
 /**
  * Set the type of the sip context.
- * 
+ *
  * @param sip The sip context.
  * @param sip_type The sip type.
  */
@@ -212,7 +212,7 @@ void fetion_sip_add_header(fetion_sip *sip, sip_header *header);
  * @return The sip message string, needs to be freed after use.
  */
 gchar* fetion_sip_to_string(fetion_sip *sip, const gchar *body);
-	
+
 /**
  * Destroy a fetion sip struct.
  *
@@ -241,8 +241,8 @@ sip_header *sip_header_create(const gchar *name, const gchar *value);
 sip_header *sip_authentication_header_create(const gchar *response);
 
 /**
- * Create a sip acknowledgement header. This header is used when the 
- * authentication needs to input confirm code. 
+ * Create a sip acknowledgement header. This header is used when the
+ * authentication needs to input confirm code.
  *
  * @param code The confirm code.
  * @param algorithm The algorithm string returned by the server.
@@ -256,7 +256,7 @@ sip_header *sip_ack_header_create(const gchar *code, const gchar *algorithm,
 
 /**
  * Create a credential sip header. This header is used when we start
- * a new chat session with an online friend. We need to start a new 
+ * a new chat session with an online friend. We need to start a new
  * socket channel to send data to.
  *
  * @param credential. The credential returned by the server.
@@ -266,7 +266,7 @@ sip_header *sip_ack_header_create(const gchar *code, const gchar *algorithm,
 sip_header *sip_credential_header_create(const gchar *credential);
 
 /**
- * Create an event sip header. This header is used in most sip message.like: 
+ * Create an event sip header. This header is used in most sip message.like:
  *
  * N: PresenceV4
  *

@@ -73,7 +73,7 @@ extern "C" {
 
 /**
  * Setup the tooltip for a given widget, note that the widget should
- * have a GdkWindow associated with, if you're not sure, use the 
+ * have a GdkWindow associated with, if you're not sure, use the
  * GTK_WIDGET_NO_WINDOW macro to check it.
  *
  * @param widget         The widget for the tooltip.

@@ -60,7 +60,7 @@ struct _HybridIMOps {
 	 */
 	gboolean (*modify_name)(HybridAccount *account, const gchar *new_name);
 	/*
-	 * Modify status text of this account. 
+	 * Modify status text of this account.
 	 */
 	gboolean (*modify_status)(HybridAccount *account, const gchar *new_status);
 	/*
@@ -95,7 +95,7 @@ struct _HybridIMOps {
 	gboolean (*buddy_move)(HybridAccount *account,
 						   HybridBuddy	 *buddy,
 						   HybridGroup	 *group);
-  
+
 	/*
 	 * Remove a buddy from the buddy list.
 	 */
@@ -117,14 +117,14 @@ struct _HybridIMOps {
 						  const gchar	*name,
 						  const gchar	*alias,
 						  const gchar	*tips);
-	
+
 	gboolean (*buddy_req)(HybridAccount	 *account,
 						  HybridGroup	 *group,
 						  const gchar	 *id,
 						  const gchar	 *alias,
 						  gboolean		  accept,
 						  const gpointer  user_data);
-	
+
 	/*
 	 * Modify the name of the group.
 	 */
@@ -161,19 +161,19 @@ struct _HybridIMOps {
 	void     (*chat_send_typing)(HybridAccount	  *account,
 								 HybridBuddy	  *buddy,
 								 HybridInputState  state);
-	
+
 	/*
 	 * Send a message to a certain buddy.
 	 */
 	void     (*chat_send)(HybridAccount	*account,
 						  HybridBuddy	*buddy,
 						  const gchar	*text);
-	
+
 	/*
 	 * Close this account.
 	 */
 	void     (*close)(HybridAccount *account);
-	
+
 };
 
 struct _HybridEmailOps {
@@ -253,13 +253,13 @@ HybridModule *hybrid_module_create(const gchar *path);
 
 /**
  * Destroy a module, free the memory allocated.
- * 
+ *
  * @param module Module to destroy.
  */
 void hybrid_module_destroy(HybridModule *module);
 
 /**
- * Load the module from the module file, run the exported sympol 
+ * Load the module from the module file, run the exported sympol
  * function hybrid_plugin_init() inside the module.
  *
  * @param module Module to load.
