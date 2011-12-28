@@ -60,13 +60,13 @@ hybrid_module_load(HybridModule *module)
     g_return_val_if_fail(module != NULL, HYBRID_ERROR);
 
     if (!(gm = g_module_open(module->path, G_MODULE_BIND_LOCAL))) {
-        hybrid_debug_error("module", g_module_error());
+        hybrid_debug_error("module", "%s", g_module_error());
         return HYBRID_ERROR;
     }
 
     if (!g_module_symbol(gm, "proto_module_init",
                          (gpointer*)&module_init)) {
-        hybrid_debug_error("module", g_module_error());
+        hybrid_debug_error("module", "%s", g_module_error());
         return HYBRID_ERROR;
     }
 
