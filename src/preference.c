@@ -43,7 +43,7 @@ void string_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs string_add_funcs = {
     .add_entry = string_pref_add_entry,
-    .save = string_pref_save
+    .save = string_pref_save,
     .destroy = string_pref_destroy
 };
 
@@ -53,7 +53,7 @@ void int_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs int_add_funcs = {
     .add_entry = int_pref_add_entry,
-    .save = int_pref_save
+    .save = int_pref_save,
     .destroy = int_pref_destroy
 };
 
@@ -63,7 +63,7 @@ void select_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs select_add_funcs = {
     .add_entry = select_pref_add_entry,
-    .save = select_pref_save
+    .save = select_pref_save,
     .destroy = select_pref_destroy
 };
 
@@ -143,7 +143,7 @@ hybrid_pref_win_add_tab(HybridPrefWin *pref_win, const gchar *name)
 
     page = gtk_vbox_new(FALSE, 0);
     label = gtk_label_new(name);
-    gtk_notebook_append_page(GTK_NOTEBOOK(pref_window->notebook),
+    gtk_notebook_append_page(GTK_NOTEBOOK(pref_win->notebook),
                              page, label);
 
     return page;
@@ -156,7 +156,7 @@ hybrid_pref_tab_add_section(GtkWidget *tab, const gchar *name)
     GtkWidget *frame;
 
     frame = gtk_frame_new(name);
-    child = gtk_table_new(1, 1, FALSE);
+    child = gtk_table_new(1, 2, FALSE);
     gtk_container_add(GTK_CONTAINER(frame), child);
     gtk_container_add(GTK_CONTAINER(tab), frame);
 
