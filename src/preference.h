@@ -41,7 +41,7 @@ typedef enum {
 typedef struct _HybridPrefEntry HybridPrefEntry;
 
 typedef struct {
-    void (*add_entry)(GtkWidget *section, HybridPrefEntry *entry);
+    guint (*add_entry)(GtkWidget *section, guint pos, HybridPrefEntry *entry);
     void (*save)(HybridPrefEntry *entry);
     void (*destroy)(HybridPrefEntry *entry);
 } PrefAddFuncs;
@@ -49,8 +49,10 @@ typedef struct {
 struct _HybridPrefEntry {
     gchar *name;
     gchar *key;
+    gchar *tooltip;
     gpointer data;
     PrefAddFuncs *type;
+    HybridPrefWin *win;
 };
 
 /* Pass an NULL-terminated array of SelectOption to add_entry */
@@ -76,6 +78,7 @@ extern "C" {
                                        GtkWidget *section,
                                        PrefKeyType type,
                                        HybridPrefEntry *entry);
+    void hybrid_pref_win_finish(HybridPrefWin *pref_win);
 
 /**
  * Create the preference window, if exists, just present the window.

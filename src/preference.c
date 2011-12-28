@@ -27,7 +27,8 @@
 
 static HybridPrefWin *main_pref_window = NULL;
 
-void bool_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+guint bool_pref_add_entry(GtkWidget *section, guint pos,
+                          HybridPrefEntry *entry);
 void bool_pref_save(HybridPrefEntry *entry);
 void bool_pref_destroy(HybridPrefEntry *entry);
 
@@ -37,7 +38,8 @@ static PrefAddFuncs bool_add_funcs = {
     .destroy = bool_pref_destroy
 };
 
-void string_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+guint string_pref_add_entry(GtkWidget *section, guint pos,
+                            HybridPrefEntry *entry);
 void string_pref_save(HybridPrefEntry *entry);
 void string_pref_destroy(HybridPrefEntry *entry);
 
@@ -47,7 +49,7 @@ static PrefAddFuncs string_add_funcs = {
     .destroy = string_pref_destroy
 };
 
-void int_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+guint int_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry);
 void int_pref_save(HybridPrefEntry *entry);
 void int_pref_destroy(HybridPrefEntry *entry);
 
@@ -57,7 +59,8 @@ static PrefAddFuncs int_add_funcs = {
     .destroy = int_pref_destroy
 };
 
-void select_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+guint select_pref_add_entry(GtkWidget *section, guint pos,
+                            HybridPrefEntry *entry);
 void select_pref_save(HybridPrefEntry *entry);
 void select_pref_destroy(HybridPrefEntry *entry);
 
@@ -75,62 +78,109 @@ static PrefAddFuncs *pref_types[] = {
     [PREF_KEY_SELECT] = &select_add_funcs
 };
 
-void bool_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
+guint
+bool_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
+{
+    GtkWidget *checkbutton;
+
+    checkbutton = gtk_check_button_new_with_label(entry->name);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton),
+                                 hybrid_pref_get_boolean(entry->win->pref,
+                                                         entry->key));
+    if (entry->tooltip)
+        gtk_widget_set_tooltip_markup(checkbutton, entry->tooltip);
+    entry->data = checkbutton;
+
+    gtk_table_attach_defaults(GTK_TABLE(section), checkbutton, 0, 2,
+                             pos, pos + 1);
+
+    return 1;
+}
+
+void
+bool_pref_save(HybridPrefEntry *entry)
+{
+    hybrid_pref_set_boolean(entry->win->pref, entry->key,
+                            gtk_toggle_button_get_active(
+                                GTK_TOGGLE_BUTTON(entry->data)));
+}
+
+void
+bool_pref_destroy(HybridPrefEntry *entry)
+{
+    return;
+}
+
+guint
+string_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
+{
+    GtkWidget *text;
+    GtkWidget *label;
+    gchar *value;
+
+    label = gtk_label_new(entry->name);
+    if (entry->tooltip)
+        gtk_widget_set_tooltip_markup(label, entry->tooltip);
+    text = gtk_entry_new();
+
+    value = hybrid_pref_get_string(entry->win->pref, entry->key);
+    if (value) {
+        gtk_entry_set_text(GTK_ENTRY(text), value);
+        g_free(value);
+    }
+
+    entry->data = text;
+
+    gtk_table_attach_defaults(GTK_TABLE(section), label, 0, 1, pos, pos + 1);
+    gtk_table_attach_defaults(GTK_TABLE(section), text, 1, 2, pos, pos + 1);
+    return 1;
+}
+
+void
+string_pref_save(HybridPrefEntry *entry)
+{
+    hybrid_pref_set_string(entry->win->pref, entry->key,
+                           gtk_entry_get_text(GTK_ENTRY(entry->data)));
+}
+
+void
+string_pref_destroy(HybridPrefEntry *entry)
+{
+    return;
+}
+
+guint
+int_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
 {
 
 }
 
-void bool_pref_save(HybridPrefEntry *entry)
+void
+int_pref_save(HybridPrefEntry *entry)
 {
 
 }
 
-void bool_pref_destroy(HybridPrefEntry *entry)
+void
+int_pref_destroy(HybridPrefEntry *entry)
 {
 
 }
 
-void string_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
+guint
+select_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
 {
 
 }
 
-void string_pref_save(HybridPrefEntry *entry)
+void
+select_pref_save(HybridPrefEntry *entry)
 {
 
 }
 
-void string_pref_destroy(HybridPrefEntry *entry)
-{
-
-}
-
-void int_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
-{
-
-}
-
-void int_pref_save(HybridPrefEntry *entry)
-{
-
-}
-
-void int_pref_destroy(HybridPrefEntry *entry)
-{
-
-}
-
-void select_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
-{
-
-}
-
-void select_pref_save(HybridPrefEntry *entry)
-{
-
-}
-
-void select_pref_destroy(HybridPrefEntry *entry)
+void
+select_pref_destroy(HybridPrefEntry *entry)
 {
 
 }
@@ -172,6 +222,8 @@ entry_destroy_cb(HybridPrefEntry *entry)
         g_free(entry->name);
     if (entry->key)
         g_free(entry->key);
+    if (entry->tooltip)
+        g_free(entry->tooltip);
     g_free(entry);
 }
 
@@ -186,6 +238,13 @@ void
 hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
                               PrefKeyType type, HybridPrefEntry *entry0)
 {
+    PrefAddFuncs *funcs;
+    HybridPrefEntry *entry;
+    guint width;
+    guint height;
+    guint delta;
+    guint tmp;
+
     if (type >= PREF_KEY_MAX || type < PREF_KEY_NONE) {
         hybrid_debug_error("pref_add_entry", "Unknown type %d", type);
         return;
@@ -197,20 +256,35 @@ hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
         return;
     }
 
-    PrefAddFuncs *funcs = pref_types[type];
+    /* Dosen't make sence for these two field to be NULL. */
+    if (!(entry0->name || entry0->key)) {
+        hybrid_debug_error("pref_add_entry", "name or key is NULL.");
+    }
 
-    HybridPrefEntry *entry = g_new0(HybridPrefEntry, 1);
-    entry->name = entry0->name ? g_strdup(entry0->name) : NULL;
-    entry->key = entry0->key ? g_strdup(entry0->key) : NULL;
+    funcs = pref_types[type];
+
+    entry = g_new0(HybridPrefEntry, 1);
+    entry->name = g_strdup(entry0->name);
+    entry->key = g_strdup(entry0->key);
+    entry->tooltip = entry0->tooltip ? g_strdup(entry0->tooltip) : NULL;
     entry->data = entry0->data;
     entry->type = funcs;
+    entry->win = pref_win;
 
-    funcs->add_entry(section, entry);
+    gtk_table_get_size(GTK_TABLE(section), &height, &width);
+    delta = funcs->add_entry(section, height - 1, entry);
+    gtk_table_get_size(GTK_TABLE(section), &tmp, &width);
+    gtk_table_resize(GTK_TABLE(section), height + delta, width);
 
     g_signal_connect(pref_win->window, "response",
                      G_CALLBACK(entry_response_cb), entry);
     g_signal_connect_swapped(section, "destroy",
                              G_CALLBACK(entry_destroy_cb), entry);
+}
+
+void hybrid_pref_win_finish(HybridPrefWin *pref_win)
+{
+    gtk_widget_show_all(pref_win->window);
 }
 
 
