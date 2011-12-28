@@ -221,7 +221,6 @@ endif(WITH_INDICATE AND INDICATE_FOUND AND INDICATE_GTK_FOUND)
 set(hybrid_SRC
   lib/connect.c
   lib/network.c
-  lib/debug.c
   lib/eventloop.c
   lib/module.c
   lib/account.c
