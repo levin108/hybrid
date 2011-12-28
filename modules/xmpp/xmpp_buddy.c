@@ -50,7 +50,7 @@ xmpp_presence_destroy(XmppPresence *presence)
     buddy = presence->buddy;
 
     buddy->presence_list = g_slist_remove(buddy->presence_list, presence);
-    
+
     g_free(presence->full_jid);
     g_free(presence->status);
     g_free(presence);
@@ -314,7 +314,7 @@ xmpp_buddy_set_status(XmppBuddy *buddy, const gchar *jid, const gchar *status)
         xmpp_buddy_add_presence(buddy, presence);
 
     } else {
-    
+
         tmp = presence->status;
         presence->status = g_strdup(status);
         g_free(tmp);
@@ -515,7 +515,7 @@ xmpp_buddy_delete(XmppBuddy *buddy)
     XmppStream *stream;
 
     g_return_val_if_fail(buddy != NULL, HYBRID_ERROR);
-    
+
     stream = buddy->stream;
 
     iq = iq_request_create(stream, IQ_TYPE_SET);
@@ -620,7 +620,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
             }
         }
     }
-    
+
 buddy_add_err:
 
     g_free(data->id);
@@ -647,7 +647,7 @@ xmpp_roster_add_item(XmppStream *stream, const gchar *jid, const gchar *name,
 
     iq = iq_request_create(stream, IQ_TYPE_SET);
     xmlnode_new_prop(iq->node, "from", stream->jid);
-    
+
     node = xmlnode_new_child(iq->node, "query");
     xmlnode_new_namespace(node, NULL, NS_IQ_ROSTER);
 

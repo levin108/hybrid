@@ -55,7 +55,7 @@ add_cb(GtkWidget *widget, HybridBuddyReqWindow *req)
     HybridGroup   *group;
     GtkTreeModel  *model;
     GtkTreeIter    iter;
-    
+
 
     account = req->account;
     module  = account->proto;
@@ -70,7 +70,7 @@ add_cb(GtkWidget *widget, HybridBuddyReqWindow *req)
     gtk_tree_model_get(model, &iter, BUDDYREQ_GROUP_GROUP_COLUMN, &group, -1);
 
     if (ops->buddy_req) {
-        ops->buddy_req(account, group,    req->buddy_id, 
+        ops->buddy_req(account, group,    req->buddy_id,
                        req->buddy_name, req->accept, req->user_data);
     }
 
@@ -113,7 +113,7 @@ create_group_model(HybridAccount *account)
 
     GHashTableIter hash_iter;
     gpointer       key;
-    
+
     store = gtk_list_store_new(BUDDYREQ_GROUP_COLUMNS,
                                G_TYPE_STRING,
                                G_TYPE_POINTER);
@@ -291,7 +291,7 @@ req_window_init(HybridBuddyReqWindow *req)
     GtkTreeModel *model;
 
     label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), 
+    gtk_label_set_markup(GTK_LABEL(label),
             _("<span size='small'><b>Add To Group:</b></span>"));
     gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
 
@@ -303,7 +303,7 @@ req_window_init(HybridBuddyReqWindow *req)
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(req->group_combo),
                                 renderer, FALSE);
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(req->group_combo),
-                                renderer, "text", 
+                                renderer, "text",
                                 BUDDYREQ_GROUP_NAME_COLUMN, NULL);
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(req->group_combo), 0);

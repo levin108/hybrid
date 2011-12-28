@@ -54,7 +54,7 @@ hybrid_pref_new(const gchar *name)
 }
 
 void
-hybrid_pref_destory(HybridPref *pref)
+hybrid_pref_destroy(HybridPref *pref)
 {
     if (!pref)
         return;

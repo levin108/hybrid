@@ -145,7 +145,7 @@ channel_removed:
  * to send messages to an online buddy who's conversation channel is not
  * ready, so before chating with an online buddy, we should first start
  * a new conversation channel, and invite the buddy to the conversation,
- * but when the channel is ready? yes, when we got the User-Entered 
+ * but when the channel is ready? yes, when we got the User-Entered
  * message through the new channel established, the channel is ready!
  */
 static void
@@ -180,7 +180,7 @@ process_enter_cb(fetion_account *ac, const gchar *sipmsg)
 /**
  * Process the synchronization message, when the contact list or the personal info
  * changed, the server will push this message to tell the client to update its
- * local cache file, well, we will not update the local cache file, we keep the 
+ * local cache file, well, we will not update the local cache file, we keep the
  * old version numbers, and reload it after the next logining.
  */
 static void
@@ -330,7 +330,7 @@ process_sipc_cb(fetion_account *ac, const gchar *sipmsg)
         g_free(callid);
         return;
     }
-    
+
     callid0 = atoi(callid);
 
     trans_cur = ac->trans_list;
@@ -481,7 +481,7 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
     if (*buddy->mobileno) {
         hybrid_info_add_pair(info, _("Mobile-no"), buddy->mobileno);
     }
-    hybrid_info_add_pair(info, _("Gender"), 
+    hybrid_info_add_pair(info, _("Gender"),
         buddy->gender == 1 ? _("Male") :
         (buddy->gender == 2 ? _("Female") : _("Secrecy")));
 
@@ -497,7 +497,7 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
 
     if ((hybrid_buddy = hybrid_blist_find_buddy(ac->account, buddy->userid))) {
 
-        if (hybrid_buddy->icon_data) { 
+        if (hybrid_buddy->icon_data) {
             pixbuf = hybrid_create_pixbuf(hybrid_buddy->icon_data,
                     hybrid_buddy->icon_data_length);
             hybrid_info_add_pixbuf_pair(info, _("Photo"), pixbuf);
@@ -663,7 +663,7 @@ fx_buddy_tooltip(HybridAccount *account, HybridBuddy *buddy, HybridTooltipData *
     return TRUE;
 }
 
-static gboolean 
+static gboolean
 fx_buddy_move(HybridAccount *account, HybridBuddy *buddy,
         HybridGroup *new_group)
 {
@@ -804,7 +804,7 @@ fx_group_remove(HybridAccount *account, HybridGroup *group)
     return TRUE;
 }
 
-static void 
+static void
 fx_group_add(HybridAccount *account, const gchar *text)
 {
     fetion_account *ac;
@@ -817,7 +817,7 @@ fx_group_add(HybridAccount *account, const gchar *text)
 static gint
 fx_chat_word_limit(HybridAccount *account)
 {
-    return 180;    
+    return 180;
 }
 
 static gboolean
@@ -854,7 +854,7 @@ fx_chat_send(HybridAccount *account, HybridBuddy *buddy, const gchar *text)
 
     } else {
         /*
-         * If the buddy's state is greater than 0, then we should 
+         * If the buddy's state is greater than 0, then we should
          * invite the buddy first to start a new socket channel,
          * then we can send the message through the new channel.
          * Now, we check whether a channel related to this buddy has

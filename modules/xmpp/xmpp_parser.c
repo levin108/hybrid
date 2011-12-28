@@ -57,7 +57,7 @@ parse_element_start(void *user_data,
                 gint value_size;
 
                 value_size = attributes[i + 4] - attributes[i + 3];
-                stream->stream_id = 
+                stream->stream_id =
                     g_strndup((gchar *)attributes[i + 3], value_size);
             }
         }
@@ -67,7 +67,7 @@ parse_element_start(void *user_data,
             hybrid_debug_error("xmpp", "invalid initiate stream.");
             return;
         }
-        
+
         return;
     }
 

@@ -52,14 +52,14 @@ create_account_model(void)
     gchar         *nickname;
     GSList        *pos;
 
-    store = gtk_list_store_new(BUDDYADD_COLUMNS, 
+    store = gtk_list_store_new(BUDDYADD_COLUMNS,
                                GDK_TYPE_PIXBUF,
                                G_TYPE_STRING,
                                G_TYPE_POINTER);
 
     for (pos = account_list; pos; pos = pos->next) {
 
-        account = (HybridAccount*)pos->data;    
+        account = (HybridAccount*)pos->data;
         proto   = account->proto;
 
         if (MODULE_TYPE_IM != proto->info->module_type) {
@@ -107,11 +107,11 @@ create_group_model(HybridAccount *account)
     GtkListStore *store;
     HybridGroup  *group;
     GtkTreeIter   iter;
-    
+
 
     GHashTableIter hash_iter;
     gpointer       key;
-    
+
     store = gtk_list_store_new(BUDDYADD_GROUP_COLUMNS,
                                G_TYPE_STRING,
                                G_TYPE_POINTER);
@@ -144,7 +144,7 @@ account_changed_cb(GtkWidget *widget, HybridBuddyAddWindow *window)
     GtkTreeModel  *model;
     GtkTreeIter    iter;
     HybridAccount *account;
-    
+
     if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)) {
         return;
     }
@@ -333,7 +333,7 @@ hybrid_buddyadd_window_init(HybridBuddyAddWindow *window)
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(window->group_combo),
                                 renderer, FALSE);
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(window->group_combo),
-                                renderer, "text", 
+                                renderer, "text",
                                 BUDDYADD_GROUP_NAME_COLUMN, NULL);
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(window->group_combo), 0);

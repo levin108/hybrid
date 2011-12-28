@@ -117,7 +117,7 @@ process_unread_mails(hybrid_imap *imap, gint unread)
 
     notify_notification_show(notification, NULL);
     g_free(summary);
-    
+
 #endif
 }
 
@@ -128,7 +128,7 @@ check_mail_cb(hybrid_imap *imap, const gchar *msg, gpointer user_data)
     const gchar *cur;
     gchar       *count_str;
     gint         count_int;
-    
+
     hybrid_debug_info("imap", "recv:\n%s", msg);
 
     if (HYBRID_OK == check_resp_ok(msg)) {
@@ -150,7 +150,7 @@ check_mail_cb(hybrid_imap *imap, const gchar *msg, gpointer user_data)
 
     imap->mail_check_source = g_timeout_add_seconds(imap->mail_check_interval,
                                                     check_mail, imap);
-    
+
     return FALSE;
 }
 
@@ -189,7 +189,7 @@ check_resp_ok(const gchar *msg)
 {
     const gchar *pos;
     const gchar *cur;
-    
+
     if ('A' == *msg) {
         pos = msg;
     } else {
@@ -225,7 +225,7 @@ imap_auth_cb(hybrid_imap *imap, const gchar *msg, gpointer user_data)
                                              _("IMAP OK."));
         hybrid_account_set_connection_status(imap->account,
                                              HYBRID_CONNECTION_CONNECTED);
-        
+
         hybrid_account_set_state(imap->account, HYBRID_STATE_ONLINE);
 
         imap->mail_check_source = g_timeout_add_seconds(
@@ -237,7 +237,7 @@ imap_auth_cb(hybrid_imap *imap, const gchar *msg, gpointer user_data)
     hybrid_account_error_reason(imap->account,
                                 _("IMAP Authenticate Failed."
                                   " Check your username and password."));
-    
+
     return FALSE;
 }
 
@@ -254,7 +254,7 @@ hybrid_imap_auth(hybrid_imap *imap)
                           imap->password);
 
     hybrid_debug_info("imap", "send:\n%s", cmd);
-    
+
     imap_trans_create(imap, imap_auth_cb, NULL);
 
     if (hybrid_ssl_write(ssl, cmd, strlen(cmd)) <= 0) {
@@ -288,7 +288,7 @@ imap_trans_create(hybrid_imap    *imap,
 
     return trans;
 }
-    
+
 void
 imap_trans_destroy(imap_trans *trans)
 {

@@ -46,14 +46,14 @@ create_account_model(void)
     gchar         *nickname;
     GSList        *pos;
 
-    store = gtk_list_store_new(GROUPADD_COLUMNS, 
+    store = gtk_list_store_new(GROUPADD_COLUMNS,
                                GDK_TYPE_PIXBUF,
                                G_TYPE_STRING,
                                G_TYPE_POINTER);
 
     for (pos = account_list; pos; pos = pos->next) {
 
-        account = (HybridAccount*)pos->data;    
+        account = (HybridAccount*)pos->data;
         proto   = account->proto;
 
         if (MODULE_TYPE_IM != proto->info->module_type) {

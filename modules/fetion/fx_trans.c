@@ -26,7 +26,7 @@ transaction_create()
     fetion_transaction *trans;
 
     trans = g_new0(fetion_transaction, 1);
-    
+
     return trans;
 }
 

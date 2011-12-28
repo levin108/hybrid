@@ -117,7 +117,7 @@ fetion_account_update_state(fetion_account *ac, gint state)
     res = fetion_sip_to_string(sip, body);
     g_free(body);
 
-    hybrid_debug_info("fetion", 
+    hybrid_debug_info("fetion",
             "user state changed to %d,send:\n%s", state, res);
 
     if (send(ac->sk, res, strlen(res), 0) == -1) {
@@ -171,7 +171,7 @@ modify_info_cb(fetion_account *account, const gchar *sipmsg,
             hybrid_account_set_status_text(account->account, value);
             g_free(value);
         }
-        
+
         if (xmlnode_has_prop(node, "nickname")) {
 
             value = xmlnode_prop(node, "nickname");
@@ -324,12 +324,12 @@ fetion_account_keep_alive(fetion_account *ac)
         return HYBRID_ERROR;
     }
 
-    g_free(res); 
+    g_free(res);
 
     return HYBRID_OK;
 }
 
-void 
+void
 fetion_account_destroy(fetion_account *ac)
 {
     if (ac) {

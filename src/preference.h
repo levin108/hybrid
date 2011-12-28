@@ -21,19 +21,44 @@
 #ifndef HYBRID_PREFERENCE_H
 #define HYBRID_PREFERENCE_H
 #include <gtk/gtk.h>
+#include "pref.h"
 
 typedef struct _HybridPrefWin HybridPrefWin;
 
 struct _HybridPrefWin {
+    HybridPref *pref;
     GtkWidget *window;
     GtkWidget *notebook;
 };
+
+typedef struct {
+    char *name;
+    char *key;
+} HybridPrefEntry;
+
+typedef enum {
+    PREF_KEY_NONE,
+    PREF_KEY_BOOL,
+    PREF_KEY_STRING,
+    PREF_KEY_INT,
+    PREF_KEY_SELECT,
+    PREF_KEY_MAX
+} PrefKeyType;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    HybridPrefWin *hybrid_pref_win_new(const gchar *title);
+    HybridPrefWin *hybrid_pref_win_new(HybridPref *pref, const gchar *title);
+    GtkWidget *hybrid_pref_win_add_tab(HybridPrefWin *pref_win,
+                                       const gchar *name);
+    GtkWidget *hybrid_pref_tab_add_section(GtkWidget *tab,
+                                           const gchar *name);
+    void hybrid_pref_section_add_entry(HybridPrefWin *pref_win,
+                                       GtkWidget *section,
+                                       PrefKeyType type,
+                                       HybridPrefEntry *entry);
+
 
 /**
  * Create the preference window, if exists, just present the window.

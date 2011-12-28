@@ -314,11 +314,11 @@ hybrid_account_update(HybridAccount *account)
                 g_strcmp0(protoname, account->proto->info->name) == 0) {
                 goto update_node;
             }
-            
+
             node = xmlnode_next(node);
         }
     }
-    
+
     /* Node not found, create a new one. */
     node = xmlnode_new_child(root, "account");
 update_node:
@@ -340,7 +340,7 @@ update_node:
     temp = g_strdup_printf("%d", account->enabled);
 
     if (xmlnode_has_prop(node, "enable")) {
-        
+
         xmlnode_set_prop(node, "enable", temp);
     } else {
         xmlnode_new_prop(node, "enable", temp);
@@ -394,7 +394,7 @@ update_node:
         case VARIABLE_TYPE_STRING:
             text = var->str_value;
             break;
-            
+
         case VARIABLE_TYPE_BOOLEAN:
             if (var->bool_value) {
                 text = "TRUE";
@@ -472,7 +472,7 @@ hybrid_account_remove(const gchar *protoname, const gchar *username)
                 xmlnode_save_file(root, account_file);
                 break;
             }
-            
+
             node = xmlnode_next(node);
         }
     }
@@ -887,7 +887,7 @@ hybrid_account_close(HybridAccount *account)
 
     /*
      * Set the account' state to be offline, it'll also
-     * change the appearance of the account menus 
+     * change the appearance of the account menus
      */
     hybrid_account_set_state(account, HYBRID_STATE_OFFLINE);
 
@@ -935,7 +935,7 @@ hybrid_account_close(HybridAccount *account)
     }
     /*
      * Note that we only remove all the item from the hashtable
-     * but not destroy it, so is the buddy_list hashtable 
+     * but not destroy it, so is the buddy_list hashtable
      */
     g_hash_table_remove_all(account->group_list);
     g_hash_table_remove_all(account->buddy_list);
@@ -993,7 +993,7 @@ hybrid_account_close_all()
         account = (HybridAccount*)pos->data;
 
         hybrid_account_close(account);
-        
+
     }
 }
 
@@ -1066,9 +1066,9 @@ hybrid_account_set_connection_status(HybridAccount *account,
     if (account->connect_state != HYBRID_CONNECTION_CONNECTED &&
         status == HYBRID_CONNECTION_CONNECTED) {
 
-        /* 
+        /*
          * It's necessary to set the status value here, because if
-         * connection status is not HYBRID_CONNECTION_CONNECTED, 
+         * connection status is not HYBRID_CONNECTION_CONNECTED,
          * hybrid_blist_add_buddy() just return without doing anything,
          * which will cause load_blist_from_disk() fail to add buddies.
          */
@@ -1091,7 +1091,7 @@ hybrid_account_set_connection_status(HybridAccount *account,
              * Now we start keep alive thread, the keep alive hook function
              * was called every 30s.
              */
-            account->keep_alive_source = 
+            account->keep_alive_source =
                 g_timeout_add_seconds(30, (GSourceFunc)keep_alive_cb, account);
         }
 
@@ -1160,7 +1160,7 @@ blist_set_buddy_icon(HybridBuddy *buddy,
     gint scale_size = 32;
 
     if (buddy->icon_data && buddy->icon_data_length != 0) {
-        pixbuf = hybrid_create_round_pixbuf(buddy->icon_data, 
+        pixbuf = hybrid_create_round_pixbuf(buddy->icon_data,
                 buddy->icon_data_length, scale_size);
     }
 
@@ -1205,7 +1205,7 @@ load_blist_from_disk(HybridAccount *account)
     root   = cache->root;
 
     if (!(node = xmlnode_find(root, "accounts"))) {
-        hybrid_debug_error("account", 
+        hybrid_debug_error("account",
             "can't find node named 'buddies' in blist.xml");
         return;
     }
@@ -1213,14 +1213,14 @@ load_blist_from_disk(HybridAccount *account)
     for (account_node = xmlnode_child(node); account_node;
             account_node = account_node->next) {
         if (g_strcmp0(account_node->name, "account")) {
-            hybrid_debug_error("account", 
+            hybrid_debug_error("account",
                 "invalid blist.xml");
             return;
         }
 
         if (!xmlnode_has_prop(account_node, "proto") ||
             !xmlnode_has_prop(account_node, "username")) {
-            hybrid_debug_error("account", 
+            hybrid_debug_error("account",
                 "invalid account node in blist.xml");
             continue;
         }
@@ -1232,13 +1232,13 @@ load_blist_from_disk(HybridAccount *account)
 
             g_free(name);
             g_free(value);
-            
+
             if (!(node = xmlnode_find(account_node, "buddies"))) {
                 return;
             }
             goto account_found;
         }
-        
+
         g_free(name);
         g_free(value);
     }
@@ -1283,11 +1283,11 @@ account_found:
 
         g_free(id);
         g_free(name);
-        
+
         /*
          * Iterate the buddy nodes, use the attribute values
-         * to create new HybridBuddys, and add them to the 
-         * buddy list and the GtkTreeView. 
+         * to create new HybridBuddys, and add them to the
+         * buddy list and the GtkTreeView.
          */
         buddy_node = xmlnode_child(group_node);
 
@@ -1325,9 +1325,9 @@ account_found:
             }
 
             /*
-             * If buddy node has attribute named 'icon', and the value ot the 
-             * attribute is not empty, then load the file pointed by 
-             * the icon value as the buddy's portrait, orelse load the 
+             * If buddy node has attribute named 'icon', and the value ot the
+             * attribute is not empty, then load the file pointed by
+             * the icon value as the buddy's portrait, orelse load the
              * default icon, we DONT need to load the default icon file
              * any more, let the blist_set_buddy_icon() do it, just
              * set the relevant argument to NULL.
@@ -1350,7 +1350,7 @@ account_found:
                     icon_data = NULL;
                     icon_data_len = 0;
                 }
-                
+
                 g_free(value);
 
             } else {
@@ -1454,7 +1454,7 @@ hybrid_variable_create(HybridAccountVariableType  type,
     var->type  = type;
     var->name  = g_strdup(name);
     var->title = g_strdup(title);
-    
+
     return var;
 }
 
@@ -1511,7 +1511,7 @@ hybrid_account_set_string_variable(HybridAccount *account,
 
     for (pos = account->option_list; pos; pos = pos->next) {
         var = (HybridAccountVariable*)pos->data;
-        
+
         if (g_strcmp0(var->name, name) == 0) {
             g_free(var->str_value);
             var->str_value = g_strdup(value);
@@ -1540,7 +1540,7 @@ hybrid_account_get_string_variable(HybridAccount *account,
 
     return NULL;
 }
-    
+
 
 void
 hybrid_account_set_bool_variable(HybridAccount *account,
@@ -1556,7 +1556,7 @@ hybrid_account_set_bool_variable(HybridAccount *account,
     for (pos = account->option_list; pos; pos = pos->next) {
         var = (HybridAccountVariable*)pos->data;
 
-        
+
         if (g_strcmp0(var->name, name) == 0) {
             var->bool_value = value;
             break;
@@ -1564,7 +1564,7 @@ hybrid_account_set_bool_variable(HybridAccount *account,
     }
 
 }
-    
+
 
 gboolean
 hybrid_account_get_bool_variable(HybridAccount *account,
@@ -1601,14 +1601,14 @@ hybrid_account_set_int_variable(HybridAccount *account,
 
     for (pos = account->option_list; pos; pos = pos->next) {
         var    = (HybridAccountVariable*)pos->data;
-        
+
         if (g_strcmp0(var->name, name) == 0) {
             var->int_value = value;
             break;
         }
     }
 }
-    
+
 
 gint
 hybrid_account_get_int_variable(HybridAccount *account,

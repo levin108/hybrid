@@ -120,13 +120,13 @@ new_tag:
     if (*pos == '\0') {
         /*
          * in this case, the input string must have no
-         * html tags, so just return the original string. 
+         * html tags, so just return the original string.
          */
         if (hybrid_stack_empty(stack)) {
 
             g_free(stack);
 
-            return temp_html; 
+            return temp_html;
 
         } else {
             goto bad_format;
@@ -134,7 +134,7 @@ new_tag:
     }
 
     /* we encounter '<', tag start. */
-    tag = g_new0(HtmlTag, 1);    
+    tag = g_new0(HtmlTag, 1);
     tag->tag_start = pos;
 
     pos ++;
@@ -203,7 +203,7 @@ next_tag:
         tag->tag_end = pos;
 
         if (g_strcasecmp(tag_name, tag->tag_name) != 0) {
-            
+
             g_free(tag_name);
 
             goto bad_format;
@@ -302,13 +302,13 @@ hybrid_sha1(const gchar *in, gint size)
     guchar hash[20];
     gchar *res;
     gint i;
-  
+
     SHA1_Init(&s);
     SHA1_Update(&s, in, size);
     SHA1_Final(hash, &s);
 
     res = g_malloc0(41);
-  
+
     for (i=0; i < 20; i++) {
         g_snprintf(res + i * 2, 41, "%.2x", (gint)hash[i]);
     }

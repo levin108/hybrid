@@ -119,7 +119,7 @@ hybrid_module_find(const gchar *name)
     return NULL;
 }
 
-gint 
+gint
 hybrid_module_init()
 {
     GDir         *dir;
@@ -146,7 +146,7 @@ hybrid_module_init()
         }
 
         if (g_str_has_suffix(abs_path, G_MODULE_SUFFIX)) {
-            
+
             module = hybrid_module_create(abs_path);
 
             if (hybrid_module_load(module) != HYBRID_OK) {

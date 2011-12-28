@@ -157,7 +157,7 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
 
     /*
      * yes, we've changed the alias name of the buddy/group, we should
-     * call the protocol-specified hook function. 
+     * call the protocol-specified hook function.
      */
     if (depth > 1) {            /* rename buddy */
         account = buddy->account;
@@ -278,7 +278,7 @@ buddy_information_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 
     /* Call the get information callback in module space. */
     if (ops->get_info) {
-        
+
         info = hybrid_info_create(buddy);
 
         ops->get_info(account, buddy);
@@ -297,7 +297,7 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
     HybridAccount *account;
     HybridModule  *module;
     HybridIMOps   *ops;
-        
+
     GdkPixbuf    *status_icon;
     GdkPixbuf    *proto_icon;
     GdkPixbuf    *buddy_icon;
@@ -307,7 +307,7 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
     account = buddy->account;
     module  = account->proto;
     ops     = module->info->im_ops;
- 
+
     new_group_name = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
 
     if (!(group = hybrid_blist_find_group_by_name(account, new_group_name))) {
@@ -322,10 +322,10 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
             return;
         }
 
-        /* 
-         * Move the buddy to the dst group. My method is to remove the buddy in 
+        /*
+         * Move the buddy to the dst group. My method is to remove the buddy in
          * the old group, and then create a new one in the new group, and set it
-         * with the same attribute. I don't know how to do in other way, if you 
+         * with the same attribute. I don't know how to do in other way, if you
          * know, tell me :)
          */
         tree = GTK_TREE_VIEW(blist->treeview);
@@ -357,9 +357,9 @@ buddy_move_cb(GtkWidget *widget, HybridBuddy *buddy)
                            HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE, TRUE,
                            HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE, TRUE,
                            -1);
-        /* 
+        /*
          * Change the number of total buddies and online buddies
-         * of the source group and the destination group. 
+         * of the source group and the destination group.
          */
         orig_group = buddy->parent;
 
@@ -532,7 +532,7 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
     HybridAccount *account;
     HybridBuddy   *buddy;
     HybridGroup   *group;
-    
+
     GHashTableIter hash_iter;
     gpointer       key;
 
@@ -548,7 +548,7 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
     gtk_tree_model_get(model, &iter, HYBRID_BLIST_OBJECT_COLUMN, &buddy, -1);
 
     account = buddy->account;
-    
+
     hybrid_create_menu(menu, _("Instant Message"), "instants", TRUE,
             G_CALLBACK(instant_message_menu_cb), buddy);
     hybrid_create_menu(menu, _("Buddy Information"), "profile", TRUE,
@@ -557,7 +557,7 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
     child_menu = hybrid_create_menu(menu, _("Move To"), "move", TRUE, NULL, NULL);
 
     group_menu = gtk_menu_new();
-    
+
     g_hash_table_iter_init(&hash_iter, account->group_list);
     while (g_hash_table_iter_next(&hash_iter, &key, (gpointer*)&group)) {
 
@@ -599,8 +599,8 @@ create_group_menu(GtkWidget *treeview, GtkTreePath *path)
     gtk_tree_model_get(model, &iter, HYBRID_BLIST_OBJECT_COLUMN, &group, -1);
 
     account = group->account;
-    
-    hybrid_create_menu(menu, _("Rename Group"), "rename", 
+
+    hybrid_create_menu(menu, _("Rename Group"), "rename",
                     hybrid_blist_get_group_renamable(group),
                     G_CALLBACK(rename_group_menu_cb), group);
 
@@ -678,7 +678,7 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
         }
 
         /*
-         * now the selected path has changed, we will check whether the 
+         * now the selected path has changed, we will check whether the
          * selected account has changed.
          */
         if (changed) {
@@ -758,7 +758,7 @@ button_press_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     return FALSE;
 }
 
-static void 
+static void
 row_activated_cb(GtkTreeView       *treeview, GtkTreePath *path,
                  GtkTreeViewColumn *col,    gpointer user_data)
 {
@@ -784,7 +784,7 @@ row_activated_cb(GtkTreeView       *treeview, GtkTreePath *path,
 
 /**
  * Callback function of the 'move-cursor' signal, when arg2 equals 1, then the cursor
- * moved next, when arg2 equals -1, the cursor moved previous, in this function the 
+ * moved next, when arg2 equals -1, the cursor moved previous, in this function the
  * selected row we got with gtk_tree_view_get_selection() is the row we selected before
  * the move action triggered, so in order to get to selected row after move, we need to
  * calculate the right position.
@@ -869,7 +869,7 @@ select_row_cb(GtkWidget *widget, GtkMovementStep arg1, gint arg2, gpointer user_
                 path = gtk_tree_model_get_path(model, &iter);
 
                 depth = gtk_tree_path_get_depth(path);
-                
+
                 goto path_found;
 
             }
@@ -997,7 +997,7 @@ init_tooltip(HybridTooltipData *data)
     return TRUE;
 }
 
-void 
+void
 hybrid_blist_init()
 {
     blist = hybrid_blist_create();
@@ -1055,7 +1055,7 @@ hybrid_blist_add_group(HybridAccount *ac, const gchar *id, const gchar *name)
 
     /*
      * Make sure we will add a group to an account only
-     * when the account's connection status is CONNECTED 
+     * when the account's connection status is CONNECTED
      */
     if (!HYBRID_IS_CONNECTED(ac)) {
         return NULL;
@@ -1124,7 +1124,7 @@ hybrid_blist_remove_group(HybridGroup *group)
 
     hybrid_blist_cache_flush();
 
-    /* 
+    /*
      * remove from the account's group hashtable, and destroy it
      * with the DestroyNotify function registered before.
      */
@@ -1158,7 +1158,7 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
 
     /*
      * Make sure we will add a buddy to an account only
-     * when the account's connection status is CONNECTED 
+     * when the account's connection status is CONNECTED
      */
     if (!HYBRID_IS_CONNECTED(ac)) {
         return NULL;
@@ -1176,7 +1176,7 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
     proto_icon = hybrid_create_proto_icon(ac->proto->info->name, 16);
 
     /*
-     * Here we need to set a default icon for the buddy, never use 
+     * Here we need to set a default icon for the buddy, never use
      * hybrid_blist_add_buddy_icon(), for it will modify the cache
      * of "crc" attribute, but we only allow this function to modify
      * the "id" and "name" attribute, so we use the original method
@@ -1186,7 +1186,7 @@ hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, const gchar *id,
     gdk_pixbuf_saturate_and_pixelate(buddy_icon, buddy_icon, 0.0, FALSE);
 
     buddy = g_new0(HybridBuddy, 1);
-    
+
     treemodel = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
 
     gtk_tree_store_append(GTK_TREE_STORE(treemodel), &buddy->iter, &parent->iter);
@@ -1236,7 +1236,7 @@ hybrid_blist_remove_buddy(HybridBuddy *buddy)
     HybridAccount *account;
     HybridGroup   *group;
     GtkTreeModel  *model;
-    
+
     g_return_if_fail(buddy != NULL);
 
     account = buddy->account;
@@ -1335,7 +1335,7 @@ hybrid_blist_set_name_field(HybridBuddy *buddy)
         tmp = g_markup_escape_text(buddy->mood, -1);
 
         mood = g_strdup_printf(
-                "\n<small><span color=\"#8f8f8f\">%s</span></small>", 
+                "\n<small><span color=\"#8f8f8f\">%s</span></small>",
                 tmp);
         g_free(tmp);
 
@@ -1425,7 +1425,7 @@ hybrid_blist_set_state_field(HybridBuddy *buddy)
         pixbuf = gdk_pixbuf_new_from_file_at_size(
                 PIXMAPS_DIR"status/unauthorize.png", 16, 16, NULL);
     }
-    
+
     gtk_tree_store_set(blist->treemodel, &buddy->iter,
                        HYBRID_BLIST_BUDDY_STATE, buddy->state,
                        HYBRID_BLIST_STATUS_ICON, pixbuf, -1);
@@ -1437,15 +1437,15 @@ hybrid_blist_set_state_field(HybridBuddy *buddy)
     gint scale_size = 32;
 
     if (buddy->icon_data == NULL || buddy->icon_data_length == 0) {
-        /* 
+        /*
          * Load the default icon. Note that we don't set the buddy's
          * icon_data attribute to the data we got from the default icon,
          * because if the icon_data attribute is not NULL, it will try
-         * to localize the icon, but we don't want to localize the 
+         * to localize the icon, but we don't want to localize the
          * default icon, so if buddy doesn't have a self-defined icon,
          * keep its icon_data attribute NULL :) .
          */
-        if (!g_file_get_contents(PIXMAPS_DIR"icons/icon.png", 
+        if (!g_file_get_contents(PIXMAPS_DIR"icons/icon.png",
                     (gchar**)&icon_data, &icon_data_length, &err)) {
 
             hybrid_debug_error("blist", "load the default icon:%s", err->message);
@@ -1457,7 +1457,7 @@ hybrid_blist_set_state_field(HybridBuddy *buddy)
                 scale_size);
 
     } else {
-        pixbuf = hybrid_create_round_pixbuf(buddy->icon_data, 
+        pixbuf = hybrid_create_round_pixbuf(buddy->icon_data,
                 buddy->icon_data_length, scale_size);
     }
 
@@ -1608,7 +1608,7 @@ hybrid_blist_set_buddy_status_priv(HybridBuddy *buddy, gboolean authorized)
     GdkPixbuf    *pixbuf;
     GtkTreeModel *model;
     gint          status;
-    
+
     g_return_if_fail(buddy != NULL);
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(blist->treeview));
@@ -1734,13 +1734,13 @@ hybrid_blist_select_first_item(HybridAccount *account)
     gtk_tree_selection_select_iter(selection, &group->iter);
 
     if (current_choose_path) {
-        gtk_tree_path_free(current_choose_path);        
+        gtk_tree_path_free(current_choose_path);
     }
 
     current_choose_path = gtk_tree_model_get_path(model, &group->iter);
 }
 
-static void 
+static void
 hybrid_blist_group_to_cache(HybridGroup *group)
 {
     HybridAccount    *ac;
@@ -1810,7 +1810,7 @@ account_exist:
         node = xmlnode_new_child(node, "buddies");
 
     } else {
-        node = temp;    
+        node = temp;
     }
 
     /* Now node point to node named 'buddies'', make it
@@ -1828,7 +1828,7 @@ account_exist:
                 temp = xmlnode_next(temp);
                 continue;
             }
-            
+
             id = xmlnode_prop(temp, "id");
             name = xmlnode_prop(temp, "name");
 
@@ -1882,7 +1882,7 @@ group_exist:
 
 
 /**
- * Write the buddy information to the cache which in fact is 
+ * Write the buddy information to the cache which in fact is
  * a XML tree in the memory, if you want to synchronize the cache
  * with the cache file, use hybrid_blist_cache_flush().
  *
@@ -1914,14 +1914,14 @@ hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
     root   = cache->root;
 
     if (!(node = buddy->parent->cache_node)) {
-        hybrid_debug_error("blist", 
+        hybrid_debug_error("blist",
                 "group node isn't cached, cache buddy failed");
         return;
     }
 
     /* whether there's a buddy node */
     if ((temp = xmlnode_child(node))) {
-        
+
         while (temp) {
 
             if (!xmlnode_has_prop(temp, "id")) {
@@ -1930,7 +1930,7 @@ hybrid_blist_buddy_to_cache(HybridBuddy *buddy, HybridBlistCacheType type)
                 temp = xmlnode_next(temp);
                 continue;
             }
-            
+
             id = xmlnode_prop(temp, "id");
 
             if (g_strcmp0(id, buddy->id) == 0) {
@@ -1998,7 +1998,7 @@ buddy_exist:
     }
 
     if (type == HYBRID_BLIST_CACHE_UPDATE_STATUS) {
-        
+
         value = g_strdup_printf("%d", buddy->status);
 
         if (xmlnode_has_prop(node, "status")) {

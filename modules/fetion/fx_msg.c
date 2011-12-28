@@ -81,7 +81,7 @@ sysmsg_error:
 
 
 static gint
-sms_response_cb(fetion_account *account, const gchar *sipmsg, 
+sms_response_cb(fetion_account *account, const gchar *sipmsg,
                 fetion_transaction *trans)
 {
     gint code;
@@ -193,7 +193,7 @@ sms_to_me_cb(fetion_account *account, const gchar *sipmsg,
              fetion_transaction *trans)
 {
     printf("%s\n", sipmsg);
-    
+
     return HYBRID_OK;
 }
 
@@ -356,7 +356,7 @@ process_invite_conn_cb(gint sk, gpointer user_data)
     hybrid_debug_info("feiton", "register to a new channel:\n%s", sip_text);
 
     if (send(sk, sip_text, strlen(sip_text), 0) == -1) {
-        
+
         hybrid_debug_error("fetion", "register to new channel error.");
 
         g_free(sip_text);
@@ -410,7 +410,7 @@ fetion_process_invite(fetion_account *account, const gchar *sipmsg)
 
         return HYBRID_ERROR;
     }
-    
+
     g_free(sip_text);
 
     sid = get_sid_from_sipuri(from);
@@ -572,7 +572,7 @@ invite_connect_cb(gint sk, gpointer user_data)
     theader = sip_header_create("K", "text/html-fragment");
     mheader = sip_header_create("K", "multiparty");
     nheader = sip_header_create("K", "nudge");
-    
+
     transaction_set_callid(trans, sip->callid);
     transaction_set_callback(trans, chat_reg_cb);
     transaction_add(account, trans);
@@ -585,7 +585,7 @@ invite_connect_cb(gint sk, gpointer user_data)
     sip_text = fetion_sip_to_string(sip, NULL);
 
     hybrid_debug_info("fetion", "register, send:\n%s", sip_text);
-    
+
     if (send(sk, sip_text, strlen(sip_text), 0) == -1) {
 
         hybrid_debug_error("fetion", "register to the new chat channel failed");
@@ -622,7 +622,7 @@ new_chat_cb(fetion_account *account, const gchar *sipmsg,
     invite_data        *data;
     fetion_transaction *new_trans;
     fetion_account     *new_account;
-    
+
     hybrid_debug_info("fetion", "%s\n", sipmsg);
 
     if (!(auth = sip_header_get_attr(sipmsg, "A"))) {
@@ -695,8 +695,8 @@ fetion_message_new_chat(fetion_account *account, const gchar *userid,
 
         return HYBRID_ERROR;
     }
-    
-    g_free(sip_text); 
+
+    g_free(sip_text);
 
     return HYBRID_OK;
 }
@@ -722,6 +722,6 @@ generate_invite_buddy_body(const gchar *sipuri)
     res = xmlnode_to_string(root);
 
     xmlnode_free(root);
-    
+
     return res;
 }

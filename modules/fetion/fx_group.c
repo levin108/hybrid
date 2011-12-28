@@ -151,7 +151,7 @@ fetion_group_remove(fetion_account *account, const gchar *groupid)
     }
 
     g_free(sip_text);
-    
+
     return HYBRID_OK;
 }
 
@@ -212,7 +212,7 @@ fetion_group_add(fetion_account *account, const gchar *name)
     fetion_sip *sip;
     sip_header *eheader;
     gchar *body;
-    gchar *sip_text; 
+    gchar *sip_text;
     fetion_transaction *trans;
 
     g_return_val_if_fail(account != NULL, HYBRID_ERROR);
@@ -237,7 +237,7 @@ fetion_group_add(fetion_account *account, const gchar *name)
     hybrid_debug_info("fetion", "add group, send:\n%s", sip_text);
 
     if (send(account->sk, sip_text, strlen(sip_text), 0) == -1) {
-        
+
         hybrid_debug_error("fetion", "add group failed");
 
         return HYBRID_ERROR;

@@ -260,23 +260,23 @@ hybrid_create_presence_pixbuf(gint presence, gint scale_size)
     case HYBRID_STATE_OFFLINE:
       name = PIXMAPS_DIR"status/offline.png";
       break;
-      
+
     case HYBRID_STATE_INVISIBLE:
       name = PIXMAPS_DIR"status/invisible.png";
       break;
-      
+
     case HYBRID_STATE_BUSY:
       name = PIXMAPS_DIR"status/busy.png";
       break;
-      
+
     case HYBRID_STATE_AWAY:
       name = PIXMAPS_DIR"status/away.png";
       break;
-      
+
     case HYBRID_STATE_ONLINE:
       name = PIXMAPS_DIR"status/available.png";
       break;
-      
+
     default:
       name = PIXMAPS_DIR"status/offline.png";
       break;
@@ -296,7 +296,7 @@ hybrid_create_menu(GtkWidget *parent, const gchar *title,
     GdkPixbuf *pixbuf;
     GtkWidget *image;
     gchar     *icon_path;
-    
+
     g_return_val_if_fail(title != NULL, NULL);
 
     if (icon_name) {

@@ -200,7 +200,7 @@ key_press_func(GtkWidget *tree, GdkEventKey *event, GtkWidget *window)
 }
 
 
-static void 
+static void
 row_activate_func(GtkTreeView *view, GtkTreePath *path,
         GtkTreeViewColumn *column, GtkWidget *window)
 {
@@ -308,11 +308,11 @@ show_search(GtkEntry *entry, gpointer user_data)
     search_box_show(text, x, y);
 }
 
-static void 
+static void
 search_btn_click_cb(GtkEntry *entry, GtkEntryIconPosition *pos,
         GdkEvent *event, gpointer user_data)
 {
-    show_search(entry, user_data);    
+    show_search(entry, user_data);
 }
 
 GtkWidget*
@@ -325,7 +325,7 @@ hybrid_search_box_create(void)
     gtk_entry_set_icon_from_stock(GTK_ENTRY(entry),
             GTK_ENTRY_ICON_SECONDARY,
             GTK_STOCK_FIND);
-    g_signal_connect(entry, "icon-press", 
+    g_signal_connect(entry, "icon-press",
             G_CALLBACK(search_btn_click_cb), NULL);
     g_signal_connect(entry, "activate",
             G_CALLBACK(show_search), NULL);

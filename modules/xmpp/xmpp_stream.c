@@ -457,7 +457,7 @@ auth_success(XmppStream *stream)
 
     account = stream->account->account;
 
-    if (account->state == HYBRID_STATE_OFFLINE || 
+    if (account->state == HYBRID_STATE_OFFLINE ||
         account->state == HYBRID_STATE_INVISIBLE) {
         account->state = HYBRID_STATE_ONLINE;
     }
@@ -497,10 +497,10 @@ start_session_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
     HybridAccount *account;
 
     account = stream->account->account;
-    
+
     xmpp_buddy_get_info(stream, stream->account->username,
                 (trans_callback)account_get_info_cb, NULL);
-    
+
     return TRUE;
 }
 
@@ -759,7 +759,7 @@ xmpp_stream_process_set_roster(XmppStream *stream, xmlnode *query)
         }
 
         value = xmlnode_prop(node, "jid");
-        
+
         if (!(buddy = xmpp_buddy_find(stream->account, value))) {
             g_free(value);
             node = node->next;
@@ -978,8 +978,8 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
             goto presence_over;
 
         } else if (g_strcmp0(value, "subscribed") == 0) {
-            
-            hybrid_message_box_show(HYBRID_MESSAGE_INFO, 
+
+            hybrid_message_box_show(HYBRID_MESSAGE_INFO,
                     "(<b>%s</b>) has accepted your request.", bare_jid);
             g_free(value);
             goto presence_over;
@@ -1019,7 +1019,7 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
         xmpp_buddy_set_status(buddy, full_jid, status);
         g_free(status);
 
-    } 
+    }
     /*
      * Check whether it has a photo label, then we can
      * determine whether to fetch the buddy's photo.
@@ -1037,7 +1037,7 @@ xmpp_stream_process_presence(XmppStream *stream, xmlnode *root)
 
         g_free(photo);
     }
-    
+
 presence_over:
     g_free(full_jid);
     g_free(bare_jid);
@@ -1057,7 +1057,7 @@ xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
     account = stream->account->account;
 
     if (!xmlnode_has_prop(root, "type")) {
-        hybrid_debug_error("xmpp", 
+        hybrid_debug_error("xmpp",
                 "invalid message received without a type property.");
         return;
     }
@@ -1075,7 +1075,7 @@ xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
     g_free(value);
 
     if (!xmlnode_has_prop(root, "from")) {
-        
+
         hybrid_debug_error("xmpp", "invalid message without a from property.");
         return;
     }
@@ -1139,7 +1139,7 @@ xmpp_stream_process(XmppStream *stream, xmlnode *node)
         }
 
     } else if (g_strcmp0(node->name, "success") == 0) {
-        
+
         if (stream->state == XMPP_STATE_SASL_AUTHENTICATING) {
 
             xmpp_stream_new_on_sasl(stream);
@@ -1156,9 +1156,9 @@ xmpp_stream_process(XmppStream *stream, xmlnode *node)
     } else if (g_strcmp0(node->name, "message") == 0) {
 
         xmpp_stream_process_message(stream, node);
-        
+
     } else if (g_strcmp0(node->name, "failure") == 0) {
-        
+
         xmpp_stream_process_failure(stream, node);
 
         /* Here we only take login failure into consideration.
@@ -1206,7 +1206,7 @@ create_initiate_stream(XmppStream *stream)
     xmlnode_new_prop(node, "to", stream->account->to);
 
     xmlnode_new_namespace(node, NULL, "jabber:client");
-    xmlnode_new_namespace(node, "stream", 
+    xmlnode_new_namespace(node, "stream",
                           "http://etherx.jabber.org/streams");
 
     version = g_strdup_printf("%d.%d",

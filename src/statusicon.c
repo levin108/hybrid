@@ -261,11 +261,11 @@ notify_cb(GtkWidget *widget, gpointer user_data)
 
     if (toggled) {
 
-        hybrid_pref_set_boolean("close_notify", TRUE);
+        hybrid_pref_set_boolean(NULL, "close_notify", TRUE);
 
     } else {
 
-        hybrid_pref_set_boolean("close_notify", FALSE);
+        hybrid_pref_set_boolean(NULL, "close_notify", FALSE);
     }
 
     hybrid_pref_save(NULL);
@@ -282,12 +282,9 @@ mute_cb(GtkWidget *widget, gpointer user_data)
     toggled = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
     if (toggled) {
-
-        hybrid_pref_set_boolean("mute", TRUE);
-
+        hybrid_pref_set_boolean(NULL, "mute", TRUE);
     } else {
-
-        hybrid_pref_set_boolean("mute", FALSE);
+        hybrid_pref_set_boolean(NULL, "mute", FALSE);
     }
 
     hybrid_pref_save(NULL);
