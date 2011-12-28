@@ -55,12 +55,18 @@ struct _HybridPrefEntry {
     HybridPrefWin *win;
 };
 
-/* Pass an NULL-terminated array of SelectOption to add_entry */
+/* Pass an NULL_name-terminated array of SelectOption to add_entry */
 /* in HybridPrefEntry.data when type is PREF_KEY_SELECT */
 typedef struct {
     gchar *name;
-    gint value;
+    gchar *value;
 } SelectOption;
+
+typedef struct {
+    gint lower;
+    gint upper;
+    gint step;
+} IntRange;
 
 #ifdef __cplusplus
 extern "C" {

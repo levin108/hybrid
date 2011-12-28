@@ -152,37 +152,116 @@ string_pref_destroy(HybridPrefEntry *entry)
 guint
 int_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
 {
+    GtkWidget *number;
+    GtkWidget *label;
+    gint value;
+    IntRange *range;
+    gint upper;
+    gint lower;
+    gint step;
 
+    label = gtk_label_new(entry->name);
+    if (entry->tooltip)
+        gtk_widget_set_tooltip_markup(label, entry->tooltip);
+
+    if ((range = entry->data)) {
+        upper = range->upper;
+        lower = range->lower;
+        step = range->step;
+    } else {
+        /* The largest range I can think of now is the number of port. */
+        upper = 65535;
+        lower = 0;
+        step = 1;
+    }
+    number = gtk_spin_button_new_with_range(lower, upper, step);
+
+    value = hybrid_pref_get_int(entry->win->pref, entry->key);
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(number), value);
+
+    entry->data = number;
+
+    gtk_table_attach_defaults(GTK_TABLE(section), label, 0, 1, pos, pos + 1);
+    gtk_table_attach_defaults(GTK_TABLE(section), number, 1, 2, pos, pos + 1);
+    return 1;
 }
 
 void
 int_pref_save(HybridPrefEntry *entry)
 {
-
+    hybrid_pref_set_int(entry->win->pref, entry->key,
+                        gtk_spin_button_get_value_as_int(
+                            GTK_SPIN_BUTTON(entry->data)));
 }
 
 void
 int_pref_destroy(HybridPrefEntry *entry)
 {
-
+    return;
 }
 
 guint
 select_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
 {
+    GtkWidget *combo;
+    GtkWidget *label;
+    gchar *value;
+    gint i;
+    gint active;
+    SelectOption *options = entry->data;
+    gpointer *data;
 
+    label = gtk_label_new(entry->name);
+    if (entry->tooltip)
+        gtk_widget_set_tooltip_markup(label, entry->tooltip);
+
+    combo = gtk_combo_box_text_new();
+    value = hybrid_pref_get_string(entry->win->pref, entry->key);
+    for (i = 0;options[i].name;i++) {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo),
+                                       options[i].name);
+        if (!g_strcmp0(options[i].value, value))
+            active = i;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo), active);
+
+    entry->data = data = g_new0(gpointer, i + 2);
+    data[0] = data + i + 1;
+    data[1] = combo;
+    for (i++;i > 1;i--) {
+        data[i] = g_strdup(options[i - 2].value);
+    }
+
+    gtk_table_attach_defaults(GTK_TABLE(section), label, 0, 1, pos, pos + 1);
+    gtk_table_attach_defaults(GTK_TABLE(section), combo, 1, 2, pos, pos + 1);
+    if (value)
+        g_free(value);
+    return 1;
 }
 
 void
 select_pref_save(HybridPrefEntry *entry)
 {
-
+    gpointer *data = entry->data;
+    gint active = gtk_combo_box_get_active(GTK_COMBO_BOX(data[1]));
+    if (active < 0 || (gpointer)(active + data + 2) > data[0]) {
+        hybrid_debug_error("select_save", "active id out of range.");
+        return;
+    }
+    hybrid_pref_set_string(entry->win->pref, entry->key,
+                           (gchar*)data[active + 2]);
 }
 
 void
 select_pref_destroy(HybridPrefEntry *entry)
 {
-
+    gpointer p;
+    gpointer *data = entry->data;
+    for (p = data[0];p > (gpointer)(data + 1);p--) {
+        g_free(p);
+    }
+    g_free(data);
+    return;
 }
 
 GtkWidget*
@@ -216,7 +295,7 @@ hybrid_pref_tab_add_section(GtkWidget *tab, const gchar *name)
 static void
 entry_destroy_cb(HybridPrefEntry *entry)
 {
-    if (entry->type->destroy)
+    if (entry->type && entry->type->destroy)
         entry->type->destroy(entry);
     if (entry->name)
         g_free(entry->name);
@@ -259,6 +338,7 @@ hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
     /* Dosen't make sence for these two field to be NULL. */
     if (!(entry0->name || entry0->key)) {
         hybrid_debug_error("pref_add_entry", "name or key is NULL.");
+        return;
     }
 
     funcs = pref_types[type];
@@ -273,6 +353,12 @@ hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
 
     gtk_table_get_size(GTK_TABLE(section), &height, &width);
     delta = funcs->add_entry(section, height - 1, entry);
+    if (!delta) {
+        entry->type = NULL;
+        entry_destroy_cb(entry);
+        hybrid_debug_error("pref_add_entry", "Cannot add entry.");
+        return;
+    }
     gtk_table_get_size(GTK_TABLE(section), &tmp, &width);
     gtk_table_resize(GTK_TABLE(section), height + delta, width);
 
@@ -288,39 +374,12 @@ void hybrid_pref_win_finish(HybridPrefWin *pref_win)
 }
 
 
-enum {
-    TAB_POS_NAME_COL,
-    TAB_POS_VALUE_COL,
-    TAB_POS_COLS
-};
+
 
 static GtkTreeModel*
 create_tab_pos_model(void)
 {
-    /* GtkTreeStore *store; */
-    /* GtkTreeIter iter; */
-
-    /* store = gtk_tree_store_new(TAB_POS_COLS, */
-    /*                            G_TYPE_STRING, */
-    /*                            G_TYPE_INT); */
-
-    /* gtk_tree_store_append(store, &iter, NULL); */
-    /* gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Top"), */
-    /*                    TAB_POS_VALUE_COL, GTK_POS_TOP, -1); */
-
-    /* gtk_tree_store_append(store, &iter, NULL); */
-    /* gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Right"), */
-    /*                    TAB_POS_VALUE_COL, GTK_POS_RIGHT, -1); */
-
-    /* gtk_tree_store_append(store, &iter, NULL); */
-    /* gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Bottom"), */
-    /*                    TAB_POS_VALUE_COL, GTK_POS_BOTTOM, -1); */
-
-    /* gtk_tree_store_append(store, &iter, NULL); */
-    /* gtk_tree_store_set(store, &iter, TAB_POS_NAME_COL, _("Left"), */
-    /*                    TAB_POS_VALUE_COL, GTK_POS_LEFT, -1); */
-
-    /* return GTK_TREE_MODEL(store); */
+    return NULL;
 }
 
 /**
@@ -388,7 +447,6 @@ tab_pos_combo_create()
 {
     /* GtkWidget *combo; */
     /* GtkTreeModel *model; */
-    /* GtkTreeIter iter; */
     /* GtkCellRenderer *renderer; */
     /* gint value; */
     /* gint tab_pos; */
