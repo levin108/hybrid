@@ -201,7 +201,7 @@ create_basic_menus(GtkBox *box)
         { "About",
           GTK_STOCK_ABOUT,
           _("About"),
-          "<controlH>",
+          "<control>H",
           _("About"),
           G_CALLBACK(show_about_cb)},
     };
