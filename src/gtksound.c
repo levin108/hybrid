@@ -71,6 +71,11 @@ hybrid_sound_play_file(const gchar *filename)
         return;
     }
 
+    if (!G_IS_OBJECT(source)) {
+        g_warning("sound source is not a gtk object.");
+        return;
+    }
+
     g_object_set(G_OBJECT(source), "location",
             filename , NULL);
 

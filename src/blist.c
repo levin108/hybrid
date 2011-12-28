@@ -133,6 +133,11 @@ edited_cb(GtkCellRendererText *text_rend, gchar *path_str, gchar *text,
     depth = gtk_tree_path_get_depth(path);
     gtk_tree_path_free(path);
 
+    if (!G_IS_OBJECT (text_rend)) {
+        hybrid_debug_error("blist", "text_rend is not a valid object.");
+        return;
+    }
+
     g_object_set(G_OBJECT(text_rend), "editable", FALSE, NULL);
 
     if (depth > 1) {
@@ -478,6 +483,10 @@ rename_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
     tree  = GTK_TREE_VIEW(blist->treeview);
     model = gtk_tree_view_get_model(tree);
     path  = gtk_tree_model_get_path(model, &buddy->iter);
+    if (!G_IS_OBJECT(blist->text_renderer)) {
+        hybrid_debug_error("blist", "text_renderer is not a gtk object.");
+        return;
+    }
     g_object_set(blist->text_renderer, "editable", TRUE, NULL);
 
     gtk_widget_grab_focus(blist->treeview);
@@ -498,9 +507,13 @@ rename_group_menu_cb(GtkWidget *widget, HybridGroup *group)
         return;
     }
 
-    tree = GTK_TREE_VIEW(blist->treeview);
+    tree  = GTK_TREE_VIEW(blist->treeview);
     model = gtk_tree_view_get_model(tree);
-    path = gtk_tree_model_get_path(model, &group->iter);
+    path  = gtk_tree_model_get_path(model, &group->iter);
+    if (!G_IS_OBJECT(blist->text_renderer)) {
+        hybrid_debug_error("blist", "text_renderer is not a valid gtk object.");
+        return;
+    }
     g_object_set(blist->text_renderer, "editable", TRUE, NULL);
 
     gtk_widget_grab_focus(blist->treeview);
