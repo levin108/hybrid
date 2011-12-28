@@ -119,6 +119,7 @@ string_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
     gchar *value;
 
     label = gtk_label_new(entry->name);
+    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
     if (entry->tooltip)
         gtk_widget_set_tooltip_markup(label, entry->tooltip);
     text = gtk_entry_new();
@@ -161,6 +162,7 @@ int_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
     gint step;
 
     label = gtk_label_new(entry->name);
+    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
     if (entry->tooltip)
         gtk_widget_set_tooltip_markup(label, entry->tooltip);
 
@@ -212,6 +214,7 @@ select_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
     str_o_int *data;
 
     label = gtk_label_new(entry->name);
+    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
     if (entry->tooltip)
         gtk_widget_set_tooltip_markup(label, entry->tooltip);
 
@@ -289,11 +292,15 @@ hybrid_pref_win_add_tab(HybridPrefWin *pref_win, const gchar *name)
 {
     GtkWidget *page;
     GtkWidget *label;
+    GtkWidget *align;
 
-    page = gtk_vbox_new(FALSE, 0);
+    page = gtk_vbox_new(FALSE, 10);
+    align = gtk_alignment_new(0, 0, 1, 0);
+    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 4, 10, 4, 10);
+    gtk_container_add(GTK_CONTAINER(align), page);
     label = gtk_label_new(name);
     gtk_notebook_append_page(GTK_NOTEBOOK(pref_win->notebook),
-                             page, label);
+                             align, label);
 
     return page;
 }
@@ -305,7 +312,10 @@ hybrid_pref_tab_add_section(GtkWidget *tab, const gchar *name)
     GtkWidget *frame;
 
     frame = gtk_frame_new(name ? name : "");
+    gtk_container_set_border_width(GTK_CONTAINER(frame), 10);
     child = gtk_table_new(1, 2, FALSE);
+    gtk_table_set_row_spacings(GTK_TABLE(child), 6);
+    gtk_table_set_col_spacings(GTK_TABLE(child), 10);
     gtk_container_add(GTK_CONTAINER(frame), child);
     gtk_container_add(GTK_CONTAINER(tab), frame);
 
@@ -557,7 +567,7 @@ hybrid_pref_create(void)
     tab = hybrid_pref_win_add_tab(main_pref_window, _("Sound"));
     pref_sound_init(tab);
 
-    /* gtk_widget_set_size_request(main_pref_window->window, 450, 300); */
+    gtk_widget_set_size_request(main_pref_window->window, 450, 300);
 
     hybrid_pref_win_finish(main_pref_window);
 }
