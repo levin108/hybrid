@@ -33,6 +33,7 @@
 #include "blist.h"
 #include "logs.h"
 #include "util.h"
+#include "about.h"
 #include "preference.h"
 #include "statusicon.h"
 #include "gtkaccount.h"
@@ -102,6 +103,12 @@ static void
 add_group_cb(GtkWidget *widget, gpointer user_data)
 {
     hybrid_groupadd_window_create();
+}
+
+static void
+show_about_cb(GtkWidget *widget, gpointer user_data)
+{
+    hybrid_about_create();
 }
 
 static void
@@ -191,7 +198,12 @@ create_basic_menus(GtkBox *box)
         },
         /* help menu. */
         { "Help", NULL, _("_Help") },
-        { "About", GTK_STOCK_ABOUT, _("About") },
+        { "About",
+          GTK_STOCK_ABOUT,
+          _("About"),
+          "<control>H",
+          _("About"),
+          G_CALLBACK(show_about_cb)},
     };
 
     actionGroup = gtk_action_group_new("Actions");

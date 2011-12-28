@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-27 12:54+0800\n"
+"POT-Creation-Date: 2011-12-28 15:13+0800\n"
 "PO-Revision-Date: 2011-12-26 16:06-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,22 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/about.c:188
+msgid ""
+"\n"
+"Bug report: "
+msgstr ""
+"\n"
+"报告Bug："
+
+#: src/about.c:183
+msgid ""
+"\n"
+"Website: "
+msgstr ""
+"\n"
+"网站："
 
 #: src/conv.c:1488
 #, c-format
@@ -127,9 +143,13 @@ msgstr "<span size='small'><b>加入到组:</b></span>"
 msgid "<span size='small'><b>Alias(Optional):</b></span>"
 msgstr "<span size='small'><b>别名(可选):</b></span>"
 
-#: src/core.c:194
+#: src/core.c:203 src/core.c:205
 msgid "About"
 msgstr "关于"
+
+#: src/about.c:291
+msgid "About Hybrid"
+msgstr "关于Hybrid"
 
 #: src/buddyreq.c:263
 msgid "Accept"
@@ -143,11 +163,11 @@ msgstr "未通过验证, 请检查用户名和密码."
 msgid "Add"
 msgstr "添加"
 
-#: src/blist.c:612 src/buddyadd.c:379 src/core.c:179 src/core.c:181
+#: src/blist.c:625 src/buddyadd.c:379 src/core.c:186 src/core.c:188
 msgid "Add Buddy"
 msgstr "添加联系人"
 
-#: src/core.c:187 src/core.c:189 src/groupadd.c:237
+#: src/core.c:194 src/core.c:196 src/groupadd.c:237
 msgid "Add Group"
 msgstr "添加组"
 
@@ -171,12 +191,12 @@ msgstr ""
 msgid "Alias"
 msgstr "别名"
 
-#: src/blist.c:462
+#: src/blist.c:467
 #, c-format
 msgid "Are you sure to delete the buddy <b>%s</b> (%s)"
 msgstr "您确定要删除联系人 <b>%s</b> (%s)"
 
-#: src/blist.c:517
+#: src/blist.c:530
 #, c-format
 msgid "Are you sure to delete the group <b>%s</b>"
 msgstr "您确定要删除组 <b>%s</b>"
@@ -206,7 +226,7 @@ msgstr "好友"
 msgid "Buddy <b>%s</b> has %s your add-buddy request."
 msgstr "<b>%s</b> %s了 您的添加好友请求."
 
-#: src/blist.c:554
+#: src/blist.c:567
 msgid "Buddy Information"
 msgstr "联系人信息"
 
@@ -251,7 +271,8 @@ msgstr "请选择需要上传的头像"
 msgid "City"
 msgstr "城市"
 
-#: src/conv.c:389 src/gtkaccount.c:310 src/info.c:209 src/notify.c:148
+#: src/about.c:336 src/conv.c:389 src/gtkaccount.c:310 src/info.c:209
+#: src/notify.c:148
 msgid "Close"
 msgstr "关闭"
 
@@ -273,7 +294,7 @@ msgstr "关闭提示"
 msgid "Close Other Pages"
 msgstr "关闭其他页"
 
-#: src/blist.c:465 src/blist.c:519
+#: src/blist.c:470 src/blist.c:532
 msgid "Confirm"
 msgstr "确认"
 
@@ -306,9 +327,13 @@ msgstr "国家"
 msgid "Decline"
 msgstr "拒绝"
 
-#: src/blist.c:465 src/blist.c:519 src/gtkaccount.c:300
+#: src/blist.c:470 src/blist.c:532 src/gtkaccount.c:300
 msgid "Delete"
 msgstr "删除"
+
+#: src/about.c:312
+msgid "Developers"
+msgstr "开发人员"
 
 #: src/gtkaccount.c:958 src/gtkaccount.c:1051
 msgid "Disable Account"
@@ -354,9 +379,20 @@ msgstr "性别"
 msgid "Hide Action Buttons"
 msgstr "隐藏动作按钮"
 
-#: src/core.c:223
+#: src/core.c:235
 msgid "Hybrid"
 msgstr ""
+
+#: src/about.c:158
+msgid ""
+"Hybrid is a lightweight extensible IM framework,currently supports China "
+"Mobile Fetion protocol,XMPP protocol, and IMAP mail notifier.\n"
+"\n"
+"\n"
+msgstr ""
+"Hybrid是一个轻量级的可扩展的IM框架，目前支持中国移动飞信协议、XMPP协议和IMAP"
+"邮件提醒。\n"
+"\n"
 
 #: modules/email/imap.c:108
 msgid "I Know"
@@ -390,9 +426,13 @@ msgstr "IMAP服务器:"
 msgid "Information"
 msgstr "信息"
 
-#: src/blist.c:552
+#: src/blist.c:565
 msgid "Instant Message"
 msgstr "即时信息"
+
+#: src/about.c:301
+msgid "Introduction"
+msgstr "软件介绍"
 
 #: lib/account.c:1122
 msgid "Invisible"
@@ -402,6 +442,10 @@ msgstr "隐身"
 msgid "Left"
 msgstr "左侧"
 
+#: src/about.c:323
+msgid "License"
+msgstr "许可协议"
+
 #: modules/fetion/fetion.c:478
 msgid "Localname"
 msgstr "本地名称"
@@ -410,12 +454,12 @@ msgstr "本地名称"
 msgid "Male"
 msgstr "男"
 
-#: src/core.c:155 src/gtkaccount.c:259
+#: src/core.c:162 src/gtkaccount.c:259
 msgid "Manage Account"
 msgstr "管理账户"
 
 #. account menu.
-#: src/core.c:153 src/statusicon.c:334
+#: src/core.c:160 src/statusicon.c:334
 msgid "Manage Accounts"
 msgstr "管理账户"
 
@@ -460,7 +504,7 @@ msgstr "更改照片失败."
 msgid "Mood"
 msgstr "心情"
 
-#: src/blist.c:557
+#: src/blist.c:570
 msgid "Move To"
 msgstr "移动到"
 
@@ -518,7 +562,7 @@ msgstr "弹出当前页"
 msgid "Port:"
 msgstr "端口:"
 
-#: src/core.c:171 src/core.c:173 src/preference.c:399
+#: src/core.c:178 src/core.c:180 src/preference.c:399
 msgid "Preference"
 msgstr "首选项"
 
@@ -534,24 +578,24 @@ msgstr "协议:"
 msgid "Province"
 msgstr "省份"
 
-#: src/core.c:161 src/core.c:163
+#: src/core.c:168 src/core.c:170
 msgid "Quit"
 msgstr "退出"
 
-#: src/blist.c:570
+#: src/blist.c:583
 msgid "Remove Buddy"
 msgstr "移动联系人"
 
 #. we won't let users to remove group which is not empty.
-#: src/blist.c:608
+#: src/blist.c:621
 msgid "Remove Group"
 msgstr "删除组"
 
-#: src/blist.c:572
+#: src/blist.c:585
 msgid "Rename Buddy"
 msgstr "重命名联系人"
 
-#: src/blist.c:603
+#: src/blist.c:616
 msgid "Rename Group"
 msgstr "重命名组"
 
@@ -647,6 +691,31 @@ msgstr "TLS握手失败."
 msgid "Tab Position:"
 msgstr "标签位置:"
 
+#: src/about.c:200
+msgid ""
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
+"more details.\n"
+"\n"
+msgstr ""
+"发布这一程序的目的是希望它有用，但没有任何担保，甚至没有适合特定目的的隐含的"
+"担保。更详细的情况请参阅 GNU 通用公共许可证。\n"
+"\n"
+
+#: src/about.c:196
+msgid ""
+"This program is free software; you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation; either version 2 of the License, or (at your option) "
+"any later version.\n"
+"\n"
+msgstr ""
+"这一程序是自由软件；你可以遵照自由软件基金会出版的 GNU 通用公共许可证条款来修"
+"改和重新发布这一程序；可采用该许可证的第二版，或者(根据您的选择)用任何更新的"
+"版本。\n"
+"\n"
+
 #: src/preference.c:48
 msgid "Top"
 msgstr "顶部"
@@ -677,7 +746,7 @@ msgstr "用户名"
 msgid "Username:"
 msgstr "用户名:"
 
-#: src/blist.c:574
+#: src/blist.c:587
 msgid "View Chat Logs"
 msgstr "查看聊天记录"
 
@@ -689,6 +758,12 @@ msgstr "查看聊天记录"
 #: src/gtkutils.c:510
 msgid "Warning"
 msgstr "警告"
+
+#: src/about.c:204
+msgid ""
+"You should have received a copy of the GNU General Public License along with "
+"this program; if not, see:"
+msgstr "您应该已经随本程序得到了 GNU 通用公共许可证的副本；如果没有，请参看:"
 
 #: modules/fetion/fetion.c:101
 msgid "Your account has logined elsewhere.You are forced to quit."
@@ -705,17 +780,17 @@ msgid "[<span color='#0099ff'>%d</span>] characters"
 msgstr "[<span color='#0099ff'>%d</span>]个字符"
 
 #. account menu.
-#: src/core.c:149
+#: src/core.c:156
 msgid "_Account"
 msgstr "帐户(_A)"
 
 #. help menu.
-#: src/core.c:193
+#: src/core.c:200
 msgid "_Help"
 msgstr "帮助(_H)"
 
 #. tools menu.
-#: src/core.c:167
+#: src/core.c:174
 msgid "_Tools"
 msgstr "工具(_T)"
 
@@ -847,3 +922,10 @@ msgstr "开始SIPC验证..."
 #: modules/xmpp/xmpp_buddy.c:107
 msgid "subscribe presence failed"
 msgstr "订阅好友状态失败"
+
+#~ msgid ""
+#~ "Developers\n"
+#~ "\n"
+#~ msgstr ""
+#~ "开发人员\n"
+#~ "\n"

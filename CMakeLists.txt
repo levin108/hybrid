@@ -250,6 +250,7 @@ set(hybrid_SRC
   src/statusicon.c
   src/searchbox.c
   src/confirm.c
+  src/about.c
   src/gtkcellrendererexpander.c
   src/core.c
   )
