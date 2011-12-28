@@ -27,6 +27,88 @@
 
 static HybridPrefWin *main_pref_window = NULL;
 
+void bool_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+void bool_pref_save(HybridPrefEntry *entry);
+
+static PrefAddFuncs bool_add_funcs = {
+    .add_entry = bool_pref_add_entry,
+    .save = bool_pref_save
+};
+
+void string_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+void string_pref_save(HybridPrefEntry *entry);
+
+static PrefAddFuncs string_add_funcs = {
+    .add_entry = string_pref_add_entry,
+    .save = string_pref_save
+};
+
+void int_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+void int_pref_save(HybridPrefEntry *entry);
+
+static PrefAddFuncs int_add_funcs = {
+    .add_entry = int_pref_add_entry,
+    .save = int_pref_save
+};
+
+void select_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
+void select_pref_save(HybridPrefEntry *entry);
+
+static PrefAddFuncs select_add_funcs = {
+    .add_entry = select_pref_add_entry,
+    .save = select_pref_save
+};
+
+static PrefAddFuncs *pref_types[] = {
+    [PREF_KEY_NONE] = NULL,
+    [PREF_KEY_BOOL] = &bool_add_funcs,
+    [PREF_KEY_STRING] = &string_add_funcs,
+    [PREF_KEY_INT] = &int_add_funcs,
+    [PREF_KEY_SELECT] = &select_add_funcs
+};
+
+void bool_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
+{
+
+}
+
+void bool_pref_save(HybridPrefEntry *entry)
+{
+
+}
+
+void string_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
+{
+
+}
+
+void string_pref_save(HybridPrefEntry *entry)
+{
+
+}
+
+void int_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
+{
+
+}
+
+void int_pref_save(HybridPrefEntry *entry)
+{
+
+}
+
+void select_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
+{
+
+}
+
+void select_pref_save(HybridPrefEntry *entry)
+{
+
+}
+
+
+
 enum {
     TAB_POS_NAME_COL,
     TAB_POS_VALUE_COL,

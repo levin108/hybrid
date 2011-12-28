@@ -32,8 +32,9 @@ struct _HybridPrefWin {
 };
 
 typedef struct {
-    char *name;
-    char *key;
+    gchar *name;
+    gchar *key;
+    gpointer data;
 } HybridPrefEntry;
 
 typedef enum {
@@ -45,13 +46,28 @@ typedef enum {
     PREF_KEY_MAX
 } PrefKeyType;
 
+typedef struct {
+    void (*add_entry)(GtkWidget *section, HybridPrefEntry *entry);
+    void (*save)(HybridPrefEntry *entry);
+} PrefAddFuncs;
+
+/* Pass an NULL-terminated array of SelectOption to add_entry */
+/* in HybridPrefEntry.data when type is PREF_KEY_SELECT */
+typedef struct {
+    gchar *name;
+    gint value;
+} SelectOption;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
     HybridPrefWin *hybrid_pref_win_new(HybridPref *pref, const gchar *title);
+
+    /* VBox */
     GtkWidget *hybrid_pref_win_add_tab(HybridPrefWin *pref_win,
                                        const gchar *name);
+    /* Frame */
     GtkWidget *hybrid_pref_tab_add_section(GtkWidget *tab,
                                            const gchar *name);
     void hybrid_pref_section_add_entry(HybridPrefWin *pref_win,
