@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-28 15:54-0500\n"
-"PO-Revision-Date: 2011-12-28 16:20-0500\n"
+"POT-Creation-Date: 2011-12-28 17:22-0500\n"
+"PO-Revision-Date: 2011-12-28 17:25-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -201,11 +201,11 @@ msgstr "正在进行身份认证..."
 msgid "Away"
 msgstr "离开"
 
-#: src/preference.c:554
+#: src/preference.c:570
 msgid "Basic Settings"
 msgstr "基本设置"
 
-#: src/preference.c:449
+#: src/preference.c:465
 msgid "Bottom"
 msgstr "底部"
 
@@ -239,11 +239,11 @@ msgstr "取消"
 msgid "Change State"
 msgstr "更改状态"
 
-#: src/preference.c:431 src/preference.c:432
+#: src/preference.c:447 src/preference.c:448
 msgid "Chat Theme:"
 msgstr "聊天主题:"
 
-#: src/preference.c:413
+#: src/preference.c:431
 msgid "Chat Window"
 msgstr "聊天窗口"
 
@@ -371,7 +371,7 @@ msgstr "飞信号"
 msgid "Gender"
 msgstr "性别"
 
-#: src/preference.c:417 src/preference.c:418
+#: src/preference.c:433 src/preference.c:434
 msgid "Hide Action Buttons"
 msgstr "隐藏动作按钮"
 
@@ -434,7 +434,7 @@ msgstr "软件介绍"
 msgid "Invisible"
 msgstr "隐身"
 
-#: src/preference.c:452
+#: src/preference.c:468
 msgid "Left"
 msgstr "左侧"
 
@@ -445,6 +445,10 @@ msgstr "许可协议"
 #: modules/fetion/fetion.c:478
 msgid "Localname"
 msgstr "本地名称"
+
+#: src/preference.c:425
+msgid "Main Window"
+msgstr "主窗口"
 
 #: modules/fetion/fetion.c:485
 msgid "Male"
@@ -505,7 +509,7 @@ msgid "Move To"
 msgstr "移动到"
 
 #. mute menu.
-#: src/preference.c:472 src/statusicon.c:361
+#: src/preference.c:488 src/statusicon.c:361
 msgid "Mute"
 msgstr "静音"
 
@@ -558,7 +562,7 @@ msgstr "弹出当前页"
 msgid "Port:"
 msgstr "端口:"
 
-#: src/core.c:178 src/core.c:180 src/preference.c:504
+#: src/core.c:178 src/core.c:180 src/preference.c:520
 msgid "Preference"
 msgstr "首选项"
 
@@ -577,6 +581,10 @@ msgstr "省份"
 #: src/core.c:168 src/core.c:170
 msgid "Quit"
 msgstr "退出"
+
+#: src/preference.c:427 src/preference.c:429
+msgid "Quit when main window is closed."
+msgstr "当主窗口关闭时退出."
 
 #: src/blist.c:583
 msgid "Remove Buddy"
@@ -599,7 +607,7 @@ msgstr "重命名组"
 msgid "Resource"
 msgstr "资源"
 
-#: src/preference.c:446
+#: src/preference.c:462
 msgid "Right"
 msgstr "右侧"
 
@@ -631,7 +639,7 @@ msgstr "发送"
 msgid "Send a screen jitter"
 msgstr "发送闪屏"
 
-#: src/preference.c:438 src/preference.c:439
+#: src/preference.c:454 src/preference.c:455
 msgid "Show Messages In A Single Window With Tabs"
 msgstr "在同一标签窗口内显示信息"
 
@@ -640,7 +648,7 @@ msgstr "在同一标签窗口内显示信息"
 msgid "Show buddy list"
 msgstr "显示联系人列表"
 
-#: src/preference.c:557
+#: src/preference.c:573
 msgid "Sound"
 msgstr "声音"
 
@@ -683,13 +691,9 @@ msgstr "TLS连接建立."
 msgid "TLS hand-shake failed."
 msgstr "TLS握手失败."
 
-#: src/preference.c:459 src/preference.c:460
+#: src/preference.c:475 src/preference.c:476
 msgid "Tab Position:"
 msgstr "标签位置:"
-
-#: src/preference.c:435
-msgid "Tabs"
-msgstr "标签"
 
 #: src/about.c:202
 msgid ""
@@ -716,7 +720,7 @@ msgstr ""
 "版本。\n"
 "\n"
 
-#: src/preference.c:443
+#: src/preference.c:459
 msgid "Top"
 msgstr "顶部"
 
@@ -929,3 +933,6 @@ msgstr "订阅好友状态失败"
 #~ msgstr ""
 #~ "开发人员\n"
 #~ "\n"
+
+#~ msgid "Tabs"
+#~ msgstr "标签"

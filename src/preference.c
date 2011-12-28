@@ -420,9 +420,15 @@ void hybrid_pref_win_finish(HybridPrefWin *pref_win)
 void
 pref_basic_init(GtkWidget *tab)
 {
-    GtkWidget *section = hybrid_pref_tab_add_section(tab, _("Chat Window"));
+    GtkWidget *section;
     int i, j;
+    section = hybrid_pref_tab_add_section(tab, _("Main Window"));
+    hybrid_pref_section_add_entry(main_pref_window, section, PREF_KEY_BOOL,
+                                  _("Quit when main window is closed."),
+                                  "quit_when_close",
+                                  _("Quit when main window is closed."), NULL);
 
+    section = hybrid_pref_tab_add_section(tab, _("Chat Window"));
     hybrid_pref_section_add_entry(main_pref_window, section, PREF_KEY_BOOL,
                                   _("Hide Action Buttons"), "hide_chat_buttons",
                                   _("Hide Action Buttons"), NULL);
@@ -442,7 +448,7 @@ pref_basic_init(GtkWidget *tab)
                                   _("Chat Theme:"), options);
     g_free(options);
 
-    section = hybrid_pref_tab_add_section(tab, _("Tabs"));
+    /* section = hybrid_pref_tab_add_section(tab, _("Tabs")); */
     hybrid_pref_section_add_entry(
         main_pref_window, section, PREF_KEY_BOOL,
         _("Show Messages In A Single Window With Tabs"), "single_chat_window",
