@@ -180,7 +180,7 @@ xmpp_stream_startsasl(XmppStream *stream)
     hybrid_debug_info("xmpp", "start sasl authentication.");
 
     hybrid_account_set_connection_string(stream->account->account,
-                                         _("Start sasl authentication."));
+                                         _("Start sasl authentication..."));
 
     xmpp_stream_set_state(stream, XMPP_STATE_SASL_AUTHENTICATING);
     /*
@@ -431,7 +431,7 @@ xmpp_stream_performtls(XmppStream *stream)
     g_return_if_fail(stream != NULL);
 
     hybrid_account_set_connection_string(stream->account->account,
-                                         _("Start performing tls"));
+                                         _("Start performing tls..."));
 
     if (!(stream->ssl = hybrid_ssl_connect_with_fd(
               stream->sk, (ssl_callback)tls_conn_cb, stream))) {

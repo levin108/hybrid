@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-28 15:13+0800\n"
+"POT-Creation-Date: 2011-12-28 15:54-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -227,13 +227,13 @@ msgstr ""
 
 #. *< name
 #. *< author
-#: modules/fetion/fetion.c:956
+#: modules/fetion/fetion.c:955
 msgid "fetion client"
 msgstr ""
 
 #. *< summary
 #. description
-#: modules/fetion/fetion.c:958
+#: modules/fetion/fetion.c:957
 msgid "hybrid plugin implementing Fetion Protocol version 4"
 msgstr ""
 
@@ -262,7 +262,7 @@ msgid "ssi authentication failed"
 msgstr ""
 
 #: modules/fetion/fx_login.c:581
-msgid "Start SSI authenticating..."
+msgid "Start SSI authentication..."
 msgstr ""
 
 #: modules/fetion/fx_login.c:646
@@ -286,7 +286,7 @@ msgid "Fetion Protocol ERROR."
 msgstr ""
 
 #: modules/fetion/fx_login.c:904
-msgid "start sipc authenticating..."
+msgid "start sipc authentication..."
 msgstr ""
 
 #. *< add an "ungroup" group
@@ -340,7 +340,7 @@ msgid "request roster failed."
 msgstr ""
 
 #: modules/xmpp/xmpp_buddy.c:567 modules/xmpp/xmpp_buddy.c:610
-#: src/gtkutils.c:510
+#: src/gtkutils.c:512
 msgid "Warning"
 msgstr ""
 
@@ -359,7 +359,7 @@ msgid "Connection Error."
 msgstr ""
 
 #: modules/xmpp/xmpp_stream.c:183
-msgid "Start sasl authentication."
+msgid "Start sasl authentication..."
 msgstr ""
 
 #: modules/xmpp/xmpp_stream.c:230
@@ -380,7 +380,7 @@ msgid "TLS connection established."
 msgstr ""
 
 #: modules/xmpp/xmpp_stream.c:434
-msgid "Start performing tls"
+msgid "Start performing tls..."
 msgstr ""
 
 #: modules/xmpp/xmpp_stream.c:440
@@ -427,19 +427,19 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/about.c:183
+#: src/about.c:185
 msgid ""
 "\n"
 "Website: "
 msgstr ""
 
-#: src/about.c:188
+#: src/about.c:190
 msgid ""
 "\n"
 "Bug report: "
 msgstr ""
 
-#: src/about.c:196
+#: src/about.c:198
 msgid ""
 "This program is free software; you can redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
@@ -448,7 +448,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/about.c:200
+#: src/about.c:202
 msgid ""
 "This program is distributed in the hope that it will be useful, but WITHOUT "
 "ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
@@ -457,29 +457,29 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/about.c:204
+#: src/about.c:206
 msgid ""
 "You should have received a copy of the GNU General Public License along with "
 "this program; if not, see:"
 msgstr ""
 
-#: src/about.c:291
+#: src/about.c:296
 msgid "About Hybrid"
 msgstr ""
 
-#: src/about.c:301
+#: src/about.c:306
 msgid "Introduction"
 msgstr ""
 
-#: src/about.c:312
+#: src/about.c:317
 msgid "Developers"
 msgstr ""
 
-#: src/about.c:323
+#: src/about.c:328
 msgid "License"
 msgstr ""
 
-#: src/about.c:336 src/conv.c:389 src/gtkaccount.c:310 src/info.c:209
+#: src/about.c:341 src/conv.c:389 src/gtkaccount.c:310 src/info.c:209
 #: src/notify.c:148
 msgid "Close"
 msgstr ""
@@ -564,7 +564,7 @@ msgid "Add"
 msgstr ""
 
 #: src/buddyadd.c:366 src/buddyreq.c:321 src/confirm.c:101 src/groupadd.c:224
-#: src/gtkaccount.c:812 src/gtkutils.c:459 src/head.c:147 src/preference.c:368
+#: src/gtkaccount.c:812 src/gtkutils.c:461 src/head.c:147
 msgid "Cancel"
 msgstr ""
 
@@ -589,7 +589,7 @@ msgstr ""
 msgid "<span size='small'><b>Add To Group:</b></span>"
 msgstr ""
 
-#: src/buddyreq.c:316 src/confirm.c:96 src/gtkutils.c:556 src/head.c:147
+#: src/buddyreq.c:316 src/confirm.c:96 src/gtkutils.c:558 src/head.c:147
 msgid "OK"
 msgstr ""
 
@@ -670,19 +670,19 @@ msgid "[<span color='#0099ff'>%d</span>] characters"
 msgstr ""
 
 #. notify.
-#: src/conv.c:1380
+#: src/conv.c:1379
 #, c-format
 msgid "%s said:"
 msgstr ""
 
-#: src/conv.c:1458 src/conv.c:1526
+#: src/conv.c:1457 src/conv.c:1525
 #, c-format
-msgid " %s stoped inputing"
+msgid " %s stopped typing"
 msgstr ""
 
-#: src/conv.c:1488
+#: src/conv.c:1487
 #, c-format
-msgid " %s is inputing"
+msgid " %s is typing..."
 msgstr ""
 
 #. account menu.
@@ -691,7 +691,7 @@ msgid "_Account"
 msgstr ""
 
 #. account menu.
-#: src/core.c:160 src/statusicon.c:334
+#: src/core.c:160 src/statusicon.c:331
 msgid "Manage Accounts"
 msgstr ""
 
@@ -708,7 +708,7 @@ msgstr ""
 msgid "_Tools"
 msgstr ""
 
-#: src/core.c:178 src/core.c:180 src/preference.c:399
+#: src/core.c:178 src/core.c:180 src/preference.c:504
 msgid "Preference"
 msgstr ""
 
@@ -737,7 +737,7 @@ msgstr ""
 msgid "<b>Please input the group name:</b>"
 msgstr ""
 
-#: src/groupadd.c:219 src/gtkaccount.c:818 src/preference.c:363
+#: src/groupadd.c:219 src/gtkaccount.c:818
 msgid "Save"
 msgstr ""
 
@@ -789,11 +789,11 @@ msgstr ""
 msgid "Enable Account"
 msgstr ""
 
-#: src/gtkutils.c:513
+#: src/gtkutils.c:515
 msgid "Information"
 msgstr ""
 
-#: src/gtkutils.c:516
+#: src/gtkutils.c:518
 msgid "Message"
 msgstr ""
 
@@ -839,65 +839,65 @@ msgstr ""
 msgid "Notification"
 msgstr ""
 
-#: src/preference.c:48
-msgid "Top"
+#: src/preference.c:413
+msgid "Chat Window"
 msgstr ""
 
-#: src/preference.c:54
-msgid "Right"
-msgstr ""
-
-#: src/preference.c:60
-msgid "Bottom"
-msgstr ""
-
-#: src/preference.c:66
-msgid "Left"
-msgstr ""
-
-#: src/preference.c:193
-msgid "<b>Chat Window:</b>"
-msgstr ""
-
-#: src/preference.c:198
+#: src/preference.c:417 src/preference.c:418
 msgid "Hide Action Buttons"
 msgstr ""
 
-#: src/preference.c:203
+#: src/preference.c:431 src/preference.c:432
 msgid "Chat Theme:"
 msgstr ""
 
-#: src/preference.c:211
-msgid "<b>Tabs:</b>"
+#: src/preference.c:435
+msgid "Tabs"
 msgstr ""
 
-#: src/preference.c:215
+#: src/preference.c:438 src/preference.c:439
 msgid "Show Messages In A Single Window With Tabs"
 msgstr ""
 
-#: src/preference.c:222
+#: src/preference.c:443
+msgid "Top"
+msgstr ""
+
+#: src/preference.c:446
+msgid "Right"
+msgstr ""
+
+#: src/preference.c:449
+msgid "Bottom"
+msgstr ""
+
+#: src/preference.c:452
+msgid "Left"
+msgstr ""
+
+#: src/preference.c:459 src/preference.c:460
 msgid "Tab Position:"
 msgstr ""
 
 #. mute menu.
-#: src/preference.c:235 src/statusicon.c:364
+#: src/preference.c:472 src/statusicon.c:361
 msgid "Mute"
 msgstr ""
 
-#: src/preference.c:347
+#: src/preference.c:554
 msgid "Basic Settings"
 msgstr ""
 
-#: src/preference.c:354
+#: src/preference.c:557
 msgid "Sound"
 msgstr ""
 
 #. show buddy list buddy.
-#: src/statusicon.c:320
+#: src/statusicon.c:317
 msgid "Show buddy list"
 msgstr ""
 
 #. notify menu
-#: src/statusicon.c:376
+#: src/statusicon.c:373
 msgid "Close Notify"
 msgstr ""

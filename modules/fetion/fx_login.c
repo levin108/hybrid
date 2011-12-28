@@ -578,7 +578,7 @@ ssi_auth_action(HybridSslConnection *isc, gpointer user_data)
 
     fetion_account *ac = (fetion_account*)user_data;
 
-    hybrid_account_set_connection_string(ac->account, _("Start SSI authenticating..."));
+    hybrid_account_set_connection_string(ac->account, _("Start SSI authentication..."));
 
     hybrid_debug_info("fetion", "ssi authencating");
     password = hash_password_v4(ac->userid, ac->password);
@@ -901,7 +901,7 @@ sipc_aut_action(gint sk, fetion_account *ac, const gchar *response)
     hybrid_debug_info("fetion", "sipc authencation action");
 
     hybrid_account_set_connection_string(ac->account,
-            _("start sipc authenticating..."));
+                                         _("start sipc authentication..."));
 
     body = generate_auth_body(ac);
 

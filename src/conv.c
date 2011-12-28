@@ -1454,8 +1454,8 @@ input_finished_cb(HybridChatWindow *chat)
 
     buddy = (HybridBuddy*)chat->data;
 
-    text = g_strdup_printf(_(" %s stoped inputing"),
-            buddy->name ? buddy->name : buddy->id);
+    text = g_strdup_printf(_(" %s stopped typing"),
+                           buddy->name ? buddy->name : buddy->id);
 
     text_ops->notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
 
@@ -1484,7 +1484,7 @@ hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean
         return;
     }
 
-    text = g_strdup_printf(_(" %s is inputing"), buddy->name);
+    text = g_strdup_printf(_(" %s is typing..."), buddy->name);
 
     text_ops->notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
 
@@ -1522,7 +1522,7 @@ hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
         return;
     }
 
-    text = g_strdup_printf(_(" %s stoped inputing"), buddy->name);
+    text = g_strdup_printf(_(" %s stopped typing"), buddy->name);
     text_ops->notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
     g_free(text);
 }
