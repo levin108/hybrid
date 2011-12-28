@@ -83,7 +83,8 @@ extern "C" {
     void hybrid_pref_section_add_entry(HybridPrefWin *pref_win,
                                        GtkWidget *section,
                                        PrefKeyType type,
-                                       HybridPrefEntry *entry);
+                                       gchar *name, gchar *key,
+                                       gchar *tooltip, gpointer data);
     void hybrid_pref_win_finish(HybridPrefWin *pref_win);
 
 /**

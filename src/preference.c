@@ -207,7 +207,7 @@ select_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
     GtkWidget *label;
     gchar *value;
     gint i;
-    gint active;
+    gint active = -1;
     SelectOption *options = entry->data;
     gpointer *data;
 
@@ -220,8 +220,9 @@ select_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
     for (i = 0;options[i].name;i++) {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo),
                                        options[i].name);
-        if (!g_strcmp0(options[i].value, value))
+        if (!g_strcmp0(options[i].value, value)) {
             active = i;
+        }
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), active);
 
@@ -255,10 +256,10 @@ select_pref_save(HybridPrefEntry *entry)
 void
 select_pref_destroy(HybridPrefEntry *entry)
 {
-    gpointer p;
+    gpointer *p;
     gpointer *data = entry->data;
-    for (p = data[0];p > (gpointer)(data + 1);p--) {
-        g_free(p);
+    for (p = (gpointer*)data[0];p > (data + 1);p--) {
+        g_free(*p);
     }
     g_free(data);
     return;
@@ -284,7 +285,7 @@ hybrid_pref_tab_add_section(GtkWidget *tab, const gchar *name)
     GtkWidget *child;
     GtkWidget *frame;
 
-    frame = gtk_frame_new(name);
+    frame = gtk_frame_new(name ? name : "");
     child = gtk_table_new(1, 2, FALSE);
     gtk_container_add(GTK_CONTAINER(frame), child);
     gtk_container_add(GTK_CONTAINER(tab), frame);
@@ -309,13 +310,15 @@ entry_destroy_cb(HybridPrefEntry *entry)
 static void
 entry_response_cb(GtkDialog *dialog, gint response_id, HybridPrefEntry *entry)
 {
-    if (response_id == GTK_RESPONSE_OK)
+    fprintf(stderr, "callback\n");
+    if (response_id == GTK_RESPONSE_ACCEPT)
         entry->type->save(entry);
 }
 
 void
 hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
-                              PrefKeyType type, HybridPrefEntry *entry0)
+                              PrefKeyType type, gchar *name, gchar *key,
+                              gchar *tooltip, gpointer data)
 {
     PrefAddFuncs *funcs;
     HybridPrefEntry *entry;
@@ -336,7 +339,7 @@ hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
     }
 
     /* Dosen't make sence for these two field to be NULL. */
-    if (!(entry0->name || entry0->key)) {
+    if (!(name || key)) {
         hybrid_debug_error("pref_add_entry", "name or key is NULL.");
         return;
     }
@@ -344,10 +347,10 @@ hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
     funcs = pref_types[type];
 
     entry = g_new0(HybridPrefEntry, 1);
-    entry->name = g_strdup(entry0->name);
-    entry->key = g_strdup(entry0->key);
-    entry->tooltip = entry0->tooltip ? g_strdup(entry0->tooltip) : NULL;
-    entry->data = entry0->data;
+    entry->name = g_strdup(name);
+    entry->key = g_strdup(key);
+    entry->tooltip = tooltip ? g_strdup(tooltip) : NULL;
+    entry->data = data;
     entry->type = funcs;
     entry->win = pref_win;
 
@@ -372,9 +375,6 @@ void hybrid_pref_win_finish(HybridPrefWin *pref_win)
 {
     gtk_widget_show_all(pref_win->window);
 }
-
-
-
 
 static GtkTreeModel*
 create_tab_pos_model(void)
@@ -492,40 +492,35 @@ tab_pos_combo_create()
  * Initialize the basic settings page.
  */
 void
-pref_basic_init(GtkFixed *fixed)
+pref_basic_init(GtkWidget *tab)
 {
-    /* GtkWidget *label; */
+    GtkWidget *section = hybrid_pref_tab_add_section(tab, _("Chat Window"));
+    int i, j;
 
-    /* label = gtk_label_new(NULL); */
-    /* gtk_label_set_markup(GTK_LABEL(label), _("<b>Chat Window:</b>")); */
+    hybrid_pref_section_add_entry(main_pref_window, section, PREF_KEY_BOOL,
+                                  _("Hide Action Buttons"), "hide_chat_buttons",
+                                  _("Hide Action Buttons"), NULL);
 
-    /* gtk_fixed_put(fixed, label, 20, 10); */
+    HybridChatTheme *themes = hybrid_chat_window_get_themes();
 
-    /* pref_window->hcb_check = */
-    /*     gtk_check_button_new_with_label(_("Hide Action Buttons")); */
-    /* gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->hcb_check), */
-    /*                              hybrid_pref_get_boolean(NULL, */
-    /*                                                      "hide_chat_buttons")); */
-    /* gtk_fixed_put(fixed, pref_window->hcb_check, 20, 35); */
+    for (i = 0;themes[i].name;i++);
 
-    /* label = gtk_label_new(_("Chat Theme:")); */
-    /* gtk_fixed_put(fixed, label, 20, 65); */
+    SelectOption *options = g_new0(SelectOption, i+1);
 
-    /* pref_window->chat_theme_combo = chat_theme_combo_create(); */
-    /* gtk_fixed_put(fixed, pref_window->chat_theme_combo, 120, 60); */
+    for (j = 0;j < i;j++) {
+        options[j].name = options[j].value = themes[j].name;
+    }
 
-    /* label = gtk_label_new(NULL); */
-    /* gtk_label_set_markup(GTK_LABEL(label), */
-    /*         _("<b>Tabs:</b>")); */
-    /* gtk_fixed_put(fixed, label, 20, 95); */
+    hybrid_pref_section_add_entry(main_pref_window, section, PREF_KEY_SELECT,
+                                  _("Chat Theme:"), "chat_theme",
+                                  _("Chat Theme:"), options);
+    g_free(options);
 
-    /* pref_window->single_cw_check = */
-    /*     gtk_check_button_new_with_label(_("Show Messages In A Single Window With Tabs")); */
-
-    /* gtk_toggle_button_set_active( */
-    /*         GTK_TOGGLE_BUTTON(pref_window->single_cw_check), */
-    /*         hybrid_pref_get_boolean(NULL, "single_chat_window")); */
-    /* gtk_fixed_put(fixed, pref_window->single_cw_check, 20, 125); */
+    section = hybrid_pref_tab_add_section(tab, _("Tabs"));
+    hybrid_pref_section_add_entry(
+        main_pref_window, section, PREF_KEY_BOOL,
+        _("Show Messages In A Single Window With Tabs"), "single_chat_window",
+        _("Show Messages In A Single Window With Tabs"), NULL);
 
     /* label = gtk_label_new(_("Tab Position:")); */
     /* gtk_fixed_put(fixed, label, 20, 165); */
@@ -538,23 +533,12 @@ pref_basic_init(GtkFixed *fixed)
  * Initialize the sound settings panel.
  */
 static void
-pref_sound_init(GtkFixed *fixed)
+pref_sound_init(GtkWidget *tab)
 {
-    /* pref_window->mute_check = gtk_check_button_new_with_label(_("Mute")); */
-    /* gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pref_window->mute_check), */
-    /*                              hybrid_pref_get_boolean(NULL, "mute")); */
-    /* gtk_fixed_put(fixed, pref_window->mute_check, 20, 15); */
-}
+    GtkWidget *section = hybrid_pref_tab_add_section(tab, NULL);
 
-/**
- * Callback function for the cancel button.
- */
-static void
-cancel_cb(GtkWidget *widget, gpointer user_data)
-{
-    /* g_return_if_fail(pref_window != NULL); */
-
-    /* gtk_widget_destroy(pref_window->window); */
+    hybrid_pref_section_add_entry(main_pref_window, section, PREF_KEY_BOOL,
+                                  _("Mute"), "mute", _("Mute"), NULL);
 }
 
 /**
@@ -695,8 +679,8 @@ hybrid_pref_win_new(HybridPref *pref, const gchar *title)
     /* by connect_after to the same signal? */
     g_signal_connect(pref_win->window, "destroy",
                      G_CALLBACK(destroy_cb), pref_win);
-    g_signal_connect_swapped(pref_win->window, "response",
-                             G_CALLBACK(gtk_widget_destroy), pref_win->window);
+    /* g_signal_connect_swapped(pref_win->window, "response", */
+    /*                          G_CALLBACK(gtk_widget_destroy), pref_win->window); */
 
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(pref_win->window));
 
@@ -716,6 +700,7 @@ hybrid_pref_win_new(HybridPref *pref, const gchar *title)
 void
 hybrid_pref_create(void)
 {
+    GtkWidget *tab;
     if (main_pref_window) {
         gtk_window_present(GTK_WINDOW(main_pref_window->window));
         return;
@@ -726,7 +711,13 @@ hybrid_pref_create(void)
     g_signal_connect_after(main_pref_window->window, "destroy",
                            G_CALLBACK(main_destroy_cb), NULL);
 
+    tab = hybrid_pref_win_add_tab(main_pref_window, _("Basic Settings"));
+    pref_basic_init(tab);
+
+    tab = hybrid_pref_win_add_tab(main_pref_window, _("Sound"));
+    pref_sound_init(tab);
+
     /* gtk_widget_set_size_request(main_pref_window->window, 450, 300); */
 
-    gtk_widget_show_all(main_pref_window->window);
+    hybrid_pref_win_finish(main_pref_window);
 }
