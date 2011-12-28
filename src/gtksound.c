@@ -37,18 +37,59 @@ add_pad(GstElement *element , GstPad *pad , gpointer data)
     g_free(name);
 }
 
+static gboolean
+bus_call (GstBus     *bus,
+          GstMessage *msg,
+          gpointer    data)
+{
+    GstElement *pipeline = data;
+    
+    switch (GST_MESSAGE_TYPE (msg)) {
+    case GST_MESSAGE_EOS:
+        gst_element_set_state(pipeline, GST_STATE_NULL);
+        g_object_unref(pipeline);
+        break;
+    case GST_MESSAGE_ERROR: {
+        gchar  *debug = NULL;
+        GError *err   = NULL;
+
+        gst_message_parse_error (msg, &err, &debug);
+
+        hybrid_debug_error("sound", "Error: %s", err->message);
+        g_error_free (err);
+
+        if (debug) {
+            hybrid_debug_error("sound", "Debug details: %s\n", debug);
+            g_free (debug);
+        }
+        gst_element_set_state(pipeline, GST_STATE_NULL);
+        g_object_unref(pipeline);
+
+        break;
+    }
+    default:
+        break;
+    }
+
+    return TRUE;
+}
+
 void
 hybrid_sound_play_file(const gchar *filename) 
 {
-
-    GstElement *pipeline;
     GstElement *source, *parser, *sink;
+    GstElement *pipeline;
+    GstBus     *bus;
 
     if (hybrid_pref_get_boolean("mute")) {
         return;
     }
 
     pipeline = gst_pipeline_new("audio-player");
+
+    bus = gst_pipeline_get_bus(GST_PIPELINE (pipeline));
+    gst_bus_add_watch(bus, bus_call, pipeline);
+    gst_object_unref(bus);
 
     source = gst_element_factory_make("filesrc" , "source");
 
@@ -71,6 +112,11 @@ hybrid_sound_play_file(const gchar *filename)
         return;
     }
 
+    if (!G_IS_OBJECT(source)) {
+        g_warning("sound source is not a gtk object.");
+        return;
+    }
+
     g_object_set(G_OBJECT(source), "location",
             filename , NULL);
 
@@ -84,14 +130,13 @@ hybrid_sound_play_file(const gchar *filename)
     }
 
     gst_element_set_state(pipeline , GST_STATE_PLAYING);
-
-    g_object_unref(pipeline);
 }
 
 void
 hybrid_sound_init(gint argc, gchar **argv)
 {
     gst_init(&argc, &argv);
+
     return;
 }
 
