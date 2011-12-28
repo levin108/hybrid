@@ -23,19 +23,11 @@
 #include <gtk/gtk.h>
 #include "pref.h"
 
-typedef struct _HybridPrefWin HybridPrefWin;
-
-struct _HybridPrefWin {
+typedef struct {
     HybridPref *pref;
     GtkWidget *window;
     GtkWidget *notebook;
-};
-
-typedef struct {
-    gchar *name;
-    gchar *key;
-    gpointer data;
-} HybridPrefEntry;
+} HybridPrefWin;
 
 typedef enum {
     PREF_KEY_NONE,
@@ -46,10 +38,20 @@ typedef enum {
     PREF_KEY_MAX
 } PrefKeyType;
 
+typedef struct _HybridPrefEntry HybridPrefEntry;
+
 typedef struct {
     void (*add_entry)(GtkWidget *section, HybridPrefEntry *entry);
     void (*save)(HybridPrefEntry *entry);
+    void (*destroy)(HybridPrefEntry *entry);
 } PrefAddFuncs;
+
+struct _HybridPrefEntry {
+    gchar *name;
+    gchar *key;
+    gpointer data;
+    PrefAddFuncs *type;
+};
 
 /* Pass an NULL-terminated array of SelectOption to add_entry */
 /* in HybridPrefEntry.data when type is PREF_KEY_SELECT */
@@ -74,7 +76,6 @@ extern "C" {
                                        GtkWidget *section,
                                        PrefKeyType type,
                                        HybridPrefEntry *entry);
-
 
 /**
  * Create the preference window, if exists, just present the window.

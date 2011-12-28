@@ -29,34 +29,42 @@ static HybridPrefWin *main_pref_window = NULL;
 
 void bool_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
 void bool_pref_save(HybridPrefEntry *entry);
+void bool_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs bool_add_funcs = {
     .add_entry = bool_pref_add_entry,
-    .save = bool_pref_save
+    .save = bool_pref_save,
+    .destroy = bool_pref_destroy
 };
 
 void string_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
 void string_pref_save(HybridPrefEntry *entry);
+void string_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs string_add_funcs = {
     .add_entry = string_pref_add_entry,
     .save = string_pref_save
+    .destroy = string_pref_destroy
 };
 
 void int_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
 void int_pref_save(HybridPrefEntry *entry);
+void int_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs int_add_funcs = {
     .add_entry = int_pref_add_entry,
     .save = int_pref_save
+    .destroy = int_pref_destroy
 };
 
 void select_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry);
 void select_pref_save(HybridPrefEntry *entry);
+void select_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs select_add_funcs = {
     .add_entry = select_pref_add_entry,
     .save = select_pref_save
+    .destroy = select_pref_destroy
 };
 
 static PrefAddFuncs *pref_types[] = {
@@ -77,12 +85,22 @@ void bool_pref_save(HybridPrefEntry *entry)
 
 }
 
+void bool_pref_destroy(HybridPrefEntry *entry)
+{
+
+}
+
 void string_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
 {
 
 }
 
 void string_pref_save(HybridPrefEntry *entry)
+{
+
+}
+
+void string_pref_destroy(HybridPrefEntry *entry)
 {
 
 }
@@ -97,6 +115,11 @@ void int_pref_save(HybridPrefEntry *entry)
 
 }
 
+void int_pref_destroy(HybridPrefEntry *entry)
+{
+
+}
+
 void select_pref_add_entry(GtkWidget *section, HybridPrefEntry *entry)
 {
 
@@ -107,6 +130,88 @@ void select_pref_save(HybridPrefEntry *entry)
 
 }
 
+void select_pref_destroy(HybridPrefEntry *entry)
+{
+
+}
+
+GtkWidget*
+hybrid_pref_win_add_tab(HybridPrefWin *pref_win, const gchar *name)
+{
+    GtkWidget *page;
+    GtkWidget *label;
+
+    page = gtk_vbox_new(FALSE, 0);
+    label = gtk_label_new(name);
+    gtk_notebook_append_page(GTK_NOTEBOOK(pref_window->notebook),
+                             page, label);
+
+    return page;
+}
+
+GtkWidget*
+hybrid_pref_tab_add_section(GtkWidget *tab, const gchar *name)
+{
+    GtkWidget *child;
+    GtkWidget *frame;
+
+    frame = gtk_frame_new(name);
+    child = gtk_table_new(1, 1, FALSE);
+    gtk_container_add(GTK_CONTAINER(frame), child);
+    gtk_container_add(GTK_CONTAINER(tab), frame);
+
+    return child;
+}
+
+static void
+entry_destroy_cb(HybridPrefEntry *entry)
+{
+    if (entry->type->destroy)
+        entry->type->destroy(entry);
+    if (entry->name)
+        g_free(entry->name);
+    if (entry->key)
+        g_free(entry->key);
+    g_free(entry);
+}
+
+static void
+entry_response_cb(GtkDialog *dialog, gint response_id, HybridPrefEntry *entry)
+{
+    if (response_id == GTK_RESPONSE_OK)
+        entry->type->save(entry);
+}
+
+void
+hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
+                              PrefKeyType type, HybridPrefEntry *entry0)
+{
+    if (type >= PREF_KEY_MAX || type < PREF_KEY_NONE) {
+        hybrid_debug_error("pref_add_entry", "Unknown type %d", type);
+        return;
+    }
+
+    if (type == PREF_KEY_NONE) {
+        hybrid_debug_error("pref_add_entry",
+                           "Doesn't support custom type yet.");
+        return;
+    }
+
+    PrefAddFuncs *funcs = pref_types[type];
+
+    HybridPrefEntry *entry = g_new0(HybridPrefEntry, 1);
+    entry->name = entry0->name ? g_strdup(entry0->name) : NULL;
+    entry->key = entry0->key ? g_strdup(entry0->key) : NULL;
+    entry->data = entry0->data;
+    entry->type = funcs;
+
+    funcs->add_entry(section, entry);
+
+    g_signal_connect(pref_win->window, "response",
+                     G_CALLBACK(entry_response_cb), entry);
+    g_signal_connect_swapped(section, "destroy",
+                             G_CALLBACK(entry_destroy_cb), entry);
+}
 
 
 enum {
