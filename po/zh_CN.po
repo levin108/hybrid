@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
 "POT-Creation-Date: 2011-12-28 15:54-0500\n"
-"PO-Revision-Date: 2011-12-28 15:56-0500\n"
+"PO-Revision-Date: 2011-12-28 16:20-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -245,7 +245,7 @@ msgstr "聊天主题:"
 
 #: src/preference.c:413
 msgid "Chat Window"
-msgstr "<b>聊天窗口</b>"
+msgstr "聊天窗口"
 
 #: src/conv.c:1123
 msgid "Chat logs"
