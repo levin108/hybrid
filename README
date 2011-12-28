@@ -2,15 +2,18 @@ Hybrid is a lightweight IM framework, currently supports China Mobile Fetion pro
 
 1) license
 
-	Hybrid is a free software released under GPLv2.
+        Hybrid is a free software released under GPLv2.
 
-1) install
+2) install
 
-	$git clone git@github.com:levin108/hybrid.git
+    [ArchLinux AUR Package](https://aur.archlinux.org/packages.php?ID=51159)
 
-	$cd hybrid
+    From Source
+        $git clone git@github.com:levin108/hybrid.git
+
+        $cd hybrid
         $mkdir -p build
         $cd build
-	$cmake ..
-	$make
-	#make install
+        $cmake ..
+        $make
+        #make install
