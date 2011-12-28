@@ -1,19 +1,22 @@
+## Hybrid
+
 Hybrid is a lightweight IM framework, currently supports China Mobile Fetion protocol and XMPP protocol.
 
-1) license
+### License
 
-        Hybrid is a free software released under GPLv2.
+Hybrid is a free software released under GPLv2.
 
-2) install
+### Install
 
-    [ArchLinux AUR Package](https://aur.archlinux.org/packages.php?ID=51159)
+#### On Arch Linux
+[AUR Package](https://aur.archlinux.org/packages.php?ID=51159)
 
-    From Source
-        $git clone git@github.com:levin108/hybrid.git
+#### Everywhere else for now (From Source)
+    $git clone git@github.com:levin108/hybrid.git
 
-        $cd hybrid
-        $mkdir -p build
-        $cd build
-        $cmake ..
-        $make
-        #make install
+    $cd hybrid
+    $mkdir -p build
+    $cd build
+    $cmake ..
+    $make
+    #make install
