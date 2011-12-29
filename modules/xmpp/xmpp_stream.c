@@ -259,7 +259,7 @@ stream_recv_cb(gint sk, XmppStream *stream)
 
             hybrid_debug_error("xmpp", "stream read io error.");
             return TRUE;
-            
+
         } else if (0 == n) {
 
             hybrid_debug_error("xmpp", "connection closed by server.");

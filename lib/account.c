@@ -76,7 +76,7 @@ hybrid_account_init(void)
     if (!(root = xmlnode_root_from_file(account_file))) {
         const gchar *root_name = "<accounts></accounts>";
         hybrid_debug_info("account", "accounts.xml doesn't exist or"
-                "in bad format, create a new one.");
+                          "in bad format, create a new one.");
         root = xmlnode_root(root_name, strlen(root_name));
         flush ^= 1;
     }
@@ -93,8 +93,9 @@ hybrid_account_init(void)
                 !xmlnode_has_prop(node, "user") ||
                 !xmlnode_has_prop(node, "proto")) {
                 hybrid_debug_error("account", "accounts.xml is in bad format,"
-                        "please try to remove ~/.config/hybrid/accounts.xml,"
-                        "and then restart hybrid :)");
+                                   "please try to remove "
+                                   "~/.config/hybrid/accounts.xml,"
+                                   "and then restart hybrid :)");
                 xmlnode_free(root);
                 return;
             }
