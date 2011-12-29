@@ -258,13 +258,11 @@ stream_recv_cb(gint sk, XmppStream *stream)
         if ((n = hybrid_ssl_read(stream->ssl, buf, sizeof(buf) - 1)) == -1) {
 
             hybrid_debug_error("xmpp", "stream read io error.");
-            hybrid_ssl_connection_destory(stream->ssl);
             return TRUE;
             
         } else if (0 == n) {
 
             hybrid_debug_error("xmpp", "connection closed by server.");
-            hybrid_ssl_connection_destory(stream->ssl);
             return FALSE;
         }
     }
