@@ -409,6 +409,12 @@ response_cb(GtkDialog *dialog, gint response_id, HybridPrefWin *pref_win)
 
 void hybrid_pref_win_finish(HybridPrefWin *pref_win)
 {
+    GdkGeometry geometry = {
+        .min_width = 450,
+        .min_height = 300
+    };
+    gtk_window_set_geometry_hints(pref_win->window, NULL,
+                                  &geometry, GDK_HINT_MIN_SIZE);
     g_signal_connect(pref_win->window, "response",
                      G_CALLBACK(response_cb), pref_win);
     gtk_widget_show_all(pref_win->window);
