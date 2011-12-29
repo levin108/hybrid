@@ -447,7 +447,8 @@ rewrite:
     case SSL_ERROR_NONE:
         if (l != len) {
             hybrid_debug_error("ssl",
-                               "ssl write %d bytes but only %d byte succeed.");
+                               "ssl write %d bytes but only %d byte succeed.",
+                               len, l);
             return -1;
         }
         return l;
