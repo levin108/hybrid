@@ -573,7 +573,5 @@ hybrid_pref_create(void)
     tab = hybrid_pref_win_add_tab(main_pref_window, _("Sound"));
     pref_sound_init(tab);
 
-    gtk_widget_set_size_request(main_pref_window->window, 450, 300);
-
     hybrid_pref_win_finish(main_pref_window);
 }
