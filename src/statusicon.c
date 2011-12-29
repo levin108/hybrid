@@ -188,16 +188,11 @@ status_icon_activate_cb(GtkWidget *widget, gpointer user_data)
     if (GTK_WIDGET_VISIBLE(hybrid_window)) {
 
         if (!gtk_window_is_active(GTK_WINDOW(hybrid_window))) {
-
             gtk_window_present(GTK_WINDOW(hybrid_window));
-
             return;
         }
-
         gtk_widget_hide(hybrid_window);
-
     } else {
-
         gtk_widget_show(hybrid_window);
     }
 }
@@ -260,11 +255,8 @@ notify_cb(GtkWidget *widget, gpointer user_data)
     toggled = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
     if (toggled) {
-
         hybrid_pref_set_boolean(NULL, "close_notify", TRUE);
-
     } else {
-
         hybrid_pref_set_boolean(NULL, "close_notify", FALSE);
     }
 
