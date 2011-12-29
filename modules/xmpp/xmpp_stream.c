@@ -246,6 +246,11 @@ stream_recv_cb(gint sk, XmppStream *stream)
         if ((n = recv(sk, buf, sizeof(buf) - 1, 0)) == -1) {
 
             hybrid_debug_error("xmpp", "init stream error.");
+            close(sk);
+            return FALSE;
+        } else if (0 == n) {
+            hybrid_debug_error("xmpp", "ssl connection closed by server.");
+            close(sk);
             return FALSE;
         }
     } else {
@@ -254,6 +259,7 @@ stream_recv_cb(gint sk, XmppStream *stream)
 
             hybrid_debug_error("xmpp", "stream read io error.");
             return TRUE;
+            
         } else if (0 == n) {
 
             hybrid_debug_error("xmpp", "connection closed by server.");
