@@ -116,7 +116,7 @@ fetion_sip_get_code(const gchar *sipmsg)
     g_return_val_if_fail(sipmsg != NULL, 0);
 
     for (pos = (gchar*)sipmsg; *pos && *pos != ' '; pos ++);
-    
+
     if (*pos == '\0') {
         return 0;
     }
@@ -171,7 +171,7 @@ get_sid_from_sipuri(const gchar *sipuri)
     pos ++;
 
     for (pos1 = pos; *pos1 && *pos1 != '@'; pos1 ++);
-    
+
     res = g_strndup(pos, pos1 - pos);
 
     return res;
@@ -278,7 +278,7 @@ fetion_sip_to_string(fetion_sip *sip, const gchar *body)
     return res;
 }
 
-void 
+void
 fetion_sip_add_header(fetion_sip *sip, sip_header *header)
 {
     sip_header *pos = sip->header;
@@ -310,7 +310,7 @@ sip_authentication_header_create(const gchar *response)
     value = g_strjoin("", start, response, end, NULL);
     header = sip_header_create("A", value);
     g_free(value);
-    
+
     return header;
 }
 
@@ -685,7 +685,7 @@ sip_parse_sync(fetion_account *account, const gchar *sipmsg)
         action = xmlnode_prop(node, "action");
 
         if (g_strcmp0(action, "update") == 0) {
-            
+
             if (!xmlnode_has_prop(node, "user-id") ||
                 !xmlnode_has_prop(node, "relation-status")) {
 
@@ -815,7 +815,7 @@ sip_parse_presence(fetion_account *ac, const gchar *sipmsg)
         }
 
         if ((pnode = xmlnode_find(node, "pr"))) {
-            
+
             if (xmlnode_has_prop(pnode, "b")) {
                 temp = xmlnode_prop(pnode, "b");
                 buddy->state = atoi(temp);

@@ -29,7 +29,7 @@ struct _EventData {
     gpointer   user_data;
 };
 
-static gboolean 
+static gboolean
 read_event_cb(GIOChannel *source, GIOCondition condition, gpointer user_data)
 {
     gboolean   ret;
@@ -80,9 +80,9 @@ ssl_recv_cb(gint sk, gpointer user_data)
     return isc->recv_cb(isc, isc->recv_data);
 }
 
-guint 
+guint
 hybrid_ssl_event_add(HybridSslConnection *isc, ssl_callback func,
-                     gpointer user_data) 
+                     gpointer user_data)
 {
     g_return_val_if_fail(isc != NULL, 0);
     g_return_val_if_fail(func != NULL, 0);

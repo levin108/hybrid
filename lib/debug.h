@@ -27,9 +27,18 @@
 extern "C" {
 #endif
 
-void hybrid_debug_info(const gchar *relm, const gchar *format, ...);
+/* format cannot be a variable now. (this should always be the case.) */
 
-void hybrid_debug_error(const gchar *relm, const gchar *format, ...);
+#define hybrid_debug_print(f, pre, post, relm, format, args...)   \
+    fprintf(f, pre" <%s> "post" "format"\n", relm, ##args)
+
+#define hybrid_debug_info(relm, format, args...)                        \
+    hybrid_debug_print(stdout, "\e[35m\e[1mINFO", "\e[0m", relm, format, ##args)
+#define hybrid_debug_error(relm, format, args...)                       \
+    hybrid_debug_print(stderr, "\e[31m\e[1mERROR ***", "***\e[0m",      \
+                       relm, format, ##args)
+#define hybrid_debug_warning(relm, format, args...)                \
+    hybrid_debug_print(stdout, "\e[35m\e[1mWARNING", "\e[0m", relm, format, ##args)
 
 #ifdef __cplusplus
 }

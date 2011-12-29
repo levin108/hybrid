@@ -23,49 +23,49 @@
 
 #include <glib.h>
 
-typedef struct _HybridAccountVariable	 HybridAccountVariable;
-typedef struct _HybridAccount			 HybridAccount;
+typedef struct _HybridAccountVariable    HybridAccountVariable;
+typedef struct _HybridAccount            HybridAccount;
 typedef enum _HybridConnectionStatusType HybridConnectionStatusType;
-typedef enum _HybridAccountVariableType	 HybridAccountVariableType;
+typedef enum _HybridAccountVariableType  HybridAccountVariableType;
 
 #include "util.h"
 #include "config.h"
 #include "module.h"
 
 struct _HybridAccount {
-	gchar *username;
-	gchar *password;
-	gchar *nickname;
-	gchar *status_text;
-	gint   state;               /**< online status. */
-	gint   connect_state;       /**< connection status. */
-	gint   keep_alive_source;   /**< source id of the keep alive. */
+    gchar *username;
+    gchar *password;
+    gchar *nickname;
+    gchar *status_text;
+    gint   state;               /**< online status. */
+    gint   connect_state;       /**< connection status. */
+    gint   keep_alive_source;   /**< source id of the keep alive. */
 
-	gint enabled;               /**< whether the account is enabled. */
+    gint enabled;               /**< whether the account is enabled. */
 
-	guchar *icon_data;          /**< binary data of the icon. */
-	gint    icon_data_len;      /**< size of the binary data. */
-	gchar  *icon_crc;           /**< checksum of the icon */
-	gchar  *icon_name;          /**< file name of the local file. */
+    guchar *icon_data;          /**< binary data of the icon. */
+    gint    icon_data_len;      /**< size of the binary data. */
+    gchar  *icon_crc;           /**< checksum of the icon */
+    gchar  *icon_name;          /**< file name of the local file. */
 
-	GtkWidget   *account_menu;
-	GtkWidget   *enable_menu;
-	GtkWidget   *enable_menu_id;
+    GtkWidget   *account_menu;
+    GtkWidget   *enable_menu;
+    GtkWidget   *enable_menu_id;
     GtkWidget   *change_state_menu;
     GtkWidget   *login_panel;
-	GtkWidget   *login_tips;
-	GtkTreeIter  login_iter;
+    GtkWidget   *login_tips;
+    GtkTreeIter  login_iter;
 
-	gpointer protocol_data;
+    gpointer protocol_data;
 
-	GSList *action_list;        /* list of action menus. */
-	GSList *option_list;        /* list of login options. */
+    GSList *action_list;        /* list of action menus. */
+    GSList *option_list;        /* list of login options. */
 
-	GHashTable *buddy_list;
-	GHashTable *group_list;
+    GHashTable *buddy_list;
+    GHashTable *group_list;
 
     HybridConfig *config;
-	HybridModule *proto;
+    HybridModule *proto;
 };
 
 enum _HybridAccountVariableType {
@@ -114,7 +114,7 @@ void hybrid_account_init(void);
 
 /**
  * Get an account from the account list, if there's
- * no matching node found, create one in the memory, 
+ * no matching node found, create one in the memory,
  * and append it to the account count.
  *
  * @param proto_name The name of the protocol.
@@ -126,7 +126,7 @@ HybridAccount *hybrid_account_get(const gchar *proto_name,
                                   const gchar *username);
 
 /**
- * Synchronize the account information in the memory with 
+ * Synchronize the account information in the memory with
  * that in the local cache file which is in fact a XML file.
  * The function first find the matching 'account' node, if found,
  * update it, orelse create a new one.
@@ -237,7 +237,7 @@ void hybrid_account_set_enabled(HybridAccount *account, gboolean enabled);
 
 /**
  * Get the checksum of the account's icon.
- * 
+ *
  * @param account The account.
  *
  * @return The checksum.
@@ -256,7 +256,7 @@ void hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
                              gint icon_data_len, const gchar *icon_crc);
 
 /**
- * Enable an account, it will create a login tips panel in the 
+ * Enable an account, it will create a login tips panel in the
  * bottom of the buddy list, and then call the protocol login function.
  *
  * @param account The account.
@@ -264,8 +264,8 @@ void hybrid_account_set_icon(HybridAccount *account, const guchar *icon_data,
 void hybrid_account_enable(HybridAccount *account);
 
 /**
- * Close an account. Remove it from the blist panel. Free the 
- * memory of the buddis and groups. But dont free the memory of 
+ * Close an account. Remove it from the blist panel. Free the
+ * memory of the buddis and groups. But dont free the memory of
  * the account. The call the protocol close callback function.
  *
  * @param account The account the close.
@@ -284,7 +284,7 @@ void hybrid_account_enable_all();
 
 /**
  * Close an account and give an error notification.
- * 
+ *
  * @param account The account to close.
  * @param reason The error reason message.
  */
@@ -295,7 +295,7 @@ void hybrid_account_error_reason(HybridAccount *account, const gchar *reason);
  * then the local buddy list stored on the disk would be loaded. Make sure
  * to set the status to CONNECTED after logining successfully, orelse you can
  * not add buddies using hybrid_blist_add_buddy().
- * 
+ *
  * Note that before calling this function, you should make sure that you have
  * set nickname,mood phrase, and state for the account.
  *
@@ -340,7 +340,7 @@ HybridAccountVariable *hybrid_variable_create(HybridAccountVariableType	 type,
  * @param variable The variable object to destroy.
  */
 void hybrid_variable_destroy(HybridAccountVariable *variable);
-    
+
 /**
  * Set the default value for a string variable.
  *
@@ -368,7 +368,7 @@ void hybrid_variable_set_bool_default(HybridAccountVariable *var,
                                       gboolean               defalut_value);
 
 /**
- * Set the string value for a user-defined variable. 
+ * Set the string value for a user-defined variable.
  *
  * @param account The account context.
  * @param name    The name of the string variable.
@@ -390,7 +390,7 @@ const gchar* hybrid_account_get_string_variable(HybridAccount *account,
 												const gchar	  *name);
 
 /**
- * Set the boolean value for a user-defined variable. 
+ * Set the boolean value for a user-defined variable.
  *
  * @param account The account context.
  * @param name    The name of the boolean variable.
@@ -410,10 +410,10 @@ void hybrid_account_set_bool_variable(HybridAccount	*account,
  */
 gboolean hybrid_account_get_bool_variable(HybridAccount	*account,
 										  const gchar	*name);
-	
-	
+
+
 /**
- * Set the integer value for a user-defined variable. 
+ * Set the integer value for a user-defined variable.
  *
  * @param account The account context.
  * @param name    The name of the integer variable.
@@ -422,7 +422,7 @@ gboolean hybrid_account_get_bool_variable(HybridAccount	*account,
 void hybrid_account_set_int_variable(HybridAccount *account,
 									 const gchar   *name,
 									 gint			value);
-	
+
  /**
  * Get the value of an user-defined integer variable.
  *

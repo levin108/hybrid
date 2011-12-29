@@ -305,7 +305,7 @@ hybrid_info_notify(HybridAccount *account, HybridNotifyInfo *info,
 
         hybrid_debug_error("info", "can not find buddy with id :\'%s\'",
                 buddy_id);
-        
+
         return;
     }
 
@@ -328,16 +328,16 @@ buddy_ok:
             value_escaped = NULL;
         }
 
-        name_markup = g_strdup_printf("<b>%s:</b>", name_escaped);    
+        name_markup = g_strdup_printf("<b>%s:</b>", name_escaped);
 
         gtk_list_store_append(GTK_LIST_STORE(model), &iter);
         gtk_list_store_set(GTK_LIST_STORE(model), &iter,
                 HYBRID_INFO_NAME_COLUMN, name_markup,
                 HYBRID_INFO_VALUE_COLUMN, value_escaped,
                 HYBRID_INFO_PIXBUF_COLUMN, item->pixbuf,
-                HYBRID_INFO_VALUE_COLUMN_VISIBLE, 
+                HYBRID_INFO_VALUE_COLUMN_VISIBLE,
                 item->type == HYBRID_INFO_ITEM_TYPE_TEXT ? TRUE : FALSE,
-                HYBRID_INFO_PIXBUF_COLUMN_VISIBLE, 
+                HYBRID_INFO_PIXBUF_COLUMN_VISIBLE,
                 item->type == HYBRID_INFO_ITEM_TYPE_PIXBUF ? TRUE : FALSE,
                 -1);
 

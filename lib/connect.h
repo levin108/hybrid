@@ -66,7 +66,7 @@ extern "C" {
  *
  * @param hostname Hostname of the destination host.
  * @param port Port of the destination host.
- * @param func Callback function to call when connection 
+ * @param func Callback function to call when connection
  *        is established.
  * @param user_data User-specified data.
  *
@@ -82,7 +82,7 @@ HybridConnection* hybrid_proxy_connect(const gchar *hostname, gint port,
  *
  * @param hostname  Hostname of the destination host.
  * @param port      Port of the destination host.
- * @param func      Callback function to call when connection 
+ * @param func      Callback function to call when connection
  *                  is established.
  * @param user_data User-specified data.
  *
@@ -97,7 +97,7 @@ HybridSslConnection* hybrid_ssl_connect(const gchar *hostname, gint port,
  * Make a SSL hand-shake on the established tcp connection.
  *
  * @param sk        Socket file discriptor of the established tcp connection.
- * @param func      Callback function to call when connection 
+ * @param func      Callback function to call when connection
  *                  is established.
  * @param user_data User-specified data.
  *
@@ -149,7 +149,7 @@ void hybrid_ssl_connection_destory(HybridSslConnection *conn);
  * Parse the http response code from the response string.
  *
  * @param http_response The response string from the server.
- * 
+ *
  * @return The code.
  */
 gint hybrid_get_http_code(const gchar *http_response);
@@ -158,7 +158,7 @@ gint hybrid_get_http_code(const gchar *http_response);
  * Parse the body length of the http response string.
  *
  * @param http_response The response string from the server.
- * 
+ *
  * @return The length.
  */
 gint hybrid_get_http_length(const gchar *http_response);

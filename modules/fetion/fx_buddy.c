@@ -72,7 +72,7 @@ fetion_buddy_scribe(fetion_account *ac)
 
     hybrid_debug_info("fetion", "send:\n%s", res);
 
-    if (send(ac->sk, res, strlen(res), 0) == -1) { 
+    if (send(ac->sk, res, strlen(res), 0) == -1) {
         g_free(res);
 
         return HYBRID_ERROR;
@@ -229,7 +229,7 @@ fetion_buddy_move_to(fetion_account *ac, const gchar *userid,
 }
 
 fetion_buddy*
-fetion_buddy_parse_info(fetion_account *ac, 
+fetion_buddy_parse_info(fetion_account *ac,
                         const gchar *userid, const gchar *sipmsg)
 {
     xmlnode      *root;
@@ -451,7 +451,7 @@ buddy_add_cb(fetion_account *account, const gchar *sipmsg,
     }
 
     if (xmlnode_has_prop(node, "status-code")) {
-        
+
         value = xmlnode_prop(node, "status-code");
 
         code = atoi(value);
@@ -482,7 +482,7 @@ buddy_add_cb(fetion_account *account, const gchar *sipmsg,
         }
 
         if (code == 486) {
-            
+
             hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
                     "You have reached the daily limit of adding buddies,\n"
                     "please try another day.");
@@ -540,7 +540,7 @@ add_buddy_ok:
 add_buddy_unknown_err:
     hybrid_message_box_show(HYBRID_MESSAGE_WARNING,
             "Add buddy error. Unknown reason.");
-    
+
     return HYBRID_ERROR;
 }
 
@@ -644,7 +644,7 @@ portrait_recv_cb(gint sk, gpointer user_data)
 
     if ((n = recv(sk, buf, sizeof(buf), 0)) == -1) {
         hybrid_debug_error("fetion", "get portrait for \'%s\':%s",
-                trans->buddy ? trans->buddy->sid : trans->ac->sid, 
+                trans->buddy ? trans->buddy->sid : trans->ac->sid,
                 strerror(errno));
         return FALSE;
     }
@@ -659,13 +659,13 @@ portrait_recv_cb(gint sk, gpointer user_data)
         }
 
         if (hybrid_get_http_code(trans->data) != 200) {
-            /* 
+            /*
              * Note that we got no portrait, but we still need
-             * to set buddy icon, just for the portrait checksum, we 
+             * to set buddy icon, just for the portrait checksum, we
              * set it default to "0" instead of leaving it NULL,
              * so that in the next login, we just check the changes
-             * of the buddy's checksum to determine whether to fetch a 
-             * portrait from the server. 
+             * of the buddy's checksum to determine whether to fetch a
+             * portrait from the server.
              */
             if (trans->portrait_type == PORTRAIT_TYPE_BUDDY) {
                 hybrid_blist_set_buddy_icon(imbuddy, NULL, 0,
@@ -898,7 +898,7 @@ fetion_buddy_handle_request(fetion_account *ac, const gchar *sipuri,
     g_return_if_fail(groupid != NULL);
 
     sip = ac->sip;
-    
+
     fetion_sip_set_type(sip, SIP_SERVICE);
     eheader = sip_event_header_create(SIP_EVENT_HANDLECONTACTREQUEST);
 
@@ -954,11 +954,11 @@ generate_buddy_move_body(const gchar *userid, const gchar *groupid)
     xmlnode     *root;
     xmlnode     *node;
     gchar       *res;
-    
+
     body = "<args></args>";
 
     root = xmlnode_root(body, strlen(body));
-    
+
     node = xmlnode_new_child(root, "contacts");
     node = xmlnode_new_child(node, "contact");
 
@@ -979,7 +979,7 @@ generate_remove_buddy_body(const gchar *userid)
     xmlnode     *root;
     xmlnode     *node;
     gchar       *res;
-    
+
     body = "<args></args>";
 
     root = xmlnode_root(body, strlen(body));

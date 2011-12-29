@@ -42,7 +42,7 @@ struct timeout_data {
     gchar *script;
 };
 
-void 
+void
 hybrid_chat_set_webkit_ops(void)
 {
     hybrid_conv_set_chat_text_ops(&webkit_ops);
@@ -166,7 +166,7 @@ hybrid_chat_webkit_create(void)
 gboolean
 timeout_cb(struct timeout_data *data)
 {
-#ifdef USE_WEBKIT   
+#ifdef USE_WEBKIT
     WebKitLoadStatus status;
 
     g_object_get(data->webkit, "load-status", &status, NULL);
@@ -274,18 +274,18 @@ hybrid_chat_webkit_notify(GtkWidget *textview, const gchar *text, gint type)
     g_object_get(textview, "load-status", &status, NULL);
 
     script = g_strdup_printf("notify(\"%s\")", text);
-    
+
     if (WEBKIT_LOAD_FINISHED                        != status    &&
         WEBKIT_LOAD_FIRST_VISUALLY_NON_EMPTY_LAYOUT != status) {
         data                                         = g_new0(struct timeout_data, 1);
         data->webkit                                 = textview;
         data->script                                 = script;
-        
+
         g_timeout_add_seconds(0, (GSourceFunc)timeout_cb, data);
 
     } else {
         webkit_web_view_execute_script(WEBKIT_WEB_VIEW(textview), script);
         g_free(script);
     }
-#endif    
+#endif
 }

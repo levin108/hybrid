@@ -82,7 +82,7 @@ void hybrid_config_destroy(HybridConfig *config);
 /**
  * Flush the blist cache, synchronize the cache in memory
  * with the local xml file.
- * 
+ *
  * @param blist_cache The cache to flush.
  */
 void hybrid_blist_cache_flush();

@@ -43,9 +43,9 @@ extern "C" {
 
 /**
  * The transaction context is to handle the sip response, when we
- * start a new sip request, we create a new transaction, and 
+ * start a new sip request, we create a new transaction, and
  * push it into the account's transaction queue, when a response
- * comes, we iterate the queue to find the transaction to whom the 
+ * comes, we iterate the queue to find the transaction to whom the
  * response belongs, and then use the transaction to process the response
  * sipmsg, note that there's an callback function in the transaction,
  * we just use it to process the response message. But how we get out
@@ -121,7 +121,7 @@ void transaction_set_data(fetion_transaction *trans, gpointer data);
  * @param timeout_cb The callback function of the timeout event.
  * @param user_data  User-specified data for callback function.
  */
-void transaction_set_timeout(fetion_transaction *trans, 
+void transaction_set_timeout(fetion_transaction *trans,
 					GSourceFunc timeout_cb, gpointer user_data);
 
 /**

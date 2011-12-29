@@ -257,7 +257,7 @@ hybrid_account_panel_create()
     account_panel = panel;
 
     panel->window = hybrid_create_window(_("Manage Account"), NULL,
-                    GTK_WIN_POS_CENTER, FALSE);
+                                         GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(panel->window, 500, 300);
     g_object_set(panel->window, "border-width", 8, NULL);
     g_signal_connect(panel->window, "destroy",
@@ -516,7 +516,7 @@ bind_combobox_to_edit(HybridAccountPanel     *panel,
     if (!gtk_tree_model_get_iter_first(model, &iter)) {
         return;
     }
-    
+
     /* This is a modify action, not an add action, we disable
        the protocol combo box, we don't allow users to modify
        the protocol of a specified account. */
@@ -527,7 +527,7 @@ bind_combobox_to_edit(HybridAccountPanel     *panel,
         if (g_strcmp0(name, module->info->name) == 0) {
             gtk_combo_box_set_active_iter(GTK_COMBO_BOX(epanel->proto_combo),
                                           &iter);
-            
+
             g_free(name);
             break;
         }
@@ -649,7 +649,7 @@ paint_edit_area(HybridAccountEditPanel *panel, gboolean is_add)
 
     for (pos = module->option_list, i = 4; pos; pos = pos->next, i ++) {
         var = (HybridAccountVariable*)pos->data;
-        
+
         if (VARIABLE_TYPE_STRING == var->type ||
             VARIABLE_TYPE_INTEGER == var->type) {
 
@@ -664,7 +664,7 @@ paint_edit_area(HybridAccountEditPanel *panel, gboolean is_add)
 
             gchar       *tmp           = NULL;
             const gchar *default_value = NULL;
-            
+
             if (VARIABLE_TYPE_INTEGER == var->type) {
 
                 tmp = g_strdup_printf("%d", var->int_value);
@@ -673,12 +673,12 @@ paint_edit_area(HybridAccountEditPanel *panel, gboolean is_add)
 
                 align = gtk_alignment_new(0.0, 0.5, 0.0, 0.0);
                 gtk_container_add(GTK_CONTAINER(align), entry);
-                
+
                 gtk_table_attach(GTK_TABLE(table), align,
                                  1, 2, i, i + 1, GTK_FILL, GTK_FILL, 5, 5);
             } else {
                 default_value = var->str_value;
-                
+
                 gtk_widget_set_size_request(entry, 150, 25);
                 gtk_table_attach(GTK_TABLE(table), entry,
                                  1, 2, i, i + 1, GTK_FILL, GTK_FILL, 5, 5);
@@ -708,7 +708,7 @@ paint_edit_area(HybridAccountEditPanel *panel, gboolean is_add)
 
     g_free(name);
 
-    
+
     if (!is_add) {
         bind_account_to_edit(panel->parent, panel);
     }
@@ -743,15 +743,15 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
         gtk_window_present(GTK_WINDOW(panel->window));
         return panel;
     }
-    
+
     panel = g_new0(HybridAccountEditPanel, 1);
 
     panel->is_add      = is_add;
     panel->parent      = parent;
     parent->edit_panel = panel;
     panel->window      = hybrid_create_window(
-                is_add ? _("Add a new account") : _("Edit the account"),
-                NULL, GTK_WIN_POS_CENTER, TRUE);
+        is_add ? _("Add a new account") : _("Edit the account"),
+        NULL, GTK_WIN_POS_CENTER, TRUE);
     gtk_container_set_border_width(GTK_CONTAINER(panel->window), 8);
     gtk_widget_set_size_request(panel->window, 300, 400);
     g_signal_connect(panel->window, "destroy", G_CALLBACK(edit_destroy), panel);
@@ -773,7 +773,7 @@ create_account_edit_panel(HybridAccountPanel *parent, gboolean is_add)
     label              = gtk_label_new(_("Protocol:"));
     proto_model        = create_protocol_model();
     panel->proto_combo = gtk_combo_box_new_with_model(proto_model);
-    
+
     gtk_combo_box_set_active(GTK_COMBO_BOX(panel->proto_combo), 0);
     g_object_unref(proto_model);
 
@@ -937,7 +937,7 @@ action_cb(GtkWidget *widget, HybridAction *action)
     if (!account->enabled) {
         return;
     }
-    
+
     if (action->callback) {
         action->callback(action);
     }

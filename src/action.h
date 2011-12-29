@@ -28,9 +28,9 @@ typedef struct _HybridAction HybridAction;
 typedef void (*ActionCallback)(HybridAction *);
 
 struct _HybridAction {
-	ActionCallback callback;
-	gchar *text;
-	HybridAccount *account;
+    ActionCallback callback;
+    gchar *text;
+    HybridAccount *account;
 };
 
 /**
@@ -43,7 +43,7 @@ struct _HybridAction {
  * @return The action menu created.
  */
 HybridAction *hybrid_action_create(HybridAccount *account,
-				const gchar *text, ActionCallback callback);
+                                   const gchar *text, ActionCallback callback);
 
 /**
  * Destroy an action menu.

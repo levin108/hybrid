@@ -56,7 +56,7 @@ hybrid_confirm_window_create(HybridAccount           *account,
     con->ok_func     = ok_func;
     con->cancel_func = cancel_func;
     con->user_data   = user_data;
-    
+
     con->window = hybrid_create_window(_("Confirm Code"), NULL,
                                        GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(con->window, 300, 200);
@@ -73,7 +73,7 @@ hybrid_confirm_window_create(HybridAccount           *account,
     gtk_label_set_markup(GTK_LABEL(label),
                          _("<i>Please input the following code in the picture:</i>"));
     gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 2, 0, 1);
-    
+
     label = gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(label), _("<i>Code:</i>"));
     gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
@@ -104,6 +104,6 @@ hybrid_confirm_window_create(HybridAccount           *account,
     g_signal_connect(button, "clicked", G_CALLBACK(cancel_cb), con);
 
     gtk_widget_show_all(con->window);
-    
+
     return con;
 }

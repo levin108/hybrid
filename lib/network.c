@@ -24,7 +24,7 @@
 
 static GHashTable *host_hash = NULL;
 
-gint 
+gint
 resolve_host(const gchar *hostname, gchar *ip)
 {
     g_return_val_if_fail(hostname != NULL, HYBRID_ERROR);
@@ -38,7 +38,7 @@ resolve_host(const gchar *hostname, gchar *ip)
     hybrid_debug_info("dns", "resolve host \'%s\'", hostname);
 
     if (host_hash && (hash_value = g_hash_table_lookup(host_hash, hostname))) {
-        strcpy(ip, (gchar*)hash_value);    
+        strcpy(ip, (gchar*)hash_value);
         hybrid_debug_info("dns", "ip of \'%s\' is \'%s\'[cached]", hostname, ip);
         return HYBRID_OK;
     }
@@ -53,16 +53,16 @@ resolve_host(const gchar *hostname, gchar *ip)
         addr = (struct sockaddr_in*)rp->ai_addr;
 
         memset(buf, 0, sizeof(buf));
-        
+
         if (!inet_ntop(AF_INET, (void*)&addr->sin_addr, buf, 16)) {
 
             hybrid_debug_error("dns", "reslove host \'%s\' failed when"
                                " transforming binary ip address to doted ip address",
                                hostname);
-            
+
             continue;
         }
-        
+
         if (g_strcmp0(buf, "0.0.0.0") == 0    ||
             g_strcmp0(buf, "127.0.0.1")          == 0) {
             continue;

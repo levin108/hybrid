@@ -35,7 +35,7 @@ close_cb(GtkWidget *widget, gpointer user_data)
     HybridNotify *notify = (HybridNotify*)user_data;
 
     gtk_widget_destroy(notify->window);
-    
+
     g_free(notify);
 }
 
@@ -58,7 +58,7 @@ hybrid_notify_create(HybridAccount *account, const gchar *title)
     notify->account = account;
 
     notify->window = hybrid_create_window(title ? title : _("Notification"),
-                        NULL, GTK_WIN_POS_CENTER, FALSE);
+                                          NULL, GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(notify->window, 400, 250);
 
     vbox = gtk_vbox_new(FALSE, 0);
@@ -193,10 +193,10 @@ hybrid_notify_popup(GdkPixbuf *pixbuf, const gchar *title,
         const gchar *summary)
 {
 #ifdef USE_LIBNOTIFY
-    if (hybrid_pref_get_boolean("close_notify")) {
+    if (hybrid_pref_get_boolean(NULL, "close_notify")) {
         return;
     }
-    
+
     if (!notification) {
     #ifdef LIBNOTIFY_OLD
         notification = notify_notification_new(title, summary, NULL, NULL);

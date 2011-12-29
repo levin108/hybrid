@@ -21,7 +21,7 @@
 #include "action.h"
 
 HybridAction*
-hybrid_action_create(HybridAccount *account, const gchar *text, 
+hybrid_action_create(HybridAccount *account, const gchar *text,
                      ActionCallback callback)
 {
     HybridAction *action;

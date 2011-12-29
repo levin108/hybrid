@@ -34,14 +34,14 @@
 static HybridChatTextOps *text_ops = NULL;
 
 /* The list of the currently opened conversation dialogs. */
-GSList *conv_list = NULL; 
+GSList *conv_list = NULL;
 
 static HybridChatTheme theme_list[] = {
 #ifdef USE_WEBKIT
     {
         "webkit",
         hybrid_chat_set_webkit_ops
-    }, 
+    },
 #endif
     {
         "textview",
@@ -121,7 +121,7 @@ switch_page_cb(GtkNotebook *notebook, gpointer newpage, guint newpage_nth,
     HybridChatWindow   *chat;
     HybridBuddy        *buddy;
     GdkPixbuf          *pixbuf;
-    HybridConversation *conv = (HybridConversation*)user_data;    
+    HybridConversation *conv = (HybridConversation*)user_data;
     gint                page_index;
 
     for (pos = conv->chat_buddies; pos; pos = pos->next) {
@@ -140,7 +140,7 @@ switch_page_cb(GtkNotebook *notebook, gpointer newpage, guint newpage_nth,
     return;
 
 page_found:
-    
+
     if (IS_SYSTEM_CHAT(chat)) {
 
         buddy = chat->data;
@@ -151,7 +151,7 @@ page_found:
         g_object_unref(pixbuf);
 
         /* Set the conversation window's title */
-        gtk_window_set_title(GTK_WINDOW(conv->window), 
+        gtk_window_set_title(GTK_WINDOW(conv->window),
             (!buddy->name || *(buddy->name) == '\0') ? buddy->id : buddy->name);
     }
 }
@@ -170,7 +170,7 @@ init_tooltip(HybridTooltipData *data)
     ops     = module->info->im_ops;
 
     if (ops->buddy_tooltip) {
-        
+
         if (!ops->buddy_tooltip(account, buddy, data)) {
             return FALSE;
         }
@@ -229,7 +229,7 @@ chat_found:
 
     text = gtk_text_buffer_get_text(send_tb, &start_iter, &stop_iter, TRUE);
 
-    if (*text == '\0') { 
+    if (*text == '\0') {
         /* Yes, nothing was input, just return. */
         return;
     }
@@ -334,7 +334,7 @@ hybrid_conv_create()
 
     theme_list[0].func();
 
-    if ((chat_theme = hybrid_pref_get_string("chat_theme")) != NULL) {
+    if ((chat_theme = hybrid_pref_get_string(NULL, "chat_theme")) != NULL) {
         gint i;
         for (i = 0; theme_list[i].name; i ++) {
             if (g_strcmp0(theme_list[i].name, chat_theme) == 0) {
@@ -363,8 +363,8 @@ hybrid_conv_create()
 
     /* create notebook */
     imconv->notebook = gtk_notebook_new();
-    
-    if ((tab_pos = hybrid_pref_get_int("tab_pos")) != -1) {
+
+    if ((tab_pos = hybrid_pref_get_int(NULL, "tab_pos")) != -1) {
         gtk_notebook_set_tab_pos(GTK_NOTEBOOK(imconv->notebook), tab_pos);
 
     } else {
@@ -378,7 +378,7 @@ hybrid_conv_create()
     g_signal_connect(imconv->notebook, "switch-page",
             G_CALLBACK(switch_page_cb), imconv);
 
-    if (!hybrid_pref_get_boolean("hide_chat_buttons")) {
+    if (!hybrid_pref_get_boolean(NULL, "hide_chat_buttons")) {
         /* create action area, "Close" button and "Send" button */
         action_area = gtk_hbox_new(FALSE, 0);
 
@@ -419,7 +419,7 @@ menu_switch_page_cb(GtkWidget *widget, HybridChatWindow *chat)
 /**
  * Close a single tab.
  */
-static void 
+static void
 close_tab(HybridChatWindow *chat)
 {
     HybridConversation *conv;
@@ -437,8 +437,8 @@ close_tab(HybridChatWindow *chat)
 
     if (g_slist_length(conv->chat_buddies) == 1) {
         /*
-         * We don't want to show the tabs any more 
-         * when we have only one tab left.      
+         * We don't want to show the tabs any more
+         * when we have only one tab left.
          */
         gtk_notebook_set_show_tabs(GTK_NOTEBOOK(conv->notebook), FALSE);
     }
@@ -450,7 +450,7 @@ close_tab(HybridChatWindow *chat)
     g_free(chat->title);
     g_free(chat);
 
-    if (conv->chat_buddies == NULL) { 
+    if (conv->chat_buddies == NULL) {
 
        /*
         * Now we need to destroy the conversation window.
@@ -481,7 +481,7 @@ menu_popup_current_page_cb(GtkWidget *widget, HybridChatWindow *chat)
     HybridBuddy        *buddy;
 
     vbox = chat->vbox;
-    /* 
+    /*
      * First we increase the reference value of vbox,
      * prevent it from being destroyed by gtk_notebook_remove_page().
      */
@@ -489,7 +489,7 @@ menu_popup_current_page_cb(GtkWidget *widget, HybridChatWindow *chat)
 
     /*
      * When closing the chat panel, the chat object will be destroyed,
-     * so we must store the buddy first before closing the tab. 
+     * so we must store the buddy first before closing the tab.
      */
     buddy = chat->data;
 
@@ -572,7 +572,7 @@ tab_press_cb(GtkWidget *widget, GdkEventButton *e, HybridChatWindow *chat)
         /* create labels menu */
         for (pos = chat->parent->chat_buddies; pos; pos = pos->next) {
 
-            temp_chat = (HybridChatWindow*)pos->data;    
+            temp_chat = (HybridChatWindow*)pos->data;
 
             if (IS_SYSTEM_CHAT(temp_chat)) {
 
@@ -655,7 +655,7 @@ tab_close_press_cb(GtkWidget *widget, GdkEventButton *e, gpointer user_data)
     return TRUE;
 }
 
-static gboolean 
+static gboolean
 focus_in_cb(GtkWidget *widget, GdkEventFocus *event, HybridChatWindow *chat)
 {
     GSList             *conv_pos;
@@ -697,7 +697,7 @@ focus_in_cb(GtkWidget *widget, GdkEventFocus *event, HybridChatWindow *chat)
 /**
  * Callback function of the conversation window's key-press event.
  */
-static gboolean 
+static gboolean
 key_press_func(GtkWidget *widget, GdkEventKey *event, HybridConversation *conv)
 {
     gint              current_page;
@@ -814,7 +814,7 @@ sendtext_buffer_changed(GtkTextBuffer *buffer, HybridChatWindow *chat)
 
         if (IS_SYSTEM_CHAT(chat) && ops->chat_send_typing) {
 
-            chat->typing_source = 
+            chat->typing_source =
                 g_timeout_add_seconds(4, (GSourceFunc)type_finished_cb, chat);
 
             chat->is_typing = TRUE;
@@ -860,9 +860,9 @@ sendtext_buffer_changed(GtkTextBuffer *buffer, HybridChatWindow *chat)
  * The layout is:
  *
  * -----------------------------------------------------
- * | Status  |                     |   Close Button    |  
+ * | Status  |                     |   Close Button    |
  * |  Icon   | buddy name (markup) |                   |
- * | (16×16) |                     |      (16×16)      | 
+ * | (16×16) |                     |      (16×16)      |
  * -----------------------------------------------------
  * |- GtkEventBox -> GtkCellView  -|--- GtkEventBox ---|
  */
@@ -922,7 +922,7 @@ create_note_label(HybridChatWindow *chat)
 
         icon_pixbuf = hybrid_create_presence_pixbuf(buddy->state, 16);
 
-        gtk_list_store_set(store, &chat->tabiter, 
+        gtk_list_store_set(store, &chat->tabiter,
                 TAB_STATUS_ICON_COLUMN, icon_pixbuf, TAB_NAME_COLUMN,
                 buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
                 -1);
@@ -959,9 +959,9 @@ create_note_label(HybridChatWindow *chat)
  * The layout is:
  *
  * -----------------------------------------------------
- * |         | Name                  |  Proto | Status |  
+ * |         | Name                  |  Proto | Status |
  * |  Icon   |--------------(markup)-|  Icon  |  Icon  |
- * | (32×32) | Mood phrase           | (16×16)| (16×16)| 
+ * | (32×32) | Mood phrase           | (16×16)| (16×16)|
  * -----------------------------------------------------
  */
 static void
@@ -969,7 +969,7 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 {
     GtkWidget       *cellview;
     GtkListStore    *store;
-    GtkCellRenderer *renderer; 
+    GtkCellRenderer *renderer;
     GtkTreePath     *path;
     HybridAccount   *account;
     HybridModule    *proto;
@@ -985,7 +985,7 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 
 
     cellview = gtk_cell_view_new();
-    
+
     store = gtk_list_store_new(LABEL_COLUMNS,
                                GDK_TYPE_PIXBUF,
                                G_TYPE_STRING,
@@ -1055,9 +1055,9 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
                 buddy->name && *(buddy->name) != '\0' ? buddy->name : buddy->id,
                 mood_text);
 
-        gtk_list_store_set(store, &chat->tipiter, 
+        gtk_list_store_set(store, &chat->tipiter,
                            BUDDY_ICON_COLUMN, icon_pixbuf,
-                           BUDDY_NAME_COLUMN, name_text, 
+                           BUDDY_NAME_COLUMN, name_text,
                            BUDDY_STATUS_ICON_COLUMN, presence_pixbuf, -1);
 
         g_object_unref(icon_pixbuf);
@@ -1117,7 +1117,7 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
     chat->toolbar = gtk_toolbar_new();
     gtk_toolbar_set_style(GTK_TOOLBAR(chat->toolbar), GTK_TOOLBAR_ICONS);
     gtk_box_pack_start(GTK_BOX(vbox), chat->toolbar, FALSE, FALSE, 0);
-    
+
     image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/logs.png");
     button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
             _("Chat logs"), _("View chat logs"), NULL, image_icon,
@@ -1145,7 +1145,7 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 
             g_free(word_limit_string);
 
-            word_limit_string = 
+            word_limit_string =
                 g_strdup_printf(_("[<span color='#0099ff'>%d</span>] characters"),
                         word_limit);
 
@@ -1256,7 +1256,7 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 
     if (type == HYBRID_CHAT_PANEL_SYSTEM) {
         if (!(buddy = (hybrid_blist_find_buddy(account, id)))) {
-            
+
             hybrid_debug_error("conv", "FATAL, can't find buddy");
 
             return NULL;
@@ -1267,7 +1267,6 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 
         /* we will check whether the protocol allows this buddy to be activated. */
         if (ops->chat_start) {
-            
             if (!ops->chat_start(account, buddy)) {
                 return NULL;
             }
@@ -1282,7 +1281,7 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
     /*
      * Whether to show the chat dialog in a single window.
      */
-    if (hybrid_pref_get_boolean("single_chat_window")) {
+    if (hybrid_pref_get_boolean(NULL, "single_chat_window")) {
 
         if (!conv_list) {
             conv = hybrid_conv_create();
@@ -1311,7 +1310,7 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 
     conv->chat_buddies = g_slist_append(conv->chat_buddies, chat);
 
-    init_chat_window(chat);    
+    init_chat_window(chat);
     return chat;
 
 found:
@@ -1355,7 +1354,7 @@ hybrid_conv_got_message(HybridAccount *account,
     }
 
     if (!(chat = hybrid_conv_find_chat(buddy_id))) {
-    
+
         /* Well, we haven't find an existing chat panel so far, so create one. */
         chat = hybrid_chat_window_create(account, buddy->id,
                 HYBRID_CHAT_PANEL_SYSTEM);
@@ -1364,7 +1363,7 @@ hybrid_conv_got_message(HybridAccount *account,
     /* check whether the chat window is active. */
     conv = chat->parent;
     if (gtk_window_is_active(GTK_WINDOW(conv->window))) {
-        
+
         current_page = gtk_notebook_current_page(GTK_NOTEBOOK(conv->notebook));
         chat_page = gtk_notebook_page_num(GTK_NOTEBOOK(conv->notebook), chat->vbox);
 
@@ -1377,7 +1376,7 @@ hybrid_conv_got_message(HybridAccount *account,
     hybrid_status_icon_blinking(buddy);
 
     /* notify. */
-    notify_msg = g_strdup_printf(_("%s said:"), 
+    notify_msg = g_strdup_printf(_("%s said:"),
             buddy->name && *buddy->name ? buddy->name : buddy->id);
     pixbuf = hybrid_create_round_pixbuf(buddy->icon_data,
                                   buddy->icon_data_length, 48);
@@ -1434,7 +1433,7 @@ hybrid_conv_got_status(HybridAccount *account, const gchar *buddy_id, const gcha
             chat = hybrid_chat_window_create(account, buddy->id, HYBRID_CHAT_PANEL_SYSTEM);
         }
     }
-    
+
     if (type == MSG_NOTIFICATION_INPUT) {
         text_ops->notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
     }
@@ -1455,8 +1454,8 @@ input_finished_cb(HybridChatWindow *chat)
 
     buddy = (HybridBuddy*)chat->data;
 
-    text = g_strdup_printf(_(" %s stoped inputing"),
-            buddy->name ? buddy->name : buddy->id);
+    text = g_strdup_printf(_(" %s stopped typing"),
+                           buddy->name ? buddy->name : buddy->id);
 
     text_ops->notify(chat->textview, text, MSG_NOTIFICATION_INPUT);
 
@@ -1485,10 +1484,10 @@ hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean
         return;
     }
 
-    text = g_strdup_printf(_(" %s is inputing"), buddy->name);
+    text = g_strdup_printf(_(" %s is typing..."), buddy->name);
 
     text_ops->notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
-    
+
     g_free(text);
 
     if (!auto_stop) {
@@ -1499,7 +1498,7 @@ hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean
         g_source_remove(chat->input_source);
     }
 
-    chat->input_source = 
+    chat->input_source =
         g_timeout_add_seconds(4, (GSourceFunc)(input_finished_cb), chat);
 }
 
@@ -1523,7 +1522,7 @@ hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
         return;
     }
 
-    text = g_strdup_printf(_(" %s stoped inputing"), buddy->name);
+    text = g_strdup_printf(_(" %s stopped typing"), buddy->name);
     text_ops->notify(chat->textview, text , MSG_NOTIFICATION_INPUT);
     g_free(text);
 }
@@ -1622,7 +1621,7 @@ hybrid_conv_find_chat(const gchar *buddy_id)
     for (conv_pos = conv_list; conv_pos; conv_pos = conv_pos->next) {
         conv = (HybridConversation*)conv_pos->data;
 
-        for (chat_pos = conv->chat_buddies; chat_pos; 
+        for (chat_pos = conv->chat_buddies; chat_pos;
                 chat_pos = chat_pos->next) {
             chat = (HybridChatWindow*)chat_pos->data;
 

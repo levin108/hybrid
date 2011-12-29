@@ -60,7 +60,7 @@ extern "C" {
 /**
  * Create an IQ request.
  *
- * @param stream The xmpp stream. 
+ * @param stream The xmpp stream.
  * @param type   Type of the request.
  *
  * @return The IQ request created.

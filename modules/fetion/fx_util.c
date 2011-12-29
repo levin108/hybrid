@@ -48,7 +48,7 @@ get_province_name(const gchar *province)
         if (!xmlnode_has_prop(node, "id")) {
             continue;
         }
-        
+
         value = xmlnode_prop(node, "id");
 
         if (g_strcmp0(value, province) == 0) {
@@ -92,7 +92,7 @@ get_city_name(const gchar *province, const gchar *city)
         if (!xmlnode_has_prop(node, "id")) {
             continue;
         }
-        
+
         value = xmlnode_prop(node, "id");
 
         if (g_strcmp0(value, province) == 0) {
@@ -125,7 +125,7 @@ province_found:
         if (!xmlnode_has_prop(node, "id")) {
             continue;
         }
-        
+
         value = xmlnode_prop(node, "id");
 
         if (g_strcmp0(value, city) == 0) {

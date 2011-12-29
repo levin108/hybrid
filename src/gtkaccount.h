@@ -88,7 +88,7 @@ void hybrid_account_remove_menu(HybridAccount *account);
 
 /**
  * Hide the disable menu,show the enable menu
- * 
+ *
  * @param account The account context
  */
 void hybrid_account_disable_menu(HybridAccount *account);

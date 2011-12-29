@@ -261,14 +261,14 @@ notify_cb(GtkWidget *widget, gpointer user_data)
 
     if (toggled) {
 
-        hybrid_pref_set_boolean("close_notify", TRUE);
+        hybrid_pref_set_boolean(NULL, "close_notify", TRUE);
 
     } else {
 
-        hybrid_pref_set_boolean("close_notify", FALSE);
+        hybrid_pref_set_boolean(NULL, "close_notify", FALSE);
     }
 
-    hybrid_pref_save();
+    hybrid_pref_save(NULL);
 }
 
 /**
@@ -282,15 +282,12 @@ mute_cb(GtkWidget *widget, gpointer user_data)
     toggled = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
     if (toggled) {
-
-        hybrid_pref_set_boolean("mute", TRUE);
-
+        hybrid_pref_set_boolean(NULL, "mute", TRUE);
     } else {
-
-        hybrid_pref_set_boolean("mute", FALSE);
+        hybrid_pref_set_boolean(NULL, "mute", FALSE);
     }
 
-    hybrid_pref_save();
+    hybrid_pref_save(NULL);
 }
 
 /**
@@ -365,7 +362,7 @@ status_icon_popup_cb(GtkWidget *widget, guint button, guint activate_time,
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
 
-    if (hybrid_pref_get_boolean("mute")) {
+    if (hybrid_pref_get_boolean(NULL, "mute")) {
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), TRUE);
     }
 
@@ -377,7 +374,7 @@ status_icon_popup_cb(GtkWidget *widget, guint button, guint activate_time,
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
 
-    if (hybrid_pref_get_boolean("close_notify")) {
+    if (hybrid_pref_get_boolean(NULL, "close_notify")) {
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), TRUE);
     }
 
@@ -398,7 +395,7 @@ status_icon_popup_cb(GtkWidget *widget, guint button, guint activate_time,
     gtk_widget_show_all(menu);
 
     gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
-            button, activate_time);
+                   button, activate_time);
 }
 
 static void

@@ -33,7 +33,7 @@ widget_motion_cb(GtkWidget *widget, GdkEvent *event, HybridTooltipData *data)
 {
     hybrid_tooltip_destroy();
 
-    hybrid_tooltip.source = g_timeout_add(500, 
+    hybrid_tooltip.source = g_timeout_add(500,
                             (GSourceFunc)hybrid_tooltip_show, data);
 
     return FALSE;
@@ -45,7 +45,7 @@ tree_motion_cb(GtkWidget *widget, GdkEventMotion *event, HybridTooltipData *data
     GtkTreePath *path;
 
     if (hybrid_tooltip.source > 0) {
-        if ((event->y >= hybrid_tooltip.rect.y) && 
+        if ((event->y >= hybrid_tooltip.rect.y) &&
            ((event->y - hybrid_tooltip.rect.height) <= hybrid_tooltip.rect.y)) {
 
             return FALSE;
@@ -67,7 +67,7 @@ tree_motion_cb(GtkWidget *widget, GdkEventMotion *event, HybridTooltipData *data
 
     hybrid_tooltip_destroy();
 
-    hybrid_tooltip.source = g_timeout_add(500, 
+    hybrid_tooltip.source = g_timeout_add(500,
                             (GSourceFunc)hybrid_tooltip_show, data);
 
     return FALSE;
@@ -174,13 +174,13 @@ paint_tooltip_default(HybridTooltipData *user_data)
 
     /* paint tooltip border */
     gtk_paint_flat_box(style, tipwindow->window, GTK_STATE_NORMAL, GTK_SHADOW_OUT,
-                       NULL, tipwindow, "tooltip", 0, 0, 
+                       NULL, tipwindow, "tooltip", 0, 0,
                        window_width, window_height);
 
     /* paint portrait border */
     gtk_paint_flat_box(style, tipwindow->window, GTK_STATE_NORMAL, GTK_SHADOW_OUT,
-                       NULL, tipwindow, "tooltip", TOOLTIP_BORDER, TOOLTIP_BORDER, 
-                       PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2, 
+                       NULL, tipwindow, "tooltip", TOOLTIP_BORDER, TOOLTIP_BORDER,
+                       PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2,
                        PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2);
 
     pixbuf = hybrid_create_round_pixbuf(NULL, 0, PORTRAIT_WIDTH);
@@ -201,7 +201,7 @@ paint_tooltip_default(HybridTooltipData *user_data)
 
         layout = (PangoLayout*)pos->data;
         gtk_paint_layout(style, tipwindow->window, GTK_STATE_NORMAL, FALSE,
-                         NULL, tipwindow, "tooltip", 
+                         NULL, tipwindow, "tooltip",
                          TOOLTIP_BORDER + PORTRAIT_WIDTH + PORTRAIT_MARGIN * 2 + SPACE_IMG_AND_WORD,
                          h, layout);
 
@@ -296,7 +296,7 @@ hybrid_tooltip_show(HybridTooltipData *data)
 
     hybrid_tooltip.widget = data->widget;
     hybrid_tooltip.window = window;
-    
+
     if (!data->tooltip_create) {
 
         hybrid_tooltip_destroy();

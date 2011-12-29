@@ -57,7 +57,7 @@ xmlnode_root(const gchar *xml_buf, gint size)
     g_return_val_if_fail(size != 0, NULL);
 
     doc = xmlParseMemory(xml_buf, size);
-    
+
     if (!doc) {
         hybrid_debug_error("xml", "parse xml");
         return NULL;
@@ -85,7 +85,7 @@ xmlnode_root_from_file(const gchar *filepath)
 
 
     doc = xmlReadFile(filepath, NULL, XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
-    
+
     if (!doc) {
         return NULL;
     }
@@ -108,7 +108,7 @@ xmlnode_next(xmlnode *node)
     xmlnode *new;
 
     g_return_val_if_fail(node != NULL, NULL);
-    
+
     new = node->next;
 
     return new;
@@ -121,7 +121,7 @@ xmlnode_find(xmlnode *node, const gchar *name)
 
 
     if (g_strcmp0(node->name, name) == 0) {
-        return node;    
+        return node;
 
     } else {
         if ((iter = xmlnode_child(node)) == NULL) {
@@ -234,7 +234,7 @@ xmlnode_has_prop(xmlnode *node, const gchar *prop)
 
     if (xmlHasProp(node->node, BAD_CAST prop)) {
         return TRUE;
-            
+
     } else {
         return FALSE;
     }
@@ -295,7 +295,7 @@ xmlnode_set_prefix(xmlnode *node, const gchar *prefix)
     node->prefix = g_strdup(prefix);
 
     value = g_strdup_printf("%s:%s", prefix, node->name);
-    
+
     xmlNodeSetName(node->node, (xmlChar *)value);
 
     g_free(value);
@@ -364,7 +364,7 @@ xmlnode_add_child(xmlnode *parent, xmlnode *child)
     g_return_val_if_fail(parent != NULL, NULL);
     g_return_val_if_fail(child != NULL, NULL);
 
-    if (xmlDOMWrapCloneNode(NULL, child->doc, child->node, &new_child, 
+    if (xmlDOMWrapCloneNode(NULL, child->doc, child->node, &new_child,
             parent->doc, parent->node, 1, 0) != 0) {
         return NULL;
     }
@@ -432,7 +432,7 @@ xmlnode_remove_node(xmlnode *node)
 
     /* Free the memory. */
     xmlUnlinkNode(node->node);
-    
+
     g_free(node->name);
     g_free(node);
 }

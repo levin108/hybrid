@@ -385,7 +385,7 @@ xmpp_buddy_req(HybridAccount *account, HybridGroup *group,
             /* set the default name. */
             gchar *name;
             gchar *pos;
-            
+
             for (pos = (gchar *)id; *pos && *pos != '@'; pos ++);
             name = g_strndup(id, pos - id);
             xmpp_buddy_set_name(buddy, name);
@@ -401,13 +401,13 @@ xmpp_buddy_req(HybridAccount *account, HybridGroup *group,
     return FALSE;
 }
 
-static void 
+static void
 xmpp_group_add(HybridAccount *account, const gchar *text)
 {
     hybrid_blist_add_group(account, text, text);
 }
 
-static gboolean 
+static gboolean
 xmpp_buddy_move(HybridAccount *account, HybridBuddy *buddy,
                 HybridGroup *new_group)
 {
@@ -461,7 +461,7 @@ xmpp_close(HybridAccount *account)
     if (stream->keepalive_source > 0) {
         g_source_remove(stream->keepalive_source);
     }
-    
+
     close(stream->sk);
 
     xmpp_stream_destroy(stream);
@@ -498,7 +498,7 @@ HybridModuleInfo module_info = {
     "levin108",                 /**< author */
     N_("jabber client"),        /**< summary */
     /* description */
-    N_("implement xmpp protocol"), 
+    N_("implement xmpp protocol"),
     "http://basiccoder.com",      /**< homepage */
     "0","1",                    /**< major version, minor version */
     "xmpp",                     /**< icon name */
@@ -510,7 +510,7 @@ HybridModuleInfo module_info = {
     NULL, /**< actions */
 };
 
-void 
+void
 xmpp_module_init(HybridModule *module)
 {
 

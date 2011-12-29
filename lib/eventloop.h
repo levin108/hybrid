@@ -35,7 +35,7 @@ typedef gboolean (*input_func)(gint sk, gpointer user_data);
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 /**
  * Add an event handler.
  *
