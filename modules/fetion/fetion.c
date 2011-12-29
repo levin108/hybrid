@@ -42,6 +42,8 @@
 
 fetion_account *ac;
 
+extern GSList *channel_list;
+
 /**
  * Process "presence changed" message.
  */
@@ -583,11 +585,17 @@ static gboolean
 fx_keep_alive(HybridAccount *account)
 {
     fetion_account *ac;
+    GSList         *pos;
 
     ac = hybrid_account_get_protocol_data(account);
 
     if (fetion_account_keep_alive(ac) != HYBRID_OK) {
         return FALSE;
+    }
+
+    for (pos = channel_list; pos; pos = pos->next) {
+        ac = (fetion_account*)pos->data;
+        fetion_account_keep_alive(ac);
     }
 
     return TRUE;

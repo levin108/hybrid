@@ -36,6 +36,8 @@
 #define VERIFY_TYPE_SSI 1
 #define VERIFY_TYPE_SIP 2
 
+extern GSList *channel_list;
+
 struct verify_data {
     gint                 type;  /* ssi verify || sipc verify */
     fetion_account      *ac;    /* common data */
@@ -746,6 +748,13 @@ hybrid_push_cb(gint sk, gpointer user_data)
 
     if ((n = recv(sk, sipmsg, sizeof(sipmsg), 0)) == -1) {
         hybrid_account_error_reason(ac->account, _("connection terminated"));
+        return FALSE;
+    } else if (0 == n) {
+        hybrid_debug_info("fetion", "hybrid_push_cb in fetion received 0 bytes,"
+                          "connection closed.");
+        channel_list = g_slist_remove(channel_list, ac);
+        fetion_account_destroy(ac);
+        close(sk);
         return FALSE;
     }
 
