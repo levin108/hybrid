@@ -353,9 +353,9 @@ hybrid_conv_create()
     gtk_window_set_default_size(GTK_WINDOW(imconv->window), 485, 500);
     gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 1);
     g_signal_connect(imconv->window, "destroy", G_CALLBACK(conv_destroy_cb),
-            imconv);
+                     imconv);
     g_signal_connect(imconv->window, "key-press-event",
-            G_CALLBACK(key_press_func), imconv);
+                     G_CALLBACK(key_press_func), imconv);
 
     /* create vbox */
     vbox = gtk_vbox_new(FALSE, 2);
@@ -376,7 +376,7 @@ hybrid_conv_create()
     gtk_notebook_set_show_border(GTK_NOTEBOOK(imconv->notebook), TRUE);
     gtk_box_pack_start(GTK_BOX(vbox), imconv->notebook, TRUE, TRUE, 0);
     g_signal_connect(imconv->notebook, "switch-page",
-            G_CALLBACK(switch_page_cb), imconv);
+                     G_CALLBACK(switch_page_cb), imconv);
 
     if (!hybrid_pref_get_boolean(NULL, "hide_chat_buttons")) {
         /* create action area, "Close" button and "Send" button */
@@ -389,7 +389,7 @@ hybrid_conv_create()
         button = gtk_button_new_with_label(_("Close"));
         gtk_widget_set_size_request(button, 100, 30);
         gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 2);
-        g_signal_connect(button, "clicked",    G_CALLBACK(conv_close_cb), imconv);
+        g_signal_connect(button, "clicked", G_CALLBACK(conv_close_cb), imconv);
 
         button = gtk_button_new_with_label(_("Send"));
         gtk_widget_set_size_request(button, 100, 30);
