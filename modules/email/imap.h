@@ -46,7 +46,7 @@ struct _hybrid_imap {
     gint                 tmp_unread;
 
     guint conn_read_source;
-    guint mail_check_interval; 
+    guint mail_check_interval;
     guint mail_check_source;
 };
 

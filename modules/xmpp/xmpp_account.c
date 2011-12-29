@@ -150,7 +150,7 @@ xmpp_account_modify_status(XmppStream *stream, gint state, const gchar *status)
 
     hybrid_debug_info("xmpp", "modify status,send:\n%s", xml_string);
 
-    if (hybrid_ssl_write(stream->ssl, xml_string, 
+    if (hybrid_ssl_write(stream->ssl, xml_string,
                 strlen(xml_string)) == -1) {
 
         hybrid_debug_error("xmpp", "modify status failed.");

@@ -37,88 +37,88 @@ typedef void (*ChatCallback)(HybridAccount *, const gchar *);
 
 typedef GtkWidget* (*text_create)(void);
 typedef void (*text_append)(GtkWidget *, HybridAccount *,
-							HybridBuddy *,	const gchar *, time_t);
+                            HybridBuddy *,	const gchar *, time_t);
 typedef void (*text_notify)(GtkWidget *, const gchar *, gint);
 typedef void (*theme_set_ops_func)(void);
 
 struct _HybridChatTheme {
-	const gchar        *name;
-	theme_set_ops_func  func;
+    const gchar        *name;
+    theme_set_ops_func  func;
 };
 
 struct _HybridChatTextOps{
-	text_create create;
-	text_append append;
-	text_notify notify;
+    text_create create;
+    text_append append;
+    text_notify notify;
 };
 
 struct _HybridConversation {
-	GtkWidget *window;
-	GtkWidget *notebook;
-	GSList    *chat_buddies;
+    GtkWidget *window;
+    GtkWidget *notebook;
+    GSList    *chat_buddies;
 };
 
 enum _HybridChatWindowType {
-	/*
-	 * system panel, double-click on buddy in the buddy list,
-	 * then the popuped panel is in this type
-	 */
-	HYBRID_CHAT_PANEL_SYSTEM,      
+    /*
+     * system panel, double-click on buddy in the buddy list,
+     * then the popuped panel is in this type
+     */
+    HYBRID_CHAT_PANEL_SYSTEM,
 
-	/*
-	 * Group chat panel. UNUSED now (6-30)
-	 */
-	HYBRID_CHAT_PANEL_GROUP_CHAT,
+    /*
+     * Group chat panel. UNUSED now (6-30)
+     */
+    HYBRID_CHAT_PANEL_GROUP_CHAT,
 
-	/*
-	 * use-defined panel, should specify the callback function
-	 * for the send button click signal.
-	 */
-	HYBRID_CHAT_PANEL_USER_DEFINED
+    /*
+     * use-defined panel, should specify the callback function
+     * for the send button click signal.
+     */
+    HYBRID_CHAT_PANEL_USER_DEFINED
 };
 
 struct _HybridChatWindow {
-	HybridConversation   *parent;
-	HybridChatWindowType  type;
-	HybridAccount        *account;
-	gchar                *id;
+    HybridConversation   *parent;
+    HybridChatWindowType  type;
+    HybridAccount        *account;
+    gchar                *id;
 
-	gchar     *title;           /**< only be used when it's user-defined window. */
-	GdkPixbuf *icon;            /**< only be used when it's user-defined window. */
+    gchar     *title;           /**< only be used when it's user-defined window. */
+    GdkPixbuf *icon;            /**< only be used when it's user-defined window. */
 
-	gint unread;                /* count of the unread message. */
+    gint unread;                /* count of the unread message. */
 
-	HybridLogs *logs;           /* log context. */
+    HybridLogs *logs;           /* log context. */
 
-	gpointer   data;
-	GtkWidget *pagelabel;
-  
+    gpointer   data;
+    GtkWidget *pagelabel;
 
-	GtkWidget *textview;
-	GtkWidget *toolbar;
-	GtkWidget *sendtext;
-	GtkWidget *vbox;            /**< The Notebook child widget */
 
-	/* label to show how many words left that can be input. */
-	GtkWidget *words_left_label;
-  
-	/* tab label */
-	GtkWidget   *tablabel;
-	GtkTreeIter  tabiter;
+    GtkWidget *textview;
+    GtkWidget *toolbar;
+    GtkWidget *sendtext;
+    GtkWidget *vbox;            /**< The Notebook child widget */
 
-	/* tip label */
-	GtkWidget   *tiplabel;
-	GtkTreeIter  tipiter;
+    /* label to show how many words left that can be input. */
+    GtkWidget *words_left_label;
 
-	/* callback function called when the send button clicked,
-	 * only be used when it's user-defined window. */
-	ChatCallback callback;
+    /* tab label */
+    GtkWidget   *tablabel;
+    GtkTreeIter  tabiter;
 
-	guint    typing_source;
-	gboolean is_typing;
+    /* tip label */
+    GtkWidget   *tiplabel;
+    GtkTreeIter  tipiter;
 
-	/* event source of the inputing timeout event. */
-	guint input_source;
+    /* callback function called when the send button clicked,
+     * only be used when it's user-defined window. */
+    ChatCallback callback;
+
+    guint    typing_source;
+    gboolean is_typing;
+
+    /* event source of the inputing timeout event. */
+    guint input_source;
 };
 
 #define IS_SYSTEM_CHAT(chat_window)       ((chat_window)->type == HYBRID_CHAT_PANEL_SYSTEM)
@@ -129,25 +129,25 @@ struct _HybridChatWindow {
  * Notebook tab columns.
  */
 enum {
-	TAB_STATUS_ICON_COLUMN = 0,
-	TAB_NAME_COLUMN,
-	TAB_COLUMNS
+    TAB_STATUS_ICON_COLUMN = 0,
+    TAB_NAME_COLUMN,
+    TAB_COLUMNS
 };
 
 /**
  * Notebook tips columns.
  */
 enum {
-	BUDDY_ICON_COLUMN = 0,
-	BUDDY_NAME_COLUMN,
-	BUDDY_STATUS_ICON_COLUMN,
-	BUDDY_PROTO_ICON_COLUMN,
-	LABEL_COLUMNS
+    BUDDY_ICON_COLUMN = 0,
+    BUDDY_NAME_COLUMN,
+    BUDDY_STATUS_ICON_COLUMN,
+    BUDDY_PROTO_ICON_COLUMN,
+    LABEL_COLUMNS
 };
 
 enum {
-	MSG_NOTIFICATION_INPUT,
-	MSG_NOTIFICATION_ERROR,
+    MSG_NOTIFICATION_INPUT,
+    MSG_NOTIFICATION_ERROR,
 };
 
 #ifdef __cplusplus
@@ -164,10 +164,11 @@ extern "C" {
  * @return The HybridChatWindow created.
  */
 HybridChatWindow *hybrid_chat_window_create(HybridAccount *account,
-					const gchar *id, HybridChatWindowType type);
+                                            const gchar *id,
+                                            HybridChatWindowType type);
 
 /**
- * Set the title of the chat window, it's only used when 
+ * Set the title of the chat window, it's only used when
  * the window is a user-defined window, otherwise this function
  * will be ignored.
  *
@@ -175,7 +176,7 @@ HybridChatWindow *hybrid_chat_window_create(HybridAccount *account,
  * @param title  The title of the chat window.
  */
 void hybrid_chat_window_set_title(HybridChatWindow *window,
-					const gchar *title);
+                                  const gchar *title);
 
 /**
  * Set the icon of the chat window, it's only used when
@@ -186,7 +187,7 @@ void hybrid_chat_window_set_title(HybridChatWindow *window,
  * @param pixbuf The icon.
  */
 void hybrid_chat_window_set_icon(HybridChatWindow *window,
-					GdkPixbuf *pixbuf);
+                                 GdkPixbuf *pixbuf);
 
 /**
  * Find a chat window for buddy with the given buddy id.
@@ -206,11 +207,11 @@ HybridChatWindow *hybrid_conv_find_chat(const gchar *buddy_id);
  * @param callback The callback function.
  */
 void hybrid_chat_window_set_callback(HybridChatWindow *window,
-					ChatCallback callback);
+                                     ChatCallback callback);
 
 void hybrid_conv_got_message(HybridAccount *account,
-				const gchar *buddy_id, const gchar *message,
-				time_t time);
+                             const gchar *buddy_id, const gchar *message,
+                             time_t time);
 
 /**
  * Set the chat text ops.
@@ -228,17 +229,17 @@ void hybrid_conv_set_chat_text_ops(HybridChatTextOps *ops);
  * @param type     Tyep of the status.
  */
 void hybrid_conv_got_status(HybridAccount *account, const gchar *buddy_id,
-		const gchar *text, gint type);
+                            const gchar *text, gint type);
 
 /**
  * Got an buddy's inputing message.
  *
  * @param account   The account.
  * @param buddy_id  ID of the buddy to which the chat window belongs.
- * @param auto_stop If TRUE it will set the inputing state to be stoped automaticly. 
+ * @param auto_stop If TRUE it will set the inputing state to be stoped automaticly.
  */
 void hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id,
-		gboolean auto_stop);
+                              gboolean auto_stop);
 
 /**
  * Got an buddy's stopping inputing message.

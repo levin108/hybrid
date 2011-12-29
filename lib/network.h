@@ -25,7 +25,7 @@
 
 /**
  * resolve DNS hostname into dotted ip address
- * 
+ *
  * @param hostname The name to be resolved
  * @param ip It will be filled with the result ip address.
  *

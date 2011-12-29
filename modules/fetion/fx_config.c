@@ -87,13 +87,13 @@ fetion_config_save_account(fetion_account *account)
     }
 
     account_name = g_strdup_printf("%s/account.xml", account_dir);
-    
+
     body = "<root></root>";
 
     root = xmlnode_root(body, strlen(body));
 
     node = xmlnode_new_child(root, "account");
-    
+
     xmlnode_new_prop(node, "personal-version", account->personal_version);
     xmlnode_new_prop(node, "contact-version", account->contact_list_version);
     xmlnode_new_prop(node, "custom-version", account->custom_config_version);
@@ -161,7 +161,7 @@ fetion_config_load_account(fetion_account *account)
     g_free(account->contact_list_version);
     if (xmlnode_has_prop(node, "contact-version")) {
         account->contact_list_version = xmlnode_prop(node, "contact-version");
-    } 
+    }
 
     g_free(account->custom_config_version);
     if (xmlnode_has_prop(node, "custom-version")) {
@@ -203,7 +203,7 @@ fetion_config_load_account(fetion_account *account)
         if (xmlnode_has_prop(node, "host")) {
             g_free(account->sipc_proxy_ip);
             account->sipc_proxy_ip = xmlnode_prop(node, "host");
-        } 
+        }
 
         if (xmlnode_has_prop(node, "port")) {
             value = xmlnode_prop(node, "port");
@@ -216,7 +216,7 @@ fetion_config_load_account(fetion_account *account)
         if (xmlnode_has_prop(node, "name")) {
             g_free(account->portrait_host_name);
             account->portrait_host_name = xmlnode_prop(node, "name");
-        } 
+        }
 
         if (xmlnode_has_prop(node, "path")) {
             g_free(account->portrait_host_path);

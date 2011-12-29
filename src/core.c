@@ -59,8 +59,7 @@ GtkUIManager *menu_ui_manager;
 static gboolean
 window_delete(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
-/* TODO add a gui preference entry */
-    if (hybrid_pref_get_boolean("quit_when_close")) {
+    if (hybrid_pref_get_boolean(NULL, "quit_when_close")) {
         gtk_widget_destroy(widget);
     } else {
         gtk_widget_hide(widget);
@@ -201,7 +200,7 @@ create_basic_menus(GtkBox *box)
         { "About",
           GTK_STOCK_ABOUT,
           _("About"),
-          "<controlH>",
+          "<control>H",
           _("About"),
           G_CALLBACK(show_about_cb)},
     };

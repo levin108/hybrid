@@ -49,7 +49,7 @@ struct _XmppStream {
 	gchar *jid;
 	gint   major_version;       /**< default 1 */
 	gint   miner_version;       /**< default 0 */
-  
+
 
 	xmlnode	*node;              /**< current xml node for parsing the xml stream. */
 	gint	 state;             /**< stream state. */
@@ -82,11 +82,11 @@ extern "C" {
 gboolean xmpp_stream_init(gint sk, XmppStream *stream);
 
 /**
- * Send a ping message on the stream to keep the 
+ * Send a ping message on the stream to keep the
  * connection alive.
  *
  * @param stream The xmpp stream.
- * 
+ *
  * @return HYBRID_OK or HYBRID_ERROR in case of an error.
  */
 gint xmpp_stream_ping(XmppStream *stream);

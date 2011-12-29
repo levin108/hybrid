@@ -157,7 +157,7 @@ void hybrid_blist_group_destroy(HybridGroup *group);
  *
  * @return The new added contact
  */
-HybridBuddy *hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent, 
+HybridBuddy *hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent,
 		const gchar *id, const gchar *name);
 
 /**
@@ -230,7 +230,7 @@ void hybrid_blist_set_buddy_status_priv(HybridBuddy *buddy, gboolean authorized)
  * Get whether a buddy has been authorized.
  *
  * @param buddy The buddy.
- * 
+ *
  * @return TRUE if the buddy if authorized, FALSE if not.
  */
 gboolean hybrid_blist_get_buddy_authorized(HybridBuddy *buddy);
@@ -276,7 +276,7 @@ void hybrid_blist_set_group_renamable(HybridGroup *group, gboolean renamable);
  * Get whether the group can be renamed.
  *
  * @param group The group.
- * 
+ *
  * @return TRUE if this group can be renamed, otherwise FALSE.
  */
 gboolean hybrid_blist_get_group_renamable(HybridGroup *group);

@@ -84,7 +84,7 @@ HybridNotifyInfo *hybrid_notify_info_create();
 
 /**
  * Destroy a notify information context;
- * 
+ *
  * @param info The notify information context to destroy.
  */
 void hybrid_notify_info_destroy(HybridNotifyInfo *info);

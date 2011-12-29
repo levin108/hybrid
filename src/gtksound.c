@@ -43,7 +43,7 @@ bus_call (GstBus     *bus,
           gpointer    data)
 {
     GstElement *pipeline = data;
-    
+
     switch (GST_MESSAGE_TYPE (msg)) {
     case GST_MESSAGE_EOS:
         gst_element_set_state(pipeline, GST_STATE_NULL);
@@ -75,13 +75,13 @@ bus_call (GstBus     *bus,
 }
 
 void
-hybrid_sound_play_file(const gchar *filename) 
+hybrid_sound_play_file(const gchar *filename)
 {
     GstElement *source, *parser, *sink;
     GstElement *pipeline;
     GstBus     *bus;
 
-    if (hybrid_pref_get_boolean("mute")) {
+    if (hybrid_pref_get_boolean(NULL, "mute")) {
         return;
     }
 

@@ -27,7 +27,7 @@ static HybridChatTextOps textview_ops = {
     hybrid_chat_textview_notify
 };
 
-void 
+void
 hybrid_chat_set_textview_ops(void)
 {
     hybrid_conv_set_chat_text_ops(&textview_ops);
@@ -117,21 +117,21 @@ hybrid_chat_textview_append(GtkWidget *textview, HybridAccount *account,
 
     names = g_strdup_printf(" (%s) ", time);
 
-    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter,
                     names, strlen(names), color, "wrap", NULL);
     g_free(names);
 
-    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter,
                     name, strlen(name), color, "bold", "wrap", NULL);
 
     names = _(" said:");
 
-    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter,
                     names, strlen(names), color, "wrap", NULL);
 
     gtk_text_buffer_insert(recv_tb, &end_iter, "\n", -1);
-    
-    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+
+    gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter,
                     message, strlen(message), "lm10", "wrap", NULL);
 
     gtk_text_buffer_insert(recv_tb, &end_iter, "\n", -1);
@@ -174,7 +174,7 @@ hybrid_chat_textview_notify(GtkWidget *textview, const gchar *text, gint type)
     gtk_text_buffer_get_end_iter(recv_tb, &end_iter);
 
     if (type == MSG_NOTIFICATION_INPUT) {
-        gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter, 
+        gtk_text_buffer_insert_with_tags_by_name(recv_tb, &end_iter,
                         text, strlen(text), "grey", "small", "wrap", NULL);
     }
 

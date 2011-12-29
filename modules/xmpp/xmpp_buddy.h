@@ -85,7 +85,7 @@ void xmpp_presence_destroy(XmppPresence *presence);
  *
  * @param buddy    The xmpp buddy.
  * @param full_jid The full jabber id.
- * 
+ *
  * @return NULL if not found.
  */
 XmppPresence *xmpp_buddy_find_presence(XmppBuddy *buddy, const gchar *full_jid);

@@ -23,7 +23,7 @@
 #define BUFLEN 4096
 
 static void
-follow_if_link (GtkWidget   *text_view, 
+follow_if_link (GtkWidget   *text_view,
                 GtkTextIter *iter)
 {
     GSList *tags = NULL, *tagp = NULL;
@@ -42,7 +42,7 @@ follow_if_link (GtkWidget   *text_view,
                 }
         }
 
-    if (tags) 
+    if (tags)
         g_slist_free (tags);
 }
 
@@ -69,27 +69,27 @@ event_after (GtkWidget *text_view,
     if (gtk_text_iter_get_offset (&start) != gtk_text_iter_get_offset (&end))
         return FALSE;
 
-    gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view), 
+    gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view),
                                            GTK_TEXT_WINDOW_WIDGET,
                                            event->x, event->y, &x, &y);
 
     gtk_text_view_get_iter_at_location (GTK_TEXT_VIEW (text_view), &iter, x, y);
 
     follow_if_link (text_view, &iter);
-    
+
     return FALSE;
 }
-static void 
-insert_link (GtkTextBuffer *buffer, 
-             GtkTextIter   *iter, 
+static void
+insert_link (GtkTextBuffer *buffer,
+             GtkTextIter   *iter,
              gchar         *text,
              gchar         *url)
 {
     GtkTextTag *tag;
-  
-    tag = gtk_text_buffer_create_tag (buffer, NULL, 
-                                      "foreground", "blue", 
-                                      "underline", PANGO_UNDERLINE_SINGLE, 
+
+    tag = gtk_text_buffer_create_tag (buffer, NULL,
+                                      "foreground", "blue",
+                                      "underline", PANGO_UNDERLINE_SINGLE,
                                       NULL);
     g_object_set_data (G_OBJECT (tag), "url", url ? url : text);
     gtk_text_buffer_insert_with_tags (buffer, iter, text, -1, tag, NULL);
@@ -111,11 +111,11 @@ set_cursor_if_appropriate (GtkTextView *text_view,
 
     gtk_text_view_get_iter_at_location (text_view, &iter, x, y);
     tags = gtk_text_iter_get_tags (&iter);
-    
+
     for (tagp = tags;  tagp != NULL;  tagp = tagp->next) {
         GtkTextTag *tag = tagp->data;
         gchar      *url = (gchar*)(g_object_get_data (G_OBJECT (tag), "url"));
-        
+
         if (url) {
             hovering = TRUE;
             break;
@@ -124,14 +124,14 @@ set_cursor_if_appropriate (GtkTextView *text_view,
 
     if (hovering != hovering_over_link) {
         hovering_over_link = hovering;
-        
+
         if (hovering_over_link)
             gdk_window_set_cursor (gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_TEXT), hand_cursor);
         else
             gdk_window_set_cursor (gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_TEXT), regular_cursor);
     }
-    
-    if (tags) 
+
+    if (tags)
         g_slist_free (tags);
 }
 
@@ -141,7 +141,7 @@ motion_notify_event (GtkWidget      *text_view,
 {
     gint x, y;
 
-    gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view), 
+    gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view),
                                            GTK_TEXT_WINDOW_WIDGET,
                                            event->x, event->y, &x, &y);
 
@@ -161,16 +161,16 @@ static void create_intro(GtkTextView *view)
 
     gtk_text_view_set_editable(view,FALSE);
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view), GTK_WRAP_WORD_CHAR);
-    g_signal_connect (view, "motion-notify-event", 
+    g_signal_connect (view, "motion-notify-event",
                       G_CALLBACK (motion_notify_event), NULL);
-    g_signal_connect(view, "event-after", 
+    g_signal_connect(view, "event-after",
                      G_CALLBACK (event_after), NULL);
 
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(view);
 
-    tag1 = gtk_text_buffer_create_tag (buffer, NULL, 
-                                       "left-margin", 25, 
-                                       "right-margin", 25, 
+    tag1 = gtk_text_buffer_create_tag (buffer, NULL,
+                                       "left-margin", 25,
+                                       "right-margin", 25,
                                        NULL);
 
 
@@ -185,7 +185,7 @@ static void create_intro(GtkTextView *view)
                                      _("\nWebsite: "), -1, tag1, NULL);
     insert_link(buffer, &iter,
                 "https://github.com/levin108/hybrid", NULL);
-    
+
     gtk_text_buffer_insert_with_tags(buffer, &iter,
                                      _("\nBug report: "), -1, tag1, NULL);
     insert_link(buffer, &iter, "https://github.com/levin108/hybrid/issues", NULL);
@@ -208,14 +208,14 @@ static void create_gpl(GtkTextView *view)
 
     gtk_text_view_set_editable(view, FALSE);
     gtk_text_view_set_wrap_mode(view, GTK_WRAP_WORD);
-    g_signal_connect (view, "motion-notify-event", 
+    g_signal_connect (view, "motion-notify-event",
                       G_CALLBACK (motion_notify_event), NULL);
 
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(view);
 
-    tag = gtk_text_buffer_create_tag (buffer, NULL, 
-                                      "left-margin", 5, 
-                                      "right-margin", 5, 
+    tag = gtk_text_buffer_create_tag (buffer, NULL,
+                                      "left-margin", 5,
+                                      "right-margin", 5,
                                       NULL);
 
     gtk_text_buffer_get_start_iter(buffer, &iter);
@@ -235,34 +235,34 @@ static void create_contri(GtkTextView *view)
 
     gtk_text_view_set_editable(view,FALSE);
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view), GTK_WRAP_WORD_CHAR);
-    g_signal_connect (view, "motion-notify-event", 
+    g_signal_connect (view, "motion-notify-event",
                       G_CALLBACK (motion_notify_event), NULL);
-    g_signal_connect(view, "event-after", 
+    g_signal_connect(view, "event-after",
                      G_CALLBACK (event_after), NULL);
 
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(view);
 
-    tag1 = gtk_text_buffer_create_tag (buffer, NULL, 
-                                       "left-margin", 25, 
-                                       "right-margin", 25, 
+    tag1 = gtk_text_buffer_create_tag (buffer, NULL,
+                                       "left-margin", 25,
+                                       "right-margin", 25,
                                        NULL);
 
-    tag2 = gtk_text_buffer_create_tag (buffer, NULL, 
-                                       "left-margin", 25, 
+    tag2 = gtk_text_buffer_create_tag (buffer, NULL,
+                                       "left-margin", 25,
                                        "weight", PANGO_WEIGHT_BOLD,
                                        NULL);
 
     gtk_text_buffer_get_start_iter(buffer, &iter);
 
     gtk_text_buffer_insert(buffer, &iter, "\n\n", 2);
-  
+
     gtk_text_buffer_insert_with_tags(buffer, &iter,
                                      "Levin Li <", -1, tag1, NULL);
     insert_link(buffer, &iter, "levin108@gmail.com", "mailto:levin108@gmail.com");
     gtk_text_buffer_insert(buffer, &iter, ("> ("), 3);
     insert_link(buffer, &iter, "@levin108", "http://twitter.com/levin108");
     gtk_text_buffer_insert(buffer, &iter, (")\n"), 2);
-    
+
     gtk_text_buffer_insert_with_tags(buffer, &iter,
                                      "Yichao Yu <", -1, tag1, NULL);
     insert_link(buffer, &iter, "yyc1992@gmail.com", "mailto:yyc1992@gmail.com");
@@ -292,7 +292,7 @@ hybrid_about_create()
 
     hand_cursor = gdk_cursor_new (GDK_HAND2);
     regular_cursor = gdk_cursor_new (GDK_XTERM);
-      
+
     window = hybrid_create_window(_("About Hybrid"), NULL,
                                   GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(window, 460, 300);
@@ -324,7 +324,7 @@ hybrid_about_create()
     gtk_container_add(GTK_CONTAINER(scroll), textview);
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
                              scroll, tablabel);
-    
+
     tablabel = gtk_label_new(_("License"));
     scroll = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),

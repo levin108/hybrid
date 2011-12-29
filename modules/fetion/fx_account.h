@@ -52,7 +52,7 @@ struct _fetion_account {
 	gchar *password;            /**< Raw password not hashed */
 	gchar *sipuri;              /**< sipuri like 'sip:100@fetion.com.cn' */
 	gchar *nickname;
-	gchar *mood_phrase;	
+	gchar *mood_phrase;
 	gchar *portrait_crc;
 	gchar *country;
 	gchar *province;
@@ -63,8 +63,8 @@ struct _fetion_account {
 	GSList *buddies;            /**< The buddy list */
 
 	gchar *sms_online_status;
-	gchar *public_ip;					
-	gchar *last_login_ip;				
+	gchar *public_ip;
+	gchar *last_login_ip;
 	gchar *last_login_time;
 
 	gchar *portrait_host_name;  /**< host name of the portrait server */
@@ -83,11 +83,11 @@ struct _fetion_account {
 	gint sms_month_limit;
 	gint sms_month_count;
 
-	gint pgGroupCallId;					
-	gint groupInfoCallId;			
+	gint pgGroupCallId;
+	gint groupInfoCallId;
 
-	gint state;					
-	gint login_status; 	
+	gint state;
+	gint login_status;
 
 	gchar *carrier;
 	gint   carrier_status;
@@ -102,10 +102,10 @@ struct _fetion_account {
 	gchar *ssic;
 
 	/* custom config string used to set personal information */
-	gchar *custom_config; 
+	gchar *custom_config;
 
 	/* a struct used to generate picture code */
-	Verification *verification;		 
+	Verification *verification;
 
 	fetion_sip *sip;
 
@@ -118,7 +118,7 @@ struct _fetion_account {
 	 * until the channel is ready, so it's always TRUE for the main channel.
 	 */
 	gboolean channel_ready;
-	
+
 	/* only used in the conversation with an online buddy, the buddy's userid. */
 	gchar *who;
 
@@ -236,7 +236,7 @@ Verification	*fetion_verification_create();
  * @return The verification object to destroy.
  */
 void fetion_verification_destroy(Verification *verification);
-	
+
 #ifdef __cplusplus
 }
 #endif

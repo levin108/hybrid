@@ -194,7 +194,7 @@ gint fetion_buddy_rename(fetion_account *ac, const gchar *userid,
  *
  * @return The fetion buddy context with detailed information.
  */
-fetion_buddy *fetion_buddy_parse_info(fetion_account *ac, 
+fetion_buddy *fetion_buddy_parse_info(fetion_account *ac,
 		const gchar *userid, const gchar *sipmsg);
 
 /**
@@ -242,7 +242,7 @@ void fetion_buddy_destroy(fetion_buddy *buddy);
  * Q: 2 S
  * N: AddBuddyV4
  * L: 211
- * 
+ *
  * <args><contacts><buddies><buddy uri="sip:777777777" local-name="test"
  * buddy-lists="4" desc="naruto" expose-mobile-no="1" expose-name="1"
  * addbuddy-phrase-id="0"/></buddies></contacts></args>

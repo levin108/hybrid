@@ -38,7 +38,7 @@ imap_read_cb(gint sk, hybrid_imap *imap)
     gboolean    last             = FALSE;
     GSList     *cur;
     imap_trans *trans;
-    
+
     memset(buf, 0, BUF_LENGTH);
 
     if (-1 == (n = hybrid_ssl_read(imap->ssl, buf, BUF_LENGTH - 1))) {
@@ -57,11 +57,11 @@ imap_read_cb(gint sk, hybrid_imap *imap)
     imap->buffer_length += n;
 
     stop = imap->buffer;
-    
+
  recheck:
 
     if (!stop) return TRUE;
-    
+
     if ((pos = strstr(stop, "\r\n"))) {
 
         stop    = pos + 2;
@@ -76,7 +76,7 @@ imap_read_cb(gint sk, hybrid_imap *imap)
             pos  += 1;
             cmd_end = stop;
             goto recheck;
-            
+
         } else if (*stop == '\0' || *stop == '\r'){
             return TRUE;
         } else {
@@ -128,7 +128,7 @@ imap_read_cb(gint sk, hybrid_imap *imap)
 
     g_free(stop);
     g_free(msg);
-    
+
     return TRUE;
 
  imap_read_err:
@@ -145,11 +145,11 @@ ssl_connect_cb(HybridSslConnection *ssl, hybrid_imap *imap)
 
     account   = imap->account;
     imap->ssl = ssl;
-    
+
     hybrid_debug_info("imap", "IMAP server connected.");
     hybrid_account_set_connection_string(account, _("IMAP Authenticating."));
 
-    imap->conn_read_source = 
+    imap->conn_read_source =
         hybrid_event_add(ssl->sk, HYBRID_EVENT_READ,
                          EVENT_CALLBACK(imap_read_cb), imap);
 
@@ -157,7 +157,7 @@ ssl_connect_cb(HybridSslConnection *ssl, hybrid_imap *imap)
         hybrid_account_error_reason(account, _("IMAP Authenticate failed."));
         return FALSE;
     }
-    
+
     return FALSE;
 }
 
@@ -179,12 +179,12 @@ email_login(HybridAccount *account)
 
     hybrid_account_set_connection_string(account,
                                          _("Connecting to IMAP server."));
-        
+
     hybrid_ssl_connect(imap->imap_server,
                        imap->imap_port,
                        SSL_CALLBACK(ssl_connect_cb),
                        imap);
-    
+
     return TRUE;
 }
 
@@ -200,13 +200,13 @@ email_close(HybridAccount *account)
     if (imap->conn_read_source > 0) {
         g_source_remove(imap->conn_read_source);
     }
-    
+
     if (imap->mail_check_source > 0) {
         g_source_remove(imap->mail_check_source);
     }
 
     hybrid_imap_destroy(imap);
-    
+
     return FALSE;
 }
 
@@ -226,7 +226,7 @@ email_options()
                                  _("Port:"));
     hybrid_variable_set_integer_default(var, 993);
     list = g_slist_append(list, var);
-    
+
     var = hybrid_variable_create(VARIABLE_TYPE_INTEGER,
                                  "check_interval",
                                  _("Check Interval\n(seconds):"));
@@ -253,20 +253,20 @@ HybridModuleInfo module_info = {
     N_("email notifier"),       /**< summary */
     /* description */
     N_("hybrid plugin implementing "
-       "IMAP protocol for email notification."), 
+       "IMAP protocol for email notification."),
     "http://basiccoder.com",    /**< homepage */
     "0","1",                    /**< major version, minor version */
     "email",                    /**< icon name */
-    
+
     MODULE_TYPE_EMAIL,
     NULL,                       //
     &mail_ops,
     NULL,                       /**< actions */
     &email_options,
-    
+
 };
 
-void 
+void
 email_module_init(HybridModule *module)
 {
 

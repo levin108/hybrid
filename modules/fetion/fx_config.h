@@ -68,7 +68,7 @@ void fetion_config_save_personal(fetion_account *account, xmlnode *node);
  *
  * @param account The fetion account.
  *
- * @return The root node of personal.xml, should be freed with 
+ * @return The root node of personal.xml, should be freed with
  *         xmlnode_free() when no longer needed.
  */
 xmlnode *fetion_config_load_personal(fetion_account *account);
@@ -86,7 +86,7 @@ void fetion_config_save_buddies(fetion_account *account, xmlnode *node);
  *
  * @param account The fetion account.
  *
- * @return The root node of buddies.xml, should be freed with 
+ * @return The root node of buddies.xml, should be freed with
  *         xmlnode_free() when no longer needed.
  */
 xmlnode *fetion_config_load_buddies(fetion_account *account);

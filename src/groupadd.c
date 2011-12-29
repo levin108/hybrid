@@ -46,14 +46,14 @@ create_account_model(void)
     gchar         *nickname;
     GSList        *pos;
 
-    store = gtk_list_store_new(GROUPADD_COLUMNS, 
+    store = gtk_list_store_new(GROUPADD_COLUMNS,
                                GDK_TYPE_PIXBUF,
                                G_TYPE_STRING,
                                G_TYPE_POINTER);
 
     for (pos = account_list; pos; pos = pos->next) {
 
-        account = (HybridAccount*)pos->data;    
+        account = (HybridAccount*)pos->data;
         proto   = account->proto;
 
         if (MODULE_TYPE_IM != proto->info->module_type) {
@@ -234,8 +234,8 @@ hybrid_groupadd_window_create()
 
     group = g_new0(HybridGroupAddWindow, 1);
 
-    group->window = hybrid_create_window(_("Add Group"), NULL, 
-                        GTK_WIN_POS_CENTER, FALSE);
+    group->window = hybrid_create_window(_("Add Group"), NULL,
+                                         GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(group->window, 420, 200);
     gtk_container_set_border_width(GTK_CONTAINER(group->window), 5);
     g_signal_connect(group->window, "destroy", G_CALLBACK(destroy_cb), group);

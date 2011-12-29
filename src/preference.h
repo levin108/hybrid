@@ -21,47 +21,86 @@
 #ifndef HYBRID_PREFERENCE_H
 #define HYBRID_PREFERENCE_H
 #include <gtk/gtk.h>
+#include "pref.h"
 
-typedef struct _HybridPreference HybridPreference;
+typedef struct {
+    HybridPref *pref;
+    GtkWidget *window;
+    GtkWidget *notebook;
+} HybridPrefWin;
 
-struct _HybridPreference {
-	GtkWidget *window;
-	GtkWidget *notebook;
-	/*
-	 * check button for mute.
-	 */
-	GtkWidget *mute_check;
-	/*
-	 * check button for whether to hide the send buttons 
-	 * or not int the bottom of the chat window.
-	 */
-	GtkWidget *hcb_check; 
+typedef enum {
+    PREF_KEY_NONE,
+    PREF_KEY_BOOL,
+    PREF_KEY_STRING,
+    PREF_KEY_INT,
+    PREF_KEY_SELECT,
+    PREF_KEY_ENUM,
+    PREF_KEY_MAX
+} PrefKeyType;
 
-	/*
-	 * check button for whether to show the chat dialogs
-	 * in a single window with tabs.
-	 */
-	GtkWidget *single_cw_check;
+typedef struct _HybridPrefEntry HybridPrefEntry;
 
-	/*
-	 * Combo box for choosing the position of the tabs;
-	 */
-	GtkWidget *tab_pos_combo;
+typedef struct {
+    guint (*add_entry)(GtkWidget *section, guint pos, HybridPrefEntry *entry);
+    void (*save)(HybridPrefEntry *entry);
+    void (*destroy)(HybridPrefEntry *entry);
+} PrefAddFuncs;
 
-	/*
-	 * Combo box for choosing the chating theme.
-	 */
-	GtkWidget *chat_theme_combo;
+struct _HybridPrefEntry {
+    gchar *name;
+    gchar *key;
+    gchar *tooltip;
+    gpointer data;
+    PrefAddFuncs *type;
+    PrefKeyType type_num;
+    HybridPrefWin *win;
 };
+
+typedef union {
+    const gchar *str;
+    gint num;
+    gpointer p;
+} str_o_int;
+
+/* Pass an NULL_name-terminated array of SelectOption to add_entry */
+/* in HybridPrefEntry.data when type is PREF_KEY_SELECT */
+typedef struct {
+    const gchar *name;
+    str_o_int value;
+} SelectOption;
+
+typedef struct {
+    gint lower;
+    gint upper;
+    gint step;
+} IntRange;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+    /* TODO: add padding etc to have a better look~~ */
+    HybridPrefWin *hybrid_pref_win_new(HybridPref *pref, const gchar *title);
+
+    /* VBox */
+    GtkWidget *hybrid_pref_win_add_tab(HybridPrefWin *pref_win,
+                                       const gchar *name);
+    /* Table */
+    GtkWidget *hybrid_pref_tab_add_section(GtkWidget *tab,
+                                           const gchar *name);
+    void hybrid_pref_section_add_entry(HybridPrefWin *pref_win,
+                                       GtkWidget *section,
+                                       PrefKeyType type,
+                                       gchar *name, gchar *key,
+                                       gchar *tooltip, gpointer data);
+
+    /* connect close signal and show. */
+    void hybrid_pref_win_finish(HybridPrefWin *pref_win);
 
 /**
  * Create the preference window, if exists, just present the window.
  */
-void hybrid_pref_create(void);
+    void hybrid_pref_create(void);
 
 #ifdef __cplusplus
 }
