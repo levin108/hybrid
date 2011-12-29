@@ -395,7 +395,7 @@ status_icon_popup_cb(GtkWidget *widget, guint button, guint activate_time,
     gtk_widget_show_all(menu);
 
     gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL,
-            button, activate_time);
+                   button, activate_time);
 }
 
 static void
