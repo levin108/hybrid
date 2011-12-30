@@ -4,22 +4,25 @@
 #include <gtk/gtk.h>
 #include "account.h"
 
-typedef struct _HybridConfirmWindow						 HybridConfirmWindow;
-typedef void (*HybridConfirmOkFunc)(HybridAccount		*account,
-									const gchar	   		*code,
-									gpointer			 user_data);
-typedef	void (*HybridConfirmCancelFunc)(HybridAccount	*account,
-										gpointer		 user_data);
+typedef struct _HybridConfirmWindow HybridConfirmWindow;
+typedef void (*HybridConfirmOkFunc)(HybridAccount *account, const gchar *code,
+                                    gpointer user_data);
+typedef void (*HybridConfirmCancelFunc)(HybridAccount *account,
+                                        gpointer user_data);
 
 struct _HybridConfirmWindow {
-	GtkWidget					*window;
-	GtkWidget					*image;
-	GtkWidget					*entry;
-	HybridAccount				*account;
-	HybridConfirmOkFunc			 ok_func;
-	HybridConfirmCancelFunc		 cancel_func;
-	gpointer					 user_data;
+    GtkWidget              *window;
+    GtkWidget              *image;
+    GtkWidget              *entry;
+    HybridAccount          *account;
+    HybridConfirmOkFunc     ok_func;
+    HybridConfirmCancelFunc cancel_func;
+    gpointer                user_data;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Create a confirm window.
@@ -31,11 +34,13 @@ struct _HybridConfirmWindow {
  *
  * @return The confirm window created.
  */
-HybridConfirmWindow *hybrid_confirm_window_create(HybridAccount					*account,
-												  guchar						*pic_data,
-												  gint							 pic_len,
-												  HybridConfirmOkFunc			 ok_func,
-												  HybridConfirmCancelFunc		 cancel_func,
-												  gpointer						 user_data);
+HybridConfirmWindow *hybrid_confirm_window_create(
+    HybridAccount *account, guchar *pic_data, gint pic_len,
+    HybridConfirmOkFunc ok_func, HybridConfirmCancelFunc cancel_func,
+    gpointer user_data);
+
+#ifdef _cplusplus
+}
+#endif
 
 #endif /* _HYBRID_CONFIRM_H */

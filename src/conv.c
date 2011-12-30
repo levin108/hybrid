@@ -341,7 +341,6 @@ hybrid_conv_create()
                 theme_list[i].func();
             }
         }
-
     }
 
     HybridConversation *imconv;
@@ -1243,7 +1242,7 @@ init_chat_window(HybridChatWindow *chat)
 
 HybridChatWindow*
 hybrid_chat_window_create(HybridAccount *account, const gchar *id,
-        HybridChatWindowType type)
+                          HybridChatWindowType type)
 {
     HybridChatWindow   *chat = NULL;
     HybridConversation *conv = NULL;
@@ -1256,14 +1255,12 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 
     if (type == HYBRID_CHAT_PANEL_SYSTEM) {
         if (!(buddy = (hybrid_blist_find_buddy(account, id)))) {
-
             hybrid_debug_error("conv", "FATAL, can't find buddy");
-
             return NULL;
         }
 
         proto = account->proto;
-        ops      = proto->info->im_ops;
+        ops = proto->info->im_ops;
 
         /* we will check whether the protocol allows this buddy to be activated. */
         if (ops->chat_start) {
@@ -1622,7 +1619,7 @@ hybrid_conv_find_chat(const gchar *buddy_id)
         conv = (HybridConversation*)conv_pos->data;
 
         for (chat_pos = conv->chat_buddies; chat_pos;
-                chat_pos = chat_pos->next) {
+             chat_pos = chat_pos->next) {
             chat = (HybridChatWindow*)chat_pos->data;
 
             temp_buddy = chat->data;

@@ -34,65 +34,65 @@ typedef enum _HybridBlistCacheType HybridBlistCacheType;
 #include "account.h"
 
 struct _HybridBlist {
-	GtkWidget         *treeview;
-	GtkTreeStore      *treemodel;
-	GtkTreeViewColumn *text_column;
-	GtkCellRenderer   *text_renderer;
+    GtkWidget         *treeview;
+    GtkTreeStore      *treemodel;
+    GtkTreeViewColumn *text_column;
+    GtkCellRenderer   *text_renderer;
 };
 
 struct _HybridGroup {
-	GtkTreeIter    iter;
-	HybridAccount *account;     /**< The corresponding xml node in cache context.*/
+    GtkTreeIter    iter;
+    HybridAccount *account;     /**< The corresponding xml node in cache context.*/
 
-	xmlnode *cache_node;
+    xmlnode *cache_node;
 
-	gint   buddy_count;         /**< count of the buddies belonging to this group. */
-	gint   online_count;        /**< count of the online buddies belonging to this group.*/
-	gchar *id;
-	gchar *name;
-	gint   renamable;           /**< whether this group can be renamed. */
+    gint   buddy_count;         /**< count of the buddies belonging to this group. */
+    gint   online_count;        /**< count of the online buddies belonging to this group.*/
+    gchar *id;
+    gchar *name;
+    gint   renamable;           /**< whether this group can be renamed. */
 };
 
 struct _HybridBuddy {
-	GtkTreeIter    iter;
-	HybridAccount *account;
-	HybridGroup   *parent;
+    GtkTreeIter    iter;
+    HybridAccount *account;
+    HybridGroup   *parent;
 
-	xmlnode *cache_node;        /**< The corresponding xml node in cache context.*/
+    xmlnode *cache_node;        /**< The corresponding xml node in cache context.*/
 
-	gchar  *id;                 /**< User Identity. */
-	gchar  *name;               /**< The name string. */
-	gchar  *mood;               /**< The mood phrase. */
-	gint    state;              /**< The presence status. */
-	gint    status;             /**< 0 if this buddy is normal, 1 if it's unathorized. */
-	gchar  *icon_name;          /**< The portrait file name.  */
-	guchar *icon_data;          /**< The portrait raw data. */
-	gsize   icon_data_length;   /**< The size of the portrait raw data */
-	gchar  *icon_crc;           /**< The portrait crc. */
+    gchar  *id;                 /**< User Identity. */
+    gchar  *name;               /**< The name string. */
+    gchar  *mood;               /**< The mood phrase. */
+    gint    state;              /**< The presence status. */
+    gint    status;             /**< 0 if this buddy is normal, 1 if it's unathorized. */
+    gchar  *icon_name;          /**< The portrait file name.  */
+    guchar *icon_data;          /**< The portrait raw data. */
+    gsize   icon_data_length;   /**< The size of the portrait raw data */
+    gchar  *icon_crc;           /**< The portrait crc. */
 };
 
 enum {
-	HYBRID_BLIST_BUDDY_ID,
-	HYBRID_BLIST_STATUS_ICON,
-	HYBRID_BLIST_BUDDY_NAME,
-	HYBRID_BLIST_PROTO_ICON,
-	HYBRID_BLIST_BUDDY_ICON,
-	HYBRID_BLIST_BUDDY_STATE,
-	HYBRID_BLIST_OBJECT_COLUMN,
-	HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
-	HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
-	HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE,
-	HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE,
-	HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
-	HYBRID_BLIST_COLUMNS
+    HYBRID_BLIST_BUDDY_ID,
+    HYBRID_BLIST_STATUS_ICON,
+    HYBRID_BLIST_BUDDY_NAME,
+    HYBRID_BLIST_PROTO_ICON,
+    HYBRID_BLIST_BUDDY_ICON,
+    HYBRID_BLIST_BUDDY_STATE,
+    HYBRID_BLIST_OBJECT_COLUMN,
+    HYBRID_BLIST_GROUP_EXPANDER_COLUMN_VISIBLE,
+    HYBRID_BLIST_CONTACT_EXPANDER_COLUMN_VISIBLE,
+    HYBRID_BLIST_STATUS_ICON_COLUMN_VISIBLE,
+    HYBRID_BLIST_PROTO_ICON_COLUMN_VISIBLE,
+    HYBRID_BLIST_BUDDY_ICON_COLUMN_VISIBLE,
+    HYBRID_BLIST_COLUMNS
 };
 
 enum _HybridBlistCacheType {
-	HYBRID_BLIST_CACHE_ADD,           /**< Add a new item to the blist cache. */
-	HYBRID_BLIST_CACHE_UPDATE_NAME,   /**< Update the name of an existing item. */
-	HYBRID_BLIST_CACHE_UPDATE_MOOD,   /**< Update the mood of an existing item. */
-	HYBRID_BLIST_CACHE_UPDATE_ICON,   /**< Update the icon of an existing item. */
-	HYBRID_BLIST_CACHE_UPDATE_STATUS  /**< Update the status of an existing item. */
+    HYBRID_BLIST_CACHE_ADD,           /**< Add a new item to the blist cache. */
+    HYBRID_BLIST_CACHE_UPDATE_NAME,   /**< Update the name of an existing item. */
+    HYBRID_BLIST_CACHE_UPDATE_MOOD,   /**< Update the mood of an existing item. */
+    HYBRID_BLIST_CACHE_UPDATE_ICON,   /**< Update the icon of an existing item. */
+    HYBRID_BLIST_CACHE_UPDATE_STATUS  /**< Update the status of an existing item. */
 };
 
 /**
@@ -158,7 +158,7 @@ void hybrid_blist_group_destroy(HybridGroup *group);
  * @return The new added contact
  */
 HybridBuddy *hybrid_blist_add_buddy(HybridAccount *ac, HybridGroup *parent,
-		const gchar *id, const gchar *name);
+                                    const gchar *id, const gchar *name);
 
 /**
  * Remove a buddy.
@@ -245,8 +245,8 @@ gboolean hybrid_blist_get_buddy_authorized(HybridBuddy *buddy);
  * @param len       The length of the icon raw data.
  * @param crc       The checksum of the icon.
  */
-void hybrid_blist_set_buddy_icon(HybridBuddy *buddy,
-		const guchar *icon_data, gsize len, const gchar *crc);
+void hybrid_blist_set_buddy_icon(HybridBuddy *buddy, const guchar *icon_data,
+                                 gsize len, const gchar *crc);
 
 /**
  * Get the portrait checksum of the specified buddy.
