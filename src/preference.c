@@ -70,12 +70,24 @@ static PrefAddFuncs select_add_funcs = {
     .destroy = select_pref_destroy
 };
 
+guint font_pref_add_entry(GtkWidget *section, guint pos,
+                            HybridPrefEntry *entry);
+void font_pref_save(HybridPrefEntry *entry);
+void font_pref_destroy(HybridPrefEntry *entry);
+
+static PrefAddFuncs font_add_funcs = {
+    .add_entry = font_pref_add_entry,
+    .save = font_pref_save,
+    .destroy = font_pref_destroy
+};
+
 static PrefAddFuncs *pref_types[] = {
     [PREF_KEY_NONE] = NULL,
     [PREF_KEY_BOOL] = &bool_add_funcs,
     [PREF_KEY_STRING] = &string_add_funcs,
     [PREF_KEY_INT] = &int_add_funcs,
-    [PREF_KEY_SELECT ... PREF_KEY_ENUM] = &select_add_funcs
+    [PREF_KEY_SELECT ... PREF_KEY_ENUM] = &select_add_funcs,
+    [PREF_KEY_FONT] = &font_add_funcs
 };
 
 guint
@@ -146,6 +158,53 @@ string_pref_save(HybridPrefEntry *entry)
 
 void
 string_pref_destroy(HybridPrefEntry *entry)
+{
+    return;
+}
+
+
+guint
+font_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
+{
+    GtkWidget *font_button;
+    GtkWidget *label;
+    gchar *font;
+
+    label = gtk_label_new(entry->name);
+    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+    if (entry->tooltip)
+        gtk_widget_set_tooltip_markup(label, entry->tooltip);
+
+    font_button = gtk_font_button_new();
+    gtk_font_button_set_show_style(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_show_size(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_use_font(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_use_size(GTK_FONT_BUTTON(font_button), TRUE);
+
+    font = hybrid_pref_get_string(entry->win->pref, entry->key);
+    if (font) {
+        gtk_font_button_set_font_name(GTK_FONT_BUTTON(font_button), font);
+        g_free(font);
+    }
+
+    entry->data = font_button;
+
+    gtk_table_attach_defaults(GTK_TABLE(section), label, 0, 1, pos, pos + 1);
+    gtk_table_attach_defaults(GTK_TABLE(section), font_button,
+                              1, 2, pos, pos + 1);
+    return 1;
+}
+
+void
+font_pref_save(HybridPrefEntry *entry)
+{
+    hybrid_pref_set_string(entry->win->pref, entry->key,
+                           gtk_font_button_get_font_name(
+                               GTK_FONT_BUTTON(entry->data)));
+}
+
+void
+font_pref_destroy(HybridPrefEntry *entry)
 {
     return;
 }
