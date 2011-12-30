@@ -64,18 +64,19 @@ hybrid_chat_textview_create(void)
 
 void
 hybrid_chat_textview_append(GtkWidget *textview, HybridAccount *account,
-                            HybridBuddy *buddy,    const gchar *message, time_t msg_time)
+                            HybridBuddy *buddy, const gchar *message,
+                            time_t msg_time)
 {
-    GtkTextBuffer        *recv_tb;
+    GtkTextBuffer          *recv_tb;
     GtkTextIter             end_iter;
     GtkTextIter             stop_iter;
     GtkTextIter             start_iter;
     GtkTextMark            *mark;
-    gchar                *names;
+    gchar                  *names;
     const gchar            *color;
     const gchar            *name;
-    struct tm            *tm_time;
-    gchar                 time[128];
+    struct tm              *tm_time;
+    gchar                   time[128];
 
     g_return_if_fail(textview != NULL);
     g_return_if_fail(message != NULL);
@@ -94,7 +95,6 @@ hybrid_chat_textview_append(GtkWidget *textview, HybridAccount *account,
     /* first line */
     if (gtk_text_iter_equal(&end_iter, &stop_iter)) {
         gtk_text_buffer_delete(recv_tb, &start_iter, &stop_iter);
-
     } else {
         gtk_text_buffer_delete(recv_tb, &end_iter, &stop_iter);
 
@@ -108,7 +108,7 @@ hybrid_chat_textview_append(GtkWidget *textview, HybridAccount *account,
     if (!buddy) {
         color = "blue";
         name = account->nickname && *account->nickname ?
-                account->nickname : account->username;
+            account->nickname : account->username;
 
     } else {
         color = "green";

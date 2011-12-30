@@ -30,33 +30,33 @@ static HybridPrefWin *main_pref_window = NULL;
 guint bool_pref_add_entry(GtkWidget *section, guint pos,
                           HybridPrefEntry *entry);
 void bool_pref_save(HybridPrefEntry *entry);
-void bool_pref_destroy(HybridPrefEntry *entry);
+//void bool_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs bool_add_funcs = {
     .add_entry = bool_pref_add_entry,
     .save = bool_pref_save,
-    .destroy = bool_pref_destroy
+    .destroy = NULL
 };
 
 guint string_pref_add_entry(GtkWidget *section, guint pos,
                             HybridPrefEntry *entry);
 void string_pref_save(HybridPrefEntry *entry);
-void string_pref_destroy(HybridPrefEntry *entry);
+//void string_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs string_add_funcs = {
     .add_entry = string_pref_add_entry,
     .save = string_pref_save,
-    .destroy = string_pref_destroy
+    .destroy = NULL
 };
 
 guint int_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry);
 void int_pref_save(HybridPrefEntry *entry);
-void int_pref_destroy(HybridPrefEntry *entry);
+//void int_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs int_add_funcs = {
     .add_entry = int_pref_add_entry,
     .save = int_pref_save,
-    .destroy = int_pref_destroy
+    .destroy = NULL
 };
 
 guint select_pref_add_entry(GtkWidget *section, guint pos,
@@ -70,12 +70,24 @@ static PrefAddFuncs select_add_funcs = {
     .destroy = select_pref_destroy
 };
 
+guint font_pref_add_entry(GtkWidget *section, guint pos,
+                            HybridPrefEntry *entry);
+void font_pref_save(HybridPrefEntry *entry);
+//void font_pref_destroy(HybridPrefEntry *entry);
+
+static PrefAddFuncs font_add_funcs = {
+    .add_entry = font_pref_add_entry,
+    .save = font_pref_save,
+    .destroy = NULL
+};
+
 static PrefAddFuncs *pref_types[] = {
     [PREF_KEY_NONE] = NULL,
     [PREF_KEY_BOOL] = &bool_add_funcs,
     [PREF_KEY_STRING] = &string_add_funcs,
     [PREF_KEY_INT] = &int_add_funcs,
-    [PREF_KEY_SELECT ... PREF_KEY_ENUM] = &select_add_funcs
+    [PREF_KEY_SELECT ... PREF_KEY_ENUM] = &select_add_funcs,
+    [PREF_KEY_FONT] = &font_add_funcs
 };
 
 guint
@@ -103,12 +115,6 @@ bool_pref_save(HybridPrefEntry *entry)
     hybrid_pref_set_boolean(entry->win->pref, entry->key,
                             gtk_toggle_button_get_active(
                                 GTK_TOGGLE_BUTTON(entry->data)));
-}
-
-void
-bool_pref_destroy(HybridPrefEntry *entry)
-{
-    return;
 }
 
 guint
@@ -144,10 +150,45 @@ string_pref_save(HybridPrefEntry *entry)
                            gtk_entry_get_text(GTK_ENTRY(entry->data)));
 }
 
-void
-string_pref_destroy(HybridPrefEntry *entry)
+guint
+font_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
 {
-    return;
+    GtkWidget *font_button;
+    GtkWidget *label;
+    gchar *font;
+
+    label = gtk_label_new(entry->name);
+    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+    if (entry->tooltip)
+        gtk_widget_set_tooltip_markup(label, entry->tooltip);
+
+    font_button = gtk_font_button_new();
+    gtk_font_button_set_show_style(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_show_size(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_use_font(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_use_size(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_title(GTK_FONT_BUTTON(font_button), entry->name);
+
+    font = hybrid_pref_get_string(entry->win->pref, entry->key);
+    if (font) {
+        gtk_font_button_set_font_name(GTK_FONT_BUTTON(font_button), font);
+        g_free(font);
+    }
+
+    entry->data = font_button;
+
+    gtk_table_attach_defaults(GTK_TABLE(section), label, 0, 1, pos, pos + 1);
+    gtk_table_attach_defaults(GTK_TABLE(section), font_button,
+                              1, 2, pos, pos + 1);
+    return 1;
+}
+
+void
+font_pref_save(HybridPrefEntry *entry)
+{
+    hybrid_pref_set_string(entry->win->pref, entry->key,
+                           gtk_font_button_get_font_name(
+                               GTK_FONT_BUTTON(entry->data)));
 }
 
 guint
@@ -194,12 +235,6 @@ int_pref_save(HybridPrefEntry *entry)
     hybrid_pref_set_int(entry->win->pref, entry->key,
                         gtk_spin_button_get_value_as_int(
                             GTK_SPIN_BUTTON(entry->data)));
-}
-
-void
-int_pref_destroy(HybridPrefEntry *entry)
-{
-    return;
 }
 
 guint

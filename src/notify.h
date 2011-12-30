@@ -80,7 +80,7 @@ void hybrid_notify_set_name(HybridNotify *notify, const gchar *name);
  * @param summary  The summary.
  */
 void hybrid_notify_popup(GdkPixbuf *pixbuf, const gchar *title,
-		const gchar *summary);
+                         const gchar *summary);
 
 #ifdef __cplusplus
 }

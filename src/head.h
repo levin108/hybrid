@@ -27,29 +27,29 @@
 typedef struct _HybridHead HybridHead;
 
 struct _HybridHead {
-	GtkWidget *cellview;
-	GtkWidget *eventbox;
-	GtkWidget *editbox;
-	GtkWidget *edit_label;
-	GtkWidget *edit_entry;
-	GtkWidget *vbox;
-	GtkTreeIter iter;
+    GtkWidget *cellview;
+    GtkWidget *eventbox;
+    GtkWidget *editbox;
+    GtkWidget *edit_label;
+    GtkWidget *edit_entry;
+    GtkWidget *vbox;
+    GtkTreeIter iter;
 
-	/* which accout is being edited. */
-	HybridAccount *edit_account;
-	gint edit_state;
+    /* which accout is being edited. */
+    HybridAccount *edit_account;
+    gint edit_state;
 };
 
 enum {
-	HYBRID_HEAD_EDIT_NAME,
-	HYBRID_HEAD_EDIT_STATUS
+    HYBRID_HEAD_EDIT_NAME,
+    HYBRID_HEAD_EDIT_STATUS
 };
 
 enum {
-	HYBRID_HEAD_PIXBUF_COLUMN,
-	HYBRID_HEAD_NAME_COLUMN,
-	HYBRID_HEAD_STATUS_ICON_COLUMN,
-	HYBRID_HEAD_COLUMNS
+    HYBRID_HEAD_PIXBUF_COLUMN,
+    HYBRID_HEAD_NAME_COLUMN,
+    HYBRID_HEAD_STATUS_ICON_COLUMN,
+    HYBRID_HEAD_COLUMNS
 };
 
 #ifdef __cplusplus

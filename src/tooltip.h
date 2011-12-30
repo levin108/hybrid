@@ -46,20 +46,20 @@ typedef gboolean (*HybridTooltipCreate)(HybridTooltipData *user_data,
 typedef gboolean (*HybridTooltipInit)(HybridTooltipData *user_data);
 
 struct _HybridTooltip {
-	GtkWidget *widget;
-	GtkWidget *window;
-	GdkRectangle rect;
-	guint source;
+    GtkWidget *widget;
+    GtkWidget *window;
+    GdkRectangle rect;
+    guint source;
 };
 
 struct _HybridTooltipData {
-	GtkWidget *widget;
-	HybridTooltipPaint tooltip_paint;
-	HybridTooltipCreate tooltip_create;
-	HybridTooltipInit tooltip_init;
-	GdkPixbuf *icon;
-	GSList *layouts;
-	gpointer user_data;
+    GtkWidget *widget;
+    HybridTooltipPaint tooltip_paint;
+    HybridTooltipCreate tooltip_create;
+    HybridTooltipInit tooltip_init;
+    GdkPixbuf *icon;
+    GSList *layouts;
+    gpointer user_data;
 };
 
 #define TOOLTIP_BORDER 10
@@ -85,8 +85,8 @@ extern "C" {
 void hybrid_tooltip_setup(GtkWidget *widget,
                           HybridTooltipCreate tooltip_create,
                           HybridTooltipPaint tooltip_paint,
-						  HybridTooltipInit tooltip_init,
-						  gpointer user_data);
+                          HybridTooltipInit tooltip_init,
+                          gpointer user_data);
 
 /**
  * Create an pango layout with markup text, the width and height will

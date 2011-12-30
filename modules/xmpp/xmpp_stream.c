@@ -1091,15 +1091,15 @@ xmpp_stream_process_message(XmppStream *stream, xmlnode *root)
     g_free(value);
 
     if ((node = xmlnode_find(root, "composing"))) {
-        hybrid_conv_got_inputing(account, bare_jid, FALSE);
+        hybrid_conv_got_input(account, bare_jid, FALSE);
     }
 
     if ((node = xmlnode_find(root, "active"))) {
-        hybrid_conv_clear_inputing(account, bare_jid);
+        hybrid_conv_clear_input(account, bare_jid);
     }
 
     if ((node = xmlnode_find(root, "paused"))) {
-        hybrid_conv_stop_inputing(account, bare_jid);
+        hybrid_conv_stop_input(account, bare_jid);
     }
 
     if ((node = xmlnode_find(root, "body"))) {

@@ -26,10 +26,10 @@
 typedef struct _HybridGroupAddWindow HybridGroupAddWindow;
 
 struct _HybridGroupAddWindow {
-	GtkWidget *window;
-	GtkWidget *account_combo;
-	GtkWidget *name_entry;
-	HybridAccount *account;
+    GtkWidget *window;
+    GtkWidget *account_combo;
+    GtkWidget *name_entry;
+    HybridAccount *account;
 };
 
 #ifdef __cplusplus
