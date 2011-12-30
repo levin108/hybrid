@@ -167,6 +167,7 @@ font_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
     gtk_font_button_set_show_size(GTK_FONT_BUTTON(font_button), TRUE);
     gtk_font_button_set_use_font(GTK_FONT_BUTTON(font_button), TRUE);
     gtk_font_button_set_use_size(GTK_FONT_BUTTON(font_button), TRUE);
+    gtk_font_button_set_title(GTK_FONT_BUTTON(font_button), entry->name);
 
     font = hybrid_pref_get_string(entry->win->pref, entry->key);
     if (font) {
