@@ -1462,7 +1462,7 @@ input_finished_cb(HybridChatWindow *chat)
 }
 
 void
-hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean auto_stop)
+hybrid_conv_got_input(HybridAccount *account, const gchar *buddy_id, gboolean auto_stop)
 {
     HybridBuddy      *buddy;
     HybridChatWindow *chat;
@@ -1500,7 +1500,7 @@ hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean
 }
 
 void
-hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
+hybrid_conv_stop_input(HybridAccount *account, const gchar *buddy_id)
 {
     HybridBuddy      *buddy;
     HybridChatWindow *chat;
@@ -1525,7 +1525,7 @@ hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
 }
 
 void
-hybrid_conv_clear_inputing(HybridAccount *account, const gchar *buddy_id)
+hybrid_conv_clear_input(HybridAccount *account, const gchar *buddy_id)
 {
     HybridBuddy      *buddy;
     HybridChatWindow *chat;
