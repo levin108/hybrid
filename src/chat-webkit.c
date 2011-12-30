@@ -70,7 +70,7 @@ escape_string(const gchar *str)
                 res = g_string_append_c(res, *str);
                 break;
         }
-        str ++;
+        str++;
     }
 
     return g_string_free(res, FALSE);
@@ -106,26 +106,22 @@ gint
 hybrid_webkit_init(void)
 {
     if (!g_file_get_contents(UI_DIR"template.html", &content_html,
-                NULL, NULL)) {
-
+                             NULL, NULL)) {
         hybrid_debug_error("webkit", "read template.html failed.");
         return HYBRID_ERROR;
     }
 
     if (!g_file_get_contents(UI_DIR"default.css", &content_css, NULL, NULL)) {
-
         hybrid_debug_error("webkit", "read default.css failed.");
         return HYBRID_ERROR;
     }
 
     if (!g_file_get_contents(UI_DIR"send.html", &content_send, NULL, NULL)) {
-
         hybrid_debug_error("webkit", "read send.html failed.");
         return HYBRID_ERROR;
     }
 
     if (!g_file_get_contents(UI_DIR"recv.html", &content_recv, NULL, NULL)) {
-
         hybrid_debug_error("webkit", "read recv.html failed.");
         return HYBRID_ERROR;
     }
@@ -208,17 +204,16 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
     if (buddy) {
         if (buddy->icon_name) {
             icon_name = g_strdup_printf("file://%s/icons/%s",
-                                    icon_path, buddy->icon_name);
+                                        icon_path, buddy->icon_name);
         } else {
             icon_name = g_strdup_printf("file://%sicons/icon.png",
                                         PIXMAPS_DIR);
         }
 
-        html = g_strdup_printf(content_recv,
-                icon_name,
-                buddy->name && *buddy->name ? buddy->name : buddy->id,
-                time,
-                escaped_message);
+        html = g_strdup_printf(content_recv, icon_name,
+                               buddy->name && *buddy->name ?
+                               buddy->name : buddy->id,
+                               time, escaped_message);
     } else {
         if (account->icon_name) {
             icon_name = g_strdup_printf("file://%s/icons/%s",
@@ -244,11 +239,11 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
 
     script = g_strdup_printf("appendMessage(\"%s\")", escaped_html);
 
-    if (WEBKIT_LOAD_FINISHED                        != status    &&
+    if (WEBKIT_LOAD_FINISHED != status &&
         WEBKIT_LOAD_FIRST_VISUALLY_NON_EMPTY_LAYOUT != status) {
-        data                                         = g_new0(struct timeout_data, 1);
-        data->webkit                                 = textview;
-        data->script                                 = script;
+        data         = g_new0(struct timeout_data, 1);
+        data->webkit = textview;
+        data->script = script;
 
         g_timeout_add_seconds(0, (GSourceFunc)timeout_cb, data);
 
@@ -277,9 +272,9 @@ hybrid_chat_webkit_notify(GtkWidget *textview, const gchar *text, gint type)
 
     if (WEBKIT_LOAD_FINISHED                        != status    &&
         WEBKIT_LOAD_FIRST_VISUALLY_NON_EMPTY_LAYOUT != status) {
-        data                                         = g_new0(struct timeout_data, 1);
-        data->webkit                                 = textview;
-        data->script                                 = script;
+        data         = g_new0(struct timeout_data, 1);
+        data->webkit = textview;
+        data->script = script;
 
         g_timeout_add_seconds(0, (GSourceFunc)timeout_cb, data);
 
