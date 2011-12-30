@@ -30,33 +30,33 @@ static HybridPrefWin *main_pref_window = NULL;
 guint bool_pref_add_entry(GtkWidget *section, guint pos,
                           HybridPrefEntry *entry);
 void bool_pref_save(HybridPrefEntry *entry);
-void bool_pref_destroy(HybridPrefEntry *entry);
+//void bool_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs bool_add_funcs = {
     .add_entry = bool_pref_add_entry,
     .save = bool_pref_save,
-    .destroy = bool_pref_destroy
+    .destroy = NULL
 };
 
 guint string_pref_add_entry(GtkWidget *section, guint pos,
                             HybridPrefEntry *entry);
 void string_pref_save(HybridPrefEntry *entry);
-void string_pref_destroy(HybridPrefEntry *entry);
+//void string_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs string_add_funcs = {
     .add_entry = string_pref_add_entry,
     .save = string_pref_save,
-    .destroy = string_pref_destroy
+    .destroy = NULL
 };
 
 guint int_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry);
 void int_pref_save(HybridPrefEntry *entry);
-void int_pref_destroy(HybridPrefEntry *entry);
+//void int_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs int_add_funcs = {
     .add_entry = int_pref_add_entry,
     .save = int_pref_save,
-    .destroy = int_pref_destroy
+    .destroy = NULL
 };
 
 guint select_pref_add_entry(GtkWidget *section, guint pos,
@@ -73,12 +73,12 @@ static PrefAddFuncs select_add_funcs = {
 guint font_pref_add_entry(GtkWidget *section, guint pos,
                             HybridPrefEntry *entry);
 void font_pref_save(HybridPrefEntry *entry);
-void font_pref_destroy(HybridPrefEntry *entry);
+//void font_pref_destroy(HybridPrefEntry *entry);
 
 static PrefAddFuncs font_add_funcs = {
     .add_entry = font_pref_add_entry,
     .save = font_pref_save,
-    .destroy = font_pref_destroy
+    .destroy = NULL
 };
 
 static PrefAddFuncs *pref_types[] = {
@@ -117,12 +117,6 @@ bool_pref_save(HybridPrefEntry *entry)
                                 GTK_TOGGLE_BUTTON(entry->data)));
 }
 
-void
-bool_pref_destroy(HybridPrefEntry *entry)
-{
-    return;
-}
-
 guint
 string_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
 {
@@ -155,13 +149,6 @@ string_pref_save(HybridPrefEntry *entry)
     hybrid_pref_set_string(entry->win->pref, entry->key,
                            gtk_entry_get_text(GTK_ENTRY(entry->data)));
 }
-
-void
-string_pref_destroy(HybridPrefEntry *entry)
-{
-    return;
-}
-
 
 guint
 font_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
@@ -201,12 +188,6 @@ font_pref_save(HybridPrefEntry *entry)
     hybrid_pref_set_string(entry->win->pref, entry->key,
                            gtk_font_button_get_font_name(
                                GTK_FONT_BUTTON(entry->data)));
-}
-
-void
-font_pref_destroy(HybridPrefEntry *entry)
-{
-    return;
 }
 
 guint
@@ -253,12 +234,6 @@ int_pref_save(HybridPrefEntry *entry)
     hybrid_pref_set_int(entry->win->pref, entry->key,
                         gtk_spin_button_get_value_as_int(
                             GTK_SPIN_BUTTON(entry->data)));
-}
-
-void
-int_pref_destroy(HybridPrefEntry *entry)
-{
-    return;
 }
 
 guint
