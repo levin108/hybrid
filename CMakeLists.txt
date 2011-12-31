@@ -39,7 +39,7 @@ if(NOT DEFINED MAN_INSTALL_DIR)
 endif(NOT DEFINED MAN_INSTALL_DIR)
 
 if(NOT DEFINED CERTS_INSTALL_DIR)
-  set(CERTS_INSTALL_DIR "$DATA_INSTALL_DIR/ca-certs")
+  set(CERTS_INSTALL_DIR "${DATA_INSTALL_DIR}/ca-certs")
 endif(NOT DEFINED CERTS_INSTALL_DIR)
 
 if(NOT DEFINED LOCALE_INSTALL_DIR)
@@ -314,13 +314,20 @@ install(FILES ${HYBRID_STATUS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/
 file(GLOB HYBRID_ICONS_PIXMAPS "share/pixmaps/icons/*.png")
 install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/pixmaps/icons/")
 
+file(GLOB HYBRID_ICON "share/pixmaps/icons/icon.png")
+install(FILES ${HYBRID_ICON} DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pixmaps/" RENAME "hybrid.png")
+
+# install desktop file
+file(GLOB HYBRID_DESKTOP "share/applications/*.desktop")
+install(FILES ${HYBRID_DESKTOP} DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications/")
+
 # install sound files
-file(GLOB HYBRID_ICONS_PIXMAPS "share/sound/*.wav")
-install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${DATA_INSTALL_DIR}/sound/")
+file(GLOB HYBRID_SOUND "share/sound/*.wav")
+install(FILES ${HYBRID_SOUND} DESTINATION "${DATA_INSTALL_DIR}/sound/")
 
 # install ui files
-file(GLOB HYBRID_ICONS_PIXMAPS "src/ui/*")
-install(FILES ${HYBRID_ICONS_PIXMAPS} DESTINATION "${UI_INSTALL_DIR}")
+file(GLOB HYBRID_UI "src/ui/*")
+install(FILES ${HYBRID_UI} DESTINATION "${UI_INSTALL_DIR}")
 
 #install ca certs files
 file(GLOB HYBRID_CA_CERTS "share/ca-certs/*")
