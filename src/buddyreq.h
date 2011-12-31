@@ -28,19 +28,19 @@ typedef void (*DestroyNotify)(gpointer user_data);
 #include "account.h"
 
 struct _HybridBuddyReqWindow {
-	gchar *buddy_id;
-	gchar *buddy_name;
-	gboolean accept;
+    gchar *buddy_id;
+    gchar *buddy_name;
+    gboolean accept;
 
-	gchar *user_data;
-	DestroyNotify notify;
+    gchar *user_data;
+    DestroyNotify notify;
 
-	HybridAccount *account;
+    HybridAccount *account;
 
-	GtkWidget *window;
-	GtkWidget *textview;
-	GtkWidget *alias_entry;
-	GtkWidget *group_combo;
+    GtkWidget *window;
+    GtkWidget *textview;
+    GtkWidget *alias_entry;
+    GtkWidget *group_combo;
 };
 
 #ifdef __cplusplus
@@ -57,7 +57,8 @@ extern "C" {
  * @return The request window created.
  */
 HybridBuddyReqWindow *hybrid_buddy_request_window_create(HybridAccount *account,
-		const gchar *id, const gchar *name);
+                                                         const gchar *id,
+                                                         const gchar *name);
 
 /**
  * Set user-specified data.
@@ -68,8 +69,9 @@ HybridBuddyReqWindow *hybrid_buddy_request_window_create(HybridAccount *account,
  *                  if not NULl, the user-specified data will be destroyed by it
  *                  when the buddy request window was destroyed.
  */
-void hybrid_buddy_request_set_user_data(HybridBuddyReqWindow *req, gpointer user_data,
-		DestroyNotify notify);
+void hybrid_buddy_request_set_user_data(HybridBuddyReqWindow *req,
+                                        gpointer user_data,
+                                        DestroyNotify notify);
 
 /**
  * Get user-specified data.

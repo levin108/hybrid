@@ -26,12 +26,12 @@
 typedef struct _HybridBuddyAddWindow HybridBuddyAddWindow;
 
 struct _HybridBuddyAddWindow {
-	GtkWidget *window;
-	GtkWidget *account_combo;
-	GtkWidget *group_combo;
-	GtkWidget *username_entry;
-	GtkWidget *localname_entry;
-	GtkWidget *tips_textview;
+    GtkWidget *window;
+    GtkWidget *account_combo;
+    GtkWidget *group_combo;
+    GtkWidget *username_entry;
+    GtkWidget *localname_entry;
+    GtkWidget *tips_textview;
 };
 
 #ifdef __cplusplus

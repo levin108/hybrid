@@ -26,20 +26,20 @@
 #include "account.h"
 
 #ifdef ENABLE_NLS
-	#include "glib/gi18n.h"
+#include "glib/gi18n.h"
 #else
-	#define  _(String) (String)
-	#define N_(String) (String)
+#define  _(String) (String)
+#define N_(String) (String)
 #endif
 
-typedef struct _HybridConfirm	 HybridConfirm;
+typedef struct _HybridConfirm HybridConfirm;
 typedef struct _HybridMessageBox HybridMessageBox;
-typedef enum _HybridMessageType	 HybridMessageType;
+typedef enum _HybridMessageType HybridMessageType;
 
-typedef	void (*confirm_cb)(gpointer user_data);
+typedef void (*confirm_cb)(gpointer user_data);
 
 struct _HybridConfirm {
-    GtkWidget   *window;
+    GtkWidget  *window;
     confirm_cb  btn_callback;
     gpointer    user_data;
 };
@@ -50,7 +50,7 @@ enum _HybridMessageType{
 };
 
 struct _HybridMessageBox {
-    GtkWidget          *window;
+    GtkWidget         *window;
     HybridMessageType  type;
 };
 
@@ -98,8 +98,9 @@ GdkPixbuf *hybrid_create_proto_icon(const gchar *proto_name, gint scale_size);
  *
  * @return The pixbuf created.
  */
-GdkPixbuf *hybrid_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_len,
-		gint scale_width, gint scale_height);
+GdkPixbuf *hybrid_create_pixbuf_at_size(const guchar *pixbuf_data,
+                                        gint pixbuf_len, gint scale_width,
+                                        gint scale_height);
 
 /**
  * Create a pixbuf using the pixbuf binary data with a round corner.
@@ -112,8 +113,8 @@ GdkPixbuf *hybrid_create_pixbuf_at_size(const guchar *pixbuf_data, gint pixbuf_l
  *
  * return The pixbuf created.
  */
-GdkPixbuf *hybrid_create_round_pixbuf(const guchar *pixbuf_data, gint pixbuf_len,
-		gint scale_size);
+GdkPixbuf *hybrid_create_round_pixbuf(const guchar *pixbuf_data,
+                                      gint pixbuf_len, gint scale_size);
 
 /**
  * Create the presence status pixbuf with the given scale size.
@@ -134,9 +135,8 @@ GdkPixbuf *hybrid_create_presence_pixbuf(gint presence, gint scale_size);
  *                  must be in share/menus, and has suffix of '.png'.
  */
 GtkWidget *hybrid_create_menu(GtkWidget *parent, const gchar *title,
-		const gchar *icon_name, gboolean sensitive,
-		GCallback callback,
-		gpointer user_data);
+                              const gchar *icon_name, gboolean sensitive,
+                              GCallback callback, gpointer user_data);
 
 /**
  * Create a seperator for a menu.
@@ -173,7 +173,8 @@ GtkWidget *hybrid_create_window(const gchar *title,	GdkPixbuf *icon,
  *         it will be destroyed when the box was closed automaticly.
  */
 HybridConfirm *hybrid_confirm_show(const gchar *title, const gchar *text,
-		const gchar *btn_text, confirm_cb btn_callback, gpointer user_data);
+                                   const gchar *btn_text,
+                                   confirm_cb btn_callback, gpointer user_data);
 
 /**
  * Create a message box window.
@@ -184,7 +185,7 @@ HybridConfirm *hybrid_confirm_show(const gchar *title, const gchar *text,
  * @return The message box created.
  */
 HybridMessageBox *hybrid_message_box_show(HybridMessageType type,
-										const gchar *format, ...);
+                                          const gchar *format, ...);
 
 #ifdef __cplusplus
 }

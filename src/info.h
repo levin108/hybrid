@@ -30,34 +30,34 @@ typedef struct _HybridNotifyInfo HybridNotifyInfo;
 #include "blist.h"
 
 struct _HybridInfo {
-	GtkWidget *window;
-	GtkWidget *treeview;
-	HybridBuddy *buddy;
+    GtkWidget *window;
+    GtkWidget *treeview;
+    HybridBuddy *buddy;
 };
 
 struct _HybridNotifyInfo {
-	GSList *item_list;
+    GSList *item_list;
 };
 
 struct _HybridInfoItem {
-	gchar *name;
-	gchar *value;
-	GdkPixbuf *pixbuf;
-	gint type; /* text item or pixbuf item. */
+    gchar *name;
+    gchar *value;
+    GdkPixbuf *pixbuf;
+    gint type; /* text item or pixbuf item. */
 };
 
 enum {
-	HYBRID_INFO_ITEM_TYPE_TEXT,
-	HYBRID_INFO_ITEM_TYPE_PIXBUF,
+    HYBRID_INFO_ITEM_TYPE_TEXT,
+    HYBRID_INFO_ITEM_TYPE_PIXBUF,
 };
 
 enum {
-	HYBRID_INFO_NAME_COLUMN,
-	HYBRID_INFO_VALUE_COLUMN,
-	HYBRID_INFO_PIXBUF_COLUMN,
-	HYBRID_INFO_VALUE_COLUMN_VISIBLE,
-	HYBRID_INFO_PIXBUF_COLUMN_VISIBLE,
-	HYBRID_INFO_COLUMNS
+    HYBRID_INFO_NAME_COLUMN,
+    HYBRID_INFO_VALUE_COLUMN,
+    HYBRID_INFO_PIXBUF_COLUMN,
+    HYBRID_INFO_VALUE_COLUMN_VISIBLE,
+    HYBRID_INFO_PIXBUF_COLUMN_VISIBLE,
+    HYBRID_INFO_COLUMNS
 };
 
 #ifdef __cplusplus
@@ -97,7 +97,7 @@ void hybrid_notify_info_destroy(HybridNotifyInfo *info);
  * @param buddy_id The id of the buddy whose information to be bind.
  */
 void hybrid_info_notify(HybridAccount *account, HybridNotifyInfo *info,
-		const gchar *buddy_id);
+                        const gchar *buddy_id);
 
 /**
  * Add a name-value pair to the notify info context.
@@ -107,7 +107,7 @@ void hybrid_info_notify(HybridAccount *account, HybridNotifyInfo *info,
  * @param value The value of the pair.
  */
 void hybrid_info_add_pair(HybridNotifyInfo *info, const gchar *name,
-		const gchar *value);
+                          const gchar *value);
 
 /**
  * Add a name-pixbuf pair to the notify info context.
@@ -117,7 +117,7 @@ void hybrid_info_add_pair(HybridNotifyInfo *info, const gchar *name,
  * @param pixbuf The pixbuf of the pair.
  */
 void hybrid_info_add_pixbuf_pair(HybridNotifyInfo *info, const gchar *name,
-		const GdkPixbuf *pixbuf);
+                                 const GdkPixbuf *pixbuf);
 
 #ifdef __cplusplus
 }
