@@ -36,6 +36,7 @@ typedef enum {
     PREF_KEY_INT,
     PREF_KEY_SELECT,
     PREF_KEY_ENUM,
+    PREF_KEY_FONT,
     PREF_KEY_MAX
 } PrefKeyType;
 

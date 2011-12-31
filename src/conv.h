@@ -238,7 +238,7 @@ void hybrid_conv_got_status(HybridAccount *account, const gchar *buddy_id,
  * @param buddy_id  ID of the buddy to which the chat window belongs.
  * @param auto_stop If TRUE it will set the inputing state to be stoped automaticly.
  */
-void hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id,
+void hybrid_conv_got_input(HybridAccount *account, const gchar *buddy_id,
                               gboolean auto_stop);
 
 /**
@@ -247,7 +247,7 @@ void hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id,
  * @param account   The account.
  * @param buddy_id  ID of the buddy to which the chat window belongs.
  */
-void hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id);
+void hybrid_conv_stop_input(HybridAccount *account, const gchar *buddy_id);
 
 /**
  * Clear the inputing message.
@@ -255,7 +255,7 @@ void hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id);
  * @param account The account.
  * @param buddy_id ID of the buddy to which the chat window belongs.
  */
-void hybrid_conv_clear_inputing(HybridAccount *account, const gchar *buddy_id);
+void hybrid_conv_clear_input(HybridAccount *account, const gchar *buddy_id);
 
 /**
  * Get the supported theme list.

@@ -60,8 +60,8 @@ GtkWidget *hybrid_chat_webkit_create(void);
  * @param msg_time The time displayed together with the message.
  */
 void hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
-								HybridBuddy *buddy,	const gchar *message,
-								time_t msg_time);
+                               HybridBuddy *buddy, const gchar *message,
+                               time_t msg_time);
 /**
  * Append a notify message to the webkit.
  *
@@ -69,8 +69,8 @@ void hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
  * @param text     Content of the notification.
  * @param type     Type of the notification.
  */
-void hybrid_chat_webkit_notify(GtkWidget *textview,
-								const gchar *text, gint type);
+void hybrid_chat_webkit_notify(GtkWidget *textview, const gchar *text,
+                               gint type);
 
 #ifdef __cplusplus
 }

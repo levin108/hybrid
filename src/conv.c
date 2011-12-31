@@ -341,7 +341,6 @@ hybrid_conv_create()
                 theme_list[i].func();
             }
         }
-
     }
 
     HybridConversation *imconv;
@@ -353,9 +352,9 @@ hybrid_conv_create()
     gtk_window_set_default_size(GTK_WINDOW(imconv->window), 485, 500);
     gtk_container_set_border_width(GTK_CONTAINER(imconv->window), 1);
     g_signal_connect(imconv->window, "destroy", G_CALLBACK(conv_destroy_cb),
-            imconv);
+                     imconv);
     g_signal_connect(imconv->window, "key-press-event",
-            G_CALLBACK(key_press_func), imconv);
+                     G_CALLBACK(key_press_func), imconv);
 
     /* create vbox */
     vbox = gtk_vbox_new(FALSE, 2);
@@ -376,7 +375,7 @@ hybrid_conv_create()
     gtk_notebook_set_show_border(GTK_NOTEBOOK(imconv->notebook), TRUE);
     gtk_box_pack_start(GTK_BOX(vbox), imconv->notebook, TRUE, TRUE, 0);
     g_signal_connect(imconv->notebook, "switch-page",
-            G_CALLBACK(switch_page_cb), imconv);
+                     G_CALLBACK(switch_page_cb), imconv);
 
     if (!hybrid_pref_get_boolean(NULL, "hide_chat_buttons")) {
         /* create action area, "Close" button and "Send" button */
@@ -389,7 +388,7 @@ hybrid_conv_create()
         button = gtk_button_new_with_label(_("Close"));
         gtk_widget_set_size_request(button, 100, 30);
         gtk_box_pack_start(GTK_BOX(action_area), button, FALSE, FALSE, 2);
-        g_signal_connect(button, "clicked",    G_CALLBACK(conv_close_cb), imconv);
+        g_signal_connect(button, "clicked", G_CALLBACK(conv_close_cb), imconv);
 
         button = gtk_button_new_with_label(_("Send"));
         gtk_widget_set_size_request(button, 100, 30);
@@ -1243,7 +1242,7 @@ init_chat_window(HybridChatWindow *chat)
 
 HybridChatWindow*
 hybrid_chat_window_create(HybridAccount *account, const gchar *id,
-        HybridChatWindowType type)
+                          HybridChatWindowType type)
 {
     HybridChatWindow   *chat = NULL;
     HybridConversation *conv = NULL;
@@ -1256,14 +1255,12 @@ hybrid_chat_window_create(HybridAccount *account, const gchar *id,
 
     if (type == HYBRID_CHAT_PANEL_SYSTEM) {
         if (!(buddy = (hybrid_blist_find_buddy(account, id)))) {
-
             hybrid_debug_error("conv", "FATAL, can't find buddy");
-
             return NULL;
         }
 
         proto = account->proto;
-        ops      = proto->info->im_ops;
+        ops = proto->info->im_ops;
 
         /* we will check whether the protocol allows this buddy to be activated. */
         if (ops->chat_start) {
@@ -1465,7 +1462,7 @@ input_finished_cb(HybridChatWindow *chat)
 }
 
 void
-hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean auto_stop)
+hybrid_conv_got_input(HybridAccount *account, const gchar *buddy_id, gboolean auto_stop)
 {
     HybridBuddy      *buddy;
     HybridChatWindow *chat;
@@ -1503,7 +1500,7 @@ hybrid_conv_got_inputing(HybridAccount *account, const gchar *buddy_id, gboolean
 }
 
 void
-hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
+hybrid_conv_stop_input(HybridAccount *account, const gchar *buddy_id)
 {
     HybridBuddy      *buddy;
     HybridChatWindow *chat;
@@ -1528,7 +1525,7 @@ hybrid_conv_stop_inputing(HybridAccount *account, const gchar *buddy_id)
 }
 
 void
-hybrid_conv_clear_inputing(HybridAccount *account, const gchar *buddy_id)
+hybrid_conv_clear_input(HybridAccount *account, const gchar *buddy_id)
 {
     HybridBuddy      *buddy;
     HybridChatWindow *chat;
@@ -1622,7 +1619,7 @@ hybrid_conv_find_chat(const gchar *buddy_id)
         conv = (HybridConversation*)conv_pos->data;
 
         for (chat_pos = conv->chat_buddies; chat_pos;
-                chat_pos = chat_pos->next) {
+             chat_pos = chat_pos->next) {
             chat = (HybridChatWindow*)chat_pos->data;
 
             temp_buddy = chat->data;
