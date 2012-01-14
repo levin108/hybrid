@@ -523,12 +523,12 @@ add_buddy_ok:
         goto add_buddy_unknown_err;
     }
 
-    if (buddy->localname && *(buddy->localname) == '\0') {
-        name = get_sid_from_sipuri(buddy->sipuri);
-
-    } else {
-        name = g_strdup(buddy->localname);
-    }
+    if (buddy->localname && *(buddy->localname) != '\0')
+	    name = g_strdup(buddy->localname);
+    else if(buddy->nickname && *(buddy->nickname) != '\0')
+	    name = g_strdup(buddy->nickname);
+    else
+	    name = get_sid_from_sipuri(buddy->sipuri);
 
     bd = hybrid_blist_add_buddy(account->account, group, buddy->userid, name);
     hybrid_blist_set_buddy_status(bd, FALSE);
@@ -607,9 +607,17 @@ fetion_buddies_init(fetion_account *ac)
             id = g_strndup(start, stop - start);
 
             imgroup = hybrid_blist_find_group(ac->account, id);
+	    if (imgroup == NULL)
+	    {
+		    start =  ++stop;
+		    for (; *stop && *stop != ';'; stop ++);
+		    id = g_strndup(start, stop - start);
+
+		    imgroup = hybrid_blist_find_group(ac->account, id);
+	    }
 
             imbuddy = hybrid_blist_add_buddy(ac->account, imgroup,
-                    buddy->userid, buddy->localname);
+                    buddy->userid, buddy->localname ? buddy->localname : buddy->nickname);
 
             if (*(imbuddy->name) == '\0') {
                 hybrid_blist_set_buddy_name(imbuddy, buddy->sid);

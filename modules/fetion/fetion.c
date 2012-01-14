@@ -62,8 +62,8 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
         buddy   = (fetion_buddy*)pos->data;
         imbuddy = hybrid_blist_find_buddy(ac->account, buddy->userid);
 
-        if (!buddy->localname || *(buddy->localname) == '\0') {
-            hybrid_blist_set_buddy_name(imbuddy, buddy->nickname);
+        if (buddy->localname && *(buddy->localname) != '\0') {
+            hybrid_blist_set_buddy_name(imbuddy, buddy->localname);
         }
         hybrid_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);
 
@@ -480,7 +480,7 @@ get_info_cb(fetion_account *ac, const gchar *sipmsg, fetion_transaction *trans)
         hybrid_info_add_pair(info, _("Localname"), buddy->localname);
     }
     hybrid_info_add_pair(info, _("Fetion-no"), buddy->sid);
-    if (*buddy->mobileno) {
+    if (buddy->mobileno && *buddy->mobileno) {
         hybrid_info_add_pair(info, _("Mobile-no"), buddy->mobileno);
     }
     hybrid_info_add_pair(info, _("Gender"),
