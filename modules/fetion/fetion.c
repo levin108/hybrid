@@ -64,6 +64,8 @@ process_presence(fetion_account *ac, const gchar *sipmsg)
 
         if (buddy->localname && *(buddy->localname) != '\0') {
             hybrid_blist_set_buddy_name(imbuddy, buddy->localname);
+        } else if (buddy->nickname && *(buddy->nickname) != '\0') {
+            hybrid_blist_set_buddy_name(imbuddy, buddy->nickname);
         }
         hybrid_blist_set_buddy_mood(imbuddy, buddy->mood_phrase);
 
