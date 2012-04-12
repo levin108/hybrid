@@ -10,7 +10,7 @@ set(PACKAGE_VERSION "0.0.1")
 set(PACKAGE_NAME "Hybird")
 set(PACKAGE_TARNAME "${TARNAME}")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
-set(PACKAGE_BUGREPORT "http://code.google.com/p/ofetion/issues/list")
+set(PACKAGE_BUGREPORT "https://github.com/levin108/hybrid/issues")
 
 find_package(PkgConfig REQUIRED)
 
