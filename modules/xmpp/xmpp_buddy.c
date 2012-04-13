@@ -694,7 +694,14 @@ xmpp_buddy_get_info(XmppStream *stream, const gchar *jid,
 
     iq = iq_request_create(stream, IQ_TYPE_GET);
 
-    xmlnode_new_prop(iq->node, "to", jid);
+    if (strcmp(stream->account->username, jid) == 0) {
+        gchar *myjid = g_strdup_printf("%s@%s", jid, stream->account->to);
+        xmlnode_new_prop(iq->node, "to", myjid);
+        g_free(myjid);
+    } else {
+        xmlnode_new_prop(iq->node, "to", jid);
+    }
+
     node = xmlnode_new_child(iq->node, "vCard");
     xmlnode_new_namespace(node, NULL, "vcard-temp");
 
