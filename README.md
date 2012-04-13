@@ -12,7 +12,7 @@ Hybrid is a free software released under GPLv2.
 [AUR Package](https://aur.archlinux.org/packages.php?ID=51159)
 
 #### Everywhere else for now (From Source)
-    $git clone git@github.com:levin108/hybrid.git
+    $git clone git://github.com/levin108/hybrid.git
 
     $cd hybrid
     $mkdir -p build
