@@ -57,7 +57,7 @@ hybrid_confirm_window_create(HybridAccount           *account,
     con->cancel_func = cancel_func;
     con->user_data   = user_data;
 
-    con->window = hybrid_create_window(_("Confirm Code"), NULL,
+    con->window = hybrid_create_window(_("CAPTCHA"), NULL,
                                        GTK_WIN_POS_CENTER, FALSE);
     gtk_widget_set_size_request(con->window, 300, 200);
     gtk_container_set_border_width(GTK_CONTAINER(con->window), 8);
