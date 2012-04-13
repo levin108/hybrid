@@ -253,14 +253,14 @@ select_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
     if (entry->tooltip)
         gtk_widget_set_tooltip_markup(label, entry->tooltip);
 
-    combo = gtk_combo_box_text_new();
+    combo = gtk_combo_box_new_text();
     if (entry->type_num == PREF_KEY_SELECT) {
         value.str = hybrid_pref_get_string(entry->win->pref, entry->key);
     } else {
         value.num = hybrid_pref_get_int(entry->win->pref, entry->key);
     }
     for (i = 0;options[i].name;i++) {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo),
+        gtk_combo_box_append_text(GTK_COMBO_BOX(combo),
                                        options[i].name);
         if (entry->type_num == PREF_KEY_SELECT) {
             if (!g_strcmp0(options[i].value.str, value.str))
@@ -270,6 +270,8 @@ select_pref_add_entry(GtkWidget *section, guint pos, HybridPrefEntry *entry)
                 active = i;
         }
     }
+    if (-1 == active)
+        active = 0;
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), active);
 
     entry->data = data = g_new0(str_o_int, i + 2);

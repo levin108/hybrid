@@ -80,28 +80,29 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    /* TODO: add padding etc to have a better look~~ */
-    HybridPrefWin *hybrid_pref_win_new(HybridPref *pref, const gchar *title);
 
-    /* VBox */
-    GtkWidget *hybrid_pref_win_add_tab(HybridPrefWin *pref_win,
+/* TODO: add padding etc to have a better look~~ */
+HybridPrefWin *hybrid_pref_win_new(HybridPref *pref, const gchar *title);
+
+/* VBox */
+GtkWidget *hybrid_pref_win_add_tab(HybridPrefWin *pref_win,
+                                   const gchar *name);
+/* Table */
+GtkWidget *hybrid_pref_tab_add_section(GtkWidget *tab,
                                        const gchar *name);
-    /* Table */
-    GtkWidget *hybrid_pref_tab_add_section(GtkWidget *tab,
-                                           const gchar *name);
-    void hybrid_pref_section_add_entry(HybridPrefWin *pref_win,
-                                       GtkWidget *section,
-                                       PrefKeyType type,
-                                       gchar *name, gchar *key,
-                                       gchar *tooltip, gpointer data);
+void hybrid_pref_section_add_entry(HybridPrefWin *pref_win,
+                                   GtkWidget *section,
+                                   PrefKeyType type,
+                                   gchar *name, gchar *key,
+                                   gchar *tooltip, gpointer data);
 
-    /* connect close signal and show. */
-    void hybrid_pref_win_finish(HybridPrefWin *pref_win);
+/* connect close signal and show. */
+void hybrid_pref_win_finish(HybridPrefWin *pref_win);
 
 /**
- * Create the preference window, if exists, just present the window.
- */
-    void hybrid_pref_create(void);
+* Create the preference window, if exists, just present the window.
+*/
+void hybrid_pref_create(void);
 
 #ifdef __cplusplus
 }
