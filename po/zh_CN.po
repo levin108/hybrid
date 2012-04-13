@@ -168,10 +168,12 @@ msgid "Add a new account"
 msgstr "新建帐户"
 
 #: modules/xmpp/xmpp_buddy.c:619
+#, fuzzy
 msgid "Add buddy failed."
-msgstr "添加联系人失败."
+msgstr "添加联系人"
 
 #: modules/xmpp/xmpp_buddy.c:568
+#, fuzzy
 msgid ""
 "Add buddy failed.\n"
 "Invalid response message."
@@ -295,8 +297,9 @@ msgid "Confirm"
 msgstr "确认"
 
 #: src/confirm.c:60
+#, fuzzy
 msgid "Confirm Code"
-msgstr "验证码"
+msgstr "确认"
 
 #: modules/email/mail.c:181
 msgid "Connecting to IMAP server."
@@ -336,6 +339,7 @@ msgid "Disable Account"
 msgstr "禁用帐户"
 
 #: modules/fetion/fx_login.c:298
+#, fuzzy
 msgid "Downloading configure file..."
 msgstr "正在下载配置文件..."
 
@@ -380,6 +384,7 @@ msgid "Hybrid"
 msgstr ""
 
 #: src/about.c:158
+#, fuzzy
 msgid ""
 "Hybrid is a lightweight extensible IM framework,currently supports China "
 "Mobile Fetion protocol,XMPP protocol, and IMAP mail notifier.\n"
@@ -492,12 +497,14 @@ msgid "Modify Status"
 msgstr "更改状态"
 
 #: modules/xmpp/xmpp_account.c:200
+#, fuzzy
 msgid "Modify full name failed."
 msgstr "更改全名失败."
 
 #: modules/xmpp/xmpp_account.c:244
+#, fuzzy
 msgid "Modify photo failed."
-msgstr "更改照片失败."
+msgstr "更改照片"
 
 #: modules/fetion/fetion.c:491 modules/fetion/fetion.c:628
 #: modules/fetion/fetion.c:668
@@ -871,8 +878,9 @@ msgid "request roster error."
 msgstr "请求名单错误."
 
 #: modules/xmpp/xmpp_buddy.c:209
+#, fuzzy
 msgid "request roster failed."
-msgstr "请求名单失败."
+msgstr "请求名单错误."
 
 #: modules/xmpp/xmpp_stream.c:668
 msgid "request vcard error."
@@ -924,8 +932,12 @@ msgid "start sipc authentication..."
 msgstr "开始SIPC验证..."
 
 #: modules/xmpp/xmpp_buddy.c:107
+#, fuzzy
 msgid "subscribe presence failed"
 msgstr "订阅好友状态失败"
+
+#~ msgid "CAPTCHA"
+#~ msgstr "验证码"
 
 #~ msgid ""
 #~ "Developers\n"
@@ -933,6 +945,15 @@ msgstr "订阅好友状态失败"
 #~ msgstr ""
 #~ "开发人员\n"
 #~ "\n"
+
+#~ msgid "Failed to add buddy."
+#~ msgstr "添加联系人失败."
+
+#~ msgid "Failed to modify photo."
+#~ msgstr "更改照片失败."
+
+#~ msgid "Failed to request roster."
+#~ msgstr "请求名单失败."
 
 #~ msgid "Tabs"
 #~ msgstr "标签"
