@@ -184,7 +184,7 @@ static void create_intro(GtkTextView *view)
     gtk_text_buffer_insert_with_tags(buffer, &iter,
                                      _("\nWebsite: "), -1, tag1, NULL);
     insert_link(buffer, &iter,
-                "https://github.com/levin108/hybrid", NULL);
+                "http://levin108.github.com/hybrid/", NULL);
 
     gtk_text_buffer_insert_with_tags(buffer, &iter,
                                      _("\nBug report: "), -1, tag1, NULL);
