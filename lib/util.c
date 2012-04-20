@@ -329,7 +329,7 @@ hybrid_base64_encode(const guchar *input, gint size)
   b64  = BIO_push(b64, bmem);
 
   BIO_write(b64, input, size);
-  BIO_flush(b64);
+  (void)BIO_flush(b64);
   BIO_get_mem_ptr(b64, &bptr);
 
   buff = (gchar *)g_malloc0(bptr->length);

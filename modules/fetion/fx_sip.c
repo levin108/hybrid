@@ -261,7 +261,7 @@ fetion_sip_to_string(fetion_sip *sip, const gchar *body)
 
     if (body) {
         to_free = res;
-        header_value = g_strdup_printf("L: %d\r\n\r\n", strlen(body));
+        header_value = g_strdup_printf("L: %lu\r\n\r\n", strlen(body));
         res = g_strjoin("", res, header_value, body, NULL);
         g_free(to_free);
         g_free(header_value);

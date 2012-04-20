@@ -302,7 +302,7 @@ cfg_connect_cb(gint sk, gpointer user_data)
                            "User-Agent: IIC2.0/PC "PROTO_VERSION"\r\n"
                            "Host: %s\r\n"
                            "Connection: Close\r\n"
-                           "Content-Length: %d\r\n\r\n%s",
+                           "Content-Length: %lu\r\n\r\n%s",
                            NAV_SERVER, strlen(body), body);
 
     g_free(body);
