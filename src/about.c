@@ -155,7 +155,7 @@ static void create_intro(GtkTextView *view)
 {
     GtkTextTag  *tag1;
     GtkTextIter  iter;
-    const char intro[] = N_("Hybrid is a lightweight extensible IM framework,"
+    const char intro[] = N_("Hybrid is a lightweight extensible IM framework, "
                             "currently supports China Mobile Fetion protocol,"
                             "XMPP protocol, and IMAP mail notifier.\n\n\n");
 

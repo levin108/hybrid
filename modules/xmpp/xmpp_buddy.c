@@ -104,7 +104,7 @@ xmpp_buddy_presence(XmppStream *stream)
     if (hybrid_ssl_write(stream->ssl, xml_string, strlen(xml_string)) == -1) {
 
         hybrid_account_error_reason(stream->account->account,
-                                    _("subscribe presence failed"));
+                                    _("Failed to subscribe presence"));
         g_free(xml_string);
 
         return;
@@ -206,7 +206,7 @@ xmpp_buddy_process_roster(XmppStream *stream, xmlnode *root)
 
 roster_err:
     hybrid_account_error_reason(stream->account->account,
-                                _("request roster failed."));
+                                _("Failed to request roster."));
 }
 
 XmppBuddy*
@@ -565,7 +565,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
     if (!xmlnode_has_prop(root, "type")) {
 
         notify = hybrid_notify_create(account, _("Warning"));
-        hybrid_notify_set_text(notify, _("Add buddy failed.\n"
+        hybrid_notify_set_text(notify, _("Failed to add buddy.\n"
                     "Invalid response message."));
 
         goto buddy_add_err;
@@ -616,7 +616,7 @@ buddy_add_cb(XmppStream *stream, xmlnode *root, buddy_add_data *data)
                 g_free(value);
 
             } else {
-                hybrid_notify_set_text(notify, _("Add buddy failed."));
+                hybrid_notify_set_text(notify, _("Failed to add buddy."));
             }
         }
     }

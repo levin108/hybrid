@@ -295,7 +295,7 @@ cfg_connect_cb(gint sk, gpointer user_data)
     gchar          *body;
     fetion_account *ac = (fetion_account*)user_data;
 
-    hybrid_account_set_connection_string(ac->account, _("Downloading configure file..."));
+    hybrid_account_set_connection_string(ac->account, _("Downloading configuration file..."));
 
     body = generate_configuration_body(ac);
     http = g_strdup_printf("POST /nav/getsystemconfig.aspx HTTP/1.1\r\n"

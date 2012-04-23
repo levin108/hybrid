@@ -197,7 +197,7 @@ modify_name_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 modify_name_err:
 
     notify = hybrid_notify_create(stream->account->account, _("System Message"));
-    hybrid_notify_set_text(notify, _("Modify full name failed."));
+    hybrid_notify_set_text(notify, _("Failed to modify full name."));
 
     return FALSE;
 }
@@ -241,7 +241,7 @@ modify_photo_cb(XmppStream *stream, xmlnode *root, gpointer user_data)
 modify_name_err:
 
     notify = hybrid_notify_create(stream->account->account, _("System Message"));
-    hybrid_notify_set_text(notify, _("Modify photo failed."));
+    hybrid_notify_set_text(notify, _("Failed to modify photo."));
 
     return FALSE;
 }
