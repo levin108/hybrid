@@ -55,6 +55,7 @@ hybrid_logs_create(HybridAccount *account, const gchar *id)
     gchar *log_path;
     gchar *account_path;
     gchar *final_path;
+    gchar *proto_path;
     struct tm *local_time;
     time_t now;
     gint e;
@@ -72,9 +73,23 @@ hybrid_logs_create(HybridAccount *account, const gchar *id)
     config_path = hybrid_config_get_path();
     log_path = g_strdup_printf("%s/logs", config_path);
 
-    /* create log directory for a specified account. */
-    account_path = g_strdup_printf("%s/%s", log_path, account->username);
+    proto_path = g_strdup_printf("%s/%s", log_path,
+                    account->proto->info->name);
     g_free(log_path);
+
+    e = mkdir(proto_path, S_IRWXU|S_IRWXO|S_IRWXG);
+
+    if (e && access(proto_path, R_OK|W_OK)) {
+        hybrid_debug_error("logs", "%s,cannot create, read or write",
+                            proto_path);
+        g_free(proto_path);
+
+        return NULL;
+    }
+
+    /* create log directory for a specified account. */
+    account_path = g_strdup_printf("%s/%s", proto_path, account->username);
+    g_free(proto_path);
 
     e = mkdir(account_path, S_IRWXU|S_IRWXO|S_IRWXG);
 
