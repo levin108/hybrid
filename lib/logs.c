@@ -121,7 +121,7 @@ hybrid_logs_create(HybridAccount *account, const gchar *id)
      * in form of id_date.xml */
     local_time = localtime(&now);
 
-    log->log_path = g_strdup_printf("%s/%d_%d_%d.html",
+    log->log_path = g_strdup_printf("%s/%d_%d_%d.xml",
                     final_path, local_time->tm_year + 1900,
                     local_time->tm_mon, local_time->tm_mday);
 
@@ -136,17 +136,12 @@ gint
 hybrid_logs_write(HybridLogs *log, const gchar *name, const gchar *msg,
                     gboolean sendout)
 {
-    xmlnode *head_node;
-    xmlnode *body_node;
     xmlnode *time_node;
-    xmlnode *font_node;
     xmlnode *name_node;
     xmlnode *cont_node;
     xmlnode *node;
     time_t now;
     const gchar *body;
-    gchar *title;
-    gchar *content;
     struct tm *local_time;
     gchar time_str[128];
 
@@ -157,72 +152,32 @@ hybrid_logs_write(HybridLogs *log, const gchar *name, const gchar *msg,
 
     local_time = localtime(&now);
 
-
     /* log file doesn't exist, we create one. */
     if (!log->root) {
-        body = "<html></html>";
-
-        title = g_strdup_printf(_("Conversation with %s (%s) at %d-%d-%d"),
-                name, log->id, local_time->tm_year + 1900,
-                local_time->tm_mon, local_time->tm_mday);
-
+        body = "<root></root>";
         log->root = xmlnode_root(body, strlen(body));
-
-        head_node = xmlnode_new_child(log->root, "head");
-
-        node = xmlnode_new_child(head_node, "meta");
-        xmlnode_new_prop(node, "http-equiv", "content-type");
-        xmlnode_new_prop(node, "content", "text/html; charset=UTF-8");
-
-        node = xmlnode_new_child(head_node, "title");
-
-        xmlnode_set_content(node, title);
-
-        node = xmlnode_new_child(log->root, "body");
-
-        node = xmlnode_new_child(node, "h3");
-
-        xmlnode_set_content(node, title);
-
-        g_free(title);
     }
 
-    if (!(body_node = xmlnode_find(log->root, "body"))) {
-
-        hybrid_debug_error("logs", "invalid log file.");
-
-        g_free(title);
-
-        return HYBRID_ERROR;
-    }
-
-    node = xmlnode_new_child(body_node, "span");
-
-    font_node = xmlnode_new_child(node, "font");
+    node = xmlnode_new_child(log->root, "m");
     if (sendout) {
-        xmlnode_new_prop(font_node, "color", "#16569E");
+        xmlnode_new_prop(node, "type", "o");
 
     } else {
-        xmlnode_new_prop(font_node, "color", "#A82F2F");
+        xmlnode_new_prop(node, "type", "i");
     }
 
-    time_node = xmlnode_new_child(font_node, "font");
-    xmlnode_new_prop(time_node, "size", "2");
+    time_node = xmlnode_new_child(node, "t");
 
     memset(time_str, 0, sizeof(time_str));
-    strftime(time_str, sizeof(time_str) - 1, "(%H:%M:%S) ", local_time);
+    strftime(time_str, sizeof(time_str) - 1, "%H:%M:%S", local_time);
 
     xmlnode_set_content(time_node, time_str);
 
-    content = g_strdup_printf("%s: ", name);
-    name_node = xmlnode_new_child(font_node, "b");
-    xmlnode_set_content(name_node, content);
-    g_free(content);
+    name_node = xmlnode_new_child(node, "n");
+    xmlnode_set_content(name_node, name);
 
-    cont_node = xmlnode_new_child(node, "font");
+    cont_node = xmlnode_new_child(node, "c");
     xmlnode_set_content(cont_node, msg);
-
-    xmlnode_new_child(node, "br");
 
     xmlnode_save_file(log->root, log->log_path);
 
