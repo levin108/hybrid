@@ -88,12 +88,66 @@ out:
     return GTK_TREE_MODEL(store);
 }
 
-void
+static void
+bind_log_to_textview(HybridLogbox *logbox, const gchar *logname)
+{
+    GSList *list, *pos;
+    HybridLogEntry *entry;
+    GtkTextBuffer *buffer;
+    GtkTextIter end_iter;
+    GtkTextMark *mark;
+    const gchar *color;
+    gchar *title;
+
+    list = hybrid_logs_read(logbox->account, logbox->buddy->id, logname);
+
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logbox->textview));
+    gtk_text_buffer_get_end_iter(buffer, &end_iter);
+
+    for (pos = list; pos; pos = pos->next) {
+        entry = pos->data;
+        if (entry->is_send) {
+            color = "blue";
+        } else {
+            color = "green";
+        }
+        title = g_strdup_printf(_("%s (%s) said:"), entry->name, entry->time);
+
+        gtk_text_buffer_insert_with_tags_by_name(buffer, &end_iter,
+                        title, strlen(title), color, "wrap",
+                        "bold", "small", NULL);
+
+        gtk_text_buffer_insert(buffer, &end_iter, "\n", -1);
+        gtk_text_buffer_insert_with_tags_by_name(buffer, &end_iter,
+                        entry->content, strlen(entry->content),
+                        "lm10", "wrap", "small", NULL);
+
+        gtk_text_buffer_insert(buffer, &end_iter, "\n", -1);
+        gtk_text_iter_set_line_offset(&end_iter, 0);
+
+        mark = gtk_text_buffer_get_mark(buffer, "scroll");
+        gtk_text_buffer_move_mark(buffer, mark, &end_iter);
+        gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(logbox->textview), mark);
+
+        g_free(title);
+
+        g_free(entry->name);
+        g_free(entry->time);
+        g_free(entry->content);
+        g_free(entry);
+        pos->data = NULL;
+    }
+
+    g_slist_free(list);
+}
+
+static void
 select_the_latest_log(HybridLogbox *logbox)
 {
     GtkTreeSelection *selection;
     GtkTreeModel *model;
     GtkTreeIter iter;
+    gchar *filename;
 
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(logbox->loglist));
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(logbox->loglist));
@@ -103,6 +157,9 @@ select_the_latest_log(HybridLogbox *logbox)
     }
 
     gtk_tree_selection_select_iter(selection, &iter);
+    gtk_tree_model_get(model, &iter, HYBRID_LOGBOX_FILE, &filename, -1);
+    bind_log_to_textview(logbox, filename);
+    g_free(filename);
 }
 
 static void
@@ -154,7 +211,6 @@ logbox_init(HybridLogbox *logbox)
     g_object_unref(model);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(logbox->loglist), FALSE);
     render_column(logbox);
-    select_the_latest_log(logbox);
     gtk_container_add(GTK_CONTAINER(scroll), logbox->loglist);
 
     scroll = gtk_scrolled_window_new(NULL, NULL);
@@ -175,11 +231,13 @@ logbox_init(HybridLogbox *logbox)
     gtk_text_buffer_create_tag(buffer, "grey", "foreground", "#808080", NULL);
     gtk_text_buffer_create_tag(buffer, "green", "foreground", "#0088bf", NULL);
     gtk_text_buffer_create_tag(buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
-    gtk_text_buffer_create_tag(buffer, "lm10", "left_margin", 3, NULL);
+    gtk_text_buffer_create_tag(buffer, "lm10", "left_margin", 10, NULL);
     gtk_text_buffer_create_tag(buffer, "wrap", "wrap-mode", GTK_WRAP_WORD_CHAR, NULL);
     gtk_text_buffer_create_tag(buffer, "small", "size-points", 9.0, NULL);
     gtk_text_buffer_get_end_iter(buffer, &end_iter);
     gtk_text_buffer_create_mark(buffer, "scroll", &end_iter, FALSE);
+
+    select_the_latest_log(logbox);
 
     /* buttons */
     action_area = gtk_hbox_new(FALSE, 0);
