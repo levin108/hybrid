@@ -26,6 +26,7 @@
 #include "conv.h"
 #include "head.h"
 #include "info.h"
+#include "logbox.h"
 #include "gtkutils.h"
 #include "gtkcellrendererexpander.h"
 
@@ -496,6 +497,15 @@ rename_buddy_menu_cb(GtkWidget *widget, HybridBuddy *buddy)
 }
 
 static void
+view_chat_logs_cb(GtkWidget *widget, HybridBuddy *buddy)
+{
+    HybridLogbox *logbox;
+
+    logbox = hybrid_logbox_create(buddy->account, buddy);
+    hybrid_logbox_show(logbox);
+}
+
+static void
 rename_group_menu_cb(GtkWidget *widget, HybridGroup *group)
 {
     GtkTreeView  *tree;
@@ -584,7 +594,8 @@ create_buddy_menu(GtkWidget *treeview, GtkTreePath *path)
                     G_CALLBACK(remove_buddy_menu_cb), buddy);
     hybrid_create_menu(menu, _("Rename Buddy"), "rename", TRUE,
                     G_CALLBACK(rename_buddy_menu_cb), buddy);
-    hybrid_create_menu(menu, _("View Chat Logs"), "logs", TRUE, NULL, NULL);
+    hybrid_create_menu(menu, _("View Chat Logs"), "logs", TRUE,
+					G_CALLBACK(view_chat_logs_cb), buddy);
 
     gtk_widget_show_all(menu);
 

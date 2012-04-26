@@ -243,6 +243,7 @@ set(hybrid_SRC
   src/preference.c
   src/chat-textview.c
   src/chat-webkit.c
+  src/logbox.c
   src/groupadd.c
   src/buddyadd.c
   src/buddyreq.c
