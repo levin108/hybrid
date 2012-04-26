@@ -132,6 +132,8 @@ logbox_init(HybridLogbox *logbox)
     GtkWidget *scroll;
     GtkWidget *button;
     GtkWidget *action_area;
+    GtkTextIter end_iter;
+    GtkTextBuffer *buffer;
     GtkTreeModel *model;
 
     vbox = gtk_vbox_new(FALSE, 0);
@@ -167,6 +169,17 @@ logbox_init(HybridLogbox *logbox)
     gtk_text_view_set_editable(GTK_TEXT_VIEW(logbox->textview), FALSE);
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(logbox->textview) , GTK_WRAP_CHAR);
     gtk_container_add(GTK_CONTAINER(scroll), logbox->textview);
+
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logbox->textview));
+    gtk_text_buffer_create_tag(buffer, "blue", "foreground", "#639900", NULL);
+    gtk_text_buffer_create_tag(buffer, "grey", "foreground", "#808080", NULL);
+    gtk_text_buffer_create_tag(buffer, "green", "foreground", "#0088bf", NULL);
+    gtk_text_buffer_create_tag(buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
+    gtk_text_buffer_create_tag(buffer, "lm10", "left_margin", 3, NULL);
+    gtk_text_buffer_create_tag(buffer, "wrap", "wrap-mode", GTK_WRAP_WORD_CHAR, NULL);
+    gtk_text_buffer_create_tag(buffer, "small", "size-points", 9.0, NULL);
+    gtk_text_buffer_get_end_iter(buffer, &end_iter);
+    gtk_text_buffer_create_mark(buffer, "scroll", &end_iter, FALSE);
 
     /* buttons */
     action_area = gtk_hbox_new(FALSE, 0);
