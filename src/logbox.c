@@ -83,7 +83,25 @@ create_log_list_model(HybridLogbox *logbox)
     }
 
 out:
+    g_dir_close(dir);
     return GTK_TREE_MODEL(store);
+}
+
+void
+select_the_latest_log(HybridLogbox *logbox)
+{
+    GtkTreeSelection *selection;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(logbox->loglist));
+    model = gtk_tree_view_get_model(GTK_TREE_VIEW(logbox->loglist));
+
+    if (!gtk_tree_model_get_iter_first(model, &iter)) {
+        return;
+    }
+
+    gtk_tree_selection_select_iter(selection, &iter);
 }
 
 static void
@@ -133,6 +151,7 @@ logbox_init(HybridLogbox *logbox)
     g_object_unref(model);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(logbox->loglist), FALSE);
     render_column(logbox);
+    select_the_latest_log(logbox);
     gtk_container_add(GTK_CONTAINER(scroll), logbox->loglist);
 
     scroll = gtk_scrolled_window_new(NULL, NULL);
