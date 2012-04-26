@@ -22,6 +22,8 @@
 #include "logbox.h"
 #include "gtkutils.h"
 
+static void bind_log_to_textview(HybridLogbox *logbox, const gchar *logname);
+
 HybridLogbox*
 hybrid_logbox_create(HybridAccount *account, HybridBuddy *buddy)
 {
@@ -43,6 +45,47 @@ static void
 close_cb(GtkWidget *widget, HybridLogbox *logbox)
 {
     gtk_widget_destroy(logbox->window);
+}
+
+static gboolean
+button_press_cb(GtkWidget *widget, GdkEventButton *event, HybridLogbox *logbox)
+{
+    GtkTreeModel *model;
+    GtkTreePath *path;
+    GtkTreeSelection *selection;
+
+    model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+
+    /* left button clicked, change selection signaled. */
+    if (event->button == 1) {
+        GtkTreeIter iter;
+        gchar *filename;
+
+        gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
+                (gint)event->x, (gint)event->y, &path, NULL, NULL, NULL);
+
+        if (!path) {
+            return FALSE;
+        }
+
+        if (!gtk_tree_model_get_iter(model, &iter, path)) {
+            gtk_tree_path_free(path);
+            return FALSE;
+        }
+
+        gtk_tree_model_get(model, &iter, HYBRID_LOGBOX_FILE, &filename, -1);
+        bind_log_to_textview(logbox, filename);
+
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+        gtk_tree_selection_select_path(selection, path);
+
+        g_free(filename);
+        gtk_tree_path_free(path);
+
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 static GtkTreeModel*
@@ -94,6 +137,7 @@ bind_log_to_textview(HybridLogbox *logbox, const gchar *logname)
     GSList *list, *pos;
     HybridLogEntry *entry;
     GtkTextBuffer *buffer;
+    GtkTextIter start_iter;
     GtkTextIter end_iter;
     GtkTextMark *mark;
     const gchar *color;
@@ -102,7 +146,9 @@ bind_log_to_textview(HybridLogbox *logbox, const gchar *logname)
     list = hybrid_logs_read(logbox->account, logbox->buddy->id, logname);
 
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logbox->textview));
+    gtk_text_buffer_get_start_iter(buffer, &start_iter);
     gtk_text_buffer_get_end_iter(buffer, &end_iter);
+    gtk_text_buffer_delete(buffer, &start_iter, &end_iter);
 
     for (pos = list; pos; pos = pos->next) {
         entry = pos->data;
@@ -211,6 +257,8 @@ logbox_init(HybridLogbox *logbox)
     g_object_unref(model);
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(logbox->loglist), FALSE);
     render_column(logbox);
+    g_signal_connect(logbox->loglist, "button-press-event",
+            G_CALLBACK(button_press_cb), logbox);
     gtk_container_add(GTK_CONTAINER(scroll), logbox->loglist);
 
     scroll = gtk_scrolled_window_new(NULL, NULL);
