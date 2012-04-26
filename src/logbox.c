@@ -157,18 +157,23 @@ bind_log_to_textview(HybridLogbox *logbox, const gchar *logname)
         } else {
             color = "green";
         }
-        title = g_strdup_printf(_("%s (%s) said:"), entry->name, entry->time);
-
+        title = g_strdup_printf("%s ", entry->name);
         gtk_text_buffer_insert_with_tags_by_name(buffer, &end_iter,
                         title, strlen(title), color, "wrap",
-                        "bold", "small", NULL);
+                        "bold", "small", "lm5", NULL);
+        g_free(title);
+
+        title = g_strdup_printf(_("(%s) said:"), entry->time);
+        gtk_text_buffer_insert_with_tags_by_name(buffer, &end_iter,
+                        title, strlen(title), "wrap",
+                        "grey", "small", NULL);
 
         gtk_text_buffer_insert(buffer, &end_iter, "\n", -1);
         gtk_text_buffer_insert_with_tags_by_name(buffer, &end_iter,
                         entry->content, strlen(entry->content),
                         "lm10", "wrap", "small", NULL);
 
-        gtk_text_buffer_insert(buffer, &end_iter, "\n", -1);
+        gtk_text_buffer_insert(buffer, &end_iter, "\n\n", -1);
         gtk_text_iter_set_line_offset(&end_iter, 0);
 
         mark = gtk_text_buffer_get_mark(buffer, "scroll");
@@ -225,7 +230,85 @@ render_column(HybridLogbox *logbox)
     gtk_tree_view_column_set_attributes(column, renderer,
                         "markup", HYBRID_LOGBOX_NAME,
                         NULL);
-    g_object_set(renderer, "xalign", 0.0, "xpad", 3, "ypad", 0, NULL);
+    g_object_set(renderer, "xalign", 0.0, "xpad", 0, "ypad", 0, NULL);
+}
+
+static GtkWidget*
+create_logbox_header(HybridLogbox *logbox)
+{
+    GtkWidget *cellview;
+    GtkTreeIter iter;
+    GtkListStore *store;
+    GtkCellRenderer *renderer;
+    GdkPixbuf *pixbuf, *ot_pixbuf;
+    GtkTreePath *path;
+    gchar *name;
+
+    cellview = gtk_cell_view_new();
+
+    store = gtk_list_store_new(HYBRID_LOGBOX_HEAD_COLUMNS,
+		                       GDK_TYPE_PIXBUF,
+			                   G_TYPE_STRING,
+                               GDK_TYPE_PIXBUF,
+                               G_TYPE_STRING);
+    gtk_cell_view_set_model(GTK_CELL_VIEW(cellview), GTK_TREE_MODEL(store));
+
+    renderer = gtk_cell_renderer_pixbuf_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(cellview), renderer, FALSE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cellview), renderer,
+                "pixbuf", HYBRID_LOGBOX_HEAD_MY_ICON, NULL);
+    g_object_set(renderer, "yalign", 0.5, "xpad", 3, "ypad", 5, NULL);
+
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(cellview), renderer, TRUE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cellview), renderer,
+                "markup", HYBRID_LOGBOX_HEAD_MY_NAME, NULL);
+    g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 5, NULL);
+
+    renderer = gtk_cell_renderer_pixbuf_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(cellview), renderer, FALSE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cellview), renderer,
+                "pixbuf", HYBRID_LOGBOX_HEAD_OT_ICON, NULL);
+    g_object_set(renderer, "yalign", 0.5, "xpad", 3, "ypad", 5, NULL);
+
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(cellview), renderer, TRUE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cellview), renderer,
+                "markup", HYBRID_LOGBOX_HEAD_OT_NAME, NULL);
+    g_object_set(renderer, "xalign", 0.0, "xpad", 6, "ypad", 5, NULL);
+
+    gtk_list_store_append(store, &iter);
+    path = gtk_tree_path_new_from_string("0");
+    gtk_cell_view_set_displayed_row(GTK_CELL_VIEW(cellview), path);
+    gtk_tree_path_free(path);
+
+    pixbuf = hybrid_create_round_pixbuf(logbox->account->icon_data,
+                        logbox->account->icon_data_len, 24);
+
+    if (!pixbuf) {
+        pixbuf = hybrid_create_default_icon(24);
+    }
+
+    ot_pixbuf = hybrid_create_round_pixbuf(logbox->buddy->icon_data,
+                        logbox->buddy->icon_data_length, 24);
+    if (!ot_pixbuf) {
+        ot_pixbuf = hybrid_create_default_icon(24);
+    }
+
+    name = g_strdup_printf("%s(%s)", logbox->account->nickname,
+                                     logbox->account->username);
+
+    gtk_list_store_set(store, &iter,
+                HYBRID_LOGBOX_HEAD_MY_ICON, pixbuf,
+                HYBRID_LOGBOX_HEAD_MY_NAME, name,
+                HYBRID_LOGBOX_HEAD_OT_ICON, ot_pixbuf,
+                HYBRID_LOGBOX_HEAD_OT_NAME, logbox->buddy->name, -1);
+
+    g_free(name);
+    g_object_unref(pixbuf);
+    g_object_unref(ot_pixbuf);
+
+    return cellview;
 }
 
 static void
@@ -238,9 +321,16 @@ logbox_init(HybridLogbox *logbox)
     GtkTextIter end_iter;
     GtkTextBuffer *buffer;
     GtkTreeModel *model;
+    GtkWidget *cellview;
+    GtkWidget *frame;
 
     vbox = gtk_vbox_new(FALSE, 0);
     gtk_container_add(GTK_CONTAINER(logbox->window), vbox);
+
+    cellview = create_logbox_header(logbox);
+    frame = gtk_frame_new(NULL);
+    gtk_container_add(GTK_CONTAINER(frame), cellview);
+    gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 3);
 
     hbox = gtk_hbox_new(FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
@@ -262,7 +352,7 @@ logbox_init(HybridLogbox *logbox)
     gtk_container_add(GTK_CONTAINER(scroll), logbox->loglist);
 
     scroll = gtk_scrolled_window_new(NULL, NULL);
-    gtk_box_pack_start(GTK_BOX(hbox), scroll, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox), scroll, TRUE, TRUE, 5);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
             GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scroll),
@@ -279,7 +369,8 @@ logbox_init(HybridLogbox *logbox)
     gtk_text_buffer_create_tag(buffer, "grey", "foreground", "#808080", NULL);
     gtk_text_buffer_create_tag(buffer, "green", "foreground", "#0088bf", NULL);
     gtk_text_buffer_create_tag(buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
-    gtk_text_buffer_create_tag(buffer, "lm10", "left_margin", 10, NULL);
+    gtk_text_buffer_create_tag(buffer, "lm5", "left_margin", 5, NULL);
+    gtk_text_buffer_create_tag(buffer, "lm10", "left_margin", 12, NULL);
     gtk_text_buffer_create_tag(buffer, "wrap", "wrap-mode", GTK_WRAP_WORD_CHAR, NULL);
     gtk_text_buffer_create_tag(buffer, "small", "size-points", 9.0, NULL);
     gtk_text_buffer_get_end_iter(buffer, &end_iter);
@@ -300,8 +391,10 @@ logbox_init(HybridLogbox *logbox)
 void
 hybrid_logbox_show(HybridLogbox *logbox)
 {
-    logbox->window = hybrid_create_window(_("Chat Log"), NULL,
-                                         GTK_WIN_POS_CENTER, FALSE);
+    gchar *title;
+    title = g_strdup_printf(_("Chat Log With %s"), logbox->buddy->name);
+    logbox->window = hybrid_create_window(title, NULL,
+                                         GTK_WIN_POS_CENTER, TRUE);
     gtk_widget_set_size_request(logbox->window, 600, 500);
     gtk_container_set_border_width(GTK_CONTAINER(logbox->window), 8);
     g_signal_connect(logbox->window, "destroy", G_CALLBACK(destroy_cb), logbox);

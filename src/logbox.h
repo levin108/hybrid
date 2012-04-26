@@ -41,6 +41,13 @@ enum {
     HYBRID_LOGBOX_COLUMNS,
 };
 
+enum {
+    HYBRID_LOGBOX_HEAD_MY_ICON,
+    HYBRID_LOGBOX_HEAD_MY_NAME,
+    HYBRID_LOGBOX_HEAD_OT_ICON,
+    HYBRID_LOGBOX_HEAD_OT_NAME,
+    HYBRID_LOGBOX_HEAD_COLUMNS,
+};
 /**
  * Create an log box object.
  *
