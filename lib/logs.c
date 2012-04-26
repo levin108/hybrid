@@ -61,6 +61,29 @@ hybrid_logs_get_path(HybridAccount *account, const gchar *id)
     return path;
 }
 
+gboolean
+hybrid_logs_exist(HybridAccount *account, const gchar *id)
+{
+    GDir *dir = NULL;
+    gchar *path;
+    const gchar *filename;
+    gboolean ret = FALSE;
+
+    path = hybrid_logs_get_path(account, id);
+
+    dir = g_dir_open(path, 0, NULL);
+    if (!dir)
+        goto out;
+
+    filename = g_dir_read_name(dir);
+
+    if (filename)
+        ret = TRUE;
+out:
+    g_free(path);
+    return ret;
+}
+
 HybridLogs*
 hybrid_logs_create(HybridAccount *account, const gchar *id)
 {

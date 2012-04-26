@@ -501,6 +501,11 @@ view_chat_logs_cb(GtkWidget *widget, HybridBuddy *buddy)
 {
     HybridLogbox *logbox;
 
+    if (!hybrid_logs_exist(buddy->account, buddy->id)) {
+        hybrid_message_box_show(HYBRID_MESSAGE_INFO, _("No Log found"));
+        return;
+    }
+
     logbox = hybrid_logbox_create(buddy->account, buddy);
     hybrid_logbox_show(logbox);
 }

@@ -54,6 +54,14 @@ extern "C" {
 gint hybrid_logs_init(void);
 
 /**
+ * Check whether there's log for the specified account and buddy
+ *
+ * @param account The log for which account.
+ * @param id      The id of the chat window.
+ */
+gboolean hybrid_logs_exist(HybridAccount *account, const gchar *id);
+
+/**
  * Create a log context.
  *
  * @param account The log for which account.
