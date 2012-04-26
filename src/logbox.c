@@ -80,6 +80,7 @@ create_log_list_model(HybridLogbox *logbox)
         }
         gtk_tree_store_append(store, &iter, NULL);
         gtk_tree_store_set(store, &iter, HYBRID_LOGBOX_NAME, name, -1);
+        gtk_tree_store_set(store, &iter, HYBRID_LOGBOX_FILE, filename, -1);
     }
 
 out:
