@@ -198,6 +198,55 @@ hybrid_logs_write(HybridLogs *log, const gchar *name, const gchar *msg,
     return HYBRID_OK;
 }
 
+GSList*
+hybrid_logs_read(HybridAccount *account, const gchar *id, const gchar *logname)
+{
+    gchar *log_path = NULL;
+    gchar *log_name = NULL;
+    gchar *tmp;
+    GSList *list = NULL;
+    xmlnode *root = NULL, *node, *child;
+    HybridLogEntry *entry;
+
+    log_path = hybrid_logs_get_path(account, id);
+    log_name = g_strdup_printf("%s/%s", log_path, logname);
+
+    root = xmlnode_root_from_file(log_name);
+    if (!root)
+        goto out;
+
+    node = xmlnode_child(root);
+    while (node) {
+        if (!xmlnode_has_prop(node, "type"))
+            goto next;
+
+        entry = g_new0(HybridLogEntry, 1);
+        tmp = xmlnode_prop(node, "type");
+        if (g_strcmp0(tmp, "o")) {
+            entry->is_send = 1;
+        } else {
+            entry->is_send = 0;
+        }
+        g_free(tmp);
+
+        child = xmlnode_find(node, "t");
+        entry->time = xmlnode_content(child);
+        child = xmlnode_find(node, "n");
+        entry->name = xmlnode_content(child);
+        child = xmlnode_find(node, "c");
+        entry->content = xmlnode_content(child);
+        list = g_slist_append(list, entry);
+next:
+        node = xmlnode_next(node);
+    }
+
+out:
+    free(log_path);
+    free(log_name);
+    xmlnode_free(root);
+    return list;
+}
+
 void
 hybrid_logs_destroy(HybridLogs *log)
 {

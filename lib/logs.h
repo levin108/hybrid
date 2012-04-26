@@ -26,12 +26,20 @@
 #include "xmlnode.h"
 
 typedef struct _HybridLogs HybridLogs;
+typedef struct _HybridLogEntry HybridLogEntry;
 
 struct _HybridLogs {
 	gchar *log_path;
 	gchar *id;
 	time_t time;
 	xmlnode *root;
+};
+
+struct _HybridLogEntry {
+    gchar *name;
+    gchar *time;
+    gchar *content;
+    gint is_send;
 };
 
 #ifdef __cplusplus
@@ -67,6 +75,17 @@ HybridLogs *hybrid_logs_create(HybridAccount *account,
 gint hybrid_logs_write(HybridLogs *log, const gchar *name, const gchar *msg,
 					gboolean sendout);
 
+/**
+ * Read a log entry.
+ *
+ * @param account  The account whose log to read.
+ * @param id       The Id of buddy to whome of the log.
+ * @param logname  The log filename.
+ *
+ * @return         The list of log entries.
+ */
+GSList *hybrid_logs_read(HybridAccount *account, const gchar *id,
+                    const gchar *logname);
 /**
  * Get the log directory path.
  *
