@@ -68,6 +68,16 @@ gint hybrid_logs_write(HybridLogs *log, const gchar *name, const gchar *msg,
 					gboolean sendout);
 
 /**
+ * Get the log directory path.
+ *
+ * @param account The account for the log.
+ * @param id      The id of the buddy for the log.
+ *
+ * @return        Path string, needs to be freed after use.
+ */
+gchar *hybrid_logs_get_path(HybridAccount *account, const gchar *id);
+
+/**
  * Destroy a log context.
  *
  * @param log The log context to destroy.

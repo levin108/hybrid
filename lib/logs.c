@@ -47,6 +47,20 @@ hybrid_logs_init(void)
     return HYBRID_OK;
 }
 
+gchar*
+hybrid_logs_get_path(HybridAccount *account, const gchar *id)
+{
+    gchar *path, *tmp;
+
+    tmp = hybrid_config_get_path();
+    path = g_strdup_printf("%s/logs/%s/%s/%s",
+            tmp, account->proto->info->name,
+            account->username, id);
+    g_free(tmp);
+
+    return path;
+}
+
 HybridLogs*
 hybrid_logs_create(HybridAccount *account, const gchar *id)
 {
