@@ -31,7 +31,7 @@ HybridConfig *global_config;
 /* The return value is owned by the function, don't free or modify. */
 /* Add lock if it might be access concurrently. */
 
-gchar*
+const gchar*
 hybrid_config_get_path(void)
 {
     gchar        *home;
@@ -82,7 +82,7 @@ check_hybrid:
 gchar*
 hybrid_config_get_cert_path(void)
 {
-    gchar *config_path;
+    const gchar *config_path;
     gchar *cert_path;
     gint   e;
 

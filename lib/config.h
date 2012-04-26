@@ -47,7 +47,7 @@ extern "C" {
  *
  * @return The path name, needs to be freed when no longer used.
  */
-gchar *hybrid_config_get_path(void);
+const gchar *hybrid_config_get_path(void);
 
 /**
  * Get the absolute path of the certificate directory,

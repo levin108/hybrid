@@ -52,7 +52,7 @@ void
 hybrid_account_init(void)
 {
     gchar    *account_file;
-    gchar    *config_path;
+    const gchar *config_path;
     xmlnode  *root;
     xmlnode  *node;
     gboolean  flush = FALSE;
@@ -276,7 +276,7 @@ void
 hybrid_account_update(HybridAccount *account)
 {
     gchar                 *account_file;
-    gchar                 *config_path;
+    const gchar           *config_path;
     xmlnode               *root;
     xmlnode               *node;
     gchar                 *username;
@@ -432,7 +432,7 @@ void
 hybrid_account_remove(const gchar *protoname, const gchar *username)
 {
     gchar         *account_file;
-    gchar         *config_path;
+    const gchar   *config_path;
     HybridAccount *account;
     xmlnode       *root;
     xmlnode       *node;

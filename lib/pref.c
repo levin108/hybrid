@@ -29,7 +29,7 @@ HybridPref*
 hybrid_pref_new(const gchar *name)
 {
     HybridPref *pref;
-    gchar *config_path;
+    const gchar *config_path;
 
     if (!(config_path = hybrid_config_get_path())) {
         hybrid_debug_error("pref", "get config path error.");
