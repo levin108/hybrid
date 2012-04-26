@@ -18,6 +18,7 @@
  *   51 Franklin Street, Suite 500, Boston, MA 02110-1335, USA.            *
  ***************************************************************************/
 
+#include "logs.h"
 #include "logbox.h"
 #include "gtkutils.h"
 
@@ -48,11 +49,40 @@ static GtkTreeModel*
 create_log_list_model(HybridLogbox *logbox)
 {
     GtkTreeStore *store;
+    GtkTreeIter iter;
+    const gchar *path;
+    const gchar *filename;
+    char name[128];
+    GDir *dir = NULL;
+    gint i;
 
     store = gtk_tree_store_new(HYBRID_LOGBOX_COLUMNS,
                                G_TYPE_STRING,
                                G_TYPE_STRING);
 
+    path = hybrid_logs_get_path(logbox->account, logbox->buddy->id);
+    dir = g_dir_open(path, 0, NULL);
+    if (!dir) {
+        hybrid_debug_error("log", "log path %s doesn't exist.\n", path);
+        goto out;
+    }
+
+    while ((filename = g_dir_read_name(dir))) {
+        for (i = 0; i < strlen(filename); i ++) {
+            if (filename[i] == '_') {
+                name[i] = '-';
+            } else if (filename[i] == '.') {
+                name[i] = '\0';
+                break;
+            } else {
+                name[i] = filename[i];
+            }
+        }
+        gtk_tree_store_append(store, &iter, NULL);
+        gtk_tree_store_set(store, &iter, HYBRID_LOGBOX_NAME, name, -1);
+    }
+
+out:
     return GTK_TREE_MODEL(store);
 }
 
@@ -63,6 +93,10 @@ render_column(HybridLogbox *logbox)
     GtkCellRenderer   *renderer;
 
     column = gtk_tree_view_column_new();
+    gtk_tree_view_append_column(GTK_TREE_VIEW(logbox->loglist), column);
+    gtk_tree_view_column_set_visible(column, TRUE);
+    gtk_tree_view_set_expander_column(GTK_TREE_VIEW(logbox->loglist), column);
+
     /* name */
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(column, renderer, TRUE);
@@ -70,7 +104,6 @@ render_column(HybridLogbox *logbox)
                         "markup", HYBRID_LOGBOX_NAME,
                         NULL);
     g_object_set(renderer, "xalign", 0.0, "xpad", 3, "ypad", 0, NULL);
-    g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 }
 
 static void
