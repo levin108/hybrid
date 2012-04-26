@@ -24,7 +24,7 @@
 gint
 hybrid_logs_init(void)
 {
-    gchar *config_path;
+    const gchar *config_path;
     gchar *log_path;
     gint e;
 
@@ -50,13 +50,13 @@ hybrid_logs_init(void)
 gchar*
 hybrid_logs_get_path(HybridAccount *account, const gchar *id)
 {
-    gchar *path, *tmp;
+    gchar *path;
+	const gchar *config_path;
 
-    tmp = hybrid_config_get_path();
+    config_path = hybrid_config_get_path();
     path = g_strdup_printf("%s/logs/%s/%s/%s",
-            tmp, account->proto->info->name,
+            config_path, account->proto->info->name,
             account->username, id);
-    g_free(tmp);
 
     return path;
 }
@@ -65,7 +65,7 @@ HybridLogs*
 hybrid_logs_create(HybridAccount *account, const gchar *id)
 {
     HybridLogs *log;
-    gchar *config_path;
+    const gchar *config_path;
     gchar *log_path;
     gchar *account_path;
     gchar *final_path;

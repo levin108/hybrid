@@ -186,8 +186,8 @@ hybrid_chat_webkit_append(GtkWidget *textview, HybridAccount *account,
     gchar                *html, *escaped_html, *escaped_message;
     gchar                *script;
     WebKitLoadStatus     status;
-    struct timeout_data *data;
-    gchar                *icon_path;
+    struct timeout_data  *data;
+    const gchar          *icon_path;
     gchar                *icon_name;
     gchar                 time[128];
     struct tm            *tm_time;

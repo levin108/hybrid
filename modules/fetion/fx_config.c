@@ -28,7 +28,7 @@
 gchar*
 fetion_get_config_dir(fetion_account *account)
 {
-    gchar *hybrid_dir;
+    const gchar *hybrid_dir;
     gchar *fetion_dir;
     gchar *account_dir;
     gint   e;
