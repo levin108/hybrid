@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-31 09:07+0800\n"
+"POT-Creation-Date: 2012-04-26 21:43+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,11 +43,6 @@ msgstr ""
 
 #: lib/account.c:1126
 msgid "Online"
-msgstr ""
-
-#: lib/logs.c:150
-#, c-format
-msgid "Conversation with %s (%s) at %d-%d-%d"
 msgstr ""
 
 #: modules/email/imap.c:92
@@ -120,120 +115,120 @@ msgstr ""
 msgid "hybrid plugin implementing IMAP protocol for email notification."
 msgstr ""
 
-#: modules/fetion/fetion.c:103
+#: modules/fetion/fetion.c:105
 msgid "Your account has logined elsewhere.You are forced to quit."
 msgstr ""
 
-#: modules/fetion/fetion.c:226
+#: modules/fetion/fetion.c:228
 #, c-format
 msgid "Buddy <b>%s</b> has %s your add-buddy request."
 msgstr ""
 
-#: modules/fetion/fetion.c:229
+#: modules/fetion/fetion.c:231
 msgid "accepted"
 msgstr ""
 
-#: modules/fetion/fetion.c:229
+#: modules/fetion/fetion.c:231
 msgid "declined"
 msgstr ""
 
-#: modules/fetion/fetion.c:376 modules/xmpp/xmpp_account.c:199
+#: modules/fetion/fetion.c:378 modules/xmpp/xmpp_account.c:199
 #: modules/xmpp/xmpp_account.c:243
 msgid "System Message"
 msgstr ""
 
-#: modules/fetion/fetion.c:470 modules/fetion/fetion.c:474
+#: modules/fetion/fetion.c:472 modules/fetion/fetion.c:476
 msgid "Unknown"
 msgstr ""
 
-#: modules/fetion/fetion.c:478
+#: modules/fetion/fetion.c:480
 msgid "Nickname"
 msgstr ""
 
-#: modules/fetion/fetion.c:480
+#: modules/fetion/fetion.c:482
 msgid "Localname"
 msgstr ""
 
-#: modules/fetion/fetion.c:482
+#: modules/fetion/fetion.c:484
 msgid "Fetion-no"
 msgstr ""
 
-#: modules/fetion/fetion.c:484
+#: modules/fetion/fetion.c:486
 msgid "Mobile-no"
 msgstr ""
 
-#: modules/fetion/fetion.c:486
+#: modules/fetion/fetion.c:488
 msgid "Gender"
 msgstr ""
 
-#: modules/fetion/fetion.c:487
+#: modules/fetion/fetion.c:489
 msgid "Male"
 msgstr ""
 
-#: modules/fetion/fetion.c:488
+#: modules/fetion/fetion.c:490
 msgid "Female"
 msgstr ""
 
-#: modules/fetion/fetion.c:488
+#: modules/fetion/fetion.c:490
 msgid "Secrecy"
 msgstr ""
 
-#: modules/fetion/fetion.c:491 modules/fetion/fetion.c:628
-#: modules/fetion/fetion.c:668
+#: modules/fetion/fetion.c:493 modules/fetion/fetion.c:630
+#: modules/fetion/fetion.c:670
 msgid "Mood"
 msgstr ""
 
-#: modules/fetion/fetion.c:494
+#: modules/fetion/fetion.c:496
 msgid "Country"
 msgstr ""
 
-#: modules/fetion/fetion.c:497
+#: modules/fetion/fetion.c:499
 msgid "Province"
 msgstr ""
 
-#: modules/fetion/fetion.c:498
+#: modules/fetion/fetion.c:500
 msgid "City"
 msgstr ""
 
-#: modules/fetion/fetion.c:505 modules/xmpp/xmpp.c:144
+#: modules/fetion/fetion.c:507 modules/xmpp/xmpp.c:144
 msgid "Photo"
 msgstr ""
 
-#: modules/fetion/fetion.c:547 modules/fetion/fetion.c:929
+#: modules/fetion/fetion.c:549 modules/fetion/fetion.c:931
 msgid "SMS To Me"
 msgstr ""
 
-#: modules/fetion/fetion.c:618 modules/fetion/fetion.c:652
+#: modules/fetion/fetion.c:620 modules/fetion/fetion.c:654
 #: modules/xmpp/xmpp.c:128 modules/xmpp/xmpp.c:259 modules/xmpp/xmpp.c:287
 msgid "Name"
 msgstr ""
 
-#: modules/fetion/fetion.c:619 modules/fetion/fetion.c:657
+#: modules/fetion/fetion.c:621 modules/fetion/fetion.c:659
 #: modules/xmpp/xmpp.c:121 modules/xmpp/xmpp.c:261
 msgid "Status"
 msgstr ""
 
-#: modules/fetion/fetion.c:623 modules/fetion/fetion.c:661
+#: modules/fetion/fetion.c:625 modules/fetion/fetion.c:663
 msgid "Fetion Number"
 msgstr ""
 
-#: modules/fetion/fetion.c:625 modules/fetion/fetion.c:663
+#: modules/fetion/fetion.c:627 modules/fetion/fetion.c:665
 msgid "Mobile Number"
 msgstr ""
 
-#: modules/fetion/fetion.c:655
+#: modules/fetion/fetion.c:657
 msgid "Alias"
 msgstr ""
 
 #. *< name
 #. *< author
-#: modules/fetion/fetion.c:963
+#: modules/fetion/fetion.c:965
 msgid "fetion client"
 msgstr ""
 
 #. *< summary
 #. description
-#: modules/fetion/fetion.c:965
+#: modules/fetion/fetion.c:967
 msgid "hybrid plugin implementing Fetion Protocol version 4"
 msgstr ""
 
@@ -480,62 +475,66 @@ msgid "License"
 msgstr ""
 
 #: src/about.c:341 src/conv.c:388 src/gtkaccount.c:310 src/info.c:209
-#: src/notify.c:148
+#: src/logbox.c:385 src/notify.c:148
 msgid "Close"
 msgstr ""
 
-#: src/blist.c:467
+#: src/blist.c:468
 #, c-format
 msgid "Are you sure to delete the buddy <b>%s</b> (%s)"
 msgstr ""
 
-#: src/blist.c:470 src/blist.c:532
+#: src/blist.c:471 src/blist.c:547
 msgid "Confirm"
 msgstr ""
 
-#: src/blist.c:470 src/blist.c:532 src/gtkaccount.c:300
+#: src/blist.c:471 src/blist.c:547 src/gtkaccount.c:300
 msgid "Delete"
 msgstr ""
 
-#: src/blist.c:530
+#: src/blist.c:505
+msgid "No Log found"
+msgstr ""
+
+#: src/blist.c:545
 #, c-format
 msgid "Are you sure to delete the group <b>%s</b>"
 msgstr ""
 
-#: src/blist.c:565
+#: src/blist.c:580
 msgid "Instant Message"
 msgstr ""
 
-#: src/blist.c:567
+#: src/blist.c:582
 msgid "Buddy Information"
 msgstr ""
 
-#: src/blist.c:570
+#: src/blist.c:585
 msgid "Move To"
 msgstr ""
 
-#: src/blist.c:583
+#: src/blist.c:598
 msgid "Remove Buddy"
 msgstr ""
 
-#: src/blist.c:585
+#: src/blist.c:600
 msgid "Rename Buddy"
 msgstr ""
 
-#: src/blist.c:587
+#: src/blist.c:602
 msgid "View Chat Logs"
 msgstr ""
 
-#: src/blist.c:616
+#: src/blist.c:632
 msgid "Rename Group"
 msgstr ""
 
 #. we won't let users to remove group which is not empty.
-#: src/blist.c:621
+#: src/blist.c:637
 msgid "Remove Group"
 msgstr ""
 
-#: src/blist.c:625 src/buddyadd.c:379 src/core.c:185 src/core.c:187
+#: src/blist.c:641 src/buddyadd.c:379 src/core.c:185 src/core.c:187
 msgid "Add Buddy"
 msgstr ""
 
@@ -708,7 +707,7 @@ msgstr ""
 msgid "_Tools"
 msgstr ""
 
-#: src/core.c:177 src/core.c:179 src/preference.c:561
+#: src/core.c:177 src/core.c:179 src/preference.c:563
 msgid "Preference"
 msgstr ""
 
@@ -835,64 +834,74 @@ msgstr ""
 msgid "<b>Information of %s</b>"
 msgstr ""
 
+#: src/logbox.c:166
+#, c-format
+msgid "(%s) said:"
+msgstr ""
+
+#: src/logbox.c:395
+#, c-format
+msgid "Chat Log With %s"
+msgstr ""
+
 #: src/notify.c:60
 msgid "Notification"
 msgstr ""
 
-#: src/preference.c:466
+#: src/preference.c:468
 msgid "Main Window"
 msgstr ""
 
-#: src/preference.c:468 src/preference.c:470
+#: src/preference.c:470 src/preference.c:472
 msgid "Quit when main window is closed."
 msgstr ""
 
-#: src/preference.c:472
+#: src/preference.c:474
 msgid "Chat Window"
 msgstr ""
 
-#: src/preference.c:474 src/preference.c:475
+#: src/preference.c:476 src/preference.c:477
 msgid "Hide Action Buttons"
 msgstr ""
 
-#: src/preference.c:488 src/preference.c:489
+#: src/preference.c:490 src/preference.c:491
 msgid "Chat Theme:"
 msgstr ""
 
-#: src/preference.c:495 src/preference.c:496
+#: src/preference.c:497 src/preference.c:498
 msgid "Show Messages In A Single Window With Tabs"
 msgstr ""
 
-#: src/preference.c:500
+#: src/preference.c:502
 msgid "Top"
 msgstr ""
 
-#: src/preference.c:503
+#: src/preference.c:505
 msgid "Right"
 msgstr ""
 
-#: src/preference.c:506
+#: src/preference.c:508
 msgid "Bottom"
 msgstr ""
 
-#: src/preference.c:509
+#: src/preference.c:511
 msgid "Left"
 msgstr ""
 
-#: src/preference.c:516 src/preference.c:517
+#: src/preference.c:518 src/preference.c:519
 msgid "Tab Position:"
 msgstr ""
 
 #. mute menu.
-#: src/preference.c:529 src/statusicon.c:353
+#: src/preference.c:531 src/statusicon.c:353
 msgid "Mute"
 msgstr ""
 
-#: src/preference.c:611
+#: src/preference.c:613
 msgid "Basic Settings"
 msgstr ""
 
-#: src/preference.c:614
+#: src/preference.c:616
 msgid "Sound"
 msgstr ""
 

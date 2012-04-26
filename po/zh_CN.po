@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hybrid\n"
 "Report-Msgid-Bugs-To: https://github.com/levin108/hybrid/issues\n"
-"POT-Creation-Date: 2011-12-31 09:07+0800\n"
+"POT-Creation-Date: 2012-04-26 21:43+0800\n"
 "PO-Revision-Date: 2011-12-28 17:25-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,6 +66,11 @@ msgstr "%s 的信息"
 #, c-format
 msgid "%s(%s) wants to add you as a friend."
 msgstr "%s(%s) 希望加您为好友"
+
+#: src/logbox.c:166
+#, fuzzy, c-format
+msgid "(%s) said:"
+msgstr "%s 说:"
 
 #: modules/email/imap.c:95
 #, c-format
@@ -155,7 +160,7 @@ msgstr "未通过验证, 请检查用户名和密码."
 msgid "Add"
 msgstr "添加"
 
-#: src/blist.c:625 src/buddyadd.c:379 src/core.c:185 src/core.c:187
+#: src/blist.c:641 src/buddyadd.c:379 src/core.c:185 src/core.c:187
 msgid "Add Buddy"
 msgstr "添加联系人"
 
@@ -179,16 +184,16 @@ msgstr ""
 "添加联系人失败.\n"
 "无效的回复信息."
 
-#: modules/fetion/fetion.c:655
+#: modules/fetion/fetion.c:657
 msgid "Alias"
 msgstr "别名"
 
-#: src/blist.c:467
+#: src/blist.c:468
 #, c-format
 msgid "Are you sure to delete the buddy <b>%s</b> (%s)"
 msgstr "您确定要删除联系人 <b>%s</b> (%s)"
 
-#: src/blist.c:530
+#: src/blist.c:545
 #, c-format
 msgid "Are you sure to delete the group <b>%s</b>"
 msgstr "您确定要删除组 <b>%s</b>"
@@ -201,11 +206,11 @@ msgstr "正在进行身份认证..."
 msgid "Away"
 msgstr "离开"
 
-#: src/preference.c:611
+#: src/preference.c:613
 msgid "Basic Settings"
 msgstr "基本设置"
 
-#: src/preference.c:506
+#: src/preference.c:508
 msgid "Bottom"
 msgstr "底部"
 
@@ -213,12 +218,12 @@ msgstr "底部"
 msgid "Buddies"
 msgstr "好友"
 
-#: modules/fetion/fetion.c:226
+#: modules/fetion/fetion.c:228
 #, c-format
 msgid "Buddy <b>%s</b> has %s your add-buddy request."
 msgstr "<b>%s</b> %s了 您的添加好友请求."
 
-#: src/blist.c:567
+#: src/blist.c:582
 msgid "Buddy Information"
 msgstr "联系人信息"
 
@@ -239,11 +244,16 @@ msgstr "取消"
 msgid "Change State"
 msgstr "更改状态"
 
-#: src/preference.c:488 src/preference.c:489
+#: src/logbox.c:395
+#, c-format
+msgid "Chat Log With %s"
+msgstr "和 %s 的聊天记录"
+
+#: src/preference.c:490 src/preference.c:491
 msgid "Chat Theme:"
 msgstr "聊天主题:"
 
-#: src/preference.c:472
+#: src/preference.c:474
 msgid "Chat Window"
 msgstr "聊天窗口"
 
@@ -263,12 +273,12 @@ msgstr ""
 msgid "Choose the avatar file to upload"
 msgstr "请选择需要上传的头像"
 
-#: modules/fetion/fetion.c:498
+#: modules/fetion/fetion.c:500
 msgid "City"
 msgstr "城市"
 
 #: src/about.c:341 src/conv.c:388 src/gtkaccount.c:310 src/info.c:209
-#: src/notify.c:148
+#: src/logbox.c:385 src/notify.c:148
 msgid "Close"
 msgstr "关闭"
 
@@ -290,7 +300,7 @@ msgstr "关闭提示"
 msgid "Close Other Pages"
 msgstr "关闭其他页"
 
-#: src/blist.c:470 src/blist.c:532
+#: src/blist.c:471 src/blist.c:547
 msgid "Confirm"
 msgstr "确认"
 
@@ -310,12 +320,7 @@ msgstr "连接关闭."
 msgid "Connection Error."
 msgstr "连接错误."
 
-#: lib/logs.c:150
-#, c-format
-msgid "Conversation with %s (%s) at %d-%d-%d"
-msgstr "与%s (%s) 在 %d-%d-%d 的对话"
-
-#: modules/fetion/fetion.c:494
+#: modules/fetion/fetion.c:496
 msgid "Country"
 msgstr "国家"
 
@@ -323,7 +328,7 @@ msgstr "国家"
 msgid "Decline"
 msgstr "拒绝"
 
-#: src/blist.c:470 src/blist.c:532 src/gtkaccount.c:300
+#: src/blist.c:471 src/blist.c:547 src/gtkaccount.c:300
 msgid "Delete"
 msgstr "删除"
 
@@ -351,11 +356,11 @@ msgstr "启用帐户"
 msgid "Enabled"
 msgstr "启用"
 
-#: modules/fetion/fetion.c:488
+#: modules/fetion/fetion.c:490
 msgid "Female"
 msgstr "女"
 
-#: modules/fetion/fetion.c:623 modules/fetion/fetion.c:661
+#: modules/fetion/fetion.c:625 modules/fetion/fetion.c:663
 msgid "Fetion Number"
 msgstr "飞信号"
 
@@ -363,15 +368,15 @@ msgstr "飞信号"
 msgid "Fetion Protocol ERROR."
 msgstr "飞信协议错误."
 
-#: modules/fetion/fetion.c:482
+#: modules/fetion/fetion.c:484
 msgid "Fetion-no"
 msgstr "飞信号"
 
-#: modules/fetion/fetion.c:486
+#: modules/fetion/fetion.c:488
 msgid "Gender"
 msgstr "性别"
 
-#: src/preference.c:474 src/preference.c:475
+#: src/preference.c:476 src/preference.c:477
 msgid "Hide Action Buttons"
 msgstr "隐藏动作按钮"
 
@@ -422,7 +427,7 @@ msgstr "IMAP服务器:"
 msgid "Information"
 msgstr "信息"
 
-#: src/blist.c:565
+#: src/blist.c:580
 msgid "Instant Message"
 msgstr "即时信息"
 
@@ -434,7 +439,7 @@ msgstr "软件介绍"
 msgid "Invisible"
 msgstr "隐身"
 
-#: src/preference.c:509
+#: src/preference.c:511
 msgid "Left"
 msgstr "左侧"
 
@@ -442,15 +447,15 @@ msgstr "左侧"
 msgid "License"
 msgstr "许可协议"
 
-#: modules/fetion/fetion.c:480
+#: modules/fetion/fetion.c:482
 msgid "Localname"
 msgstr "本地名称"
 
-#: src/preference.c:466
+#: src/preference.c:468
 msgid "Main Window"
 msgstr "主窗口"
 
-#: modules/fetion/fetion.c:487
+#: modules/fetion/fetion.c:489
 msgid "Male"
 msgstr "男"
 
@@ -467,11 +472,11 @@ msgstr "管理账户"
 msgid "Message"
 msgstr "消息"
 
-#: modules/fetion/fetion.c:625 modules/fetion/fetion.c:663
+#: modules/fetion/fetion.c:627 modules/fetion/fetion.c:665
 msgid "Mobile Number"
 msgstr "手机号"
 
-#: modules/fetion/fetion.c:484
+#: modules/fetion/fetion.c:486
 msgid "Mobile-no"
 msgstr "手机号"
 
@@ -499,21 +504,21 @@ msgstr "更改全名失败."
 msgid "Modify photo failed."
 msgstr "更改照片失败."
 
-#: modules/fetion/fetion.c:491 modules/fetion/fetion.c:628
-#: modules/fetion/fetion.c:668
+#: modules/fetion/fetion.c:493 modules/fetion/fetion.c:630
+#: modules/fetion/fetion.c:670
 msgid "Mood"
 msgstr "心情"
 
-#: src/blist.c:570
+#: src/blist.c:585
 msgid "Move To"
 msgstr "移动到"
 
 #. mute menu.
-#: src/preference.c:529 src/statusicon.c:353
+#: src/preference.c:531 src/statusicon.c:353
 msgid "Mute"
 msgstr "静音"
 
-#: modules/fetion/fetion.c:618 modules/fetion/fetion.c:652
+#: modules/fetion/fetion.c:620 modules/fetion/fetion.c:654
 #: modules/xmpp/xmpp.c:128 modules/xmpp/xmpp.c:259 modules/xmpp/xmpp.c:287
 msgid "Name"
 msgstr "名称"
@@ -522,9 +527,13 @@ msgstr "名称"
 msgid "New Mail."
 msgstr "新邮件"
 
-#: modules/fetion/fetion.c:478
+#: modules/fetion/fetion.c:480
 msgid "Nickname"
 msgstr "昵称"
+
+#: src/blist.c:505
+msgid "No Log found"
+msgstr "未发现聊天记录"
 
 #: src/head.c:349
 msgid "No account was enabled."
@@ -550,7 +559,7 @@ msgstr "在线"
 msgid "Password:"
 msgstr "密码:"
 
-#: modules/fetion/fetion.c:505 modules/xmpp/xmpp.c:144
+#: modules/fetion/fetion.c:507 modules/xmpp/xmpp.c:144
 msgid "Photo"
 msgstr "照片"
 
@@ -562,7 +571,7 @@ msgstr "弹出当前页"
 msgid "Port:"
 msgstr "端口:"
 
-#: src/core.c:177 src/core.c:179 src/preference.c:561
+#: src/core.c:177 src/core.c:179 src/preference.c:563
 msgid "Preference"
 msgstr "首选项"
 
@@ -574,7 +583,7 @@ msgstr "协议"
 msgid "Protocol:"
 msgstr "协议:"
 
-#: modules/fetion/fetion.c:497
+#: modules/fetion/fetion.c:499
 msgid "Province"
 msgstr "省份"
 
@@ -582,24 +591,24 @@ msgstr "省份"
 msgid "Quit"
 msgstr "退出"
 
-#: src/preference.c:468 src/preference.c:470
+#: src/preference.c:470 src/preference.c:472
 msgid "Quit when main window is closed."
 msgstr "当主窗口关闭时退出."
 
-#: src/blist.c:583
+#: src/blist.c:598
 msgid "Remove Buddy"
 msgstr "删除联系人"
 
 #. we won't let users to remove group which is not empty.
-#: src/blist.c:621
+#: src/blist.c:637
 msgid "Remove Group"
 msgstr "删除组"
 
-#: src/blist.c:585
+#: src/blist.c:600
 msgid "Rename Buddy"
 msgstr "重命名联系人"
 
-#: src/blist.c:616
+#: src/blist.c:632
 msgid "Rename Group"
 msgstr "重命名组"
 
@@ -607,7 +616,7 @@ msgstr "重命名组"
 msgid "Resource"
 msgstr "资源"
 
-#: src/preference.c:503
+#: src/preference.c:505
 msgid "Right"
 msgstr "右侧"
 
@@ -615,7 +624,7 @@ msgstr "右侧"
 msgid "SASL authentication error."
 msgstr "SASL认证失败."
 
-#: modules/fetion/fetion.c:547 modules/fetion/fetion.c:929
+#: modules/fetion/fetion.c:549 modules/fetion/fetion.c:931
 msgid "SMS To Me"
 msgstr "发短信给自己"
 
@@ -627,7 +636,7 @@ msgstr "保存"
 msgid "Screen jitter"
 msgstr "闪屏"
 
-#: modules/fetion/fetion.c:488
+#: modules/fetion/fetion.c:490
 msgid "Secrecy"
 msgstr "保密"
 
@@ -639,7 +648,7 @@ msgstr "发送"
 msgid "Send a screen jitter"
 msgstr "发送闪屏"
 
-#: src/preference.c:495 src/preference.c:496
+#: src/preference.c:497 src/preference.c:498
 msgid "Show Messages In A Single Window With Tabs"
 msgstr "在同一标签窗口内显示信息"
 
@@ -648,7 +657,7 @@ msgstr "在同一标签窗口内显示信息"
 msgid "Show buddy list"
 msgstr "显示联系人列表"
 
-#: src/preference.c:614
+#: src/preference.c:616
 msgid "Sound"
 msgstr "声音"
 
@@ -664,7 +673,7 @@ msgstr "正在进行TLS握手..."
 msgid "Start sasl authentication..."
 msgstr "正在进行SASL验证..."
 
-#: modules/fetion/fetion.c:619 modules/fetion/fetion.c:657
+#: modules/fetion/fetion.c:621 modules/fetion/fetion.c:659
 #: modules/xmpp/xmpp.c:121 modules/xmpp/xmpp.c:261
 msgid "Status"
 msgstr "状态"
@@ -678,7 +687,7 @@ msgstr "状态 (%s)"
 msgid "Subscription"
 msgstr "订阅"
 
-#: modules/fetion/fetion.c:376 modules/xmpp/xmpp_account.c:199
+#: modules/fetion/fetion.c:378 modules/xmpp/xmpp_account.c:199
 #: modules/xmpp/xmpp_account.c:243
 msgid "System Message"
 msgstr "系统消息"
@@ -691,7 +700,7 @@ msgstr "TLS连接建立."
 msgid "TLS hand-shake failed."
 msgstr "TLS握手失败."
 
-#: src/preference.c:516 src/preference.c:517
+#: src/preference.c:518 src/preference.c:519
 msgid "Tab Position:"
 msgstr "标签位置:"
 
@@ -720,7 +729,7 @@ msgstr ""
 "版本。\n"
 "\n"
 
-#: src/preference.c:500
+#: src/preference.c:502
 msgid "Top"
 msgstr "顶部"
 
@@ -734,7 +743,7 @@ msgstr "共可输入%d个字符，剩余"
 msgid "Ungrouped"
 msgstr "未分组"
 
-#: modules/fetion/fetion.c:470 modules/fetion/fetion.c:474
+#: modules/fetion/fetion.c:472 modules/fetion/fetion.c:476
 msgid "Unknown"
 msgstr "未知"
 
@@ -750,7 +759,7 @@ msgstr "用户名"
 msgid "Username:"
 msgstr "用户名:"
 
-#: src/blist.c:587
+#: src/blist.c:602
 msgid "View Chat Logs"
 msgstr "查看聊天记录"
 
@@ -769,7 +778,7 @@ msgid ""
 "this program; if not, see:"
 msgstr "您应该已经随本程序得到了 GNU 通用公共许可证的副本；如果没有，请参看:"
 
-#: modules/fetion/fetion.c:103
+#: modules/fetion/fetion.c:105
 msgid "Your account has logined elsewhere.You are forced to quit."
 msgstr "您的帐户已在其他地方登陆. 您被强迫登出."
 
@@ -798,7 +807,7 @@ msgstr "帮助(_H)"
 msgid "_Tools"
 msgstr "工具(_T)"
 
-#: modules/fetion/fetion.c:229
+#: modules/fetion/fetion.c:231
 msgid "accepted"
 msgstr "接受"
 
@@ -810,7 +819,7 @@ msgstr "资源绑定错误."
 msgid "connection terminated"
 msgstr "连接中断."
 
-#: modules/fetion/fetion.c:229
+#: modules/fetion/fetion.c:231
 msgid "declined"
 msgstr "拒绝"
 
@@ -826,13 +835,13 @@ msgstr "邮件提示"
 
 #. *< name
 #. *< author
-#: modules/fetion/fetion.c:963
+#: modules/fetion/fetion.c:965
 msgid "fetion client"
 msgstr "飞信客户端"
 
 #. *< summary
 #. description
-#: modules/fetion/fetion.c:965
+#: modules/fetion/fetion.c:967
 msgid "hybrid plugin implementing Fetion Protocol version 4"
 msgstr "hybrid的飞信协议插件"
 
@@ -926,6 +935,9 @@ msgstr "开始SIPC验证..."
 #: modules/xmpp/xmpp_buddy.c:107
 msgid "subscribe presence failed"
 msgstr "订阅好友状态失败"
+
+#~ msgid "Conversation with %s (%s) at %d-%d-%d"
+#~ msgstr "与%s (%s) 在 %d-%d-%d 的对话"
 
 #~ msgid ""
 #~ "Developers\n"
