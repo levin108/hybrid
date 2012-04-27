@@ -24,6 +24,7 @@
 #include "gtkutils.h"
 #include "gtksound.h"
 #include "notify.h"
+#include "logbox.h"
 #include "chat-textview.h"
 #include "chat-webkit.h"
 #include "conv.h"
@@ -1080,6 +1081,32 @@ create_buddy_tips_panel(GtkWidget *vbox, HybridChatWindow *chat)
 }
 
 static void
+view_chat_log_cb(GtkWidget *widget, HybridChatWindow *chat)
+{
+    HybridLogbox *logbox;
+    HybridAccount *account = chat->account;
+    gchar *id = chat->id;
+    HybridBuddy *buddy;
+
+    buddy = hybrid_blist_find_buddy(account, id);
+    if (!buddy) {
+        goto out;
+    }
+
+    if (!hybrid_logs_exist(buddy->account, buddy->id)) {
+        goto out;
+    }
+
+    logbox = hybrid_logbox_create(account, buddy);
+    hybrid_logbox_show(logbox);
+
+    return;
+out:
+    hybrid_message_box_show(HYBRID_MESSAGE_INFO, _("No Log found"));
+    return;
+}
+
+static void
 init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
 {
     GtkWidget     *scroll;
@@ -1120,7 +1147,7 @@ init_chat_window_body(GtkWidget *vbox, HybridChatWindow *chat)
     image_icon = gtk_image_new_from_file(PIXMAPS_DIR"menus/logs.png");
     button = gtk_toolbar_append_item(GTK_TOOLBAR(chat->toolbar),
             _("Chat logs"), _("View chat logs"), NULL, image_icon,
-            NULL, NULL);
+			G_CALLBACK(view_chat_log_cb), chat);
 
     if (IS_SYSTEM_CHAT(chat)) {
         gtk_toolbar_append_space(GTK_TOOLBAR(chat->toolbar));
