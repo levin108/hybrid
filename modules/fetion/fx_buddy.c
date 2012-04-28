@@ -736,8 +736,6 @@ portrait_conn_cb(gint sk, gpointer user_data)
     trans->ac            = data->ac;
     trans->portrait_type = data->portrait_type;
 
-    g_free(data);
-
     if (trans->portrait_type == PORTRAIT_TYPE_BUDDY) {
         encoded_sipuri = g_uri_escape_string(trans->buddy->sipuri, NULL, TRUE);
 
@@ -764,11 +762,14 @@ portrait_conn_cb(gint sk, gpointer user_data)
 
     if (send(sk, http_string, strlen(http_string), 0) == -1) {
         hybrid_debug_error("fetion", "download portrait for \'%s\':%s",
-                trans->buddy->sid, strerror(errno));
+                data->buddy->sid, strerror(errno));
+        g_free(trans);
+        g_free(data);
         g_free(http_string);
         return FALSE;
     }
 
+    g_free(data);
     g_free(http_string);
 
     hybrid_event_add(sk, HYBRID_EVENT_READ, portrait_recv_cb, trans);
