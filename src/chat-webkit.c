@@ -58,6 +58,7 @@ escape_string(const gchar *str)
 
     while (str && *str) {
         switch (*str) {
+			case 10:
             case 13:
                 res = g_string_append(res, "<br/>");
                 break;
@@ -65,7 +66,11 @@ escape_string(const gchar *str)
                 res = g_string_append(res, "\\\"");
                 break;
             case '\t':
+				res = g_string_append(res, "&nbsp;&nbsp;&nbsp;&nbsp;");
                 break;
+			case ' ':
+				res = g_string_append(res, "&nbsp;");
+				break;
             default:
                 res = g_string_append_c(res, *str);
                 break;
