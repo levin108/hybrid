@@ -235,8 +235,10 @@ hybrid_logs_read(HybridAccount *account, const gchar *id, const gchar *logname)
     log_name = g_strdup_printf("%s/%s", log_path, logname);
 
     root = xmlnode_root_from_file(log_name);
-    if (!root)
+    if (!root) {
+		hybrid_debug_error("log", "log %s read error.\n", log_name);
         goto out;
+	}
 
     node = xmlnode_child(root);
     while (node) {

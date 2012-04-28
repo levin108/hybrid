@@ -47,6 +47,14 @@ close_cb(GtkWidget *widget, HybridLogbox *logbox)
     gtk_widget_destroy(logbox->window);
 }
 
+static gint
+data_compare(gconstpointer a, gconstpointer b)
+{
+    const gchar *e1 = a, *e2 = b;
+
+    return -g_strcmp0(e1, e2);
+}
+
 static gboolean
 button_press_cb(GtkWidget *widget, GdkEventButton *event, HybridLogbox *logbox)
 {
@@ -93,9 +101,10 @@ create_log_list_model(HybridLogbox *logbox)
 {
     GtkTreeStore *store;
     GtkTreeIter iter;
+    GSList *list = NULL, *pos;
     const gchar *path;
     const gchar *filename;
-    char name[128];
+    gchar name[128], *fname;
     GDir *dir = NULL;
     gint i;
 
@@ -111,20 +120,33 @@ create_log_list_model(HybridLogbox *logbox)
     }
 
     while ((filename = g_dir_read_name(dir))) {
-        for (i = 0; i < strlen(filename); i ++) {
-            if (filename[i] == '_') {
+        list = g_slist_append(list, g_strdup(filename));
+    }
+
+    list = g_slist_sort(list, (GCompareFunc)data_compare);
+
+    for (pos = list; pos; pos = pos->next) {
+        fname = pos->data;
+        for (i = 0; i < strlen(fname); i ++) {
+            if (fname[i] == '_') {
                 name[i] = '-';
-            } else if (filename[i] == '.') {
+            } else if (fname[i] == '.') {
                 name[i] = '\0';
                 break;
             } else {
-                name[i] = filename[i];
+                name[i] = fname[i];
             }
         }
+
         gtk_tree_store_append(store, &iter, NULL);
         gtk_tree_store_set(store, &iter, HYBRID_LOGBOX_NAME, name, -1);
-        gtk_tree_store_set(store, &iter, HYBRID_LOGBOX_FILE, filename, -1);
+        gtk_tree_store_set(store, &iter, HYBRID_LOGBOX_FILE, fname, -1);
+
+        free(fname);
+        pos->data = NULL;
     }
+
+    g_slist_free(list);
 
 out:
     g_dir_close(dir);
