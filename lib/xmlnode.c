@@ -84,7 +84,8 @@ xmlnode_root_from_file(const gchar *filepath)
     g_return_val_if_fail(filepath != NULL, NULL);
 
 
-    doc = xmlReadFile(filepath, NULL, XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+    doc = xmlReadFile(filepath, NULL,
+            XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_RECOVER);
 
     if (!doc) {
         return NULL;
