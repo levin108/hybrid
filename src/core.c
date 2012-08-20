@@ -279,6 +279,7 @@ main(gint argc, gchar **argv)
     if(!g_thread_supported())
         g_thread_init(NULL);
     gdk_threads_init();
+    gdk_threads_enter();
 
     gtk_init(&argc, &argv);
 
@@ -317,5 +318,6 @@ main(gint argc, gchar **argv)
 
     gtk_main();
 
+    gdk_threads_leave();
     return 0;
 }

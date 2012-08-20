@@ -28,6 +28,7 @@
 #include "config.h"
 
 #include <unistd.h>
+#include <netinet/in.h>
 #include <fcntl.h>
 #include <openssl/crypto.h>
 #include <openssl/ssl.h>
