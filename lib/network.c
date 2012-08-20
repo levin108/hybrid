@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <glib.h>
+#include <netinet/in.h>
 #include "util.h"
 #include "network.h"
 
