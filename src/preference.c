@@ -380,6 +380,16 @@ entry_response_cb(GtkDialog *dialog, gint response_id, HybridPrefEntry *entry)
         entry->type->save(entry);
 }
 
+void 
+gtk_table_get_size (GtkTable *table, guint *rows, guint *columns)
+{
+    g_return_if_fail (GTK_IS_TABLE (table));
+    if (rows)
+        *rows = table->nrows;
+    if (columns)
+        *columns = table->ncols;
+}
+
 void
 hybrid_pref_section_add_entry(HybridPrefWin *pref_win, GtkWidget *section,
                               PrefKeyType type, gchar *name, gchar *key,
